@@ -1,11 +1,50 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FeedItemCard } from '@/components/FeedItemCard';
-import { feedData } from '@/data/feedData';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
+import { generateFeedFromBags } from '@/services/feed';
+import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Feed = () => {
   const [displayCount, setDisplayCount] = useState(9);
   const [showFollowedOnly, setShowFollowedOnly] = useState(false);
+  const [feedData, setFeedData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadFeed();
+  }, []);
+
+  const loadFeed = async () => {
+    try {
+      setLoading(true);
+      // Load bags from Supabase
+      const { data: bags, error } = await supabase
+        .from('user_bags')
+        .select(`
+          *,
+          profile:profiles(*),
+          bag_equipment(
+            *,
+            equipment(*)
+          )
+        `)
+        .order('updated_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+
+      // Generate feed items from bags
+      const feedItems = generateFeedFromBags(bags || []);
+      setFeedData(feedItems);
+    } catch (error) {
+      console.error('Error loading feed:', error);
+      toast.error('Failed to load feed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredData = showFollowedOnly 
     ? feedData.filter(item => item.isFromFollowed)
@@ -28,41 +67,52 @@ const Feed = () => {
     console.log('Followed user:', userId);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="space-y-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <Skeleton className="w-10 h-10 rounded-full" />
+                  <div>
+                    <Skeleton className="h-4 w-32 mb-1" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </div>
+                <Skeleton className="h-48 w-full rounded-lg" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen pt-6 pb-20">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-display font-bold text-foreground mb-2">
-            Your Feed
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Discover the latest from golfers you follow
-          </p>
-        </div>
-
-        {/* Filter Controls */}
-        <div className="mb-8 flex items-center gap-4">
-          <Button
-            variant={showFollowedOnly ? "secondary" : "default"}
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Filter Toggle */}
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Your Feed</h1>
+          <button
             onClick={() => setShowFollowedOnly(!showFollowedOnly)}
-            size="sm"
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              showFollowedOnly
+                ? 'bg-primary text-white'
+                : 'bg-white text-gray-700 border border-gray-300'
+            }`}
           >
-            {showFollowedOnly ? 'Show All Posts' : 'Following Only'}
-          </Button>
-          
-          {showFollowedOnly && (
-            <div className="text-sm text-muted-foreground">
-              Showing posts from {filteredData.length} followed golfers
-            </div>
-          )}
+            {showFollowedOnly ? 'Following' : 'All Posts'}
+          </button>
         </div>
 
-        {/* Feed Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {/* Feed Items */}
+        <div className="space-y-6">
           {displayedItems.map((item) => (
             <FeedItemCard
-              key={item.postId}
+              key={item.id}
               item={item}
               onLike={handleLike}
               onFollow={handleFollow}
@@ -70,34 +120,16 @@ const Feed = () => {
           ))}
         </div>
 
-        {/* Load More */}
+        {/* Load More Button */}
         {hasMore && (
-          <div className="flex justify-center">
+          <div className="mt-8 text-center">
             <Button
               onClick={handleLoadMore}
               variant="outline"
               size="lg"
-              className="min-w-32"
             >
               Load More
             </Button>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {filteredData.length === 0 && (
-          <div className="text-center py-20">
-            <div className="max-w-md mx-auto">
-              <h3 className="text-xl font-medium text-foreground mb-2">
-                No posts from followed golfers
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Follow some golfers in the Bags section to see their latest posts here.
-              </p>
-              <Button onClick={() => setShowFollowedOnly(false)}>
-                Show All Posts
-              </Button>
-            </div>
           </div>
         )}
       </div>

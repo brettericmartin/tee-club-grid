@@ -1,0 +1,26 @@
+{
+  "name": "api-examples",
+  "version": "1.0.0",
+  "main": "scrape-equipment-images.js",
+  "scripts": {
+    "start": "node scrape-equipment-images.js",
+    "dev": "nodemon scrape-equipment-images.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "cheerio": "^1.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
+    "express": "^5.1.0",
+    "puppeteer": "^24.11.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "nodemon": "^3.1.10"
+  }
+}

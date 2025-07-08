@@ -1,12 +1,15 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users } from "lucide-react";
+import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import Navigation from "@/components/Navigation";
-import BagCompositeCard from "@/components/BagCompositeCard";
-import { bagsBrowserData, BagData } from "@/data/sampleBagsData";
+import { BagCard } from "@/components/bags/BagCard";
+import { getBags } from "@/services/bags";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLikedBags } from "@/hooks/useLikedBags";
+import { toast } from "sonner";
 
 type SortOption = "trending" | "newest" | "most-liked" | "following" | "price-high" | "price-low";
 type HandicapRange = "all" | "0-5" | "6-15" | "16+";
@@ -14,39 +17,62 @@ type PriceRange = "all" | "under-2k" | "2k-5k" | "5k+";
 
 const BagsBrowser = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [bags, setBags] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("trending");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [handicapRange, setHandicapRange] = useState<HandicapRange>("all");
   const [priceRange, setPriceRange] = useState<PriceRange>("all");
-  const [likedBags, setLikedBags] = useState<Set<string>>(new Set());
+  const { likedBags, toggleLike } = useLikedBags();
   const [followedBags, setFollowedBags] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    loadBags();
+  }, [sortBy, user]);
+
+  const loadBags = async () => {
+    try {
+      setLoading(true);
+      const data = await getBags({
+        sortBy: sortBy,
+        userId: user?.id
+      });
+      setBags(data || []);
+    } catch (error) {
+      console.error('Error loading bags:', error);
+      toast.error('Failed to load bags');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter and sort bags
   const filteredBags = useMemo(() => {
-    let filtered = bagsBrowserData.map(bag => ({
-      ...bag,
-      isLiked: likedBags.has(bag.id),
-      isFollowing: followedBags.has(bag.id)
-    }));
+    let filtered = bags;
 
     // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(bag => 
-        bag.owner.toLowerCase().includes(query) ||
-        bag.title.toLowerCase().includes(query) ||
-        bag.brands.some(brand => brand.toLowerCase().includes(query)) ||
-        bag.description?.toLowerCase().includes(query)
+        bag.name.toLowerCase().includes(query) ||
+        bag.profiles?.username?.toLowerCase().includes(query) ||
+        bag.profiles?.display_name?.toLowerCase().includes(query) ||
+        bag.bag_equipment?.some((be: any) => 
+          be.equipment?.brand?.toLowerCase().includes(query) ||
+          be.equipment?.model?.toLowerCase().includes(query)
+        )
       );
     }
 
     // Handicap filter
     if (handicapRange !== "all") {
       filtered = filtered.filter(bag => {
+        const handicap = bag.profiles?.handicap || 0;
         switch (handicapRange) {
-          case "0-5": return bag.handicap <= 5;
-          case "6-15": return bag.handicap >= 6 && bag.handicap <= 15;
-          case "16+": return bag.handicap >= 16;
+          case "0-5": return handicap <= 5;
+          case "6-15": return handicap >= 6 && handicap <= 15;
+          case "16+": return handicap >= 16;
           default: return true;
         }
       });
@@ -55,61 +81,36 @@ const BagsBrowser = () => {
     // Price filter
     if (priceRange !== "all") {
       filtered = filtered.filter(bag => {
+        const totalValue = bag.totalValue || 0;
         switch (priceRange) {
-          case "under-2k": return bag.totalValue < 2000;
-          case "2k-5k": return bag.totalValue >= 2000 && bag.totalValue <= 5000;
-          case "5k+": return bag.totalValue > 5000;
+          case "under-2k": return totalValue < 2000;
+          case "2k-5k": return totalValue >= 2000 && totalValue <= 5000;
+          case "5k+": return totalValue > 5000;
           default: return true;
         }
       });
     }
 
-    // Sort bags
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "trending":
-          // Prioritize trending bags, then by likes
-          if (a.isTrending && !b.isTrending) return -1;
-          if (!a.isTrending && b.isTrending) return 1;
-          return b.likeCount - a.likeCount;
-        
-        case "newest":
-          // For demo, sort by ID (assuming higher ID = newer)
-          return parseInt(b.id) - parseInt(a.id);
-        
-        case "most-liked":
-          return b.likeCount - a.likeCount;
-        
-        case "following":
-          // Show followed bags first, then by likes
-          if (a.isFollowing && !b.isFollowing) return -1;
-          if (!a.isFollowing && b.isFollowing) return 1;
-          return b.likeCount - a.likeCount;
-        
-        case "price-high":
-          return b.totalValue - a.totalValue;
-        
-        case "price-low":
-          return a.totalValue - b.totalValue;
-        
-        default:
-          return 0;
-      }
-    });
+    // Additional sorting for price options
+    if (sortBy === 'price-high') {
+      filtered.sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0));
+    } else if (sortBy === 'price-low') {
+      filtered.sort((a, b) => (a.totalValue || 0) - (b.totalValue || 0));
+    }
 
     return filtered;
-  }, [searchQuery, sortBy, handicapRange, priceRange, likedBags, followedBags]);
+  }, [searchQuery, sortBy, handicapRange, priceRange, likedBags, followedBags, bags]);
 
-  const handleToggleLike = (bagId: string) => {
-    setLikedBags(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(bagId)) {
-        newSet.delete(bagId);
-      } else {
-        newSet.add(bagId);
-      }
-      return newSet;
-    });
+  const handleToggleLike = async (bagId: string) => {
+    if (!user) {
+      toast.error('Please sign in to like bags');
+      return;
+    }
+    
+    const success = await toggleLike(bagId);
+    if (!success) {
+      toast.error('Failed to update like');
+    }
   };
 
   const handleToggleFollow = (bagId: string) => {
@@ -125,13 +126,8 @@ const BagsBrowser = () => {
   };
 
   const handleViewBag = (bagId: string) => {
-    // Find the bag to get the owner name
-    const bag = bagsBrowserData.find(b => b.id === bagId);
-    if (bag) {
-      // Convert owner name to URL-friendly format
-      const username = bag.owner.toLowerCase().replace(/\s+/g, '-');
-      navigate(`/bag/${username}`);
-    }
+    console.log('Navigating to bag:', bagId);
+    navigate(`/bag/${bagId}`);
   };
 
   const getSortIcon = (sort: SortOption) => {
@@ -145,6 +141,19 @@ const BagsBrowser = () => {
       default: return null;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8 max-w-7xl mt-16">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -188,12 +197,6 @@ const BagsBrowser = () => {
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="trending">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" />
-                  Trending
-                </div>
-              </SelectItem>
               <SelectItem value="newest">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
@@ -206,12 +209,14 @@ const BagsBrowser = () => {
                   Most Liked
                 </div>
               </SelectItem>
-              <SelectItem value="following">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Following
-                </div>
-              </SelectItem>
+              {user && (
+                <SelectItem value="following">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Following
+                  </div>
+                </SelectItem>
+              )}
               <SelectItem value="price-high">
                 <div className="flex items-center gap-2">
                   <DollarSign className="w-4 h-4" />
@@ -254,13 +259,13 @@ const BagsBrowser = () => {
           </Select>
 
           {/* Clear Filters */}
-          {(searchQuery || sortBy !== "trending" || handicapRange !== "all" || priceRange !== "all") && (
+          {(searchQuery || sortBy !== "newest" || handicapRange !== "all" || priceRange !== "all") && (
             <Button 
               variant="outline" 
               size="sm"
               onClick={() => {
                 setSearchQuery("");
-                setSortBy("trending");
+                setSortBy("newest");
                 setHandicapRange("all");
                 setPriceRange("all");
               }}
@@ -283,12 +288,12 @@ const BagsBrowser = () => {
         {/* Bags Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBags.map((bag) => (
-            <BagCompositeCard
+            <BagCard
               key={bag.id}
               bag={bag}
-              onToggleLike={handleToggleLike}
-              onToggleFollow={handleToggleFollow}
-              onViewBag={handleViewBag}
+              onView={handleViewBag}
+              onLike={() => handleToggleLike(bag.id)}
+              isLiked={likedBags.has(bag.id)}
             />
           ))}
         </div>
@@ -305,7 +310,7 @@ const BagsBrowser = () => {
               variant="outline"
               onClick={() => {
                 setSearchQuery("");
-                setSortBy("trending");
+                setSortBy("newest");
                 setHandicapRange("all");
                 setPriceRange("all");
               }}

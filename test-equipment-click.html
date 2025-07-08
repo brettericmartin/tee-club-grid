@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Equipment Click</title>
+</head>
+<body>
+    <h1>Debug Steps for Equipment Detail Modal</h1>
+    
+    <h2>1. Check Browser Console</h2>
+    <p>When you click "View Details" on an equipment item, you should see:</p>
+    <ul>
+        <li>"Equipment clicked: [equipment-id]"</li>
+        <li>"Equipment details loaded: [object]" OR an error message</li>
+        <li>"Modal should be open now: false" (it will be false because state hasn't updated yet)</li>
+    </ul>
+    
+    <h2>2. Common Issues</h2>
+    <ul>
+        <li><strong>No console logs?</strong> - The click handler isn't firing. Check if you're in edit mode (View Details only shows when NOT editing)</li>
+        <li><strong>Error in console?</strong> - The equipment details query is failing. Could be missing joins or RLS policies</li>
+        <li><strong>Details loaded but no modal?</strong> - The modal component might have an issue</li>
+    </ul>
+    
+    <h2>3. Quick SQL Test</h2>
+    <p>Run this in Supabase to test if equipment details can be fetched:</p>
+    <pre>
+-- Get a sample equipment ID from your bag
+SELECT equipment_id FROM bag_equipment LIMIT 1;
+
+-- Then test the query (replace YOUR_EQUIPMENT_ID)
+SELECT * FROM equipment WHERE id = 'YOUR_EQUIPMENT_ID';
+    </pre>
+</body>
+</html>

@@ -1,22 +1,42 @@
-import { useState } from 'react';
-import { Heart, MessageCircle, Eye, UserPlus, UserCheck } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Heart, MessageCircle, Eye, UserPlus, UserCheck, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { FeedItem, getPostTypeLabel, formatTimestamp } from '@/data/feedData';
+import { FeedItemData } from '@/services/feed';
+
+// Helper functions
+export const getPostTypeLabel = (type: string): string => {
+  const labels: Record<string, string> = {
+    'bag_photo': 'Bag Photo',
+    'new_equipment': 'New Equipment',
+    'equipment_showcase': 'Equipment Showcase',
+    'tournament_prep': 'Tournament Prep'
+  };
+  return labels[type] || 'Post';
+};
+
+export const formatTimestamp = (date: Date): string => {
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  
+  if (hours < 1) return 'Just now';
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString();
+};
 import { Button } from '@/components/ui/button';
-import { realGolfEquipment } from '@/utils/realEquipmentData';
 import EquipmentDetailModal from './EquipmentDetailModal';
-import { sampleEquipmentDetails } from '@/data/sampleEquipmentDetails';
+import { supabase } from '@/lib/supabase';
+import type { Database } from '@/lib/supabase';
+
+type Equipment = Database['public']['Tables']['equipment']['Row'];
 
 interface FeedItemCardProps {
-  item: FeedItem;
+  item: FeedItemData;
   onLike?: (postId: string) => void;
   onFollow?: (userId: string) => void;
 }
-
-// Helper function to get equipment details by ID
-const getEquipmentById = (id: string) => {
-  return realGolfEquipment.find(item => item.id === id);
-};
 
 export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -25,6 +45,36 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
   const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
+  const [equipmentData, setEquipmentData] = useState<Record<string, Equipment>>({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (item.type === 'new_equipment' && item.bagData?.featuredClubs) {
+      loadEquipmentData();
+    }
+  }, [item]);
+
+  const loadEquipmentData = async () => {
+    if (!item.bagData?.featuredClubs) return;
+    
+    setLoading(true);
+    const equipmentMap: Record<string, Equipment> = {};
+
+    // Fetch equipment directly by IDs since we're now using real equipment IDs
+    const { data: equipmentList } = await supabase
+      .from('equipment')
+      .select('*')
+      .in('id', item.bagData.featuredClubs);
+
+    if (equipmentList) {
+      equipmentList.forEach(eq => {
+        equipmentMap[eq.id] = eq;
+      });
+    }
+
+    setEquipmentData(equipmentMap);
+    setLoading(false);
+  };
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -44,19 +94,19 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
 
   const handleEquipmentClick = (e: React.MouseEvent, equipmentId: string) => {
     e.stopPropagation();
-    const equipment = realGolfEquipment.find(item => item.id === equipmentId);
+    const equipment = equipmentData[equipmentId];
     if (equipment) {
-      // Try to get detailed equipment data, fallback to basic info
-      const equipmentDetail = sampleEquipmentDetails[equipmentId] || {
+      // Convert to equipment detail format for modal
+      const equipmentDetail = {
         id: equipment.id,
         brand: equipment.brand,
         model: equipment.model,
         category: equipment.category,
-        specs: {},
-        msrp: equipment.price,
-        description: "Professional golf equipment",
-        features: [],
-        images: [equipment.image_url],
+        specs: equipment.specs || {},
+        msrp: Number(equipment.msrp) || 0,
+        description: equipment.description || "Professional golf equipment",
+        features: equipment.features || [],
+        images: [equipment.image_url || '/api/placeholder/400/400'],
         popularShafts: [],
         popularGrips: [],
         currentBuild: {
@@ -79,7 +129,7 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
             imageUrl: "",
             isStock: true
           },
-          totalPrice: equipment.price
+          totalPrice: Number(equipment.msrp) || 0
         },
         isFeatured: false
       };
@@ -91,7 +141,7 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
   // Get equipment details for featured items
   const featuredClubsData = item.bagData 
     ? item.bagData.featuredClubs
-        .map(id => getEquipmentById(id))
+        .map(id => equipmentData[id])
         .filter(Boolean)
         .slice(0, 6)
     : [];
@@ -211,7 +261,7 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             
             {/* Featured clubs in 3x2 grid */}
-            {item.bagData && featuredClubsData.length > 0 && (
+            {item.bagData && featuredClubsData.length > 0 && !loading && (
               <div className="absolute top-[8%] left-[8%] right-[8%] bottom-[35%]">
                 <div className="w-full h-full grid grid-cols-3 grid-rows-2 gap-2">
                   {featuredClubsData.map((equipment, index) => {
@@ -229,10 +279,10 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
                         onMouseLeave={() => setHoveredItem(null)}
                         onClick={(e) => handleEquipmentClick(e, equipment.id)}
                       >
-                        <div className="w-full aspect-square bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-lg p-2 shadow-[0_4px_6px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-white/15 hover:shadow-2xl">
+                        <div className="gel-card w-full aspect-square rounded-lg p-2 transition-all duration-200 hover:scale-105 hover:shadow-2xl">
                           <div className="w-full h-full">
                             <img 
-                              src={equipment.image_url}
+                              src={equipment.image_url || '/api/placeholder/150/150'}
                               alt={`${equipment.brand} ${equipment.model}`}
                               className="w-full h-full object-contain"
                               onError={(e) => {
@@ -252,8 +302,10 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
                           
                           {/* Equipment name on hover */}
                           {isHoveredItem && (
-                            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                              {equipment.brand} {equipment.model}
+                            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 gel-card px-3 py-1.5 rounded-full whitespace-nowrap">
+                              <span className="text-white text-xs font-medium">
+                                {equipment.brand} {equipment.model}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -261,6 +313,13 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
                     );
                   })}
                 </div>
+              </div>
+            )}
+            
+            {/* Loading state for equipment */}
+            {item.bagData && loading && (
+              <div className="absolute top-[8%] left-[8%] right-[8%] bottom-[35%] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-white/60" />
               </div>
             )}
 

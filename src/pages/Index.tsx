@@ -1,25 +1,69 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import FloatingActionButton from "@/components/FloatingActionButton";
-import { sampleBags } from "@/data/sampleBags";
+import { getBags } from "@/services/bags";
 import { Button } from "@/components/ui/button";
-import { Plus, UserPlus, Share2, DollarSign } from "lucide-react";
+import { Plus, UserPlus, Share2, DollarSign, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { realGolfEquipment } from "@/utils/realEquipmentData";
+import { getEquipment } from "@/services/equipment";
+import type { Database } from "@/lib/supabase";
+
+type Equipment = Database['public']['Tables']['equipment']['Row'];
 
 const Index = () => {
   // Hero carousel state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [trendingBags, setTrendingBags] = useState<any[]>([]);
   
-  // Hero equipment images for carousel - using real equipment images
-  const heroImages = realGolfEquipment.slice(0, 4).map(equipment => equipment.image_url);
+  // Hero equipment images for carousel - using database equipment images
+  const heroImages = equipment.slice(0, 4).map(eq => eq.image_url).filter(Boolean) as string[];
 
+  // Load equipment data
+  useEffect(() => {
+    loadEquipment();
+    loadTrendingBags();
+  }, []);
+  
+  const loadEquipment = async () => {
+    try {
+      const data = await getEquipment({ limit: 20 });
+      setEquipment(data || []);
+    } catch (error) {
+      console.error('Error loading equipment:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const loadTrendingBags = async () => {
+    try {
+      const data = await getBags({ sortBy: 'most-liked', limit: 8 });
+      const transformedBags = (data || []).map(bag => ({
+        id: bag.id,
+        title: bag.name,
+        owner: bag.profile?.full_name || bag.profile?.username || 'Unknown',
+        image: bag.background_image ? `/images/${bag.background_image}.jpg` : '/placeholder.svg',
+        clubCount: bag.bag_equipment?.length || 0,
+        handicap: '5.2',
+        totalValue: bag.bag_equipment?.reduce((sum: number, item: any) => 
+          sum + (item.purchase_price || item.equipment?.msrp || 0), 0) || 0
+      }));
+      setTrendingBags(transformedBags);
+    } catch (error) {
+      console.error('Error loading trending bags:', error);
+    }
+  };
+  
   // Auto-scroll carousel every 5 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
+    if (heroImages.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
   }, [heroImages.length]);
 
   // Parallax scroll hook
@@ -57,13 +101,13 @@ const Index = () => {
     return iconMap[category] || '🏌️';
   };
 
-  const popularEquipment = realGolfEquipment.map(equipment => ({
-    brand: equipment.brand,
-    model: equipment.model,
-    category: equipment.category.charAt(0).toUpperCase() + equipment.category.slice(1),
-    price: `$${equipment.msrp.toFixed(0)}`,
-    image: equipment.image_url,
-    icon: getCategoryIcon(equipment.category)
+  const popularEquipment = equipment.map(eq => ({
+    brand: eq.brand,
+    model: eq.model,
+    category: eq.category.charAt(0).toUpperCase() + eq.category.slice(1),
+    price: `$${Number(eq.msrp || 0).toFixed(0)}`,
+    image: eq.image_url || '/api/placeholder/200/200',
+    icon: getCategoryIcon(eq.category)
   }));
 
   // Stats data - Community focused
@@ -87,7 +131,11 @@ const Index = () => {
       >
         {/* Auto-scrolling Equipment Carousel Background */}
         <div className="absolute inset-0">
-          {heroImages.map((image, index) => (
+          {loading ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-white/60" />
+            </div>
+          ) : heroImages.map((image, index) => (
             <div
               key={index}
               className={`absolute inset-0 transition-opacity duration-1000 ${
@@ -173,7 +221,7 @@ const Index = () => {
 
           {/* Interactive Masonry Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-16">
-            {sampleBags.map((bag, index) => (
+            {trendingBags.map((bag, index) => (
               <motion.div 
                 key={bag.id}
                 initial={{ opacity: 0, y: 50 }}

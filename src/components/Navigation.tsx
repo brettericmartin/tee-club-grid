@@ -1,6 +1,18 @@
-import { Search, User, Home, Grid, Heart, Settings, Users, MapPin, X } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Search, User, Home, Grid, Heart, Settings, Users, MapPin, X, LogOut } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { SignInModal } from "@/components/auth/SignInModal";
+import { SignUpModal } from "@/components/auth/SignUpModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavLinkProps {
   to: string;
@@ -25,6 +37,19 @@ const NavLink = ({ to, children }: NavLinkProps) => {
 
 const Navigation = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
     <>
@@ -95,11 +120,52 @@ const Navigation = () => {
                 >
                   <Search className="w-5 h-5 text-white" />
                 </button>
-                <button className="relative w-10 h-10 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 hover:from-gray-500 hover:to-gray-700 hover:scale-110 transition-all flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
-                  {/* Notification Badge */}
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
-                </button>
+                
+                {user ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="relative">
+                        <Avatar className="w-10 h-10 hover:scale-110 transition-all cursor-pointer">
+                          <AvatarImage src={user.user_metadata?.avatar_url} />
+                          <AvatarFallback className="bg-gradient-to-br from-gray-600 to-gray-800">
+                            {user.user_metadata?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {/* Notification Badge */}
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuLabel>
+                        <div className="flex flex-col">
+                          <span>{user.user_metadata?.username || 'My Account'}</span>
+                          <span className="text-xs text-muted-foreground font-normal">{user.email}</span>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate('/profile')}>
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/settings')}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <button 
+                    onClick={() => setShowSignIn(true)}
+                    className="relative w-10 h-10 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 hover:from-gray-500 hover:to-gray-700 hover:scale-110 transition-all flex items-center justify-center"
+                  >
+                    <User className="w-5 h-5 text-white" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -164,6 +230,18 @@ const Navigation = () => {
           </div>
         </div>
       )}
+
+      {/* Auth Modals */}
+      <SignInModal 
+        isOpen={showSignIn} 
+        onClose={() => setShowSignIn(false)}
+        onSignUpClick={() => setShowSignUp(true)}
+      />
+      <SignUpModal 
+        isOpen={showSignUp} 
+        onClose={() => setShowSignUp(false)}
+        onSignInClick={() => setShowSignIn(true)}
+      />
     </>
   );
 };
