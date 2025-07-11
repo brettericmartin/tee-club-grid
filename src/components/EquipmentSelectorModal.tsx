@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, X, Plus, Filter, Loader2 } from "lucide-react";
+import { Search, X, Plus, Filter, Loader2, ChevronRight } from "lucide-react";
 import { getEquipment, searchEquipment as searchEquipmentAPI } from "@/services/equipment";
 import type { Database } from "@/lib/supabase";
 
@@ -26,6 +26,7 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
   const [selectedYear, setSelectedYear] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [allEquipment, setAllEquipment] = useState<Equipment[]>([]); // Store all equipment
   const [loading, setLoading] = useState(true);
 
   const categories = [
@@ -38,53 +39,63 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
     { id: "bag", name: "Bags" }
   ];
 
-  // Get unique brands and years from equipment
-  const brands = [...new Set(equipment.map(e => e.brand))].sort();
-  const years = [...new Set(equipment.map(e => e.release_year).filter(Boolean))].sort((a, b) => (b || 0) - (a || 0));
+  // Get unique brands and years from all equipment (not filtered)
+  const brands = [...new Set(allEquipment.map(e => e.brand))].sort();
+  const years = [...new Set(allEquipment.map(e => e.release_date ? new Date(e.release_date).getFullYear() : null).filter(Boolean))].sort((a, b) => (b || 0) - (a || 0));
 
+  // Load all equipment when modal opens
   useEffect(() => {
     if (open) {
-      loadEquipment();
+      loadAllEquipment();
     }
-  }, [open, selectedCategory, selectedBrand, selectedYear]);
+  }, [open]);
 
-  const loadEquipment = async () => {
+  // Filter equipment when filters change
+  useEffect(() => {
+    if (allEquipment.length > 0) {
+      filterEquipment();
+    }
+  }, [allEquipment, selectedCategory, selectedBrand, selectedYear, searchQuery]);
+
+  const loadAllEquipment = async () => {
     setLoading(true);
     try {
-      const filters: any = {};
-      if (selectedCategory !== "all") {
-        filters.category = selectedCategory;
-      }
-      
-      const data = await getEquipment(filters);
-      
-      let filtered = data || [];
-      
-      // Apply brand filter
-      if (selectedBrand) {
-        filtered = filtered.filter(item => item.brand === selectedBrand);
-      }
-      
-      // Apply year filter
-      if (selectedYear) {
-        filtered = filtered.filter(item => item.release_year?.toString() === selectedYear);
-      }
-      
-      // Apply search
-      if (searchQuery) {
-        const searchLower = searchQuery.toLowerCase();
-        filtered = filtered.filter(item => 
-          item.brand.toLowerCase().includes(searchLower) ||
-          item.model.toLowerCase().includes(searchLower)
-        );
-      }
-      
-      setEquipment(filtered);
+      const data = await getEquipment({ category: selectedCategory !== "all" ? selectedCategory : undefined });
+      setAllEquipment(data || []);
     } catch (error) {
       console.error('Error loading equipment:', error);
+      setAllEquipment([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterEquipment = () => {
+    let filtered = [...allEquipment];
+    
+    // Apply brand filter
+    if (selectedBrand) {
+      filtered = filtered.filter(item => item.brand === selectedBrand);
+    }
+    
+    // Apply year filter
+    if (selectedYear) {
+      filtered = filtered.filter(item => {
+        const itemYear = item.release_date ? new Date(item.release_date).getFullYear().toString() : null;
+        return itemYear === selectedYear;
+      });
+    }
+    
+    // Apply search
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      filtered = filtered.filter(item => 
+        item.brand.toLowerCase().includes(searchLower) ||
+        item.model.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    setEquipment(filtered);
   };
 
   const handleSearch = async (query: string) => {
@@ -100,7 +111,7 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
         setLoading(false);
       }
     } else if (!query) {
-      loadEquipment();
+      filterEquipment(); // Use local filtering instead of reloading
     }
   };
 
@@ -113,6 +124,24 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
 
   const hasActiveFilters = selectedBrand || selectedYear || searchQuery || selectedCategory !== "all";
 
+  // Breadcrumb navigation handlers
+  const handleBreadcrumbClick = (type: 'category' | 'brand' | 'year') => {
+    switch (type) {
+      case 'category':
+        setSelectedCategory("all");
+        setSelectedBrand("");
+        setSelectedYear("");
+        break;
+      case 'brand':
+        setSelectedBrand("");
+        setSelectedYear("");
+        break;
+      case 'year':
+        setSelectedYear("");
+        break;
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0">
@@ -121,6 +150,51 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
         </DialogHeader>
 
         <div className="px-6 pb-6 space-y-4">
+          {/* Breadcrumb Navigation */}
+          {hasActiveFilters && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span 
+                className="cursor-pointer hover:text-foreground transition-colors"
+                onClick={() => handleBreadcrumbClick('category')}
+              >
+                All Equipment
+              </span>
+              {selectedCategory !== "all" && (
+                <>
+                  <ChevronRight className="w-4 h-4" />
+                  <span 
+                    className="cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => handleBreadcrumbClick('category')}
+                  >
+                    {categories.find(c => c.id === selectedCategory)?.name}
+                  </span>
+                </>
+              )}
+              {selectedBrand && (
+                <>
+                  <ChevronRight className="w-4 h-4" />
+                  <span 
+                    className="cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => handleBreadcrumbClick('brand')}
+                  >
+                    {selectedBrand}
+                  </span>
+                </>
+              )}
+              {selectedYear && (
+                <>
+                  <ChevronRight className="w-4 h-4" />
+                  <span 
+                    className="cursor-pointer hover:text-foreground transition-colors"
+                    onClick={() => handleBreadcrumbClick('year')}
+                  >
+                    {selectedYear}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Search and Filters */}
           <div className="flex gap-2">
             <div className="relative flex-1">
@@ -247,8 +321,8 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
                         </div>
                         <h4 className="font-medium text-sm">{item.brand}</h4>
                         <p className="text-sm text-muted-foreground">{item.model}</p>
-                        {item.release_year && (
-                          <p className="text-xs text-muted-foreground mt-1">{item.release_year}</p>
+                        {item.release_date && (
+                          <p className="text-xs text-muted-foreground mt-1">{new Date(item.release_date).getFullYear()}</p>
                         )}
                         {item.msrp && (
                           <p className="text-sm font-medium mt-2">${item.msrp}</p>

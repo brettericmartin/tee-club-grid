@@ -20,7 +20,8 @@ export async function getEquipment(options?: {
       equipment_saves (count),
       equipment_photos (
         photo_url,
-        is_primary
+        is_primary,
+        likes_count
       )
     `);
 
@@ -55,15 +56,31 @@ export async function getEquipment(options?: {
   
   if (error) throw error;
   
-  // Process data to include average rating and primary photo
-  return data?.map(equipment => ({
-    ...equipment,
-    averageRating: equipment.equipment_reviews?.length 
-      ? equipment.equipment_reviews.reduce((sum, r) => sum + r.rating, 0) / equipment.equipment_reviews.length 
-      : null,
-    primaryPhoto: equipment.equipment_photos?.find(p => p.is_primary)?.photo_url || equipment.image_url,
-    savesCount: equipment.equipment_saves?.[0]?.count || 0
-  }));
+  // Process data to include average rating, primary photo, and total likes
+  return data?.map(equipment => {
+    // Get most liked photo or primary photo
+    const sortedPhotos = equipment.equipment_photos?.sort((a, b) => 
+      (b.likes_count || 0) - (a.likes_count || 0)
+    );
+    const primaryPhoto = sortedPhotos?.[0]?.photo_url || 
+                        equipment.equipment_photos?.find(p => p.is_primary)?.photo_url || 
+                        equipment.image_url;
+    
+    // Calculate total likes from all photos
+    const totalPhotoLikes = equipment.equipment_photos?.reduce(
+      (sum, photo) => sum + (photo.likes_count || 0), 0
+    ) || 0;
+    
+    return {
+      ...equipment,
+      averageRating: equipment.equipment_reviews?.length 
+        ? equipment.equipment_reviews.reduce((sum, r) => sum + r.rating, 0) / equipment.equipment_reviews.length 
+        : null,
+      primaryPhoto,
+      savesCount: equipment.equipment_saves?.[0]?.count || 0,
+      totalLikes: totalPhotoLikes
+    };
+  });
 }
 
 // Get single equipment details
@@ -98,6 +115,7 @@ export async function getEquipmentDetails(equipmentId: string) {
         .from('equipment_photos')
         .select('*')
         .eq('equipment_id', equipmentId)
+        .order('likes_count', { ascending: false })
     ]);
   } catch (err) {
     console.warn('Error fetching related data:', err);
@@ -124,13 +142,17 @@ export async function getEquipmentDetails(equipmentId: string) {
   // Get top bags using this equipment
   const topBags = await getTopBagsWithEquipment(equipmentId);
   
+  // Get the most liked photo (first one after sorting by likes_count desc)
+  const mostLikedPhoto = data.equipment_photos?.[0]?.photo_url;
+  
   return {
     ...data,
     averageRating,
     lowestPrice,
     reviewCount: data.equipment_reviews?.length || 0,
     photoCount: data.equipment_photos?.length || 0,
-    topBags
+    topBags,
+    primaryPhoto: mostLikedPhoto || equipment.image_url
   };
 }
 
@@ -274,10 +296,20 @@ export async function getUserSavedEquipment(userId: string) {
 
   if (error) throw error;
   
-  return data?.map(item => ({
-    ...item.equipment,
-    primaryPhoto: item.equipment?.equipment_photos?.find(p => p.is_primary)?.photo_url || item.equipment?.image_url
-  }));
+  return data?.map(item => {
+    // Get most liked photo for saved equipment too
+    const sortedPhotos = item.equipment?.equipment_photos?.sort((a, b) => 
+      (b.likes_count || 0) - (a.likes_count || 0)
+    );
+    const primaryPhoto = sortedPhotos?.[0]?.photo_url || 
+                        item.equipment?.equipment_photos?.find(p => p.is_primary)?.photo_url || 
+                        item.equipment?.image_url;
+    
+    return {
+      ...item.equipment,
+      primaryPhoto
+    };
+  });
 }
 
 // Upload equipment photo

@@ -9,8 +9,8 @@ export default defineConfig(({ mode }) => {
   
   return {
     server: {
-      host: "::",
-      port: 8080,
+      host: "localhost",
+      port: 5173,
     },
     plugins: [
       react(),
@@ -21,10 +21,6 @@ export default defineConfig(({ mode }) => {
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
-    },
-    define: {
-      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.NEXT_PUBLIC_SUPABASE_URL),
-      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     },
   };
 });

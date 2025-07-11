@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Heart, Star, Users } from 'lucide-react';
+import { X, Heart, Star, Users, ExternalLink } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -140,7 +140,18 @@ export function EquipmentShowcaseModal({
             <div className="space-y-6">
               {/* Basic Info */}
               <div>
-                <h3 className="text-lg font-semibold mb-2">Equipment Details</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold">Equipment Details</h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.location.href = `/equipment/${bagEquipment.equipment_id}`}
+                    className="flex items-center gap-2"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View Product Page
+                  </Button>
+                </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Brand</span>

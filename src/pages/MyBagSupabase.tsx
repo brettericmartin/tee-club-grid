@@ -11,13 +11,14 @@ import { Textarea } from "@/components/ui/textarea";
 import Navigation from "@/components/Navigation";
 import { BagSelectorDialog } from "@/components/bag/BagSelectorDialog";
 import { CreateBagDialog } from "@/components/bag/CreateBagDialog";
-import { EquipmentSelector } from "@/components/equipment/EquipmentSelector";
+import { EquipmentSelectorImproved } from "@/components/equipment/EquipmentSelectorImproved";
 import { EquipmentEditor } from "@/components/bag/EquipmentEditor";
 import { BagPreview } from "@/components/bag/BagPreview";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import type { Database } from "@/lib/supabase";
+import { smartCreateBagPost, smartCreateBagUpdatePost, smartCreateEquipmentPost } from "@/services/feedSmartUpdate";
 
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
   equipment: Database['public']['Tables']['equipment']['Row'];
@@ -49,9 +50,29 @@ const MyBagSupabase = () => {
   const [selectedBagEquipment, setSelectedBagEquipment] = useState<BagEquipmentItem | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  // Redirect if not logged in
+  // Show sign-in prompt if not logged in
   if (!authLoading && !user) {
-    return <Navigate to="/" />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-primary/10">
+        <Navigation />
+        <div className="container mx-auto px-4 pt-32">
+          <div className="max-w-md mx-auto text-center">
+            <div className="glass-card p-8">
+              <h1 className="text-3xl font-bold text-white mb-4">Sign In to View Your Bag</h1>
+              <p className="text-white/70 mb-6">
+                Create an account to build and showcase your golf bag collection.
+              </p>
+              <Button 
+                onClick={() => window.location.href = '/?signin=true'} 
+                className="bg-primary hover:bg-primary/90 text-white"
+              >
+                Sign In
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   useEffect(() => {
@@ -209,6 +230,9 @@ const MyBagSupabase = () => {
       setBagDescription('');
       setSelectedBackground('midwest-lush');
       setBagItems([]);
+      
+      // Create feed post for bag creation
+      await smartCreateBagPost(user.id, newBag.id, newBag.name);
     } catch (error) {
       console.error('Error creating bag:', error);
       toast.error('Failed to create bag');
@@ -258,6 +282,17 @@ const MyBagSupabase = () => {
       
       setIsEditing(false);
       toast.success("Bag saved successfully!");
+      
+      // Track changes for feed post
+      const changes = [];
+      if (currentBag.name !== bagName) changes.push(`Renamed bag to "${bagName}"`);
+      if (currentBag.description !== bagDescription) changes.push('Updated description');
+      if (currentBag.background_image !== selectedBackground) changes.push('Changed background');
+      
+      // Create feed post if there were changes
+      if (changes.length > 0) {
+        await smartCreateBagUpdatePost(user.id, currentBag.id, bagName, changes);
+      }
       
       // Update local state
       setBags(bags.map(b => 
@@ -342,6 +377,16 @@ const MyBagSupabase = () => {
       setBagItems(prev => [...prev, newItem]);
       setEquipmentSelectorOpen(false);
       toast.success(`Equipment added to your bag!`);
+      
+      // Create feed post for equipment addition
+      const equipmentName = `${newItem.equipment.brand} ${newItem.equipment.model}`;
+      await smartCreateEquipmentPost(
+        user.id, 
+        currentBag.id, 
+        currentBag.name,
+        equipmentName,
+        newItem.equipment.id
+      );
     } catch (error: any) {
       console.error('Error adding equipment:', error);
       toast.error(`Failed to add equipment: ${error.message || 'Unknown error'}`);
@@ -633,7 +678,7 @@ const MyBagSupabase = () => {
         onCreateBag={handleCreateBag}
       />
 
-      <EquipmentSelector
+      <EquipmentSelectorImproved
         isOpen={equipmentSelectorOpen}
         onClose={() => setEquipmentSelectorOpen(false)}
         onSelectEquipment={addEquipment}

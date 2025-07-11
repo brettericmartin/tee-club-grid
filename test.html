@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connection Test</title>
+</head>
+<body>
+    <h1>Testing Server Connection</h1>
+    <p>If you can see this in your browser at http://localhost:5173/test.html, the server is working.</p>
+    <p>Current time: <span id="time"></span></p>
+    <script>
+        document.getElementById('time').textContent = new Date().toLocaleTimeString();
+        
+        // Test if we can fetch from the app
+        fetch('http://localhost:5173/')
+            .then(res => res.text())
+            .then(text => {
+                console.log('App HTML loaded successfully');
+                document.body.innerHTML += '<p style="color: green;">✓ Server is responding correctly</p>';
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                document.body.innerHTML += '<p style="color: red;">✗ Error connecting to server: ' + err + '</p>';
+            });
+    </script>
+</body>
+</html>

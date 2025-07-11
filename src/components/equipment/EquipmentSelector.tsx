@@ -193,10 +193,27 @@ export function EquipmentSelector({ isOpen, onClose, onSelectEquipment }: Equipm
 
   const loadShafts = async (category: string) => {
     try {
+      // Define shaft compatibility - which shaft categories work with which club types
+      const shaftCompatibility: Record<string, string[]> = {
+        'driver': ['driver', 'wood', 'fairway_wood'],
+        'fairway_wood': ['driver', 'wood', 'fairway_wood', 'hybrid'],
+        'hybrid': ['hybrid', 'fairway_wood', 'utility_iron'],
+        'utility_iron': ['utility_iron', 'hybrid', 'iron'],
+        'iron': ['iron', 'irons'],
+        'irons': ['iron', 'irons'],
+        'wedge': ['wedge', 'wedges'],
+        'wedges': ['wedge', 'wedges'],
+        'putter': ['putter', 'putters'],
+        'putters': ['putter', 'putters']
+      };
+
+      // Get compatible shaft categories for the selected equipment
+      const compatibleCategories = shaftCompatibility[category] || [category];
+      
       const { data } = await supabase
         .from('shafts')
         .select('*')
-        .eq('category', category)
+        .in('category', compatibleCategories)
         .order('is_stock', { ascending: false })
         .order('brand', { ascending: true });
 

@@ -4,11 +4,11 @@ import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users, Loader2 } 
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import Navigation from "@/components/Navigation";
 import { BagCard } from "@/components/bags/BagCard";
 import { getBags } from "@/services/bags";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLikedBags } from "@/hooks/useLikedBags";
+import { toggleFollow } from "@/services/users";
 import { toast } from "sonner";
 
 type SortOption = "trending" | "newest" | "most-liked" | "following" | "price-high" | "price-low";
@@ -30,6 +30,15 @@ const BagsBrowser = () => {
   useEffect(() => {
     loadBags();
   }, [sortBy, user]);
+
+  // Debug: Log user authentication status
+  useEffect(() => {
+    console.log('BagsBrowser user auth status:', { 
+      user: user?.id, 
+      email: user?.email, 
+      isAuthenticated: !!user 
+    });
+  }, [user]);
 
   const loadBags = async () => {
     try {
@@ -113,16 +122,37 @@ const BagsBrowser = () => {
     }
   };
 
-  const handleToggleFollow = (bagId: string) => {
-    setFollowedBags(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(bagId)) {
-        newSet.delete(bagId);
+  const handleToggleFollow = async (userId: string, username: string) => {
+    console.log('BagsBrowser handleToggleFollow called:', { userId, username, currentUser: user?.id });
+    
+    if (!user) {
+      toast.error('Please sign in to follow users');
+      return;
+    }
+    
+    try {
+      console.log('Calling toggleFollow with:', { followerId: user.id, followingId: userId });
+      const success = await toggleFollow(user.id, userId);
+      console.log('toggleFollow result:', success);
+      
+      if (success) {
+        // Update the followed bags state
+        setFollowedBags(prev => {
+          const newSet = new Set(prev);
+          if (newSet.has(userId)) {
+            newSet.delete(userId);
+          } else {
+            newSet.add(userId);
+          }
+          return newSet;
+        });
       } else {
-        newSet.add(bagId);
+        toast.error('Failed to update follow status');
       }
-      return newSet;
-    });
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+      toast.error('Failed to update follow status');
+    }
   };
 
   const handleViewBag = (bagId: string) => {
@@ -145,8 +175,7 @@ const BagsBrowser = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="container mx-auto px-4 py-8 max-w-7xl mt-16">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="flex items-center justify-center min-h-[400px]">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
@@ -157,19 +186,7 @@ const BagsBrowser = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <div className="container mx-auto px-4 py-8 max-w-7xl mt-16">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-display font-bold text-foreground mb-2">
-            Bags Browser
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Discover amazing golf setups from players around the world
-          </p>
-        </div>
-
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Search Bar */}
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
@@ -293,7 +310,10 @@ const BagsBrowser = () => {
               bag={bag}
               onView={handleViewBag}
               onLike={() => handleToggleLike(bag.id)}
+              onFollow={handleToggleFollow}
               isLiked={likedBags.has(bag.id)}
+              isFollowing={followedBags.has(bag.profiles?.id || '')}
+              currentUserId={user?.id}
             />
           ))}
         </div>

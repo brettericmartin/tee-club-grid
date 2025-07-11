@@ -1,22 +1,27 @@
 import { useState, useEffect } from "react";
-import { Grid, List, Heart, Camera, Loader2 } from "lucide-react";
+import { Grid, List, Heart, Camera, Loader2, Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Navigation from "@/components/Navigation";
-import { getEquipment } from "@/services/equipment";
+import { getEquipment, getUserSavedEquipment } from "@/services/equipment";
 import { useAuth } from "@/contexts/AuthContext";
 import { toggleEquipmentSave } from "@/services/equipment";
 import { useToast } from "@/hooks/use-toast";
 import EquipmentDataInfo from "@/components/EquipmentDataInfo";
+import { Checkbox } from "@/components/ui/checkbox";
+import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
 
 const Equipment = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [category, setCategory] = useState('all');
   const [sortBy, setSortBy] = useState<'popular' | 'newest' | 'price-low' | 'price-high'>('popular');
+  const [brand, setBrand] = useState('all');
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [equipment, setEquipment] = useState<any[]>([]);
+  const [allEquipment, setAllEquipment] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set());
+  const [brands, setBrands] = useState<string[]>([]);
   
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -26,14 +31,34 @@ const Equipment = () => {
     loadEquipment();
   }, [category, sortBy]);
 
+  useEffect(() => {
+    if (user && showSavedOnly) {
+      loadSavedEquipment();
+    }
+  }, [user, showSavedOnly]);
+
+  useEffect(() => {
+    filterEquipment();
+  }, [brand, showSavedOnly, allEquipment, savedItems]);
+
   const loadEquipment = async () => {
     setLoading(true);
     try {
       const data = await getEquipment({
         category: category === 'all' ? undefined : category,
-        sortBy
+        sortBy: sortBy === 'popular' ? 'newest' : sortBy // Change 'popular' to 'newest' for now since we don't have likes data
       });
-      setEquipment(data || []);
+      setAllEquipment(data || []);
+      
+      // Extract unique brands
+      const uniqueBrands = Array.from(new Set(data?.map(item => item.brand) || [])).sort();
+      setBrands(uniqueBrands);
+      
+      // Load saved items if user is logged in
+      if (user) {
+        const saved = await getUserSavedEquipment(user.id);
+        setSavedItems(new Set(saved?.map(item => item.id) || []));
+      }
     } catch (error) {
       console.error('Error loading equipment:', error);
       toast({
@@ -46,10 +71,37 @@ const Equipment = () => {
     }
   };
 
-  // Categories that exist in our database
-  const categories = ['all', 'driver', 'iron', 'wedge', 'putter', 'ball', 'bag'];
-  // Brands that exist in our database
-  const brands = ['all', 'TaylorMade', 'Titleist', 'Callaway', 'Ping', 'Scotty Cameron', 'Cleveland', 'Odyssey', 'Bridgestone', 'Mizuno', 'Cobra', 'Srixon', 'Vessel', 'Sun Mountain', 'Ogio', 'L.A.B. Golf', 'Bettinardi'];
+  const loadSavedEquipment = async () => {
+    if (!user) return;
+    try {
+      const saved = await getUserSavedEquipment(user.id);
+      setSavedItems(new Set(saved?.map(item => item.id) || []));
+    } catch (error) {
+      console.error('Error loading saved equipment:', error);
+    }
+  };
+
+  const filterEquipment = () => {
+    let filtered = allEquipment;
+    
+    // Filter by brand
+    if (brand !== 'all') {
+      filtered = filtered.filter(item => item.brand === brand);
+    }
+    
+    // Filter by saved only
+    if (showSavedOnly && user) {
+      filtered = filtered.filter(item => savedItems.has(item.id));
+    }
+    
+    setEquipment(filtered);
+  };
+
+  // Categories from our standardized list
+  const categoryOptions = Object.entries(EQUIPMENT_CATEGORIES).map(([key, value]) => ({
+    value,
+    label: CATEGORY_DISPLAY_NAMES[value]
+  }));
 
   const handleSaveToggle = async (e: React.MouseEvent, equipmentId: string) => {
     e.stopPropagation();
@@ -152,13 +204,6 @@ const Equipment = () => {
                   <span className="text-muted-foreground">{item.savesCount || 0} saves</span>
                 </div>
                 
-                {item.averageRating && (
-                  <div className="flex items-center gap-1 text-sm">
-                    <span className="text-muted-foreground">
-                      ★ {item.averageRating.toFixed(1)} ({item.equipment_reviews?.length || 0})
-                    </span>
-                  </div>
-                )}
                 
                 <div className="flex gap-2 pt-2">
                   <Button 
@@ -245,11 +290,6 @@ const Equipment = () => {
                 <p className="text-muted-foreground text-sm capitalize">{item.category.replace('_', ' ')}</p>
                 <div className="flex gap-4 mt-1 text-sm">
                   <span className="font-bold">${item.msrp}</span>
-                  {item.averageRating && (
-                    <span className="text-muted-foreground">
-                      ★ {item.averageRating.toFixed(1)} ({item.equipment_reviews?.length || 0})
-                    </span>
-                  )}
                   <span className="text-muted-foreground">{item.savesCount || 0} saves</span>
                 </div>
               </div>
@@ -283,15 +323,67 @@ const Equipment = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <div className="container mx-auto px-4 py-8 max-w-7xl mt-16">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Show info if no equipment loaded */}
         {equipment.length === 0 && !loading && <EquipmentDataInfo />}
         
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-display font-bold">Equipment</h1>
+        {/* Filters and View Bar */}
+        <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+          {/* Filters */}
+          <div className="flex gap-4 flex-wrap">
+            {/* Category Filter */}
+            <select 
+              value={category} 
+              onChange={(e) => setCategory(e.target.value)}
+              className="px-4 py-2 border border-border rounded-lg bg-background"
+            >
+              <option value="all">All Equipment</option>
+              {categoryOptions.map(cat => (
+                <option key={cat.value} value={cat.value}>{cat.label}</option>
+              ))}
+            </select>
+
+            {/* Sort */}
+            <select 
+              value={sortBy} 
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="px-4 py-2 border border-border rounded-lg bg-background"
+            >
+              <option value="popular">Most Liked</option>
+              <option value="newest">Newest</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+            </select>
+
+            {/* Brand Filter */}
+            <select 
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              className="px-4 py-2 border border-border rounded-lg bg-background"
+            >
+              <option value="all">All Brands</option>
+              {brands.map(b => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+            </select>
+
+            {/* Saved Only Checkbox */}
+            {user && (
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="saved-only"
+                  checked={showSavedOnly}
+                  onCheckedChange={(checked) => setShowSavedOnly(checked as boolean)}
+                />
+                <label 
+                  htmlFor="saved-only" 
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Saved items only
+                </label>
+              </div>
+            )}
+          </div>
           
           {/* View Toggle */}
           <div className="flex gap-2">
@@ -310,42 +402,6 @@ const Equipment = () => {
               <List className="w-4 h-4" />
             </Button>
           </div>
-        </div>
-
-        {/* Filters */}
-        <div className="flex gap-4 mb-6 flex-wrap">
-          {/* Category Filter */}
-          <select 
-            value={category} 
-            onChange={(e) => setCategory(e.target.value)}
-            className="px-4 py-2 border border-border rounded-lg bg-background"
-          >
-            <option value="all">All Equipment</option>
-            {categories.slice(1).map(cat => (
-              <option key={cat} value={cat} className="capitalize">{cat}</option>
-            ))}
-          </select>
-
-          {/* Sort */}
-          <select 
-            value={sortBy} 
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-4 py-2 border border-border rounded-lg bg-background"
-          >
-            <option value="popular">Most Popular</option>
-            <option value="newest">Newest</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="rating">Highest Rated</option>
-          </select>
-
-          {/* Brand Filter */}
-          <select className="px-4 py-2 border border-border rounded-lg bg-background">
-            <option value="all">All Brands</option>
-            {brands.slice(1).map(brand => (
-              <option key={brand} value={brand} className="capitalize">{brand}</option>
-            ))}
-          </select>
         </div>
 
         {/* Equipment Display */}

@@ -1,25 +1,35 @@
 import { useState } from 'react';
-import { Heart, Eye, TrendingUp, Star } from 'lucide-react';
+import { Heart, Eye, TrendingUp, Star, UserPlus, UserMinus, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { getBrandAbbreviation } from '@/utils/brandAbbreviations';
 import { cn } from '@/lib/utils';
 import { EquipmentShowcaseModal } from '@/components/EquipmentShowcaseModal';
+import type { Database } from '@/lib/supabase';
 
 interface BagEquipmentItem {
   id: string;
-  position: number;
-  custom_photo_url?: string;
+  bag_id: string;
+  equipment_id: string;
+  is_featured: boolean;
+  purchase_date?: string;
   purchase_price?: number;
-  is_featured?: boolean;
-  equipment?: {
+  notes?: string;
+  custom_specs?: Record<string, any>;
+  created_at: string;
+  equipment: {
     id: string;
     brand: string;
     model: string;
     category: string;
     image_url?: string;
     msrp?: number;
+    specs?: Record<string, any>;
+    popularity_score?: number;
+    release_date?: string;
+    created_at: string;
   };
 }
 
@@ -33,6 +43,7 @@ interface BagCardProps {
     views_count: number;
     is_trending?: boolean;
     profiles?: {
+      id: string;
       username: string;
       display_name: string;
       avatar_url?: string;
@@ -42,13 +53,25 @@ interface BagCardProps {
   };
   onView: (bagId: string) => void;
   onLike?: (bagId: string) => void;
+  onFollow?: (userId: string, username: string) => void;
   isLiked?: boolean;
+  isFollowing?: boolean;
+  currentUserId?: string;
 }
 
-export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) {
+export function BagCard({ 
+  bag, 
+  onView, 
+  onLike, 
+  onFollow, 
+  isLiked = false, 
+  isFollowing = false,
+  currentUserId 
+}: BagCardProps) {
   const [imageError, setImageError] = useState<Record<string, boolean>>({});
   const [selectedBagEquipment, setSelectedBagEquipment] = useState<BagEquipmentItem | null>(null);
   const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   
   // Find the actual golf bag equipment (category 'bag' or 'golf_bag')
   const allEquipment = bag.bag_equipment || [];
@@ -57,7 +80,7 @@ export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) 
   );
   
   // Get the golf bag image
-  const golfBagImage = golfBag?.custom_photo_url || golfBag?.equipment?.image_url;
+  const golfBagImage = golfBag?.equipment?.image_url;
   console.log('Golf bag found:', golfBag?.equipment?.brand, golfBag?.equipment?.model, 'image:', golfBagImage);
   
   // Separate clubs and accessories (excluding the bag itself)
@@ -69,12 +92,12 @@ export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) 
     item.equipment && ['balls', 'gloves', 'speakers', 'tees', 'towels', 'ball_marker', 'accessories'].includes(item.equipment.category)
   );
   
-  // Sort by featured first, then by position
+  // Sort by featured first, then by creation date
   const sortEquipment = (items: BagEquipmentItem[]) => 
     items.sort((a, b) => {
       if (a.is_featured && !b.is_featured) return -1;
       if (!a.is_featured && b.is_featured) return 1;
-      return (a.position || 0) - (b.position || 0);
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   
   // Get 6 clubs for main grid (3x2)
@@ -88,12 +111,9 @@ export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) 
     sum + (item.purchase_price || item.equipment?.msrp || 0), 0
   ) || 0;
   
-  const clubCount = clubs.length;
+  const equipmentCount = allEquipment.length;
 
   const getEquipmentImage = (item: BagEquipmentItem) => {
-    if (item.custom_photo_url && !imageError[item.id]) {
-      return item.custom_photo_url;
-    }
     if (item.equipment?.image_url && !imageError[`${item.id}-equipment`]) {
       return item.equipment.image_url;
     }
@@ -106,6 +126,37 @@ export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) 
     setSelectedBagEquipment(item);
     setEquipmentModalOpen(true);
   };
+
+  const handleFollowClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onFollow || !bag.profiles?.id || !bag.profiles?.username) {
+      console.error('Missing follow data:', { 
+        onFollow: !!onFollow, 
+        userId: bag.profiles?.id, 
+        username: bag.profiles?.username,
+        currentUserId
+      });
+      return;
+    }
+    
+    console.log('Follow button clicked:', {
+      currentUserId,
+      targetUserId: bag.profiles.id,
+      targetUsername: bag.profiles.username
+    });
+    
+    setFollowLoading(true);
+    try {
+      await onFollow(bag.profiles.id, bag.profiles.username);
+    } catch (error) {
+      console.error('Follow error in BagCard:', error);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
+  // Don't show follow button if it's the current user's bag
+  const showFollowButton = currentUserId && bag.profiles?.id && currentUserId !== bag.profiles.id;
 
   return (
     <>
@@ -148,9 +199,9 @@ export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) 
         )}
       </div>
 
-      {/* Glassmorphic container */}
+      {/* Container - removed backdrop blur */}
       <div 
-        className="relative backdrop-blur-sm bg-white/5 p-4 h-full min-h-[400px] cursor-pointer"
+        className="relative bg-white/5 p-4 h-full min-h-[400px] cursor-pointer"
         onClick={() => onView(bag.id)}
       >
         {/* Header with user info */}
@@ -174,13 +225,40 @@ export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) 
             </div>
           </div>
           
-          {/* Trending badge */}
-          {(bag.is_trending || bag.likes_count > 50) && (
-            <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
-              <TrendingUp className="w-3 h-3 mr-1" />
-              Trending
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Follow button */}
+            {showFollowButton && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleFollowClick}
+                disabled={followLoading}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                {followLoading ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : isFollowing ? (
+                  <>
+                    <UserMinus className="w-3 h-3 mr-1" />
+                    Unfollow
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-3 h-3 mr-1" />
+                    Follow
+                  </>
+                )}
+              </Button>
+            )}
+            
+            {/* Trending badge */}
+            {(bag.is_trending || bag.likes_count > 50) && (
+              <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
+                <TrendingUp className="w-3 h-3 mr-1" />
+                Trending
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Bag name */}
@@ -195,7 +273,7 @@ export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) 
             return (
               <div 
                 key={index}
-                className="aspect-square rounded-lg overflow-hidden bg-white/10 backdrop-blur-sm relative group/item cursor-pointer z-10"
+                className="aspect-square rounded-lg overflow-hidden bg-white/10 relative group/item cursor-pointer z-10"
                 onClick={(e) => item && handleEquipmentClick(e, item)}
               >
                 {item ? (
@@ -207,7 +285,7 @@ export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) 
                       onError={() => {
                         setImageError(prev => ({
                           ...prev,
-                          [item.custom_photo_url ? item.id : `${item.id}-equipment`]: true
+                          [`${item.id}-equipment`]: true
                         }));
                       }}
                     />
@@ -251,7 +329,7 @@ export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) 
             return (
               <div 
                 key={`acc-${index}`}
-                className="aspect-square rounded-md overflow-hidden bg-white/10 backdrop-blur-sm relative group/item cursor-pointer z-10"
+                className="aspect-square rounded-md overflow-hidden bg-white/10 relative group/item cursor-pointer z-10"
                 onClick={(e) => item && handleEquipmentClick(e, item)}
               >
                 {item ? (
@@ -295,8 +373,8 @@ export function BagCard({ bag, onView, onLike, isLiked = false }: BagCardProps) 
         <div className="flex items-center justify-between text-white/90 text-sm" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <span className="font-semibold">{clubCount}</span>
-              <span className="text-xs text-white/70">clubs</span>
+              <span className="font-semibold">{equipmentCount}</span>
+              <span className="text-xs text-white/70">pieces</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="font-semibold">${totalValue.toLocaleString()}</span>

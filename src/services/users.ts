@@ -54,34 +54,56 @@ export async function updateUserProfile(userId: string, updates: {
 
 // Follow/unfollow user
 export async function toggleFollow(followerId: string, followingId: string) {
-  // Check if already following
-  const { data: existing } = await supabase
-    .from('user_follows')
-    .select('id')
-    .eq('follower_id', followerId)
-    .eq('following_id', followingId)
-    .single();
+  console.log('toggleFollow called with:', { followerId, followingId });
+  
+  try {
+    // Check if already following
+    const { data: existing, error: checkError } = await supabase
+      .from('user_follows')
+      .select('id')
+      .eq('follower_id', followerId)
+      .eq('following_id', followingId)
+      .single();
 
-  if (existing) {
-    // Unfollow
-    const { error } = await supabase
-      .from('user_follows')
-      .delete()
-      .eq('id', existing.id);
-    
-    if (error) throw error;
-    return false; // unfollowed
-  } else {
-    // Follow
-    const { error } = await supabase
-      .from('user_follows')
-      .insert({
-        follower_id: followerId,
-        following_id: followingId
-      });
-    
-    if (error) throw error;
-    return true; // followed
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking follow status:', checkError);
+      throw checkError;
+    }
+
+    if (existing) {
+      console.log('Unfollowing user...');
+      // Unfollow
+      const { error } = await supabase
+        .from('user_follows')
+        .delete()
+        .eq('id', existing.id);
+      
+      if (error) {
+        console.error('Error unfollowing:', error);
+        throw error;
+      }
+      console.log('Successfully unfollowed');
+      return false; // unfollowed
+    } else {
+      console.log('Following user...');
+      // Follow
+      const { error } = await supabase
+        .from('user_follows')
+        .insert({
+          follower_id: followerId,
+          following_id: followingId
+        });
+      
+      if (error) {
+        console.error('Error following:', error);
+        throw error;
+      }
+      console.log('Successfully followed');
+      return true; // followed
+    }
+  } catch (error) {
+    console.error('toggleFollow error:', error);
+    throw error;
   }
 }
 

@@ -95,42 +95,42 @@
   }
 
   .dark {
-    --background: 10 20% 4%;
+    --background: 0 0% 0%; /* True black for OLED */
     --foreground: 0 0% 100%;
-    --card: 154 20% 8%;
+    --card: 0 0% 100% / 0.05;
     --card-foreground: 0 0% 100%;
-    --popover: 154 20% 8%;
+    --popover: 0 0% 0% / 0.9;
     --popover-foreground: 0 0% 100%;
     
-    --primary: 134 61% 51%;
-    --primary-foreground: 10 20% 4%;
-    --primary-hover: 134 61% 55%;
+    --primary: 142 76% 36%; /* #10B981 - Signature green */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 142 76% 40%;
     
-    --accent: 45 100% 50%;
-    --accent-foreground: 10 20% 4%;
-    --accent-hover: 45 100% 55%;
+    --accent: 142 76% 36%; /* Same as primary for consistency */
+    --accent-foreground: 0 0% 100%;
+    --accent-hover: 142 76% 40%;
     
-    --secondary: 154 20% 12%;
+    --secondary: 220 13% 13%; /* #1f2937 */
     --secondary-foreground: 0 0% 100%;
     
-    --muted: 154 20% 12%;
-    --muted-foreground: 0 0% 100% / 0.6;
+    --muted: 217 19% 27%; /* #374151 */
+    --muted-foreground: 0 0% 100% / 0.7;
     
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
     --border: 0 0% 100% / 0.1;
     --input: 0 0% 100% / 0.1;
-    --ring: 134 61% 51%;
+    --ring: 142 76% 36%;
 
-    --sidebar-background: 10 20% 4%;
+    --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 134 61% 51%;
-    --sidebar-primary-foreground: 10 20% 4%;
-    --sidebar-accent: 154 20% 12%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 13% 13%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 100% / 0.1;
-    --sidebar-ring: 134 61% 51%;
+    --sidebar-ring: 142 76% 36%;
   }
 }
 
@@ -164,24 +164,63 @@
     margin-bottom: 1.5rem;
   }
 
-  /* Glassmorphism Effects */
-  .gel-card {
-    background: hsl(var(--glass));
-    backdrop-filter: blur(16px);
-    border: 1px solid hsl(var(--glass-border));
-    box-shadow: var(--shadow-glass), var(--shadow-glass-inset);
+  /* Glassmorphism Effects - Premium Golf Aesthetic */
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
   }
 
-  .gel-card:hover {
-    background: hsl(var(--glass-hover));
-    transform: translateY(-2px);
-    transition: all 0.3s var(--ease-luxury);
+  .glass-card:hover {
+    @apply bg-white/[0.15] scale-105;
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.4);
   }
 
-  /* Additional gel utilities */
-  .gel-button {
+  /* Dark glass for content areas */
+  .glass-dark {
+    @apply bg-black/70 backdrop-blur-[8px] border-t border-white/10;
+  }
+
+  /* Button styles matching design system */
+  .glass-button {
     @apply bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg;
-    @apply hover:bg-white/20 transition-all;
+    @apply hover:bg-white/20 transition-all duration-200;
+  }
+
+  .primary-button {
+    @apply bg-primary hover:bg-primary/90 text-white font-medium;
+    @apply px-6 py-3 rounded-lg transition-all duration-200;
+  }
+
+  /* Legacy class mapping */
+  .gel-card {
+    @apply glass-card;
+  }
+
+  .gel-button {
+    @apply glass-button;
+  }
+
+  /* Consistent hover effects */
+  .hover-scale {
+    @apply hover:scale-105 transition-transform duration-200;
+  }
+
+  .hover-glow {
+    @apply hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-200;
+  }
+
+  /* Text styling for premium feel */
+  .text-premium {
+    @apply text-white font-medium;
+  }
+
+  .text-premium-muted {
+    @apply text-white/70;
+  }
+
+  .text-premium-dim {
+    @apply text-white/50;
   }
 
   .dark-gradient {
@@ -264,5 +303,18 @@
   @keyframes kenBurns {
     0% { transform: scale(1); }
     100% { transform: scale(1.1); }
+  }
+
+  /* 3D Flip Card Styles */
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
   }
 }

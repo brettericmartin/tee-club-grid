@@ -7,7 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import BagsBrowser from "./pages/BagsBrowser";
-import BagDisplay from "./pages/BagDisplay";
+import BagDisplay from "./pages/BagDisplayStyled";
 import MyBag from "./pages/MyBagSupabase";
 import Equipment from "./pages/Equipment";
 import EquipmentDetail from "./pages/EquipmentDetail";
@@ -18,10 +18,22 @@ import Saved from "./pages/Saved";
 import Following from "./pages/Following";
 import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
+import Debug from "./pages/Debug";
+import DebugFeed from "./pages/DebugFeed";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-const App = () => (
+const App = () => {
+  console.log('App component rendering...');
+  
+  return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
@@ -49,6 +61,8 @@ const App = () => (
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/admin/seed-equipment" element={<SeedEquipment />} />
                 <Route path="/admin/equipment-migration" element={<EquipmentMigration />} />
+                <Route path="/debug" element={<Debug />} />
+                <Route path="/debug-feed" element={<DebugFeed />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
@@ -58,6 +72,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

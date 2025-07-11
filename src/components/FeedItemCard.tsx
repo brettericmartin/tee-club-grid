@@ -206,7 +206,7 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
 
             {/* Post Type Badge */}
             <div className="absolute top-4 right-4">
-              <div className="gel-card px-3 py-1 rounded-full">
+              <div className="glass-card px-3 py-1 rounded-full">
                 <span className="text-white text-xs font-medium">
                   {getPostTypeLabel(item.postType)}
                 </span>
@@ -279,7 +279,7 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
                         onMouseLeave={() => setHoveredItem(null)}
                         onClick={(e) => handleEquipmentClick(e, equipment.id)}
                       >
-                        <div className="gel-card w-full aspect-square rounded-lg p-2 transition-all duration-200 hover:scale-105 hover:shadow-2xl">
+                        <div className="glass-card w-full aspect-square rounded-lg p-2 transition-all duration-200 hover:scale-105 hover:shadow-2xl">
                           <div className="w-full h-full">
                             <img 
                               src={equipment.image_url || '/api/placeholder/150/150'}
@@ -302,7 +302,7 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
                           
                           {/* Equipment name on hover */}
                           {isHoveredItem && (
-                            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 gel-card px-3 py-1.5 rounded-full whitespace-nowrap">
+                            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 glass-card px-3 py-1.5 rounded-full whitespace-nowrap">
                               <span className="text-white text-xs font-medium">
                                 {equipment.brand} {equipment.model}
                               </span>
@@ -324,19 +324,18 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
             )}
 
             {/* Bottom info bar */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/70 backdrop-blur-[8px] border-t border-white/10">
+            <div className="absolute bottom-0 left-0 right-0 p-4 glass-dark">
               <div className="flex items-end justify-between mb-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="text-white font-semibold text-sm truncate">{item.userName}</h3>
-                  <p className="text-gray-300 text-xs truncate">Handicap: {item.userHandicap}</p>
+                  <p className="text-white/70 text-xs truncate">Handicap: {item.userHandicap}</p>
                 </div>
                 
                 <div className="flex items-center gap-2 ml-2">
                   <Button
                     size="sm"
-                    variant={isFollowing ? "secondary" : "default"}
                     onClick={handleFollow}
-                    className="flex items-center gap-1 text-xs"
+                    className={`flex items-center gap-1 text-xs ${isFollowing ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' : 'bg-primary hover:bg-primary/90 text-white'}`}
                   >
                     {isFollowing ? (
                       <>
@@ -362,7 +361,7 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
                 
                 <div className="flex items-center gap-3">
                   <Link to={`/bag/${item.userId}`}>
-                    <Button variant="outline" size="sm" className="flex items-center gap-1 text-xs">
+                    <Button size="sm" className="flex items-center gap-1 text-xs bg-white/10 hover:bg-white/20 text-white border border-white/20">
                       <Eye className="w-3 h-3" />
                       View Full Bag
                     </Button>

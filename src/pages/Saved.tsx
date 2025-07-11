@@ -3,7 +3,6 @@ import { Grid, List, Heart, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Navigation from "@/components/Navigation";
 import { Link } from "react-router-dom";
 
 const Saved = () => {
@@ -182,13 +181,9 @@ const Saved = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <div className="container mx-auto px-4 py-8 max-w-7xl mt-16">
-        <h1 className="text-3xl font-display font-bold mb-8">My Saved Items</h1>
-
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <Card>
             <CardContent className="p-6 text-center">
               <p className="text-3xl font-bold text-primary">{savedEquipment.length}</p>

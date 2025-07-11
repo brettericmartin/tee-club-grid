@@ -43,10 +43,6 @@ const BagCard = ({ bag }: BagCardProps) => {
     }).format(value);
   };
 
-  // Convert owner name to username format
-  const getUsername = (ownerName: string) => {
-    return ownerName.toLowerCase().replace(/\s+/g, '_');
-  };
 
   return (
     <motion.div
@@ -55,8 +51,8 @@ const BagCard = ({ bag }: BagCardProps) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
     >
-      <Link to={`/bag/${getUsername(bag.owner)}`} className="block">
-        <div className="luxury-card bg-card rounded-xl shadow-card overflow-hidden cursor-pointer group border border-border/10">
+      <Link to={`/bag/${bag.id}`} className="block">
+        <div className="bg-white/10 backdrop-blur-[10px] rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3)] overflow-hidden cursor-pointer group border border-white/20 hover:bg-white/[0.15] hover:scale-105 transition-all duration-200">
         {/* Image Container */}
         <div className="relative overflow-hidden">
           <img
@@ -93,7 +89,7 @@ const BagCard = ({ bag }: BagCardProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 rounded-full bg-card/90 backdrop-blur-sm shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-card hover:scale-110"
+              className="h-8 w-8 rounded-full bg-white/10 backdrop-blur-sm shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white/20 hover:scale-110"
               onClick={handleLike}
             >
               <Heart 
@@ -107,7 +103,7 @@ const BagCard = ({ bag }: BagCardProps) => {
           {/* Value Badge */}
           <Badge 
             variant="default"
-            className="absolute bottom-3 left-3 bg-primary text-primary-foreground shadow-sm font-display font-bold"
+            className="absolute bottom-3 left-3 bg-primary text-white shadow-sm font-display font-bold"
           >
             {formatValue(bag.totalValue)}
           </Badge>
@@ -116,7 +112,7 @@ const BagCard = ({ bag }: BagCardProps) => {
         {/* Content */}
         <div className="p-4 space-y-3">
           {/* Title */}
-          <h3 className="font-display font-semibold text-lg text-foreground group-hover:text-primary transition-colors duration-200">
+          <h3 className="font-display font-semibold text-lg text-white group-hover:text-primary transition-colors duration-200">
             {bag.title}
           </h3>
 
@@ -130,8 +126,8 @@ const BagCard = ({ bag }: BagCardProps) => {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium text-sm text-foreground">{bag.owner}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="font-medium text-sm text-white">{bag.owner}</p>
+                <p className="text-xs text-white/70">
                   {bag.handicap > 0 ? `+${bag.handicap}` : bag.handicap} handicap
                 </p>
               </div>
@@ -140,15 +136,15 @@ const BagCard = ({ bag }: BagCardProps) => {
             {/* Handicap Badge */}
             <Badge 
               variant="outline"
-              className="bg-accent text-accent-foreground border-accent/30 font-bold text-xs"
+              className="bg-primary/20 text-primary border-primary/30 font-bold text-xs"
             >
               {bag.handicap > 0 ? `+${bag.handicap}` : bag.handicap}
             </Badge>
           </div>
 
           {/* Stats */}
-          <div className="flex items-center justify-between pt-2 border-t border-border/50">
-            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+          <div className="flex items-center justify-between pt-2 border-t border-white/10">
+            <div className="flex items-center space-x-4 text-sm text-white/70">
               <span className="flex items-center space-x-1">
                 <span className="w-2 h-2 bg-primary rounded-full"></span>
                 <span>{bag.clubCount} clubs</span>

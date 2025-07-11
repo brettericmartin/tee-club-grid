@@ -1,9 +1,12 @@
-import { MapPin, Share2, UserPlus, Edit3 } from 'lucide-react';
+import { useState } from 'react';
+import { MapPin, Share2, UserPlus, UserMinus, Edit3, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 
 interface BagHeaderProps {
   userProfile: {
+    id: string;
     name: string;
     username: string;
     avatar?: string;
@@ -18,9 +21,37 @@ interface BagHeaderProps {
   };
   isOwnBag: boolean;
   courseImage?: string;
+  onFollow?: (userId: string, username: string) => Promise<boolean>;
+  isFollowing?: boolean;
 }
 
-const BagHeader = ({ userProfile, bagStats, isOwnBag, courseImage }: BagHeaderProps) => {
+const BagHeader = ({ 
+  userProfile, 
+  bagStats, 
+  isOwnBag, 
+  courseImage, 
+  onFollow, 
+  isFollowing = false 
+}: BagHeaderProps) => {
+  const [followLoading, setFollowLoading] = useState(false);
+
+  const handleFollowClick = async () => {
+    if (!onFollow || !userProfile.id || !userProfile.username) return;
+    
+    setFollowLoading(true);
+    try {
+      const success = await onFollow(userProfile.id, userProfile.username);
+      if (!success) {
+        toast.error('Failed to update follow status');
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+      toast.error('Failed to update follow status');
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   return (
     <div className="relative">
       {/* Course Background */}
@@ -69,9 +100,25 @@ const BagHeader = ({ userProfile, bagStats, isOwnBag, courseImage }: BagHeaderPr
                   Edit Bag
                 </Button>
               ) : (
-                <Button size="sm" className="bg-primary hover:bg-primary-hover">
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Follow
+                <Button 
+                  size="sm" 
+                  className={isFollowing ? "bg-gray-600 hover:bg-gray-700" : "bg-primary hover:bg-primary-hover"}
+                  onClick={handleFollowClick}
+                  disabled={followLoading}
+                >
+                  {followLoading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : isFollowing ? (
+                    <>
+                      <UserMinus className="w-4 h-4 mr-2" />
+                      Unfollow
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Follow
+                    </>
+                  )}
                 </Button>
               )}
               <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">

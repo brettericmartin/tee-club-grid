@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Camera, Edit3, Star, StarOff, X, Images } from 'lucide-react';
+import { Camera, Edit3, Star, StarOff, X, Images, Crop } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,8 @@ import {
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { CommunityPhotosGallery } from './CommunityPhotosGallery';
+import { ImageCropper } from '@/components/ImageCropper';
+import { UnifiedPhotoUploadDialog } from '@/components/shared/UnifiedPhotoUploadDialog';
 import type { Database } from '@/lib/supabase';
 
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
@@ -48,6 +50,14 @@ export function EquipmentEditor({
   const [loftOptions, setLoftOptions] = useState<any[]>([]);
   const [equipmentPhotos, setEquipmentPhotos] = useState<any[]>([]);
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+  const [showCropper, setShowCropper] = useState(false);
+  const [cropperImage, setCropperImage] = useState<string>('');
+  const [pendingCropFile, setPendingCropFile] = useState<File | null>(null);
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
+  
+  // Check if equipment is a club (needs shaft/grip/loft options)
+  const isClub = ['driver', 'fairway_wood', 'wood', 'woods', 'hybrid', 'utility_iron', 
+                  'iron', 'irons', 'wedge', 'wedges', 'putter', 'putters'].includes(equipment.equipment.category);
   
   const [formData, setFormData] = useState({
     shaft_id: equipment.shaft_id || '',
@@ -151,55 +161,6 @@ export function EquipmentEditor({
     }
   };
 
-  const handlePhotoUpload = async (file: File) => {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${equipment.equipment_id}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError, data } = await supabase.storage
-        .from('equipment-photos')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        // If bucket doesn't exist, show helpful error
-        if (uploadError.message.includes('bucket')) {
-          toast.error('Storage bucket not configured. Please contact support.');
-          return;
-        }
-        throw uploadError;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('equipment-photos')
-        .getPublicUrl(filePath);
-
-      // Save to equipment_photos table for community sharing
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { error: dbError } = await supabase.from('equipment_photos').insert({
-          equipment_id: equipment.equipment_id,
-          photo_url: publicUrl,
-          user_id: user.id,
-          is_primary: false
-        });
-        
-        if (!dbError) {
-          // Reload photos to show the new one
-          await loadEquipmentPhotos();
-        }
-      }
-
-      setFormData({ ...formData, custom_photo_url: publicUrl });
-      toast.success('Photo uploaded successfully');
-    } catch (error: any) {
-      console.error('Error uploading photo:', error);
-      toast.error(error.message || 'Failed to upload photo');
-    }
-  };
 
   return (
     <>
@@ -224,33 +185,37 @@ export function EquipmentEditor({
                 />
               </div>
               <div className="space-y-2">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handlePhotoUpload(file);
-                  }}
-                  className="hidden"
-                  id="photo-upload"
-                />
-                <Label htmlFor="photo-upload" className="cursor-pointer">
-                  <Button variant="outline" size="sm" asChild>
-                    <span>
-                      <Camera className="w-4 h-4 mr-2" />
-                      Upload Custom Photo
-                    </span>
-                  </Button>
-                </Label>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowPhotoUpload(true)}
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  Upload Custom Photo
+                </Button>
                 {formData.custom_photo_url && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setFormData({ ...formData, custom_photo_url: '' })}
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Remove Custom Photo
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setCropperImage(formData.custom_photo_url);
+                        setShowCropper(true);
+                        setPendingCropFile(null);
+                      }}
+                    >
+                      <Crop className="w-4 h-4 mr-2" />
+                      Crop Photo
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setFormData({ ...formData, custom_photo_url: '' })}
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Remove Photo
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
@@ -295,8 +260,8 @@ export function EquipmentEditor({
 
           {/* Configuration */}
           <div className="grid grid-cols-2 gap-4">
-            {/* Shaft Selection */}
-            {shafts.length > 0 && (
+            {/* Shaft Selection - Only show for clubs */}
+            {isClub && shafts.length > 0 && (
               <div>
                 <Label>Shaft</Label>
                 <Select
@@ -318,29 +283,31 @@ export function EquipmentEditor({
               </div>
             )}
 
-            {/* Grip Selection */}
-            <div>
-              <Label>Grip</Label>
-              <Select
-                value={formData.grip_id}
-                onValueChange={(value) => setFormData({ ...formData, grip_id: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select grip" />
-                </SelectTrigger>
-                <SelectContent>
-                  {grips.map((grip) => (
-                    <SelectItem key={grip.id} value={grip.id}>
-                      {grip.brand} {grip.model} - {grip.size}
-                      {grip.is_stock && ' (Stock)'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Grip Selection - Only show for clubs */}
+            {isClub && (
+              <div>
+                <Label>Grip</Label>
+                <Select
+                  value={formData.grip_id}
+                  onValueChange={(value) => setFormData({ ...formData, grip_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select grip" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {grips.map((grip) => (
+                      <SelectItem key={grip.id} value={grip.id}>
+                        {grip.brand} {grip.model} - {grip.size}
+                        {grip.is_stock && ' (Stock)'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-            {/* Loft Selection */}
-            {loftOptions.length > 0 && (
+            {/* Loft Selection - Only show for clubs with loft options */}
+            {isClub && loftOptions.length > 0 && (
               <div>
                 <Label>Loft/Configuration</Label>
                 <Select
@@ -435,6 +402,71 @@ export function EquipmentEditor({
           setFormData({ ...formData, custom_photo_url: photoUrl });
           toast.success('Photo selected');
         }}
+      />
+
+      {/* Image Cropper */}
+      <ImageCropper
+        isOpen={showCropper}
+        onClose={() => {
+          setShowCropper(false);
+          setCropperImage('');
+          setPendingCropFile(null);
+        }}
+        imageUrl={cropperImage}
+        onCropComplete={async (croppedImageUrl, cropData) => {
+          console.log('Crop complete called with:', { croppedImageUrl, cropData });
+          try {
+            if (pendingCropFile) {
+              // Convert cropped blob URL to file for upload
+              const response = await fetch(croppedImageUrl);
+              const blob = await response.blob();
+              console.log('Created blob:', blob);
+              
+              const croppedFile = new File([blob], pendingCropFile.name, { type: 'image/jpeg' });
+              console.log('Created file:', croppedFile);
+              
+              // Upload the cropped file
+              await handlePhotoUpload(croppedFile);
+            } else {
+              // For existing photos, we need to re-upload the cropped version
+              const response = await fetch(croppedImageUrl);
+              const blob = await response.blob();
+              const fileName = `equipment-${equipment.equipment_id}-cropped-${Date.now()}.jpg`;
+              const croppedFile = new File([blob], fileName, { type: 'image/jpeg' });
+              
+              // TODO: Integrate with unified photo upload
+              // For now, just update the photo URL directly
+              setFormData({ ...formData, custom_photo_url: croppedImageUrl });
+            }
+            
+            setShowCropper(false);
+            setCropperImage('');
+            setPendingCropFile(null);
+          } catch (error) {
+            console.error('Error processing cropped image:', error);
+            toast.error('Failed to process cropped image');
+          }
+        }}
+        aspectRatio={1}
+        title="Crop Equipment Photo"
+      />
+
+      {/* Unified Photo Upload Dialog */}
+      <UnifiedPhotoUploadDialog
+        isOpen={showPhotoUpload}
+        onClose={() => setShowPhotoUpload(false)}
+        onUploadComplete={(photoUrl) => {
+          setFormData({ ...formData, custom_photo_url: photoUrl });
+          loadEquipmentPhotos();
+        }}
+        context={{
+          type: 'equipment',
+          equipmentId: equipment.equipment_id,
+          equipmentName: `${equipment.equipment.brand} ${equipment.equipment.model}`,
+          bagId: equipment.bag_id,
+          bagName: equipment.bag?.name
+        }}
+        initialCaption={`Check out my ${equipment.equipment.brand} ${equipment.equipment.model}!`}
       />
     </>
   );

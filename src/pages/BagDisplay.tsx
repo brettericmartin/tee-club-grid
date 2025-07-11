@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Navigation from "@/components/Navigation";
 import BackgroundLayer from "@/components/BackgroundLayer";
 import EquipmentDetailModal from "@/components/EquipmentDetailModal";
 import BagHeader from "@/components/bag/BagHeader";
@@ -11,6 +10,7 @@ import { BagItem } from "@/types/equipment";
 import { EquipmentDetail } from "@/types/equipmentDetail";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { toggleFollow } from "@/services/users";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import type { Database } from "@/lib/supabase";
@@ -34,10 +34,13 @@ const BagDisplay = () => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    loadBagById();
+    if (bagId) {
+      loadBagById();
+    }
   }, [bagId]);
   
   const loadBagById = async () => {
+    console.log('Loading bag with ID:', bagId);
     try {
       setLoading(true);
       
@@ -52,9 +55,12 @@ const BagDisplay = () => {
         .single();
         
       if (bagError || !bagData) {
+        console.error('Bag error:', bagError);
         toast.error('Bag not found');
         return;
       }
+      
+      console.log('Bag data:', bagData);
       
       setUserBag(bagData);
       setUserProfile(bagData.profiles);
@@ -73,6 +79,8 @@ const BagDisplay = () => {
         return;
       }
       
+      console.log('Equipment data:', equipmentData);
+      
       // Convert to BagItem format
       const items: BagItem[] = (equipmentData || []).map((item: any) => ({
         equipment: {
@@ -80,7 +88,7 @@ const BagDisplay = () => {
           brand: item.equipment.brand,
           model: item.equipment.model,
           category: item.equipment.category,
-          image: item.equipment.image_url || '',
+          image: item.equipment.image_url || '/placeholder.jpg',
           msrp: Number(item.equipment.msrp) || 0,
           customSpecs: item.custom_specs,
           specs: item.equipment.specs || {}
@@ -99,7 +107,57 @@ const BagDisplay = () => {
     }
   };
   
+  console.log('Render state:', { loading, userBag, userProfile, bagItems: bagItems.length });
+  
   const isOwnBag = currentUser?.id === userProfile?.id;
+
+  const handleFollowClick = async (userId: string, username: string) => {
+    if (!currentUser) {
+      toast.error('Please sign in to follow users');
+      return false;
+    }
+    
+    try {
+      const success = await toggleFollow(currentUser.id, userId);
+      if (success) {
+        setIsFollowing(true);
+        toast.success('Followed successfully');
+      } else {
+        setIsFollowing(false);
+        toast.success('Unfollowed successfully');
+      }
+      return success;
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+      toast.error('Failed to update follow status');
+      return false;
+    }
+  };
+
+  // Check if current user is following this user
+  const [isFollowing, setIsFollowing] = useState(false);
+  
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!currentUser?.id || !userProfile?.id) return;
+      
+      try {
+        const { data } = await supabase
+          .from('user_follows')
+          .select('id')
+          .eq('follower_id', currentUser.id)
+          .eq('following_id', userProfile.id)
+          .single();
+        
+        setIsFollowing(!!data);
+      } catch (error) {
+        // No follow relationship found
+        setIsFollowing(false);
+      }
+    };
+    
+    checkFollowStatus();
+  }, [currentUser?.id, userProfile?.id]);
 
 
   const handleToggleFeatured = (equipmentId: string) => {
@@ -174,7 +232,6 @@ const BagDisplay = () => {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
         <BackgroundLayer backgroundId="midwest-lush" />
-        <Navigation />
         <Loader2 className="w-8 h-8 animate-spin text-white" />
       </div>
     );
@@ -184,7 +241,6 @@ const BagDisplay = () => {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
         <BackgroundLayer backgroundId="midwest-lush" />
-        <Navigation />
         <div className="text-center text-white">
           <h2 className="text-2xl font-bold mb-4">User or bag not found</h2>
         </div>
@@ -194,8 +250,7 @@ const BagDisplay = () => {
 
   return (
     <div className="min-h-screen relative">
-      <BackgroundLayer backgroundId={userProfile.bag_background || 'midwest-lush'} />
-      <Navigation />
+      <BackgroundLayer backgroundId={userBag?.background_image || 'midwest-lush'} />
       
       {/* Immersive Layout */}
       <div className="relative min-h-screen">
@@ -204,6 +259,8 @@ const BagDisplay = () => {
           bagStats={bagStats}
           isOwnBag={isOwnBag}
           courseImage="/api/placeholder/1920/1080" // Course backdrop
+          onFollow={handleFollowClick}
+          isFollowing={isFollowing}
         />
 
         {/* Content Area */}

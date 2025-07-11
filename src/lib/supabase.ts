@@ -17,9 +17,11 @@ export interface Database {
         Row: {
           id: string;
           username: string;
-          full_name?: string;
+          display_name?: string;
           avatar_url?: string;
           handicap?: number;
+          home_course?: string;
+          years_playing?: number;
           location?: string;
           bio?: string;
           created_at: string;
@@ -50,7 +52,12 @@ export interface Database {
           user_id: string;
           name: string;
           description?: string;
-          is_public: boolean;
+          is_primary: boolean;
+          is_public?: boolean;
+          bag_type?: string;
+          total_value?: number;
+          likes_count?: number;
+          views_count?: number;
           background_image?: string;
           created_at: string;
           updated_at: string;
