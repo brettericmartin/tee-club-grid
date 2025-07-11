@@ -42,7 +42,7 @@ const App = () => {
         <BrowserRouter>
           <div className="min-h-screen bg-background font-sans antialiased">
             {/* Fixed background gradient */}
-            <div className="fixed inset-0 bg-gradient-to-br from-gray-950 via-gray-900 to-primary/10 -z-10" />
+            <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-primary/10 -z-10" />
             
             <Navigation />
             

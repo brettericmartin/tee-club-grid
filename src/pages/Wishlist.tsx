@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
+import EquipmentCard from "@/components/shared/EquipmentCard";
 
 const Wishlist = () => {
   // Sample wishlist items - in real app, this would come from user data
@@ -31,41 +32,30 @@ const Wishlist = () => {
 
   const categories = categorizeItems();
 
-  const EquipmentCard = ({ item, onRemove }: { item: any; onRemove: (id: string) => void }) => (
-    <Card className="group luxury-card bg-card hover:shadow-hover transition-all duration-300">
-      <CardContent className="p-4">
-        <div className="relative">
-          <img 
-            src={item.image} 
-            alt={`${item.brand} ${item.model}`}
-            className="w-full h-40 object-contain mb-4 group-hover:scale-105 transition-transform duration-300"
-          />
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute top-2 right-2 h-8 w-8 rounded-full bg-card/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={() => onRemove(item.id)}
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-        
-        <div className="space-y-2">
-          <h3 className="font-semibold text-sm">{item.brand}</h3>
-          <p className="text-xs text-muted-foreground">{item.model}</p>
-          <p className="text-sm font-semibold text-primary">${item.msrp.toLocaleString()}</p>
-          
-          <div className="flex gap-2 pt-2">
-            <Button size="sm" className="flex-1">
-              Add to Bag
-            </Button>
-            <Button variant="outline" size="sm">
-              <Heart className="w-4 h-4 fill-current text-red-500" />
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+  const WishlistEquipmentCard = ({ item, onRemove }: { item: any; onRemove: (id: string) => void }) => (
+    <div className="relative group">
+      <EquipmentCard
+        equipment={item}
+        variant="grid"
+        isSaved={true}
+        onSaveToggle={(e) => {
+          e.stopPropagation();
+          onRemove(item.id);
+        }}
+        onViewDetails={() => {
+          // Navigate to equipment detail
+          window.location.href = `/equipment/${item.id}`;
+        }}
+      />
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute top-2 right-2 h-8 w-8 rounded-full bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        onClick={() => onRemove(item.id)}
+      >
+        <X className="w-4 h-4 text-white" />
+      </Button>
+    </div>
   );
 
   const CategorySection = ({ title, items }: { title: string; items: any[] }) => {
@@ -76,7 +66,7 @@ const Wishlist = () => {
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item) => (
-            <EquipmentCard 
+            <WishlistEquipmentCard 
               key={item.id} 
               item={item} 
               onRemove={removeFromWishlist}

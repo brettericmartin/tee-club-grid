@@ -7,11 +7,11 @@
 @layer base {
   :root {
     /* Light Mode - Clean & Minimal */
-    --background: 0 0% 0%;
+    --background: 0 0% 6%;
     --foreground: 0 0% 100%;
-    --card: 0 0% 0%;
+    --card: 0 0% 8%;
     --card-foreground: 0 0% 100%;
-    --popover: 0 0% 0%;
+    --popover: 0 0% 8%;
     --popover-foreground: 0 0% 100%;
     
     --primary: 142 76% 36%;
@@ -95,11 +95,11 @@
   }
 
   .dark {
-    --background: 0 0% 0%; /* True black for OLED */
+    --background: 0 0% 6%; /* Sophisticated charcoal #0F0F0F */
     --foreground: 0 0% 100%;
-    --card: 0 0% 100% / 0.05;
+    --card: 0 0% 100% / 0.06;
     --card-foreground: 0 0% 100%;
-    --popover: 0 0% 0% / 0.9;
+    --popover: 0 0% 8% / 0.95;
     --popover-foreground: 0 0% 100%;
     
     --primary: 142 76% 36%; /* #10B981 - Signature green */
@@ -110,7 +110,7 @@
     --accent-foreground: 0 0% 100%;
     --accent-hover: 142 76% 40%;
     
-    --secondary: 220 13% 13%; /* #1f2937 */
+    --secondary: 220 13% 16%; /* Refined dark gray #232831 */
     --secondary-foreground: 0 0% 100%;
     
     --muted: 217 19% 27%; /* #374151 */
@@ -119,17 +119,17 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 0 0% 100% / 0.1;
-    --input: 0 0% 100% / 0.1;
+    --border: 0 0% 100% / 0.08;
+    --input: 0 0% 100% / 0.08;
     --ring: 142 76% 36%;
 
-    --sidebar-background: 0 0% 0%;
+    --sidebar-background: 0 0% 7%; /* Subtle gray for sidebar #121212 */
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 142 76% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 13% 13%;
+    --sidebar-accent: 220 13% 16%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 100% / 0.1;
+    --sidebar-border: 0 0% 100% / 0.08;
     --sidebar-ring: 142 76% 36%;
   }
 }
@@ -166,25 +166,25 @@
 
   /* Glassmorphism Effects - Premium Golf Aesthetic */
   .glass-card {
-    @apply bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    @apply bg-white/[0.08] backdrop-blur-[12px] border border-white/[0.12] rounded-xl;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     transition: all 0.2s ease;
   }
 
   .glass-card:hover {
-    @apply bg-white/[0.15] scale-105;
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.4);
+    @apply bg-white/[0.12] scale-[1.02];
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   /* Dark glass for content areas */
   .glass-dark {
-    @apply bg-black/70 backdrop-blur-[8px] border-t border-white/10;
+    @apply bg-gray-900/80 backdrop-blur-[10px] border-t border-white/[0.08];
   }
 
   /* Button styles matching design system */
   .glass-button {
-    @apply bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg;
-    @apply hover:bg-white/20 transition-all duration-200;
+    @apply bg-white/[0.08] backdrop-blur-sm border border-white/[0.12] rounded-lg;
+    @apply hover:bg-white/[0.14] transition-all duration-200;
   }
 
   .primary-button {
@@ -224,7 +224,7 @@
   }
 
   .dark-gradient {
-    @apply bg-gradient-to-br from-gray-950 via-gray-900 to-primary/10;
+    @apply bg-gradient-to-br from-gray-900 via-gray-800 to-primary/10;
   }
 
   /* Masonry Gallery */
@@ -280,9 +280,9 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom, 
-      rgba(0,0,0,0.7) 0%, 
-      rgba(0,0,0,0.8) 50%, 
-      rgba(0,0,0,0.9) 100%);
+      rgba(15,15,15,0.7) 0%, 
+      rgba(15,15,15,0.8) 50%, 
+      rgba(15,15,15,0.9) 100%);
     backdrop-filter: blur(20px);
   }
 

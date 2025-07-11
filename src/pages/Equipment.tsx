@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import EquipmentDataInfo from "@/components/EquipmentDataInfo";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
+import EquipmentCard from "@/components/shared/EquipmentCard";
 
 const Equipment = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -162,73 +163,14 @@ const Equipment = () => {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {equipment.map(item => (
-          <Card 
-            key={item.id} 
-            className="hover:shadow-card transition-all duration-200 cursor-pointer"
-            onClick={() => navigate(`/equipment/${item.id}`)}
-          >
-            <CardContent className="p-0">
-              <div className="aspect-square bg-background p-4 relative">
-                <img 
-                  src={item.primaryPhoto || item.image_url}
-                  alt={`${item.brand} ${item.model}`}
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
-                />
-                <div 
-                  className="absolute inset-0 bg-muted flex items-center justify-center text-muted-foreground font-medium text-sm"
-                  style={{ display: 'none' }}
-                >
-                  {item.brand.split(' ').map(word => word[0]).join('')}
-                </div>
-                {item.equipment_photos && item.equipment_photos.length > 0 && (
-                  <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full flex items-center gap-1 text-xs">
-                    <Camera className="w-3 h-3" />
-                    <span>{item.equipment_photos.length}</span>
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-4 space-y-3">
-                <div>
-                  <h3 className="font-semibold text-foreground">{item.brand}</h3>
-                  <p className="text-sm text-muted-foreground">{item.model}</p>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-foreground">${item.msrp}</span>
-                  <span className="text-muted-foreground">{item.savesCount || 0} saves</span>
-                </div>
-                
-                
-                <div className="flex gap-2 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/equipment/${item.id}`);
-                    }}
-                  >
-                    View Details
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={savedItems.has(item.id) ? "text-primary" : "text-muted-foreground hover:text-primary"}
-                    onClick={(e) => handleSaveToggle(e, item.id)}
-                  >
-                    <Heart className={`w-4 h-4 ${savedItems.has(item.id) ? 'fill-current' : ''}`} />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <EquipmentCard
+            key={item.id}
+            equipment={item}
+            variant="grid"
+            isSaved={savedItems.has(item.id)}
+            onSaveToggle={(e) => handleSaveToggle(e, item.id)}
+            onViewDetails={() => navigate(`/equipment/${item.id}`)}
+          />
         ))}
       </div>
     );
@@ -254,68 +196,14 @@ const Equipment = () => {
     return (
       <div className="space-y-4">
         {equipment.map(item => (
-          <Card 
-            key={item.id} 
-            className="hover:shadow-card transition-all duration-200 cursor-pointer"
-            onClick={() => navigate(`/equipment/${item.id}`)}
-          >
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-20 h-20 bg-background p-2 rounded relative flex-shrink-0">
-                <img 
-                  src={item.primaryPhoto || item.image_url}
-                  alt={`${item.brand} ${item.model}`}
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
-                />
-                <div 
-                  className="absolute inset-0 bg-muted flex items-center justify-center text-muted-foreground font-medium text-xs rounded"
-                  style={{ display: 'none' }}
-                >
-                  {item.brand.split(' ').map(word => word[0]).join('')}
-                </div>
-                {item.equipment_photos && item.equipment_photos.length > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-black/60 text-white px-1.5 py-0.5 rounded-full flex items-center gap-0.5 text-xs">
-                    <Camera className="w-2.5 h-2.5" />
-                    <span>{item.equipment_photos.length}</span>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex-1">
-                <h3 className="font-medium">{item.brand} {item.model}</h3>
-                <p className="text-muted-foreground text-sm capitalize">{item.category.replace('_', ' ')}</p>
-                <div className="flex gap-4 mt-1 text-sm">
-                  <span className="font-bold">${item.msrp}</span>
-                  <span className="text-muted-foreground">{item.savesCount || 0} saves</span>
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/equipment/${item.id}`);
-                  }}
-                >
-                  View Details
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className={savedItems.has(item.id) ? "text-primary" : "text-muted-foreground hover:text-primary"}
-                  onClick={(e) => handleSaveToggle(e, item.id)}
-                >
-                  <Heart className={`w-4 h-4 ${savedItems.has(item.id) ? 'fill-current' : ''}`} />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <EquipmentCard
+            key={item.id}
+            equipment={item}
+            variant="list"
+            isSaved={savedItems.has(item.id)}
+            onSaveToggle={(e) => handleSaveToggle(e, item.id)}
+            onViewDetails={() => navigate(`/equipment/${item.id}`)}
+          />
         ))}
       </div>
     );

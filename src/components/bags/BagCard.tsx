@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { getBrandAbbreviation } from '@/utils/brandAbbreviations';
 import { cn } from '@/lib/utils';
 import { EquipmentShowcaseModal } from '@/components/EquipmentShowcaseModal';
+import EquipmentTile from '@/components/shared/EquipmentTile';
 import type { Database } from '@/lib/supabase';
 
 interface BagEquipmentItem {
@@ -271,49 +272,36 @@ export function BagCard({
             const imageUrl = item ? getEquipmentImage(item) : null;
             
             return (
-              <div 
-                key={index}
-                className="aspect-square rounded-lg overflow-hidden bg-white/10 relative group/item cursor-pointer z-10"
-                onClick={(e) => item && handleEquipmentClick(e, item)}
-              >
+              <div key={index} className="relative group/item">
                 {item ? (
-                  imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt={`${item.equipment?.brand} ${item.equipment?.model}`}
-                      className="w-full h-full object-cover"
-                      onError={() => {
-                        setImageError(prev => ({
-                          ...prev,
-                          [`${item.id}-equipment`]: true
-                        }));
+                  <>
+                    <EquipmentTile
+                      equipment={{
+                        ...item.equipment,
+                        image_url: imageUrl || undefined
                       }}
+                      size="lg"
+                      showPhotoCount={false}
+                      className="w-full h-full"
+                      onClick={(e) => handleEquipmentClick(e, item)}
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
-                      <span className="text-white font-bold text-lg">
-                        {getBrandAbbreviation(item.equipment?.brand || '')}
-                      </span>
+                    
+                    {/* Featured indicator */}
+                    {item.is_featured && (
+                      <div className="absolute top-1 right-1 z-10">
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                      </div>
+                    )}
+                    
+                    {/* Hover overlay with equipment name */}
+                    <div className="absolute inset-0 bg-black/80 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center p-1 rounded-xl z-20 pointer-events-none">
+                      <p className="text-white text-xs text-center line-clamp-2">
+                        {item.equipment?.brand} {item.equipment?.model}
+                      </p>
                     </div>
-                  )
+                  </>
                 ) : (
-                  <div className="w-full h-full bg-white/5" />
-                )}
-                
-                {/* Featured indicator */}
-                {item?.is_featured && (
-                  <div className="absolute top-1 right-1">
-                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                  </div>
-                )}
-                
-                {/* Hover overlay with equipment name */}
-                {item && (
-                  <div className="absolute inset-0 bg-black/80 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center p-1">
-                    <p className="text-white text-xs text-center line-clamp-2">
-                      {item.equipment?.brand} {item.equipment?.model}
-                    </p>
-                  </div>
+                  <div className="aspect-square rounded-xl bg-white/5" />
                 )}
               </div>
             );
@@ -327,42 +315,29 @@ export function BagCard({
             const imageUrl = item ? getEquipmentImage(item) : null;
             
             return (
-              <div 
-                key={`acc-${index}`}
-                className="aspect-square rounded-md overflow-hidden bg-white/10 relative group/item cursor-pointer z-10"
-                onClick={(e) => item && handleEquipmentClick(e, item)}
-              >
+              <div key={`acc-${index}`} className="relative group/item">
                 {item ? (
-                  imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt={`${item.equipment?.brand} ${item.equipment?.model}`}
-                      className="w-full h-full object-cover"
-                      onError={() => {
-                        setImageError(prev => ({
-                          ...prev,
-                          [`${item.id}-acc`]: true
-                        }));
+                  <>
+                    <EquipmentTile
+                      equipment={{
+                        ...item.equipment,
+                        image_url: imageUrl || undefined
                       }}
+                      size="sm"
+                      showPhotoCount={false}
+                      className="w-full h-full"
+                      onClick={(e) => handleEquipmentClick(e, item)}
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
-                      <span className="text-white font-semibold text-xs">
-                        {getBrandAbbreviation(item.equipment?.brand || '')}
-                      </span>
+                    
+                    {/* Hover overlay with equipment name */}
+                    <div className="absolute inset-0 bg-black/80 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center p-1 rounded-lg z-20 pointer-events-none">
+                      <p className="text-white text-[10px] text-center line-clamp-2">
+                        {item.equipment?.brand} {item.equipment?.model}
+                      </p>
                     </div>
-                  )
+                  </>
                 ) : (
-                  <div className="w-full h-full bg-white/5" />
-                )}
-                
-                {/* Hover overlay with equipment name */}
-                {item && (
-                  <div className="absolute inset-0 bg-black/80 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center p-1">
-                    <p className="text-white text-[10px] text-center line-clamp-2">
-                      {item.equipment?.brand} {item.equipment?.model}
-                    </p>
-                  </div>
+                  <div className="aspect-square rounded-lg bg-white/5" />
                 )}
               </div>
             );
