@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Share2, RotateCcw, Clock, Plus, Camera, Trophy, User, Eye } from 'lucide-react';
+import { MessageCircle, Share2, RotateCcw, Clock, Plus, Camera, Trophy, User, Eye } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import BagCard from '@/components/BagCard';
 import { cn } from '@/lib/utils';
 import { EquipmentShowcaseModal } from '@/components/EquipmentShowcaseModal';
 import { toggleFollow } from '@/services/users';
+import { TeedBallLike } from '@/components/shared/TeedBallLike';
 
 interface FeedCardProps {
   post: {
@@ -278,17 +279,15 @@ export function FeedCard({ post, onUpdate }: FeedCardProps) {
         {/* Actions */}
         <div className="flex items-center justify-between pt-2 border-t border-white/10">
           <div className="flex items-center gap-4">
-            <button
-              onClick={handleLike}
+            <TeedBallLike
+              isLiked={isLiked}
+              likeCount={likeCount}
+              onLike={handleLike}
+              size="md"
+              showCount={true}
               disabled={!user || isLiking}
-              className={cn(
-                "flex items-center gap-2 text-sm transition-colors",
-                isLiked ? "text-red-500" : "text-white/60 hover:text-white"
-              )}
-            >
-              <Heart className={cn("w-4 h-4", isLiked && "fill-current")} />
-              {likeCount}
-            </button>
+              className="text-white/60 hover:text-white"
+            />
             <button className="flex items-center gap-2 text-sm text-white/60 hover:text-white">
               <MessageCircle className="w-4 h-4" />
               Comment

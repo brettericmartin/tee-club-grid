@@ -17,9 +17,18 @@ interface BagCompositeCardProps {
   onViewBag?: (bagId: string) => void;
 }
 
+import { EQUIPMENT_CATEGORIES } from '@/lib/equipment-categories';
+
 // Helper function to check if equipment is a club (vs accessory)
 const isClub = (category: string) => {
-  return ['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'].includes(category);
+  return [
+    EQUIPMENT_CATEGORIES.driver,
+    EQUIPMENT_CATEGORIES.fairway_wood,
+    EQUIPMENT_CATEGORIES.hybrid,
+    EQUIPMENT_CATEGORIES.iron,
+    EQUIPMENT_CATEGORIES.wedge,
+    EQUIPMENT_CATEGORIES.putter
+  ].includes(category);
 };
 
 const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagCompositeCardProps) => {

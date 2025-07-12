@@ -586,7 +586,7 @@ const MyBagSupabase = () => {
                       onClick={() => handleEditEquipment(item)}
                     >
                       <img
-                        src={item.custom_photo_url || item.equipment.image_url || '/placeholder.svg'}
+                        src={item.custom_photo_url || item.equipment.image_url }
                         alt={`${item.equipment.brand} ${item.equipment.model}`}
                         className="w-full h-full object-cover"
                       />

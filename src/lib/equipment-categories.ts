@@ -11,6 +11,10 @@ export const EQUIPMENT_CATEGORIES = {
   glove: 'glove',
   rangefinder: 'rangefinder',
   gps: 'gps',
+  tee: 'tee',
+  towel: 'towel',
+  ball_marker: 'ball_marker',
+  divot_tool: 'divot_tool',
   accessories: 'accessories'
 } as const;
 
@@ -29,6 +33,10 @@ export const CATEGORY_DISPLAY_NAMES: Record<EquipmentCategory, string> = {
   glove: 'Gloves',
   rangefinder: 'Rangefinders',
   gps: 'GPS Devices',
+  tee: 'Tees',
+  towel: 'Towels',
+  ball_marker: 'Ball Markers',
+  divot_tool: 'Divot Tools',
   accessories: 'Accessories'
 };
 
@@ -46,6 +54,10 @@ export const CATEGORY_ALIASES: Record<string, EquipmentCategory> = {
   glove: 'glove',
   rangefinder: 'rangefinder',
   gps: 'gps',
+  tee: 'tee',
+  towel: 'towel',
+  ball_marker: 'ball_marker',
+  divot_tool: 'divot_tool',
   accessories: 'accessories',
   
   // Plural (for backwards compatibility)
@@ -59,6 +71,10 @@ export const CATEGORY_ALIASES: Record<string, EquipmentCategory> = {
   bags: 'bag',
   gloves: 'glove',
   rangefinders: 'rangefinder',
+  tees: 'tee',
+  towels: 'towel',
+  ball_markers: 'ball_marker',
+  divot_tools: 'divot_tool',
   
   // Common variations
   woods: 'fairway_wood',
@@ -71,7 +87,10 @@ export const CATEGORY_ALIASES: Record<string, EquipmentCategory> = {
   'sand_wedge': 'wedge',
   'lob_wedge': 'wedge',
   'gap_wedge': 'wedge',
-  'pitching_wedge': 'wedge'
+  'pitching_wedge': 'wedge',
+  'gps_devices': 'gps',
+  'golf_ball': 'ball',
+  'golf_balls': 'ball'
 };
 
 // Normalize category for database storage

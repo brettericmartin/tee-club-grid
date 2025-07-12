@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Search, X, Plus, Filter, Loader2, ChevronRight } from "lucide-react";
 import { getEquipment, searchEquipment as searchEquipmentAPI } from "@/services/equipment";
 import type { Database } from "@/lib/supabase";
+import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
 
@@ -31,12 +32,10 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
 
   const categories = [
     { id: "all", name: "All Equipment" },
-    { id: "driver", name: "Drivers" },
-    { id: "iron", name: "Irons" },
-    { id: "wedge", name: "Wedges" },
-    { id: "putter", name: "Putters" },
-    { id: "ball", name: "Balls" },
-    { id: "bag", name: "Bags" }
+    ...Object.values(EQUIPMENT_CATEGORIES).map(category => ({
+      id: category,
+      name: CATEGORY_DISPLAY_NAMES[category]
+    }))
   ];
 
   // Get unique brands and years from all equipment (not filtered)

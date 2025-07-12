@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, Upload, Info } from "lucide-react";
 import { toast } from "sonner";
 import { SubmitEquipmentForm } from "@/lib/equipment-types";
+import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
 
 interface SubmitEquipmentModalProps {
   isOpen: boolean;
@@ -25,9 +26,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit }: SubmitEquipmentModa
     imageUrl: ""
   });
 
-  const categories = [
-    "driver", "fairway", "hybrid", "iron", "wedge", "putter", "ball", "bag", "rangefinder", "glove"
-  ];
+  const categories = Object.values(EQUIPMENT_CATEGORIES);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,7 +127,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit }: SubmitEquipmentModa
                   <option value="">Select category</option>
                   {categories.map(cat => (
                     <option key={cat} value={cat}>
-                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      {CATEGORY_DISPLAY_NAMES[cat]}
                     </option>
                   ))}
                 </select>

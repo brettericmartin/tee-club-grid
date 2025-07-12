@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
+import { CATEGORY_DISPLAY_NAMES } from '@/lib/equipment-categories';
 
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
   equipment: Database['public']['Tables']['equipment']['Row'];
@@ -89,23 +90,20 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
     'driver',
     'fairway_wood',
     'hybrid',
-    'utility_iron',
-    'irons',
+    'iron',
     'wedge',
     'putter',
-    'golf_ball',
+    'ball',
+    'bag',
+    'glove',
+    'rangefinder',
+    'gps',
+    'tee',
+    'towel',
+    'ball_marker',
+    'divot_tool',
+    'accessories'
   ];
-
-  const categoryLabels: Record<string, string> = {
-    driver: 'Driver',
-    fairway_wood: 'Fairway Woods',
-    hybrid: 'Hybrids',
-    utility_iron: 'Utility Irons',
-    irons: 'Irons',
-    wedge: 'Wedges',
-    putter: 'Putter',
-    golf_ball: 'Golf Ball',
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -198,11 +196,30 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                         className="bg-background/80 rounded-lg p-3 space-y-2"
                       >
                         <div className="aspect-square rounded overflow-hidden bg-accent">
-                          <img
-                            src={item.custom_photo_url || item.equipment.image_url || '/placeholder.svg'}
-                            alt={`${item.equipment.brand} ${item.equipment.model}`}
-                            className="w-full h-full object-cover"
-                          />
+                          {item.custom_photo_url || item.equipment.image_url ? (
+                            <img
+                              src={item.custom_photo_url || item.equipment.image_url}
+                              alt={`${item.equipment.brand} ${item.equipment.model}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                const parent = e.currentTarget.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
+                                    <span class="text-white font-bold text-lg">
+                                      ${item.equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                                    </span>
+                                  </div>`;
+                                }
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
+                              <span className="text-white font-bold text-lg">
+                                {item.equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <div className="font-medium text-sm">
@@ -231,7 +248,7 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                   return (
                     <div key={category}>
                       <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                        {categoryLabels[category]}
+                        {CATEGORY_DISPLAY_NAMES[category as keyof typeof CATEGORY_DISPLAY_NAMES] || category}
                       </h4>
                       <div className="space-y-2">
                         {items.map((item) => (
@@ -240,11 +257,30 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                             className="flex items-center gap-3 p-2 rounded hover:bg-background/80 transition-colors"
                           >
                             <div className="w-12 h-12 rounded bg-accent overflow-hidden flex-shrink-0">
-                              <img
-                                src={item.custom_photo_url || item.equipment.image_url || '/placeholder.svg'}
-                                alt={`${item.equipment.brand} ${item.equipment.model}`}
-                                className="w-full h-full object-cover"
-                              />
+                              {item.custom_photo_url || item.equipment.image_url ? (
+                                <img
+                                  src={item.custom_photo_url || item.equipment.image_url}
+                                  alt={`${item.equipment.brand} ${item.equipment.model}`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    const parent = e.currentTarget.parentElement;
+                                    if (parent) {
+                                      parent.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
+                                        <span class="text-white font-bold text-xs">
+                                          ${item.equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                                        </span>
+                                      </div>`;
+                                    }
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
+                                  <span className="text-white font-bold text-xs">
+                                    {item.equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="font-medium text-sm">

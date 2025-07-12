@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ErrorBoundary, AsyncErrorBoundary } from "./components/ErrorBoundary";
 import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import BagsBrowser from "./pages/BagsBrowser";
@@ -34,21 +35,24 @@ const App = () => {
   console.log('App component rendering...');
   
   return (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="min-h-screen bg-background font-sans antialiased">
-            {/* Fixed background gradient */}
-            <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-primary/10 -z-10" />
-            
-            <Navigation />
-            
-            {/* Main content with padding for fixed nav */}
-            <main className="pt-16">
-              <Routes>
+  <ErrorBoundary>
+    <AsyncErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <div className="min-h-screen bg-background font-sans antialiased">
+                {/* Fixed background gradient */}
+                <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-primary/10 -z-10" />
+                
+                <Navigation />
+                
+                {/* Main content with padding for fixed nav */}
+                <main className="pt-16">
+                  <ErrorBoundary>
+                    <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/bags" element={<BagsBrowser />} />
                 <Route path="/bag/:bagId" element={<BagDisplay />} />
@@ -66,12 +70,15 @@ const App = () => {
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </main>
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+                  </ErrorBoundary>
+                </main>
+              </div>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </AsyncErrorBoundary>
+  </ErrorBoundary>
   );
 };
 

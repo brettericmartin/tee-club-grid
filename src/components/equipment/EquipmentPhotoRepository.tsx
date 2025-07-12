@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
-  Upload, X, Star, Loader2, ThumbsUp, ThumbsDown, 
-  Download, ExternalLink, Camera, Grid, List, SortDesc 
+  Upload, X, Star, Loader2, 
+  Camera, Grid, List, SortDesc 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,16 +27,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { uploadEquipmentPhoto } from '@/services/equipment';
+import { TeedBallLike } from '@/components/shared/TeedBallLike';
 
 interface EquipmentPhoto {
   id: string;
   photo_url: string;
   caption?: string;
   is_primary: boolean;
-  upvotes: number;
-  downvotes: number;
-  score: number;
-  user_vote?: 'upvote' | 'downvote' | null;
+  likes_count: number;
+  user_liked?: boolean;
   created_at: string;
   user?: {
     username: string;
@@ -65,7 +64,7 @@ export function EquipmentPhotoRepository({
   const { user } = useAuth();
   const [photos, setPhotos] = useState<EquipmentPhoto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<'score' | 'newest' | 'oldest'>('score');
+  const [sortBy, setSortBy] = useState<'likes' | 'newest' | 'oldest'>('likes');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedPhoto, setSelectedPhoto] = useState<EquipmentPhoto | null>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -77,20 +76,23 @@ export function EquipmentPhotoRepository({
   const loadPhotos = async () => {
     try {
       let query = supabase
-        .from('equipment_photos_with_votes')
+        .from('equipment_photos')
         .select(`
           *,
           user:profiles!equipment_photos_user_id_fkey (
             username,
             avatar_url
+          ),
+          user_liked:equipment_photo_likes!left (
+            id
           )
         `)
         .eq('equipment_id', equipmentId);
 
       // Apply sorting
       switch (sortBy) {
-        case 'score':
-          query = query.order('score', { ascending: false });
+        case 'likes':
+          query = query.order('likes_count', { ascending: false });
           break;
         case 'newest':
           query = query.order('created_at', { ascending: false });
@@ -103,7 +105,14 @@ export function EquipmentPhotoRepository({
       const { data, error } = await query;
 
       if (error) throw error;
-      setPhotos(data || []);
+      
+      // Process data to include user_liked boolean
+      const processedPhotos = (data || []).map(photo => ({
+        ...photo,
+        user_liked: user ? photo.user_liked?.length > 0 : false
+      }));
+      
+      setPhotos(processedPhotos);
     } catch (error) {
       console.error('Error loading photos:', error);
       toast.error('Failed to load photos');
@@ -112,42 +121,43 @@ export function EquipmentPhotoRepository({
     }
   };
 
-  const handleVote = async (photoId: string, voteType: 'upvote' | 'downvote') => {
+  const handleLike = async (photoId: string) => {
     if (!user) {
-      toast.error('Please sign in to vote');
+      toast.error('Please sign in to like photos');
       return;
     }
 
     try {
-      const { data, error } = await supabase.rpc('toggle_photo_vote', {
-        p_photo_id: photoId,
-        p_vote_type: voteType
-      });
+      const photo = photos.find(p => p.id === photoId);
+      if (!photo) return;
 
-      if (error) throw error;
-
-      // Reload photos to get updated counts
-      loadPhotos();
-      
-      const action = data.action;
-      if (action === 'created') {
-        toast.success(`Photo ${voteType}d!`);
-      } else if (action === 'removed') {
-        toast.success('Vote removed');
-      } else if (action === 'changed') {
-        toast.success('Vote changed');
+      if (photo.user_liked) {
+        // Unlike: Remove like
+        await supabase
+          .from('equipment_photo_likes')
+          .delete()
+          .eq('photo_id', photoId)
+          .eq('user_id', user.id);
+      } else {
+        // Like: Add like
+        await supabase
+          .from('equipment_photo_likes')
+          .insert({
+            photo_id: photoId,
+            user_id: user.id
+          });
       }
+
+      // Reload photos to get updated like counts
+      await loadPhotos();
     } catch (error) {
-      console.error('Error voting:', error);
-      toast.error('Failed to vote');
+      console.error('Error toggling like:', error);
+      throw error; // Let TeedBallLike component handle the error display
     }
   };
 
 
   const PhotoCard = ({ photo }: { photo: EquipmentPhoto }) => {
-    const isUpvoted = photo.user_vote === 'upvote';
-    const isDownvoted = photo.user_vote === 'downvote';
-
     return (
       <Card className="group relative overflow-hidden">
         <div 
@@ -176,32 +186,13 @@ export function EquipmentPhotoRepository({
 
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant={isUpvoted ? "default" : "outline"}
-                onClick={() => handleVote(photo.id, 'upvote')}
-                className="h-8"
-              >
-                <ThumbsUp className="w-3 h-3 mr-1" />
-                {photo.upvotes}
-              </Button>
-              <Button
-                size="sm"
-                variant={isDownvoted ? "destructive" : "outline"}
-                onClick={() => handleVote(photo.id, 'downvote')}
-                className="h-8"
-              >
-                <ThumbsDown className="w-3 h-3 mr-1" />
-                {photo.downvotes}
-              </Button>
-            </div>
-            <span className={`text-sm font-medium ${
-              photo.score > 0 ? 'text-green-600' : 
-              photo.score < 0 ? 'text-red-600' : 'text-gray-500'
-            }`}>
-              {photo.score > 0 ? '+' : ''}{photo.score}
-            </span>
+            <TeedBallLike
+              isLiked={photo.user_liked || false}
+              likeCount={photo.likes_count || 0}
+              onLike={() => handleLike(photo.id)}
+              size="md"
+              showCount={true}
+            />
           </div>
 
           {photo.caption && (
@@ -230,7 +221,7 @@ export function EquipmentPhotoRepository({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="score">Top Rated</SelectItem>
+              <SelectItem value="likes">Most Liked</SelectItem>
               <SelectItem value="newest">Newest</SelectItem>
               <SelectItem value="oldest">Oldest</SelectItem>
             </SelectContent>
@@ -317,29 +308,6 @@ export function EquipmentPhotoRepository({
                 <span>Uploaded by {selectedPhoto.user?.username}</span>
                 <span>{new Date(selectedPhoto.created_at).toLocaleDateString()}</span>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => window.open(selectedPhoto.photo_url, '_blank')}
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Open Original
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    const a = document.createElement('a');
-                    a.href = selectedPhoto.photo_url;
-                    a.download = `${brand}-${model}-${selectedPhoto.id}.jpg`;
-                    a.click();
-                  }}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
-                </Button>
-              </div>
             </div>
           </DialogContent>
         </Dialog>
@@ -378,9 +346,10 @@ export function EquipmentPhotoRepository({
                       toast.success('Photo uploaded successfully!');
                       setShowUploadDialog(false);
                       loadPhotos();
-                    } catch (error) {
+                    } catch (error: any) {
                       console.error('Upload error:', error);
-                      toast.error('Failed to upload photo');
+                      const errorMessage = error?.message || 'Failed to upload photo';
+                      toast.error(errorMessage);
                     }
                   }
                 }}

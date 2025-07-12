@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Heart, Camera } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { Database } from '@/lib/supabase';
+import { TeedBallLike } from '@/components/shared/TeedBallLike';
 
 type EquipmentPhoto = Database['public']['Tables']['equipment_photos']['Row'] & {
   profile?: Database['public']['Tables']['profiles']['Row'];
@@ -47,7 +48,7 @@ export function CommunityPhotosGallery({
       setLoading(true);
       
       // First get all photos for this equipment
-      let query = supabase
+      const query = supabase
         .from('equipment_photos')
         .select(`
           *,
@@ -199,32 +200,22 @@ export function CommunityPhotosGallery({
                           <span className="text-xs truncate">
                             @{photo.profile?.username || 'Anonymous'}
                           </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleLike(photo.id, photo.is_liked_by_user || false);
-                            }}
-                            className="flex items-center gap-1 text-xs"
-                          >
-                            <Heart 
-                              className={`w-3 h-3 ${
-                                photo.is_liked_by_user 
-                                  ? 'fill-red-500 text-red-500' 
-                                  : 'text-white'
-                              }`}
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <TeedBallLike
+                              isLiked={photo.is_liked_by_user || false}
+                              likeCount={photo.likes_count || 0}
+                              onLike={async () => {
+                                await toggleLike(photo.id, photo.is_liked_by_user || false);
+                              }}
+                              size="sm"
+                              showCount={true}
+                              className="text-white hover:text-primary"
                             />
-                            {photo.likes_count || 0}
-                          </button>
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Liked indicator */}
-                    {photo.is_liked_by_user && (
-                      <div className="absolute top-2 right-2">
-                        <Heart className="w-4 h-4 fill-red-500 text-red-500 drop-shadow-md" />
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>

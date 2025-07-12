@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
 import EquipmentCard from "@/components/shared/EquipmentCard";
+import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
 
 const Wishlist = () => {
   // Sample wishlist items - in real app, this would come from user data
@@ -17,16 +18,13 @@ const Wishlist = () => {
   const totalValue = wishlistItems.reduce((sum, item) => sum + (item?.msrp || 0), 0);
 
   const categorizeItems = () => {
-    const categories = {
-      drivers: wishlistItems.filter(item => item?.category === 'driver'),
-      woods: wishlistItems.filter(item => item?.category === 'wood'),
-      irons: wishlistItems.filter(item => item?.category === 'iron'),
-      wedges: wishlistItems.filter(item => item?.category === 'wedge'),
-      putters: wishlistItems.filter(item => item?.category === 'putter'),
-      accessories: wishlistItems.filter(item => 
-        ['ball', 'glove', 'rangefinder', 'bag'].includes(item?.category || '')
-      )
-    };
+    const categories: Record<string, any[]> = {};
+    
+    // Initialize categories from standardized list
+    Object.values(EQUIPMENT_CATEGORIES).forEach(cat => {
+      categories[cat] = wishlistItems.filter(item => item?.category === cat);
+    });
+    
     return categories;
   };
 
@@ -132,20 +130,23 @@ const Wishlist = () => {
               </TabsList>
 
               <TabsContent value="all" className="space-y-8 mt-8">
-                <CategorySection title="Drivers" items={categories.drivers} />
-                <CategorySection title="Woods & Hybrids" items={categories.woods} />
-                <CategorySection title="Irons" items={categories.irons} />
-                <CategorySection title="Wedges" items={categories.wedges} />
-                <CategorySection title="Putters" items={categories.putters} />
-                <CategorySection title="Accessories" items={categories.accessories} />
+                {Object.entries(categories).map(([category, items]) => (
+                  <CategorySection 
+                    key={category}
+                    title={CATEGORY_DISPLAY_NAMES[category as keyof typeof CATEGORY_DISPLAY_NAMES] || category}
+                    items={items}
+                  />
+                ))}
               </TabsContent>
 
               <TabsContent value="clubs" className="space-y-8 mt-8">
-                <CategorySection title="Drivers" items={categories.drivers} />
-                <CategorySection title="Woods & Hybrids" items={categories.woods} />
-                <CategorySection title="Irons" items={categories.irons} />
-                <CategorySection title="Wedges" items={categories.wedges} />
-                <CategorySection title="Putters" items={categories.putters} />
+                {['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'].map(category => (
+                  <CategorySection 
+                    key={category}
+                    title={CATEGORY_DISPLAY_NAMES[category as keyof typeof CATEGORY_DISPLAY_NAMES]}
+                    items={categories[category]}
+                  />
+                ))}
               </TabsContent>
 
               <TabsContent value="gear" className="mt-8">
@@ -161,7 +162,13 @@ const Wishlist = () => {
               </TabsContent>
 
               <TabsContent value="accessories" className="mt-8">
-                <CategorySection title="Accessories" items={categories.accessories} />
+                {['ball', 'bag', 'glove', 'rangefinder', 'gps', 'tee', 'towel', 'ball_marker', 'divot_tool', 'accessories'].map(category => (
+                  <CategorySection 
+                    key={category}
+                    title={CATEGORY_DISPLAY_NAMES[category as keyof typeof CATEGORY_DISPLAY_NAMES]}
+                    items={categories[category]}
+                  />
+                ))}
               </TabsContent>
             </Tabs>
           )}

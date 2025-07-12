@@ -23,6 +23,8 @@ const Equipment = () => {
   const [loading, setLoading] = useState(true);
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set());
   const [brands, setBrands] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
   
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -42,13 +44,19 @@ const Equipment = () => {
     filterEquipment();
   }, [brand, showSavedOnly, allEquipment, savedItems]);
 
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [category, sortBy, brand, showSavedOnly]);
+
   const loadEquipment = async () => {
+    console.log('loadEquipment called');
     setLoading(true);
     try {
       const data = await getEquipment({
         category: category === 'all' ? undefined : category,
         sortBy: sortBy === 'popular' ? 'newest' : sortBy // Change 'popular' to 'newest' for now since we don't have likes data
       });
+      console.log('Equipment data received:', data);
       setAllEquipment(data || []);
       
       // Extract unique brands
@@ -212,8 +220,7 @@ const Equipment = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Show info if no equipment loaded */}
-        {equipment.length === 0 && !loading && <EquipmentDataInfo />}
+        {/* Show info if no equipment loaded - removed since we have data */}
         
         {/* Filters and View Bar */}
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
@@ -293,7 +300,102 @@ const Equipment = () => {
         </div>
 
         {/* Equipment Display */}
-        {view === 'grid' ? <EquipmentGrid /> : <EquipmentList />}
+        <div className="mt-8">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : equipment.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-muted-foreground">No equipment found</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Showing {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, equipment.length)} of {equipment.length} items
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="flex items-center px-3 text-sm">
+                    Page {currentPage} of {Math.ceil(equipment.length / itemsPerPage)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(equipment.length / itemsPerPage), p + 1))}
+                    disabled={currentPage >= Math.ceil(equipment.length / itemsPerPage)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {equipment.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(item => (
+                <div key={item.id} className="glass-card p-4 cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => navigate(`/equipment/${item.id}`)}>
+                  <div className="aspect-square mb-3 rounded-lg overflow-hidden bg-white/5">
+                    {(item.primaryPhoto || item.image_url) ? (
+                      <img 
+                        src={item.primaryPhoto || item.image_url} 
+                        alt={`${item.brand} ${item.model}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const parent = e.currentTarget.parentElement;
+                          if (parent) {
+                            parent.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
+                              <span class="text-white font-bold text-2xl">
+                                ${item.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                              </span>
+                            </div>`;
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
+                        <span className="text-white font-bold text-2xl">
+                          {item.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="font-bold line-clamp-1">{item.brand} {item.model}</h3>
+                  <p className="text-sm text-muted-foreground capitalize">{item.category.replace(/_/g, ' ')}</p>
+                  <p className="font-bold mt-1">${item.msrp}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="flex-1 mr-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/equipment/${item.id}`);
+                      }}
+                    >
+                      View
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={(e) => handleSaveToggle(e, item.id)}
+                      className={savedItems.has(item.id) ? "text-primary" : ""}
+                    >
+                      <Heart className={`w-4 h-4 ${savedItems.has(item.id) ? 'fill-current' : ''}`} />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

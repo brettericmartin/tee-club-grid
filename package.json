@@ -8,7 +8,14 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "scrape:test": "node scripts/setup-scraper.js",
+    "scrape:equipment": "node scripts/scrape-equipment.js",
+    "scrape:2ndswing": "node scripts/scrape-2ndswing.js",
+    "scrape:golf": "node scripts/scrape-golf-equipment.js",
+    "scrape:images": "node scripts/download-images.js",
+    "scrape:import": "node scripts/import-scraped-equipment.js",
+    "scrape:all": "npm run scrape:golf && npm run scrape:images && npm run scrape:import"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -42,6 +49,8 @@
     "@supabase/supabase-js": "^2.50.3",
     "@tanstack/react-query": "^5.56.2",
     "@types/lodash": "^4.17.20",
+    "axios": "^1.10.0",
+    "cheerio": "^1.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -63,6 +72,7 @@
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^11.1.0",
     "vaul": "^0.9.3",
     "zod": "^3.23.8"
   },
@@ -81,6 +91,7 @@
     "globals": "^15.9.0",
     "lovable-tagger": "^1.1.7",
     "postcss": "^8.4.47",
+    "puppeteer": "^24.12.1",
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",

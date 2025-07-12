@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
-import { getEquipmentDetails, toggleEquipmentSave } from '@/services/equipment';
+import { getEquipmentDetails, toggleEquipmentSave, isEquipmentSaved } from '@/services/equipment';
 import { EquipmentPhotoRepository } from '@/components/equipment/EquipmentPhotoRepository';
 import { toast } from 'sonner';
 
@@ -34,9 +34,9 @@ export default function EquipmentDetail() {
       setEquipment(data);
       
       // Check if user has saved this equipment
-      if (user) {
-        // You'd need to add this check to your service
-        // setIsSaved(await isEquipmentSaved(user.id, id));
+      if (user && id) {
+        const saved = await isEquipmentSaved(user.id, id);
+        setIsSaved(saved);
       }
     } catch (error) {
       console.error('Error loading equipment:', error);
@@ -52,12 +52,19 @@ export default function EquipmentDetail() {
       return;
     }
 
+    if (!id) {
+      toast.error('Equipment ID not found');
+      return;
+    }
+
     try {
-      const saved = await toggleEquipmentSave(user.id, id!);
+      const saved = await toggleEquipmentSave(user.id, id);
       setIsSaved(saved);
       toast.success(saved ? 'Equipment saved!' : 'Equipment removed from saved');
-    } catch (error) {
-      toast.error('Failed to save equipment');
+    } catch (error: any) {
+      console.error('Save equipment error:', error);
+      const errorMessage = error.message || 'Failed to save equipment';
+      toast.error(errorMessage);
     }
   };
 
@@ -111,11 +118,30 @@ export default function EquipmentDetail() {
           <div>
             <Card>
               <CardContent className="p-0">
-                <img
-                  src={equipment.primaryPhoto || equipment.image_url || '/placeholder.svg'}
-                  alt={`${equipment.brand} ${equipment.model}`}
-                  className="w-full h-96 object-cover rounded-lg"
-                />
+                {equipment.most_liked_photo || equipment.primaryPhoto || equipment.image_url ? (
+                  <img
+                    src={equipment.most_liked_photo || equipment.primaryPhoto || equipment.image_url}
+                    alt={`${equipment.brand} ${equipment.model}`}
+                    className="w-full h-96 object-cover rounded-lg"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `<div class="w-full h-96 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40 rounded-lg">
+                          <span class="text-white font-bold text-4xl">
+                            ${equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                          </span>
+                        </div>`;
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-96 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40 rounded-lg">
+                    <span className="text-white font-bold text-4xl">
+                      {equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                    </span>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

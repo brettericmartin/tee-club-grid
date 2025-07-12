@@ -10,6 +10,7 @@ interface EquipmentTileProps {
     category: string;
     image_url?: string;
     primaryPhoto?: string;
+    most_liked_photo?: string;
     equipment_photos?: any[];
   };
   size?: 'sm' | 'md' | 'lg';
@@ -40,7 +41,8 @@ const EquipmentTile: FC<EquipmentTileProps> = ({
     lg: 'w-24 h-24 p-3'
   };
 
-  const imageUrl = equipment.primaryPhoto || equipment.image_url;
+  // 4-tier image fallback system: most_liked_photo → primaryPhoto → image_url → brand initials
+  const imageUrl = equipment.most_liked_photo || equipment.primaryPhoto || equipment.image_url;
   const photoCount = equipment.equipment_photos?.length || 0;
 
   return (
@@ -57,7 +59,7 @@ const EquipmentTile: FC<EquipmentTileProps> = ({
         <img
           src={imageUrl}
           alt={`${equipment.brand} ${equipment.model}`}
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
             const fallback = e.currentTarget.nextElementSibling as HTMLElement;

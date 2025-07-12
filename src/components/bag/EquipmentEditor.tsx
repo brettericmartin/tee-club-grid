@@ -179,7 +179,7 @@ export function EquipmentEditor({
             <div className="flex items-center gap-4">
               <div className="w-32 h-32 bg-accent rounded-lg overflow-hidden">
                 <img
-                  src={formData.custom_photo_url || equipment.equipment.image_url || '/placeholder.svg'}
+                  src={formData.custom_photo_url || equipment.equipment.most_liked_photo || equipment.equipment.image_url }
                   alt={`${equipment.equipment.brand} ${equipment.equipment.model}`}
                   className="w-full h-full object-cover"
                 />

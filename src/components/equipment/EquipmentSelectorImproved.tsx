@@ -9,8 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
+import { EQUIPMENT_CATEGORIES as STANDARD_CATEGORIES, CATEGORY_DISPLAY_NAMES } from '@/lib/equipment-categories';
+import { useCategoryImages } from '@/hooks/useCategoryImages';
 
-type Equipment = Database['public']['Tables']['equipment']['Row'];
+type Equipment = Database['public']['Tables']['equipment']['Row'] & {
+  most_liked_photo?: string;
+};
 type Shaft = Database['public']['Tables']['shafts']['Row'];
 type Grip = Database['public']['Tables']['grips']['Row'];
 type LoftOption = Database['public']['Tables']['loft_options']['Row'];
@@ -26,24 +30,155 @@ interface EquipmentSelectorImprovedProps {
   }) => void;
 }
 
-// Equipment categories with metadata - matching actual database values
-const EQUIPMENT_CATEGORIES = [
-  { value: 'driver', label: 'Driver', icon: '🏌️', hasShaft: true, hasGrip: true, hasLoft: true },
-  { value: 'fairway_wood', label: 'Fairway Wood', icon: '🏌️', hasShaft: true, hasGrip: true, hasLoft: true },
-  { value: 'wood,woods', label: 'Woods', icon: '🏌️', hasShaft: true, hasGrip: true, hasLoft: true },
-  { value: 'hybrid', label: 'Hybrid', icon: '🏌️', hasShaft: true, hasGrip: true, hasLoft: true },
-  { value: 'utility_iron', label: 'Utility Iron', icon: '🏌️', hasShaft: true, hasGrip: true, hasLoft: true },
-  { value: 'iron,irons', label: 'Irons', icon: '⛳', hasShaft: true, hasGrip: true, hasLoft: false },
-  { value: 'wedge,wedges', label: 'Wedges', icon: '⛳', hasShaft: true, hasGrip: true, hasLoft: true },
-  { value: 'putter,putters', label: 'Putters', icon: '⛳', hasShaft: true, hasGrip: true, hasLoft: false },
-  { value: 'ball,golf_ball', label: 'Golf Balls', icon: '🏐', hasShaft: false, hasGrip: false, hasLoft: false },
-  { value: 'bags', label: 'Golf Bags', icon: '🎒', hasShaft: false, hasGrip: false, hasLoft: false },
-  { value: 'gloves', label: 'Gloves', icon: '🧤', hasShaft: false, hasGrip: false, hasLoft: false },
-  { value: 'ball_marker', label: 'Ball Markers', icon: '🎯', hasShaft: false, hasGrip: false, hasLoft: false },
-  { value: 'tees', label: 'Tees', icon: '⛳', hasShaft: false, hasGrip: false, hasLoft: false },
-  { value: 'towels', label: 'Towels', icon: '🏷️', hasShaft: false, hasGrip: false, hasLoft: false },
-  { value: 'speakers', label: 'Speakers', icon: '🔊', hasShaft: false, hasGrip: false, hasLoft: false },
-];
+// Equipment categories with metadata - using standardized values
+const EQUIPMENT_CATEGORIES = Object.values(STANDARD_CATEGORIES).map(category => {
+  // Define which categories have shafts, grips, and lofts
+  const hasShaft = ['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'].includes(category);
+  const hasGrip = ['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'].includes(category);
+  const hasLoft = ['driver', 'fairway_wood', 'hybrid', 'wedge'].includes(category);
+  
+  // Choose appropriate icons
+  const iconMap: Record<string, string> = {
+    driver: '🏌️',
+    fairway_wood: '🏌️', 
+    hybrid: '🏌️',
+    iron: '⛳',
+    wedge: '⛳',
+    putter: '⛳',
+    ball: '🏐',
+    bag: '🎒',
+    glove: '🧤',
+    rangefinder: '📏',
+    gps: '📍',
+    tee: '⛳',
+    towel: '🏷️',
+    ball_marker: '🎯',
+    divot_tool: '🔧',
+    accessories: '🎒'
+  };
+  
+  return {
+    value: category,
+    label: CATEGORY_DISPLAY_NAMES[category],
+    icon: iconMap[category] || '⛳',
+    hasShaft,
+    hasGrip,
+    hasLoft
+  };
+});
+
+// Category tile component with dynamic images
+const CategoryTile = ({ 
+  category, 
+  categoryImages, 
+  onClick 
+}: {
+  category: typeof EQUIPMENT_CATEGORIES[0];
+  categoryImages: Record<string, any>;
+  onClick: () => void;
+}) => {
+  const [imageError, setImageError] = useState(false);
+  
+  const categoryImage = categoryImages[category.value];
+  const hasImage = !imageError && categoryImage?.imageUrl;
+  
+  return (
+    <Card
+      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-all group"
+      onClick={onClick}
+    >
+      <div className="text-center">
+        {hasImage ? (
+          <div className="w-16 h-16 mx-auto mb-2 rounded-lg overflow-hidden">
+            <img
+              src={categoryImage.imageUrl}
+              alt={`${category.label} - ${categoryImage.equipment}`}
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          </div>
+        ) : (
+          <div className="text-3xl mb-2">{category.icon}</div>
+        )}
+        <div className="font-medium text-white group-hover:text-primary transition-colors">
+          {category.label}
+        </div>
+        {hasImage && (
+          <div className="text-xs text-white/50 mt-1 truncate">
+            {categoryImage.equipment}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+};
+
+// Equipment image component with fallbacks
+const EquipmentImage = ({ 
+  equipment, 
+  categoryImages, 
+  className = "w-20 h-20 object-cover rounded" 
+}: {
+  equipment: Equipment;
+  categoryImages: Record<string, any>;
+  className?: string;
+}) => {
+  const [imageError, setImageError] = useState(false);
+  
+  // Determine image source with fallback priority:
+  // 1. Equipment-specific most liked photo (NEW!)
+  // 2. equipment.image_url
+  // 3. most liked photo from category
+  // 4. brand initials
+  const getImageSrc = () => {
+    // First try equipment-specific most liked photo
+    if (!imageError && equipment.most_liked_photo) {
+      return equipment.most_liked_photo;
+    }
+    
+    // Then try the original equipment image
+    if (!imageError && equipment.image_url) {
+      return equipment.image_url;
+    }
+    
+    // Finally try category-level most liked photo
+    const categoryImage = categoryImages[equipment.category];
+    if (categoryImage?.imageUrl) {
+      return categoryImage.imageUrl;
+    }
+    
+    return null;
+  };
+  
+  const imageSrc = getImageSrc();
+  
+  if (imageSrc) {
+    return (
+      <img
+        src={imageSrc}
+        alt={`${equipment.brand} ${equipment.model}`}
+        className={className}
+        onError={() => setImageError(true)}
+      />
+    );
+  }
+  
+  // Fallback to brand initials
+  const brandInitials = equipment.brand
+    ?.split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || '??';
+    
+  return (
+    <div className={`${className} bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center`}>
+      <span className="text-white font-bold text-lg">
+        {brandInitials}
+      </span>
+    </div>
+  );
+};
 
 export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }: EquipmentSelectorImprovedProps) {
   // State management
@@ -65,6 +200,9 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   // Search and filters
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Category images for fallbacks
+  const { categoryImages } = useCategoryImages(Object.values(STANDARD_CATEGORIES));
 
   // Reset state when dialog closes
   useEffect(() => {
@@ -99,20 +237,11 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   const loadBrands = async (categoryValue: string) => {
     setLoading(true);
     try {
-      // Handle categories that might have multiple values (e.g., "iron,irons")
-      const categories = categoryValue.split(',');
-      
-      let query = supabase
+      const { data, error } = await supabase
         .from('equipment')
-        .select('brand');
-      
-      if (categories.length > 1) {
-        query = query.in('category', categories);
-      } else {
-        query = query.eq('category', categoryValue);
-      }
-      
-      const { data, error } = await query.order('brand');
+        .select('brand')
+        .eq('category', categoryValue)
+        .order('brand');
 
       if (data && !error) {
         const uniqueBrands = [...new Set(data.map(item => item.brand))].filter(Boolean);
@@ -127,31 +256,66 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
 
   // Load equipment when brand is selected
   const loadEquipment = async () => {
-    if (!selectedCategory || !selectedBrand) return;
+    if (!selectedCategory || !selectedBrand) {
+      console.log('❌ Cannot load equipment - missing category or brand');
+      return;
+    }
+    
+    console.log('🔍 Loading equipment with photos:', { 
+      category: selectedCategory.value, 
+      brand: selectedBrand 
+    });
     
     setLoading(true);
     try {
-      // Handle categories that might have multiple values
-      const categories = selectedCategory.value.split(',');
-      
-      let query = supabase
+      // First get equipment with most liked photos
+      const { data: equipmentWithPhotos, error: equipmentError } = await supabase
         .from('equipment')
-        .select('*')
-        .eq('brand', selectedBrand);
-      
-      if (categories.length > 1) {
-        query = query.in('category', categories);
-      } else {
-        query = query.eq('category', selectedCategory.value);
-      }
-      
-      const { data, error } = await query.order('model');
+        .select(`
+          *,
+          equipment_photos!left (
+            photo_url,
+            likes_count
+          )
+        `)
+        .eq('brand', selectedBrand)
+        .eq('category', selectedCategory.value)
+        .order('model');
 
-      if (data && !error) {
-        setEquipment(data);
+      if (equipmentError) {
+        console.error('❌ Database error loading equipment:', equipmentError);
+        setEquipment([]);
+        return;
       }
+
+      if (!equipmentWithPhotos) {
+        console.log('⚪ No equipment found');
+        setEquipment([]);
+        return;
+      }
+
+      // Process equipment to get most liked photo for each
+      const processedEquipment = equipmentWithPhotos.map(equipment => {
+        const photos = equipment.equipment_photos || [];
+        // Sort photos by likes and get the most liked one
+        const mostLikedPhoto = photos
+          .sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0))
+          .find(photo => photo.photo_url);
+
+        return {
+          ...equipment,
+          most_liked_photo: mostLikedPhoto?.photo_url || null,
+          equipment_photos: undefined // Remove the joined data to clean up the object
+        };
+      });
+
+      console.log('✅ Loaded equipment with photos:', processedEquipment.length, 'items');
+      console.log('📸 Items with photos:', processedEquipment.filter(e => e.most_liked_photo).length);
+      
+      setEquipment(processedEquipment);
     } catch (err) {
-      console.error('Error loading equipment:', err);
+      console.error('❌ Error loading equipment:', err);
+      setEquipment([]);
     } finally {
       setLoading(false);
     }
@@ -215,6 +379,14 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     }
   };
 
+  // Load equipment when step changes to 'equipment' and we have category + brand
+  useEffect(() => {
+    if (step === 'equipment' && selectedCategory && selectedBrand) {
+      console.log('🔄 Loading equipment for:', selectedCategory.value, selectedBrand);
+      loadEquipment();
+    }
+  }, [step, selectedCategory, selectedBrand]);
+
   useEffect(() => {
     if (selectedEquipment) {
       loadCustomizationOptions();
@@ -223,13 +395,17 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
 
   const handleCategorySelect = (category: typeof EQUIPMENT_CATEGORIES[0]) => {
     setSelectedCategory(category);
+    setSelectedBrand('');
+    setEquipment([]);
+    setSelectedEquipment(null);
     setStep('brand');
   };
 
   const handleBrandSelect = (brand: string) => {
     setSelectedBrand(brand);
+    setEquipment([]); // Clear previous equipment
+    setSelectedEquipment(null);
     setStep('equipment');
-    loadEquipment();
   };
 
   const handleEquipmentSelect = (equipment: Equipment) => {
@@ -289,23 +465,66 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           <DialogTitle className="text-2xl">{getStepTitle()}</DialogTitle>
         </DialogHeader>
 
-        {/* Progress breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-white/60 mb-4">
+        {/* Progress breadcrumb - mobile-friendly navigation */}
+        <div className="flex items-center flex-wrap gap-2 mb-6 p-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
+          <Badge 
+            variant="secondary" 
+            className="bg-white/20 text-white hover:bg-white/30 cursor-pointer transition-all text-sm py-2 px-3 min-h-[40px] flex items-center"
+            onClick={() => {
+              setStep('category');
+              setSelectedCategory(null);
+              setSelectedBrand('');
+              setEquipment([]);
+              setSelectedEquipment(null);
+            }}
+          >
+            Equipment Type
+          </Badge>
+          
           {selectedCategory && (
             <>
-              <span className="text-white">{selectedCategory.label}</span>
-              {selectedBrand && (
-                <>
-                  <ChevronRight className="w-4 h-4" />
-                  <span className="text-white">{selectedBrand}</span>
-                </>
-              )}
-              {selectedEquipment && (
-                <>
-                  <ChevronRight className="w-4 h-4" />
-                  <span className="text-white">{selectedEquipment.model}</span>
-                </>
-              )}
+              <ChevronRight className="w-4 h-4 text-white/50" />
+              <Badge 
+                variant="outline" 
+                className="bg-primary/20 text-white border-primary/40 hover:bg-primary/30 cursor-pointer transition-all text-sm py-2 px-3 min-h-[40px] flex items-center"
+                onClick={() => {
+                  setStep('brand');
+                  setSelectedBrand('');
+                  setEquipment([]);
+                  setSelectedEquipment(null);
+                }}
+              >
+                {selectedCategory.label}
+              </Badge>
+            </>
+          )}
+          
+          {selectedBrand && (
+            <>
+              <ChevronRight className="w-4 h-4 text-white/50" />
+              <Badge 
+                variant="outline" 
+                className="bg-primary/20 text-white border-primary/40 hover:bg-primary/30 cursor-pointer transition-all text-sm py-2 px-3 min-h-[40px] flex items-center"
+                onClick={() => {
+                  setStep('equipment');
+                  setEquipment([]);
+                  setSelectedEquipment(null);
+                }}
+              >
+                {selectedBrand}
+              </Badge>
+            </>
+          )}
+          
+          {selectedEquipment && (
+            <>
+              <ChevronRight className="w-4 h-4 text-white/50" />
+              <Badge 
+                variant="default" 
+                className="bg-primary text-white text-sm py-2 px-3 min-h-[40px] flex items-center"
+              >
+                {selectedEquipment.model}
+              </Badge>
             </>
           )}
         </div>
@@ -315,18 +534,12 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           {step === 'category' && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {EQUIPMENT_CATEGORIES.map((category) => (
-                <Card
+                <CategoryTile
                   key={category.value}
-                  className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-all group"
+                  category={category}
+                  categoryImages={categoryImages}
                   onClick={() => handleCategorySelect(category)}
-                >
-                  <div className="text-center">
-                    <div className="text-3xl mb-2">{category.icon}</div>
-                    <div className="font-medium text-white group-hover:text-primary transition-colors">
-                      {category.label}
-                    </div>
-                  </div>
-                </Card>
+                />
               ))}
             </div>
           )}
@@ -393,6 +606,39 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                 <div className="text-center py-8">
                   <div className="animate-spin h-8 w-8 border-2 border-primary rounded-full border-t-transparent mx-auto" />
                 </div>
+              ) : equipment.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <h3 className="text-lg font-semibold text-white mb-2">No Equipment Found</h3>
+                  <p className="text-white/60 mb-4">
+                    No {selectedCategory?.label.toLowerCase()} found for {selectedBrand}
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setStep('brand');
+                        setSelectedBrand('');
+                        setEquipment([]);
+                      }}
+                      className="glass-button"
+                    >
+                      Try Different Brand
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setStep('category');
+                        setSelectedCategory(null);
+                        setSelectedBrand('');
+                        setEquipment([]);
+                      }}
+                      className="glass-button"
+                    >
+                      Change Category
+                    </Button>
+                  </div>
+                </div>
               ) : (
                 <div className="grid gap-3">
                   {equipment.map((item) => (
@@ -402,20 +648,18 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                       onClick={() => handleEquipmentSelect(item)}
                     >
                       <div className="flex items-start justify-between">
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-white">{item.model}</h3>
                           <p className="text-sm text-white/60">{item.brand}</p>
                           {item.msrp && (
                             <p className="text-sm text-white/60">${item.msrp}</p>
                           )}
                         </div>
-                        {item.image_url && (
-                          <img
-                            src={item.image_url}
-                            alt={item.model}
-                            className="w-20 h-20 object-cover rounded"
-                          />
-                        )}
+                        <EquipmentImage 
+                          equipment={item}
+                          categoryImages={categoryImages}
+                          className="w-20 h-20 object-cover rounded flex-shrink-0"
+                        />
                       </div>
                     </Card>
                   ))}
@@ -539,11 +783,30 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
             variant="ghost"
             onClick={() => {
               switch (step) {
-                case 'brand': setStep('category'); break;
-                case 'equipment': setStep('brand'); break;
-                case 'shaft': setStep('equipment'); break;
-                case 'grip': setStep('shaft'); break;
-                case 'loft': setStep('grip'); break;
+                case 'brand': 
+                  setStep('category');
+                  setSelectedCategory(null);
+                  setSelectedBrand('');
+                  setEquipment([]);
+                  break;
+                case 'equipment': 
+                  setStep('brand');
+                  setSelectedBrand('');
+                  setEquipment([]);
+                  setSelectedEquipment(null);
+                  break;
+                case 'shaft': 
+                  setStep('equipment');
+                  setSelectedEquipment(null);
+                  break;
+                case 'grip': 
+                  setStep('shaft');
+                  setSelectedShaft(null);
+                  break;
+                case 'loft': 
+                  setStep('grip');
+                  setSelectedGrip(null);
+                  break;
               }
             }}
             disabled={step === 'category'}

@@ -13,8 +13,10 @@ interface EquipmentCardProps {
     msrp: number;
     image_url?: string;
     primaryPhoto?: string;
+    most_liked_photo?: string;
     equipment_photos?: any[];
     savesCount?: number;
+    [key: string]: any; // Allow additional properties
   };
   variant?: 'grid' | 'list';
   isSaved?: boolean;

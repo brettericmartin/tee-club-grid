@@ -64,9 +64,10 @@ export function QuickPhotoUpload({
       setCaption('');
       setPreviewUrl(null);
       onPhotoUploaded?.();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error);
-      toast.error('Failed to upload photo');
+      const errorMessage = error?.message || 'Failed to upload photo';
+      toast.error(errorMessage);
     } finally {
       setUploading(false);
     }

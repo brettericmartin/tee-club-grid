@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/lib/supabase';
 import { debounce } from 'lodash';
 import type { Database } from '@/lib/supabase';
+import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from '@/lib/equipment-categories';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
 type Shaft = Database['public']['Tables']['shafts']['Row'];
@@ -60,17 +61,11 @@ export function EquipmentSelector({ isOpen, onClose, onSelectEquipment }: Equipm
   const [loftOptions, setLoftOptions] = useState<LoftOption[]>([]);
   const [selectedLoft, setSelectedLoft] = useState<LoftOption | null>(null);
 
-  // Equipment categories
-  const categories = [
-    { value: 'driver', label: 'Driver' },
-    { value: 'fairway_wood', label: 'Fairway Wood' },
-    { value: 'hybrid', label: 'Hybrid' },
-    { value: 'utility_iron', label: 'Utility Iron' },
-    { value: 'irons', label: 'Irons' },
-    { value: 'wedge', label: 'Wedge' },
-    { value: 'putter', label: 'Putter' },
-    { value: 'golf_ball', label: 'Golf Ball' }
-  ];
+  // Equipment categories - using standardized values from single source
+  const categories = Object.values(EQUIPMENT_CATEGORIES).map(category => ({
+    value: category,
+    label: CATEGORY_DISPLAY_NAMES[category]
+  }));
 
   // Debounced search function
   const debouncedEquipmentSearch = useMemo(

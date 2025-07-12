@@ -16,12 +16,11 @@ export async function getEquipment(options?: {
     .from('equipment')
     .select(`
       *,
-      equipment_reviews (rating),
-      equipment_saves (count),
       equipment_photos (
+        id,
         photo_url,
-        is_primary,
-        likes_count
+        likes_count,
+        is_primary
       )
     `);
 
@@ -40,7 +39,7 @@ export async function getEquipment(options?: {
       query = query.order('popularity_score', { ascending: false });
       break;
     case 'newest':
-      query = query.order('release_date', { ascending: false });
+      query = query.order('created_at', { ascending: false });
       break;
     case 'price-low':
       query = query.order('msrp', { ascending: true });
@@ -56,29 +55,22 @@ export async function getEquipment(options?: {
   
   if (error) throw error;
   
-  // Process data to include average rating, primary photo, and total likes
+  // Return simplified data with proper photo handling
   return data?.map(equipment => {
-    // Get most liked photo or primary photo
+    // Sort photos by likes_count to get the most liked one
     const sortedPhotos = equipment.equipment_photos?.sort((a, b) => 
       (b.likes_count || 0) - (a.likes_count || 0)
     );
-    const primaryPhoto = sortedPhotos?.[0]?.photo_url || 
-                        equipment.equipment_photos?.find(p => p.is_primary)?.photo_url || 
-                        equipment.image_url;
     
-    // Calculate total likes from all photos
-    const totalPhotoLikes = equipment.equipment_photos?.reduce(
-      (sum, photo) => sum + (photo.likes_count || 0), 0
-    ) || 0;
+    // Use the most liked photo, or the first one, or fall back to image_url
+    const primaryPhoto = sortedPhotos?.[0]?.photo_url || equipment.image_url;
     
     return {
       ...equipment,
-      averageRating: equipment.equipment_reviews?.length 
-        ? equipment.equipment_reviews.reduce((sum, r) => sum + r.rating, 0) / equipment.equipment_reviews.length 
-        : null,
+      averageRating: null,
       primaryPhoto,
-      savesCount: equipment.equipment_saves?.[0]?.count || 0,
-      totalLikes: totalPhotoLikes
+      savesCount: 0,
+      totalLikes: 0
     };
   });
 }
@@ -121,13 +113,20 @@ export async function getEquipmentDetails(equipmentId: string) {
     console.warn('Error fetching related data:', err);
   }
 
+  // Get the most liked photo as primaryPhoto
+  const mostLikedPhoto = photos.data && photos.data.length > 0 
+    ? photos.data[0].photo_url 
+    : null;
+
   // Combine the data
   const data = {
     ...equipment,
     equipment_reviews: reviews.data || [],
     equipment_photos: photos.data || [],
     equipment_prices: [],
-    equipment_discussions: []
+    equipment_discussions: [],
+    primaryPhoto: mostLikedPhoto, // Set most liked photo as primary
+    most_liked_photo: mostLikedPhoto // Also add for consistency
   };
   
   // Calculate aggregate data
@@ -141,9 +140,6 @@ export async function getEquipmentDetails(equipmentId: string) {
 
   // Get top bags using this equipment
   const topBags = await getTopBagsWithEquipment(equipmentId);
-  
-  // Get the most liked photo (first one after sorting by likes_count desc)
-  const mostLikedPhoto = data.equipment_photos?.[0]?.photo_url;
   
   return {
     ...data,
@@ -188,36 +184,82 @@ export async function addEquipmentReview(review: {
   return data;
 }
 
+// Check if equipment is saved by user
+export async function isEquipmentSaved(userId: string, equipmentId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('equipment_saves')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('equipment_id', equipmentId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 is "The result contains 0 rows" which is expected when not saved
+      console.error('Error checking equipment save status:', error);
+      return false;
+    }
+
+    return !!data;
+  } catch (error) {
+    console.error('Error checking equipment save status:', error);
+    return false;
+  }
+}
+
 // Save/unsave equipment
 export async function toggleEquipmentSave(userId: string, equipmentId: string) {
-  // Check if already saved
-  const { data: existing } = await supabase
-    .from('equipment_saves')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('equipment_id', equipmentId)
-    .single();
+  try {
+    // Check if already saved
+    const { data: existing, error: checkError } = await supabase
+      .from('equipment_saves')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('equipment_id', equipmentId)
+      .single();
 
-  if (existing) {
-    // Unsave
-    const { error } = await supabase
-      .from('equipment_saves')
-      .delete()
-      .eq('id', existing.id);
-    
-    if (error) throw error;
-    return false; // unsaved
-  } else {
-    // Save
-    const { error } = await supabase
-      .from('equipment_saves')
-      .insert({
-        user_id: userId,
-        equipment_id: equipmentId
-      });
-    
-    if (error) throw error;
-    return true; // saved
+    // Handle check error (ignore if not found)
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking save status:', checkError);
+      throw new Error(`Failed to check save status: ${checkError.message}`);
+    }
+
+    if (existing) {
+      // Unsave
+      const { error } = await supabase
+        .from('equipment_saves')
+        .delete()
+        .eq('id', existing.id);
+      
+      if (error) {
+        console.error('Error removing save:', error);
+        throw new Error(`Failed to remove from saved: ${error.message}`);
+      }
+      return false; // unsaved
+    } else {
+      // Save
+      const { error } = await supabase
+        .from('equipment_saves')
+        .insert({
+          user_id: userId,
+          equipment_id: equipmentId
+        });
+      
+      if (error) {
+        console.error('Error saving equipment:', error);
+        if (error.code === 'PGRST301' || error.message?.includes('duplicate')) {
+          throw new Error('Equipment is already saved');
+        } else if (error.message?.includes('permission') || error.message?.includes('policy')) {
+          throw new Error('Permission denied. Please make sure you are signed in.');
+        } else {
+          throw new Error(`Failed to save equipment: ${error.message}`);
+        }
+      }
+      return true; // saved
+    }
+  } catch (error) {
+    console.error('Error in toggleEquipmentSave:', error);
+    throw error;
   }
 }
 
@@ -283,11 +325,12 @@ export async function getUserSavedEquipment(userId: string) {
     .from('equipment_saves')
     .select(`
       *,
-      equipment:equipment (
+      equipment:equipment_id (
         *,
         equipment_photos (
           photo_url,
-          is_primary
+          is_primary,
+          likes_count
         )
       )
     `)
@@ -297,6 +340,8 @@ export async function getUserSavedEquipment(userId: string) {
   if (error) throw error;
   
   return data?.map(item => {
+    if (!item.equipment) return null;
+    
     // Get most liked photo for saved equipment too
     const sortedPhotos = item.equipment?.equipment_photos?.sort((a, b) => 
       (b.likes_count || 0) - (a.likes_count || 0)
@@ -307,9 +352,11 @@ export async function getUserSavedEquipment(userId: string) {
     
     return {
       ...item.equipment,
-      primaryPhoto
+      primaryPhoto,
+      most_liked_photo: sortedPhotos?.[0]?.photo_url,
+      created_at: item.created_at // Keep the save date
     };
-  });
+  }).filter(Boolean);
 }
 
 // Upload equipment photo
@@ -320,32 +367,87 @@ export async function uploadEquipmentPhoto(
   caption?: string,
   isPrimary: boolean = false
 ) {
-  // Upload to Supabase Storage
-  const fileName = `${userId}/${equipmentId}/${Date.now()}-${file.name}`;
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from('equipment-images')
-    .upload(fileName, file);
+  try {
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error(`File type ${file.type} is not allowed. Please upload a JPEG, PNG, WebP, or GIF image.`);
+    }
 
-  if (uploadError) throw uploadError;
+    // Validate file size (10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      throw new Error('File size must be less than 10MB');
+    }
 
-  // Get public URL
-  const { data: { publicUrl } } = supabase.storage
-    .from('equipment-images')
-    .getPublicUrl(fileName);
+    // Upload to Supabase Storage
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const fileName = `${userId}/${equipmentId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    
+    console.log('Uploading file:', fileName, 'Type:', file.type, 'Size:', file.size);
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('equipment-photos')
+      .upload(fileName, file, {
+        contentType: file.type,
+        upsert: false
+      });
 
-  // Save to database
-  const { data, error } = await supabase
-    .from('equipment_photos')
-    .insert({
-      user_id: userId,
-      equipment_id: equipmentId,
-      photo_url: publicUrl,
-      caption,
-      is_primary: isPrimary
-    })
-    .select()
-    .single();
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError);
+      if (uploadError.message?.includes('row-level security')) {
+        throw new Error('Permission denied. Please make sure you are logged in.');
+      } else if (uploadError.message?.includes('bucket')) {
+        throw new Error('Storage bucket not found. Please contact support.');
+      } else {
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+    }
 
-  if (error) throw error;
-  return data;
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('equipment-photos')
+      .getPublicUrl(fileName);
+
+    console.log('File uploaded, saving to database. URL:', publicUrl);
+
+    // Save to database
+    const { data, error } = await supabase
+      .from('equipment_photos')
+      .insert({
+        user_id: userId,
+        equipment_id: equipmentId,
+        photo_url: publicUrl,
+        caption,
+        is_primary: isPrimary,
+        metadata: {
+          file_name: file.name,
+          file_size: file.size,
+          mime_type: file.type,
+          uploaded_at: new Date().toISOString()
+        }
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Database insert error:', error);
+      // Try to clean up the uploaded file
+      await supabase.storage
+        .from('equipment-photos')
+        .remove([fileName]);
+      
+      if (error.message?.includes('row-level security')) {
+        throw new Error('Permission denied. Please make sure you are logged in.');
+      } else {
+        throw new Error(`Failed to save photo information: ${error.message}`);
+      }
+    }
+
+    console.log('Photo uploaded successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Upload equipment photo error:', error);
+    throw error;
+  }
 }

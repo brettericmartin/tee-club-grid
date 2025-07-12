@@ -47,11 +47,16 @@ async function checkData() {
     .from('equipment')
     .select('*')
     .limit(5);
+    
+  // Get total count
+  const { count: totalEquipment } = await supabase
+    .from('equipment')
+    .select('*', { count: 'exact', head: true });
 
   if (equipmentError) {
     console.error('Error fetching equipment:', equipmentError);
   } else {
-    console.log(`Equipment found: ${equipment?.length || 0}`);
+    console.log(`Equipment found: ${totalEquipment || 0} total (showing first ${equipment?.length || 0})`);
     if (equipment?.length > 0) {
       console.log('Sample equipment:', equipment.map(e => ({ 
         id: e.id, 

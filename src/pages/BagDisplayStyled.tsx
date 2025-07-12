@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
 
 const BagDisplayStyled = () => {
   const { bagId } = useParams();
@@ -123,7 +124,7 @@ const BagDisplayStyled = () => {
     return acc;
   }, {}) || {};
 
-  const categoryOrder = ['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter', 'ball', 'bag', 'glove', 'other'];
+  const categoryOrder = Object.values(EQUIPMENT_CATEGORIES);
 
   return (
     <div className="min-h-screen bg-black">
@@ -219,8 +220,8 @@ const BagDisplayStyled = () => {
 
             return (
               <div key={category}>
-                <h3 className="text-lg font-semibold text-white mb-4 capitalize">
-                  {category.replace('_', ' ')}s
+                <h3 className="text-lg font-semibold text-white mb-4">
+                  {CATEGORY_DISPLAY_NAMES[category as keyof typeof CATEGORY_DISPLAY_NAMES] || category}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {items.map((item: any) => (
