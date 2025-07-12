@@ -27,7 +27,7 @@ const FloatingActionButton = () => {
       </div>
       
       {/* FAB Button */}
-      <button className="w-14 h-14 bg-primary hover:bg-primary-hover rounded-full shadow-luxury hover:shadow-hover transition-all duration-300 flex items-center justify-center hover:scale-110">
+      <button className="w-14 h-14 bg-primary hover:bg-primary-hover rounded-full shadow-luxury hover:shadow-hover transition-[shadow,transform] duration-300 flex items-center justify-center hover:scale-110">
         <div className="relative">
           <ShoppingBag className="w-6 h-6 text-primary-foreground" />
           <Plus className="w-3 h-3 text-primary-foreground absolute -top-1 -right-1" />

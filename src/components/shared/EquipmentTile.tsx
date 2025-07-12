@@ -48,7 +48,7 @@ const EquipmentTile: FC<EquipmentTileProps> = ({
   return (
     <div
       className={cn(
-        'glass-card relative overflow-hidden cursor-pointer transition-all duration-200',
+        'glass-card relative overflow-hidden cursor-pointer transition-[transform,shadow] duration-200',
         'hover:scale-[1.02] hover:shadow-lg',
         sizeClasses[size],
         className
@@ -60,6 +60,7 @@ const EquipmentTile: FC<EquipmentTileProps> = ({
           src={imageUrl}
           alt={`${equipment.brand} ${equipment.model}`}
           className="w-full h-full object-cover"
+          loading="lazy"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
             const fallback = e.currentTarget.nextElementSibling as HTMLElement;

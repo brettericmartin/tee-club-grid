@@ -13,7 +13,7 @@ const ViewToggle = ({ viewMode, setViewMode }: ViewToggleProps) => {
         onClick={() => setViewMode('list')}
         variant="ghost"
         size="sm"
-        className={`p-2 rounded-lg transition-all ${
+        className={`p-2 rounded-lg transition-colors ${
           viewMode === 'list' 
             ? 'bg-white/20 text-white' 
             : 'bg-white/10 text-white/70 hover:bg-white/15 hover:text-white'
@@ -25,7 +25,7 @@ const ViewToggle = ({ viewMode, setViewMode }: ViewToggleProps) => {
         onClick={() => setViewMode('gallery')}
         variant="ghost"
         size="sm"
-        className={`p-2 rounded-lg transition-all ${
+        className={`p-2 rounded-lg transition-colors ${
           viewMode === 'gallery' 
             ? 'bg-white/20 text-white' 
             : 'bg-white/10 text-white/70 hover:bg-white/15 hover:text-white'

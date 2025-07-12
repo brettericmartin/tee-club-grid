@@ -14,7 +14,7 @@ const ListView = ({ bagItems, isOwnBag, onEquipmentClick, onRemoveItem }: ListVi
       {bagItems.map(item => (
         <div 
           key={item.equipment.id}
-          className="gel-card rounded-xl p-4 hover:bg-white/15 transition-all cursor-pointer group"
+          className="gel-card rounded-xl p-4 hover:bg-white/15 transition-colors cursor-pointer group"
           onClick={() => onEquipmentClick(item)}
         >
           <div className="flex items-center gap-4">
@@ -23,7 +23,8 @@ const ListView = ({ bagItems, isOwnBag, onEquipmentClick, onRemoveItem }: ListVi
               <img 
                 src={item.equipment.image} 
                 alt={`${item.equipment.brand} ${item.equipment.model}`}
-                className="w-full h-full object-cover mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-300"
+                className="w-full h-full object-cover mix-blend-luminosity group-hover:mix-blend-normal transition-[mix-blend-mode] duration-300"
+                loading="lazy"
               />
             </div>
             

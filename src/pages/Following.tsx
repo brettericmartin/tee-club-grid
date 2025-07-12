@@ -204,7 +204,7 @@ const Following = () => {
             const isUnfollowing = unfollowingIds.has(user.id);
 
             return (
-              <Card key={user.id} className="hover:shadow-card transition-all duration-200">
+              <Card key={user.id} className="hover:shadow-card transition-shadow duration-200">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <Link to={`/bag/${user.username}`} className="flex items-center flex-1">

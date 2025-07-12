@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit3, Save, X, Eye, Settings, Trash2 } from "lucide-react";
+import { Plus, Edit3, Save, X, Eye, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import BackgroundLayer from "@/components/BackgroundLayer";
 import BackgroundPicker from "@/components/BackgroundPicker";
@@ -8,12 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Navigation from "@/components/Navigation";
 import { BagSelectorDialog } from "@/components/bag/BagSelectorDialog";
 import { CreateBagDialog } from "@/components/bag/CreateBagDialog";
 import { EquipmentSelectorImproved } from "@/components/equipment/EquipmentSelectorImproved";
 import { EquipmentEditor } from "@/components/bag/EquipmentEditor";
 import { BagPreview } from "@/components/bag/BagPreview";
+import { BagGalleryDndKit } from "@/components/bag/BagGalleryDndKit";
+import { bagLayoutsService, type BagLayout } from "@/services/bagLayouts";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -41,6 +44,9 @@ const MyBagSupabase = () => {
   const [bagDescription, setBagDescription] = useState("");
   const [bagItems, setBagItems] = useState<BagEquipmentItem[]>([]);
   const [selectedBackground, setSelectedBackground] = useState('midwest-lush');
+  const [viewMode, setViewMode] = useState<'gallery' | 'list'>('gallery');
+  const [layout, setLayout] = useState<BagLayout>({});
+  const [isEditingLayout, setIsEditingLayout] = useState(false);
   
   // Modal states
   const [showBagSelector, setShowBagSelector] = useState(false);
@@ -49,6 +55,7 @@ const MyBagSupabase = () => {
   const [equipmentEditorOpen, setEquipmentEditorOpen] = useState(false);
   const [selectedBagEquipment, setSelectedBagEquipment] = useState<BagEquipmentItem | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [totalTees, setTotalTees] = useState(0);
 
   // Show sign-in prompt if not logged in
   if (!authLoading && !user) {
@@ -78,8 +85,44 @@ const MyBagSupabase = () => {
   useEffect(() => {
     if (user) {
       loadBags();
+      calculateTotalTees();
     }
   }, [user]);
+  
+  const calculateTotalTees = async () => {
+    if (!user) return;
+    
+    try {
+      // Count tees from all user's bags
+      const { count: bagTees } = await supabase
+        .from('bag_likes')
+        .select('bag_id', { count: 'exact', head: true })
+        .in('bag_id', 
+          supabase
+            .from('user_bags')
+            .select('id')
+            .eq('user_id', user.id)
+        );
+      
+      // Count tees from user's posts (feed_posts)
+      const { count: postTees } = await supabase
+        .from('likes')
+        .select('post_id', { count: 'exact', head: true })
+        .in('post_id',
+          supabase
+            .from('feed_posts') 
+            .select('id')
+            .eq('user_id', user.id)
+        );
+      
+      const total = (bagTees || 0) + (postTees || 0);
+      setTotalTees(total);
+    } catch (error) {
+      console.error('Error calculating total tees:', error);
+      // Fallback to just using current bag's likes
+      setTotalTees(0);
+    }
+  };
 
   const loadBags = async () => {
     if (!user) return;
@@ -186,6 +229,21 @@ const MyBagSupabase = () => {
 
       console.log('Loaded equipment:', data);
       setBagItems(data || []);
+      
+      // Load layout data
+      const loadedLayout = await bagLayoutsService.loadLayout(bagId);
+      if (loadedLayout) {
+        setLayout(loadedLayout);
+      } else if (data && data.length > 0) {
+        // Generate default layout if none exists
+        const defaultLayout = bagLayoutsService.generateDefaultLayout(
+          data.map((item: any) => ({
+            id: item.equipment_id,
+            category: item.equipment.category
+          }))
+        );
+        setLayout(defaultLayout);
+      }
     } catch (error) {
       console.error('Error loading bag equipment:', error);
       // Don't show error toast for empty bags, just set empty array
@@ -410,6 +468,53 @@ const MyBagSupabase = () => {
     }
   };
 
+  const autoFillBag = async () => {
+    if (!currentBag) return;
+    
+    const categories = [
+      'driver', 'fairway_wood', 'hybrid', 'iron', 
+      'wedge', 'putter', 'ball', 'bag', 
+      'glove', 'rangefinder', 'gps'
+    ];
+    
+    try {
+      setLoading(true);
+      const existingCategories = new Set(bagItems.map(item => item.equipment.category));
+      const missingCategories = categories.filter(cat => !existingCategories.has(cat));
+      
+      if (missingCategories.length === 0) {
+        toast.info('Your bag already has equipment from all categories!');
+        return;
+      }
+      
+      for (const category of missingCategories) {
+        // Get most popular equipment in this category
+        const { data: equipment, error } = await supabase
+          .from('equipment')
+          .select('*')
+          .eq('category', category)
+          .order('popularity_score', { ascending: false })
+          .limit(1)
+          .single();
+          
+        if (error || !equipment) continue;
+        
+        // Add to bag
+        await addEquipment({
+          equipment_id: equipment.id
+        });
+      }
+      
+      toast.success(`Added ${missingCategories.length} items to your bag!`);
+      await loadBagEquipment(currentBag.id);
+    } catch (error) {
+      console.error('Error auto-filling bag:', error);
+      toast.error('Failed to auto-fill bag');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleFeatured = async (bagEquipmentId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
@@ -441,6 +546,36 @@ const MyBagSupabase = () => {
   const totalValue = bagItems.reduce((sum, item) => 
     sum + (item.purchase_price || item.equipment.msrp || 0), 0
   );
+
+  // Calculate featured items by category
+  const featuredCounts = (() => {
+    const CLUB_CATEGORIES = ['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'];
+    const ACCESSORY_CATEGORIES = ['ball', 'glove', 'rangefinder', 'gps', 'tee', 'towel', 'ball_marker', 'divot_tool', 'accessories'];
+    
+    const featured = bagItems.filter(item => item.is_featured);
+    const featuredClubs = featured.filter(item => CLUB_CATEGORIES.includes(item.equipment.category));
+    const featuredAccessories = featured.filter(item => ACCESSORY_CATEGORIES.includes(item.equipment.category));
+    const featuredBag = featured.find(item => item.equipment.category === 'bag');
+    
+    return {
+      clubs: featuredClubs.length,
+      accessories: featuredAccessories.length,
+      bag: featuredBag ? 1 : 0,
+      total: featured.length
+    };
+  })();
+
+  // Check if featured items exceed display limits
+  const featuredWarnings = [];
+  if (featuredCounts.clubs > 6) {
+    featuredWarnings.push(`${featuredCounts.clubs} featured clubs (only 6 will show)`);
+  }
+  if (featuredCounts.clubs + featuredCounts.bag > 6) {
+    featuredWarnings.push(`${featuredCounts.clubs} featured clubs + ${featuredCounts.bag} featured bag (only 6 total will show)`);
+  }
+  if (featuredCounts.accessories > 4) {
+    featuredWarnings.push(`${featuredCounts.accessories} featured accessories (only 4 will show)`);
+  }
 
   if (authLoading || loading) {
     return (
@@ -499,6 +634,25 @@ const MyBagSupabase = () => {
           <div className="flex items-center gap-3">
             {!isEditing && (
               <>
+                {/* View Mode Toggle */}
+                <div className="bg-white/10 rounded-lg p-1 flex">
+                  <Button
+                    variant={viewMode === 'gallery' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('gallery')}
+                    className={viewMode === 'gallery' ? '' : 'text-white hover:text-white hover:bg-white/10'}
+                  >
+                    <Grid3x3 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className={viewMode === 'list' ? '' : 'text-white hover:text-white hover:bg-white/10'}
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                </div>
                 {bags.length > 1 && (
                   <Button onClick={() => setShowBagSelector(true)} variant="outline">
                     Switch Bag
@@ -529,10 +683,20 @@ const MyBagSupabase = () => {
                 </Button>
               </>
             ) : (
-              <Button onClick={() => setIsEditing(true)} variant="outline">
-                <Edit3 className="w-4 h-4 mr-2" />
-                Edit Bag
-              </Button>
+              <>
+                {viewMode === 'gallery' && (
+                  <Button
+                    onClick={() => setIsEditingLayout(!isEditingLayout)}
+                    variant={isEditingLayout ? 'destructive' : 'outline'}
+                  >
+                    {isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}
+                  </Button>
+                )}
+                <Button onClick={() => setIsEditing(true)} variant="outline">
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  Edit Bag
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -548,21 +712,33 @@ const MyBagSupabase = () => {
           </div>
         )}
 
+        {/* Featured Items Warning */}
+        {featuredWarnings.length > 0 && (
+          <Alert className="mb-6 bg-yellow-500/10 border-yellow-500/20">
+            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+            <AlertTitle className="text-yellow-500">Too Many Featured Items</AlertTitle>
+            <AlertDescription className="text-yellow-400/90">
+              You have {featuredWarnings.join(', ')}. 
+              Some featured items won't appear on your bag card.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Stats Bar */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <Card className="bg-white/10 backdrop-blur-md border-white/20">
+        <div className="grid grid-cols-4 gap-4 mb-8">
+          <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
             <CardContent className="p-4 text-center">
-              <p className="text-sm text-gray-200">Total Value</p>
-              <p className="text-2xl font-bold text-white">${totalValue.toLocaleString()}</p>
+              <p className="text-sm text-gray-200">Total Tees</p>
+              <p className="text-2xl font-bold text-white">{totalTees.toLocaleString()}</p>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-md border-white/20">
+          <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
             <CardContent className="p-4 text-center">
               <p className="text-sm text-gray-200">Equipment</p>
               <p className="text-2xl font-bold text-white">{bagItems.length}</p>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-md border-white/20">
+          <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
             <CardContent className="p-4 text-center">
               <p className="text-sm text-gray-200">Featured</p>
               <p className="text-2xl font-bold text-white">
@@ -570,15 +746,40 @@ const MyBagSupabase = () => {
               </p>
             </CardContent>
           </Card>
+          <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
+            <CardContent className="p-4 text-center">
+              <p className="text-xs text-gray-300">Est. Value</p>
+              <p className="text-lg font-medium text-white">${totalValue.toLocaleString()}</p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Equipment Display */}
         {bagItems.length === 0 ? (
           <EmptyState />
+        ) : viewMode === 'gallery' ? (
+          <BagGalleryDndKit
+            bagEquipment={bagItems}
+            layout={layout}
+            isEditing={isEditingLayout}
+            isOwnBag={true}
+            onLayoutChange={setLayout}
+            onSaveLayout={async () => {
+              if (!currentBag) return;
+              const success = await bagLayoutsService.saveLayout(currentBag.id, layout);
+              if (success) {
+                toast.success('Layout saved successfully!');
+                setIsEditingLayout(false);
+              } else {
+                toast.error('Failed to save layout');
+              }
+            }}
+            onEquipmentClick={handleEditEquipment}
+          />
         ) : (
           <div className="space-y-4">
             {bagItems.map((item) => (
-              <Card key={item.id} className="bg-white/10 backdrop-blur-md border-white/20">
+              <Card key={item.id} className="bg-white/10 backdrop-blur-[10px] border-white/20">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
                     <div 
@@ -589,6 +790,7 @@ const MyBagSupabase = () => {
                         src={item.custom_photo_url || item.equipment.image_url }
                         alt={`${item.equipment.brand} ${item.equipment.model}`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     </div>
                     <div className="flex-1 cursor-pointer" onClick={() => handleEditEquipment(item)}>
@@ -649,13 +851,19 @@ const MyBagSupabase = () => {
           </div>
         )}
 
-        {/* Add Equipment Button */}
+        {/* Add Equipment Buttons */}
         {isEditing && (
-          <div className="mt-8 text-center">
+          <div className="mt-8 flex flex-wrap gap-4 justify-center">
             <Button onClick={() => setEquipmentSelectorOpen(true)} size="lg">
               <Plus className="w-5 h-5 mr-2" />
               Add Equipment
             </Button>
+            {bagItems.length < 10 && (
+              <Button onClick={autoFillBag} size="lg" variant="outline">
+                <Zap className="w-5 h-5 mr-2" />
+                Auto-Fill Bag
+              </Button>
+            )}
           </div>
         )}
       </div>

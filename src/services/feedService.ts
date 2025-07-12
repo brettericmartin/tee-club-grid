@@ -1,4 +1,45 @@
 import { supabase } from '@/lib/supabase';
+import type { Database } from '@/lib/supabase';
+
+type FeedPost = Database['public']['Tables']['feed_posts']['Row'];
+
+// Create a feed post when equipment photo is uploaded
+export async function createEquipmentPhotoFeedPost(
+  userId: string,
+  equipmentId: string,
+  equipmentName: string,
+  photoUrl: string,
+  caption?: string,
+  bagId?: string
+) {
+  console.log('Creating equipment photo feed post:', { userId, equipmentId, photoUrl });
+  try {
+    const { data, error } = await supabase
+      .from('feed_posts')
+      .insert({
+        user_id: userId,
+        type: 'equipment_photo',
+        equipment_id: equipmentId,
+        bag_id: bagId,
+        media_urls: [photoUrl],
+        content: caption || `Check out my ${equipmentName}! 📸`,
+        likes_count: 0
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Equipment photo feed post creation failed:', error);
+      throw error;
+    }
+    
+    console.log('Equipment photo feed post created successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Error creating equipment photo feed post:', error);
+    throw error;
+  }
+}
 
 // Create a feed post when a bag is created
 export async function createBagCreationPost(userId: string, bagId: string, bagName: string) {

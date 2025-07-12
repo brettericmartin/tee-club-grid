@@ -223,6 +223,7 @@ const MyBag = () => {
                       src={item.equipment.image || '/api/placeholder/96/96'} 
                       alt={`${item.equipment.brand} ${item.equipment.model}`}
                       className="w-full h-full object-cover cursor-pointer"
+                      loading="lazy"
                       onClick={() => handleEquipmentClick(item)}
                     />
                   </div>

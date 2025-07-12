@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Heart, Eye, TrendingUp, Star, UserPlus, UserMinus, Loader2 } from 'lucide-react';
+import { useState, memo } from 'react';
+import { Eye, TrendingUp, Star, UserPlus, UserMinus, Loader2, ExternalLink } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { getBrandAbbreviation } from '@/utils/brandAbbreviations';
 import { cn } from '@/lib/utils';
 import { EquipmentShowcaseModal } from '@/components/EquipmentShowcaseModal';
 import EquipmentTile from '@/components/shared/EquipmentTile';
+import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import type { Database } from '@/lib/supabase';
 
 interface BagEquipmentItem {
@@ -19,6 +20,7 @@ interface BagEquipmentItem {
   purchase_price?: number;
   notes?: string;
   custom_specs?: Record<string, any>;
+  custom_photo_url?: string;
   created_at: string;
   equipment: {
     id: string;
@@ -60,7 +62,7 @@ interface BagCardProps {
   currentUserId?: string;
 }
 
-export function BagCard({ 
+export const BagCard = memo(function BagCard({ 
   bag, 
   onView, 
   onLike, 
@@ -74,24 +76,37 @@ export function BagCard({
   const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   
-  // Find the actual golf bag equipment (category 'bag' or 'golf_bag')
+  // Define club categories
+  const CLUB_CATEGORIES = ['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'];
+  const ACCESSORY_CATEGORIES = ['ball', 'glove', 'rangefinder', 'gps', 'tee', 'towel', 'ball_marker', 'divot_tool', 'accessories'];
+  
+  // Find the actual golf bag equipment
   const allEquipment = bag.bag_equipment || [];
   const golfBag = allEquipment.find(item => 
-    item.equipment && ['bag', 'golf_bag', 'bags'].includes(item.equipment.category)
+    item.equipment && item.equipment.category === 'bag'
   );
   
   // Get the golf bag image
-  const golfBagImage = golfBag?.equipment?.image_url;
+  const golfBagImage = golfBag?.custom_photo_url || golfBag?.equipment?.image_url;
   console.log('Golf bag found:', golfBag?.equipment?.brand, golfBag?.equipment?.model, 'image:', golfBagImage);
   
-  // Separate clubs and accessories (excluding the bag itself)
+  // Separate clubs and accessories
   const clubs = allEquipment.filter(item => 
-    item.equipment && 
-    !['balls', 'gloves', 'speakers', 'tees', 'towels', 'ball_marker', 'accessories', 'bag', 'golf_bag', 'bags'].includes(item.equipment.category)
+    item.equipment && CLUB_CATEGORIES.includes(item.equipment.category)
   );
   const accessories = allEquipment.filter(item => 
-    item.equipment && ['balls', 'gloves', 'speakers', 'tees', 'towels', 'ball_marker', 'accessories'].includes(item.equipment.category)
+    item.equipment && ACCESSORY_CATEGORIES.includes(item.equipment.category)
   );
+  
+  // If bag is featured and there are less than 6 featured clubs, include it in clubs
+  const featuredClubs = clubs.filter(item => item.is_featured);
+  const shouldIncludeBagInClubs = golfBag?.is_featured && featuredClubs.length < 6;
+  
+  if (shouldIncludeBagInClubs && golfBag) {
+    clubs.push(golfBag);
+  } else if (golfBag && !shouldIncludeBagInClubs) {
+    accessories.push(golfBag);
+  }
   
   // Sort by featured first, then by creation date
   const sortEquipment = (items: BagEquipmentItem[]) => 
@@ -101,7 +116,7 @@ export function BagCard({
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   
-  // Get 6 clubs for main grid (3x2)
+  // Get 6 items for main grid (3x2) - clubs and possibly featured bag
   const displayClubs = sortEquipment([...clubs]).slice(0, 6);
   
   // Get 4 accessories for bottom row
@@ -115,6 +130,10 @@ export function BagCard({
   const equipmentCount = allEquipment.length;
 
   const getEquipmentImage = (item: BagEquipmentItem) => {
+    // Prioritize custom photo URL if available
+    if (item.custom_photo_url && !imageError[`${item.id}-custom`]) {
+      return item.custom_photo_url;
+    }
     if (item.equipment?.image_url && !imageError[`${item.id}-equipment`]) {
       return item.equipment.image_url;
     }
@@ -162,7 +181,7 @@ export function BagCard({
   return (
     <>
       <Card 
-      className="group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
+      className="group relative overflow-hidden transition-[transform,shadow] duration-300 hover:scale-[1.02] hover:shadow-2xl"
     >
       {/* Background with glassmorphic effect */}
       <div className="absolute inset-0">
@@ -176,6 +195,7 @@ export function BagCard({
               onError={() => {
                 setImageError(prev => ({ ...prev, 'golf-bag': true }));
               }}
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/60" />
           </>
@@ -345,40 +365,49 @@ export function BagCard({
         </div>
 
         {/* Stats bar */}
-        <div className="flex items-center justify-between text-white/90 text-sm" onClick={(e) => e.stopPropagation()}>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <span className="font-semibold">{equipmentCount}</span>
-              <span className="text-xs text-white/70">pieces</span>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-white/90 text-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1">
+                <span className="font-semibold">{equipmentCount}</span>
+                <span className="text-xs text-white/70">pieces</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="font-semibold">${totalValue.toLocaleString()}</span>
+                <span className="text-xs text-white/70">value</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <span className="font-semibold">${totalValue.toLocaleString()}</span>
-              <span className="text-xs text-white/70">value</span>
+            
+            <div className="flex items-center gap-3">
+              <TeedBallLike
+                isLiked={isLiked}
+                likeCount={bag.likes_count || 0}
+                onLike={() => onLike?.(bag.id)}
+                size="sm"
+                showCount={true}
+                className="text-white/70 hover:text-white"
+              />
+              
+              <div className="flex items-center gap-1">
+                <Eye className="w-4 h-4 text-white/70" />
+                <span className="text-xs">{bag.views_count || 0}</span>
+              </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onLike?.(bag.id);
-              }}
-              className="flex items-center gap-1 hover:scale-110 transition-transform"
-            >
-              <Heart 
-                className={cn(
-                  "w-4 h-4",
-                  isLiked ? "fill-red-500 text-red-500" : "text-white/70"
-                )}
-              />
-              <span className="text-xs">{bag.likes_count || 0}</span>
-            </button>
-            
-            <div className="flex items-center gap-1">
-              <Eye className="w-4 h-4 text-white/70" />
-              <span className="text-xs">{bag.views_count || 0}</span>
-            </div>
-          </div>
+          {/* View Bag Button */}
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onView(bag.id);
+            }}
+            variant="outline"
+            size="sm"
+            className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 group"
+          >
+            <span>View Full Bag</span>
+            <ExternalLink className="w-3 h-3 ml-2 opacity-50 group-hover:opacity-100 transition-opacity" />
+          </Button>
         </div>
       </div>
     </Card>
@@ -394,4 +423,4 @@ export function BagCard({
     />
   </>
   );
-}
+});

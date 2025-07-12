@@ -24,7 +24,7 @@ const CategoryTile: FC<{
   return (
     <Card
       className={cn(
-        "glass-card p-6 cursor-pointer transition-all duration-200 group relative",
+        "glass-card p-6 cursor-pointer transition-colors duration-200 group relative",
         "hover:scale-[1.02] hover:bg-white/15",
         isSelected && "ring-2 ring-primary bg-primary/10"
       )}
@@ -43,6 +43,7 @@ const CategoryTile: FC<{
               src={imageUrl}
               alt={category.label}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="text-3xl">{category.icon}</div>

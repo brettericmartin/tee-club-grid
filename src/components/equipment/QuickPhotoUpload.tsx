@@ -4,9 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { uploadEquipmentPhoto } from '@/services/equipment';
+import { createEquipmentPhotoFeedPost } from '@/services/feedService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
 interface QuickPhotoUploadProps {
   equipmentId: string;
@@ -27,6 +30,7 @@ export function QuickPhotoUpload({
   const [caption, setCaption] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [shareToFeed, setShareToFeed] = useState(true);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,7 +54,8 @@ export function QuickPhotoUpload({
 
     setUploading(true);
     try {
-      await uploadEquipmentPhoto(
+      // Upload the photo
+      const photoUrl = await uploadEquipmentPhoto(
         user.id,
         equipmentId,
         selectedFile,
@@ -58,11 +63,37 @@ export function QuickPhotoUpload({
         false // Not primary by default
       );
 
+      // Create feed post if checkbox is checked
+      if (shareToFeed && photoUrl) {
+        try {
+          // Get user's primary bag
+          const { data: userBag } = await supabase
+            .from('user_bags')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('is_primary', true)
+            .maybeSingle();
+
+          await createEquipmentPhotoFeedPost(
+            user.id,
+            equipmentId,
+            equipmentName,
+            photoUrl,
+            caption,
+            userBag?.id
+          );
+        } catch (feedError) {
+          console.error('Feed post creation failed:', feedError);
+          // Don't fail the whole upload if feed post fails
+        }
+      }
+
       toast.success('Photo uploaded successfully!');
       setIsOpen(false);
       setSelectedFile(null);
       setCaption('');
       setPreviewUrl(null);
+      setShareToFeed(true);
       onPhotoUploaded?.();
     } catch (error: any) {
       console.error('Upload error:', error);
@@ -159,6 +190,20 @@ export function QuickPhotoUpload({
                 onChange={(e) => setCaption(e.target.value)}
                 placeholder="Add a caption..."
               />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="share-to-feed"
+                checked={shareToFeed}
+                onCheckedChange={(checked) => setShareToFeed(checked as boolean)}
+              />
+              <Label
+                htmlFor="share-to-feed"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Share to feed
+              </Label>
             </div>
 
             <div className="flex justify-end gap-2">

@@ -71,6 +71,7 @@ const GalleryTile = ({ item, size, isOwnBag, onClick }: GalleryTileProps) => {
         src={item.equipment.image} 
         alt={`${item.equipment.brand} ${item.equipment.model}`}
         className="w-full h-full object-cover"
+        loading="lazy"
         style={{ 
           objectPosition: 'center',
           filter: 'brightness(0.9) contrast(1.1)'

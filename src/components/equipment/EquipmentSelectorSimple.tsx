@@ -89,6 +89,7 @@ const EquipmentImageSimple = ({
         src={imageSrc}
         alt={`${equipment.brand} ${equipment.model}`}
         className={className}
+        loading="lazy"
         onError={() => setImageError(true)}
       />
     );
@@ -299,7 +300,7 @@ export function EquipmentSelectorSimple({ isOpen, onClose, onSelect }: Equipment
                 return (
                   <Card
                     key={category.value}
-                    className="glass-card p-6 cursor-pointer hover:scale-[1.02] hover:bg-white/15 transition-all duration-200 group border-white/10"
+                    className="glass-card p-6 cursor-pointer hover:scale-[1.02] hover:bg-white/15 transition-[transform,colors] duration-200 group border-white/10"
                     onClick={() => handleCategorySelect(category.value)}
                   >
                     <div className="text-center">
@@ -309,6 +310,7 @@ export function EquipmentSelectorSimple({ isOpen, onClose, onSelect }: Equipment
                             src={categoryImage.imageUrl}
                             alt={categoryImage.equipment}
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                            loading="lazy"
                             title={`${categoryImage.equipment} (${categoryImage.likesCount} likes)`}
                           />
                         ) : (

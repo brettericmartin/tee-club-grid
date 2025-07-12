@@ -170,7 +170,7 @@ const Feed = () => {
             <DropdownMenuTrigger asChild>
               <Button
                 size="lg"
-                className="w-14 h-14 rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+                className="w-14 h-14 rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-[shadow,transform] duration-200 hover:scale-110"
               >
                 <Plus className="w-6 h-6" />
               </Button>

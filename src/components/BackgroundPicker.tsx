@@ -40,7 +40,7 @@ const BackgroundPicker = ({ currentBackground, onBackgroundChange }: BackgroundP
             {bagBackgrounds.map((bg) => (
               <div
                 key={bg.id}
-                className="relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all hover:scale-105"
+                className="relative cursor-pointer rounded-lg overflow-hidden border-2 transition-transform hover:scale-105"
                 style={{
                   borderColor: currentBackground === bg.id ? 'hsl(var(--primary))' : 'transparent'
                 }}

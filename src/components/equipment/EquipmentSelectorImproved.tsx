@@ -84,7 +84,7 @@ const CategoryTile = ({
   
   return (
     <Card
-      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-all group"
+      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors group"
       onClick={onClick}
     >
       <div className="text-center">
@@ -94,6 +94,7 @@ const CategoryTile = ({
               src={categoryImage.imageUrl}
               alt={`${category.label} - ${categoryImage.equipment}`}
               className="w-full h-full object-cover"
+              loading="lazy"
               onError={() => setImageError(true)}
             />
           </div>
@@ -158,6 +159,7 @@ const EquipmentImage = ({
         src={imageSrc}
         alt={`${equipment.brand} ${equipment.model}`}
         className={className}
+        loading="lazy"
         onError={() => setImageError(true)}
       />
     );
@@ -469,7 +471,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
         <div className="flex items-center flex-wrap gap-2 mb-6 p-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
           <Badge 
             variant="secondary" 
-            className="bg-white/20 text-white hover:bg-white/30 cursor-pointer transition-all text-sm py-2 px-3 min-h-[40px] flex items-center"
+            className="bg-white/20 text-white hover:bg-white/30 cursor-pointer transition-colors text-sm py-2 px-3 min-h-[40px] flex items-center"
             onClick={() => {
               setStep('category');
               setSelectedCategory(null);
@@ -486,7 +488,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               <ChevronRight className="w-4 h-4 text-white/50" />
               <Badge 
                 variant="outline" 
-                className="bg-primary/20 text-white border-primary/40 hover:bg-primary/30 cursor-pointer transition-all text-sm py-2 px-3 min-h-[40px] flex items-center"
+                className="bg-primary/20 text-white border-primary/40 hover:bg-primary/30 cursor-pointer transition-colors text-sm py-2 px-3 min-h-[40px] flex items-center"
                 onClick={() => {
                   setStep('brand');
                   setSelectedBrand('');
@@ -504,7 +506,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               <ChevronRight className="w-4 h-4 text-white/50" />
               <Badge 
                 variant="outline" 
-                className="bg-primary/20 text-white border-primary/40 hover:bg-primary/30 cursor-pointer transition-all text-sm py-2 px-3 min-h-[40px] flex items-center"
+                className="bg-primary/20 text-white border-primary/40 hover:bg-primary/30 cursor-pointer transition-colors text-sm py-2 px-3 min-h-[40px] flex items-center"
                 onClick={() => {
                   setStep('equipment');
                   setEquipment([]);
@@ -644,7 +646,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                   {equipment.map((item) => (
                     <Card
                       key={item.id}
-                      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-all"
+                      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors"
                       onClick={() => handleEquipmentSelect(item)}
                     >
                       <div className="flex items-start justify-between">
@@ -679,7 +681,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               {shafts.map((shaft) => (
                 <Card
                   key={shaft.id}
-                  className={`glass-card p-4 cursor-pointer transition-all ${
+                  className={`glass-card p-4 cursor-pointer transition-colors ${
                     selectedShaft?.id === shaft.id 
                       ? 'ring-2 ring-primary bg-primary/10' 
                       : 'hover:bg-white/20'
@@ -719,7 +721,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               {grips.map((grip) => (
                 <Card
                   key={grip.id}
-                  className={`glass-card p-4 cursor-pointer transition-all ${
+                  className={`glass-card p-4 cursor-pointer transition-colors ${
                     selectedGrip?.id === grip.id 
                       ? 'ring-2 ring-primary bg-primary/10' 
                       : 'hover:bg-white/20'

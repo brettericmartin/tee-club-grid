@@ -168,6 +168,7 @@ export function EquipmentPhotoRepository({
             src={photo.photo_url}
             alt={photo.caption || 'Equipment photo'}
             className="w-full h-64 object-cover"
+            loading="lazy"
           />
           
           {photo.is_primary && (

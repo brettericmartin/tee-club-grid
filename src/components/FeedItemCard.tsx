@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Eye, UserPlus, UserCheck, Loader2 } from 'lucide-react';
+import { MessageCircle, Eye, UserPlus, UserCheck, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { FeedItemData } from '@/services/feed';
+import { TeedBallLike } from '@/components/shared/TeedBallLike';
 
 // Helper functions
 export const getPostTypeLabel = (type: string): string => {
@@ -227,14 +228,20 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
                 
                 <button 
                   onClick={handleLike}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-full backdrop-blur-sm border transition-all ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full backdrop-blur-sm border transition-colors ${
                     isLiked 
                       ? 'bg-red-500/20 border-red-500/30 text-red-400' 
                       : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
                   }`}
                 >
-                  <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-                  <span className="text-sm font-medium">{item.likes + (isLiked ? 1 : 0)}</span>
+                  <TeedBallLike
+                    isLiked={isLiked}
+                    likeCount={item.likes}
+                    onLike={(e) => e.stopPropagation()}
+                    size="sm"
+                    showCount={true}
+                    className=""
+                  />
                 </button>
               </div>
             </div>
@@ -272,14 +279,14 @@ export const FeedItemCard = ({ item, onLike, onFollow }: FeedItemCardProps) => {
                     return (
                       <div 
                         key={equipment.id}
-                        className={`relative transition-all duration-300 cursor-pointer ${
+                        className={`relative transition-transform duration-300 cursor-pointer ${
                           isHoveredItem ? 'scale-110 z-10' : ''
                         }`}
                         onMouseEnter={() => setHoveredItem(`club-${index}`)}
                         onMouseLeave={() => setHoveredItem(null)}
                         onClick={(e) => handleEquipmentClick(e, equipment.id)}
                       >
-                        <div className="glass-card w-full aspect-square rounded-lg p-2 transition-all duration-200 hover:scale-105 hover:shadow-2xl">
+                        <div className="glass-card w-full aspect-square rounded-lg p-2 transition-[transform,shadow] duration-200 hover:scale-105 hover:shadow-2xl">
                           <div className="w-full h-full">
                             <img 
                               src={equipment.image_url || '/api/placeholder/150/150'}

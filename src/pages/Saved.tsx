@@ -139,7 +139,7 @@ const Saved = () => {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {filteredEquipment.map(item => (
-          <Card key={item.id} className="hover:shadow-card transition-all duration-200">
+          <Card key={item.id} className="hover:shadow-card transition-shadow duration-200">
             <CardContent className="p-0">
               <Link to={`/equipment/${item.id}`}>
                 <div className="aspect-square bg-background p-4 relative">
@@ -147,6 +147,7 @@ const Saved = () => {
                     src={item.primaryPhoto || '/placeholder.svg'} 
                     alt={`${item.brand} ${item.model}`}
                     className="w-full h-full object-contain"
+                    loading="lazy"
                     onError={(e) => {
                       e.currentTarget.src = '/placeholder.svg';
                     }}
@@ -232,13 +233,14 @@ const Saved = () => {
     return (
       <div className="space-y-2">
         {filteredEquipment.map(item => (
-          <Card key={item.id} className="hover:shadow-card transition-all duration-200">
+          <Card key={item.id} className="hover:shadow-card transition-shadow duration-200">
             <CardContent className="p-4 flex items-center gap-4">
               <Link to={`/equipment/${item.id}`}>
                 <img 
                   src={item.primaryPhoto || '/placeholder.svg'}
                   alt={`${item.brand} ${item.model}`}
                   className="w-20 h-20 object-contain"
+                  loading="lazy"
                   onError={(e) => {
                     e.currentTarget.src = '/placeholder.svg';
                   }}
@@ -333,7 +335,7 @@ const Saved = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {followedBags.map(bag => (
-          <Card key={bag.id} className="hover:shadow-card transition-all duration-200">
+          <Card key={bag.id} className="hover:shadow-card transition-shadow duration-200">
             <CardContent className="p-6">
               <Link to={`/bag/${bag.id}`} className="block">
                 <div className="flex items-center mb-4">
@@ -342,6 +344,7 @@ const Saved = () => {
                       src={bag.profile.avatar_url} 
                       alt={bag.profile.full_name || bag.profile.username}
                       className="w-12 h-12 rounded-full object-cover"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm">

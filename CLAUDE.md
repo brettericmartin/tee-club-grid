@@ -1,196 +1,144 @@
-# CLAUDE.md - Teed.club Complete Project Context
+# CLAUDE.md - Teed.club Development Guide
 
-## CRITICAL WORKFLOW INSTRUCTIONS FOR CLAUDE
+## CRITICAL TASK EXECUTION RULES
 
-When creating ANY script or database operation, ALWAYS provide:
-1. The EXACT terminal command to run
-2. Expected output
-3. Troubleshooting steps
+**For ANY script or database operation:**
+1. Provide EXACT terminal command: `node scripts/[filename].js`
+2. Show expected output
+3. Include troubleshooting steps
+4. Always use scripts/ folder with './supabase-admin.js' import
+5. Add error handling + console.log for progress
 
-Use this format:
-- Created: scripts/[filename].js
-- TO RUN: node scripts/[filename].js
-- Expected output: [Show exact expected output]
-- If it fails: [Specific troubleshooting steps]
+**Interaction Guidelines:**
+- Execute scripts directly when possible
+- Focus on specific task context, not entire project scope
+- Provide working code examples with clear implementation steps
 
-For all database scripts:
-- Always use the scripts/ folder
-- Import from './supabase-admin.js'
-- Include error handling
-- Add console.log for progress
+## Platform Vision
 
-## Claude Interaction Guidelines
+**Core Concept:** "Your golf bag IS your social profile"
 
-- Don't ask me to run a script unless there's a reason you can't run it yourself
+**Key Success Factors:**
+- $7.1B golf equipment market with no dedicated social platform
+- Community-driven content with gamification rewards
+- Clear monetization through affiliate revenue sharing
 
-## Core Vision & Mission
+## Technical Foundation
 
-"Your golf bag IS your social profile" - Instead of traditional profiles, golfers showcase their equipment setups as their digital identity. Every golfer's bag tells their story through the clubs they choose.
+**Stack:** Vite + React + TypeScript + Supabase + Tailwind CSS
+**Design:** Mobile-first, glassmorphism, golf-themed interactions ("Tees" not "Likes")
+**Database:** PostgreSQL with Row Level Security
 
-Why Teed.club Will Succeed:
-- $7.1 billion golf equipment market with no dedicated social platform
-- Golfers are obsessed with equipment discussions and gear optimization  
-- Clear monetization path through affiliate revenue sharing
-- First-mover advantage - No competitor exists in this space
+## Business Model & Monetization Strategy
 
-## MOBILE-FIRST DEVELOPMENT APPROACH
+### Revenue Streams:
+1. **Primary: Affiliate Commissions** (3-8% from golf brands) - 50/50 split with users who showcase equipment
+2. **Premium Subscriptions** ($5/month target) - Multiple bags, advanced customization, dream bag builder
+3. **Future: Brand Partnerships** - Sponsored showcases, exclusive launches, tournament sponsorships
 
-This is a MOBILE-FIRST application. Most users will access Teed.club on their phones while:
-- At the golf course
-- In the pro shop
-- Browsing equipment during downtime
-- Sharing quick bag updates
+### Affiliate Link Strategy:
+- **Phase 1**: Direct manufacturer links (no commission) to build functionality
+- **Phase 2**: Apply to individual brand affiliate programs (Callaway, TaylorMade, Ping, etc.)
+- **Phase 3**: Integrate affiliate networks (Commission Junction, ShareASale)
+- **Implementation**: Link management system to easily swap regular → affiliate links
 
-All UI decisions must prioritize mobile experience:
-- Touch-friendly tap targets (minimum 44x44px)
-- Thumb-reachable navigation
-- Vertical scrolling preferred over horizontal
-- Bottom navigation for primary actions
-- Single column layouts on mobile
-- Swipe gestures for common actions
-- Large, readable text (16px minimum)
-- Optimized images and lazy loading
-- Offline-capable for course usage
+### Premium Subscription Features:
+- **Free Tier**: 1 bag per user
+- **Premium Tier**: Unlimited bags, advanced customization, dream bag builder
+- **Value Proposition**: Build value before introducing pricing
 
-Desktop is secondary and should be a scaled-up mobile experience, not a separate design.
+## Gamification & Community Engagement
 
-## Business Model & Monetization
+### Badge System Architecture:
+**Core Categories:**
+- **Early Bird**: Early adopter recognition
+- **Photo Mastery**: Tiered photo contributions (5, 50, 100+ photos)
+  - Introductory → Advanced → Expert → Master
+- **Equipment Connoisseur**: Adding equipment to platform
+- **Brand Specialist**: 3+ pieces from same brand (brand-specific badges)
+- **Brand Loyalist**: All clubs from single brand
+- **Community Contributor**: Forum participation, reviews, helpful content
 
-Revenue Streams:
-1. Primary: Affiliate Commissions (4-10% from golf brands) - 50/50 split with users who showcase equipment
-2. Future: Brand Partnerships - Sponsored showcases, exclusive launches, tournament sponsorships
+**Badge Implementation Requirements:**
+- Expandable system for future badge types
+- User action tracking and analytics
+- Dramatic achievement notifications with feed post options
+- Public badge display on profiles
+- Badge-based credibility scoring
 
-## Design System & Visual Identity
+### Content Moderation & Quality:
+- Equipment duplicate reporting system
+- Community review for flagged content
+- User-driven equipment additions with approval workflow
+- Forum system for equipment discussions and "brand clubs"
 
-Core Design Philosophy: Premium, Modern, Golf-Inspired - Softer dark theme with glassmorphism effects
+## Personal Portfolio System
 
-Color Palette:
-- Background: #0a0a0a (Near black) or #111111 (Softer dark gray)
-- Card Background: #1a1a1a (Elevated surfaces)
-- Foreground: #ffffff
-- Primary: #10B981 (Signature green for CTAs)
-- Secondary: #1f2937
-- Border: rgba(255, 255, 255, 0.1)
-- True Black: #000000 (Use sparingly for accents only)
+### User Contribution Curation:
+**Public-Facing Portfolio Features:**
+- Personal badge showcase
+- Photo gallery (user-curated, removable content)
+- Equipment additions to platform
+- Contribution history and impact metrics
+- Customizable personal brand presentation
 
-Mobile-Specific Design:
-- Bottom navigation bar (fixed)
-- Full-width cards with 16px padding
-- Stacked layouts, no side-by-side on mobile
-- Pull-to-refresh on feed
-- Swipe to tee/save
-- Touch feedback on all interactive elements
+**Privacy Controls:**
+- User-controlled visibility settings
+- Selective content display
+- Portfolio customization tools
 
-Glassmorphism Standards:
-- background: rgba(255, 255, 255, 0.1)
-- backdrop-filter: blur(10px)
-- border: 1px solid rgba(255, 255, 255, 0.2)
-- box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3)
+## AI-Enhanced Equipment Intelligence
 
-Component Standards:
-- Border Radius: 12px for cards, 8px for smaller elements
-- Transitions: 0.2s ease on all interactive elements
-- Hover States: Slight scale (1.05) and increased opacity
-- Touch States: Immediate visual feedback
+### Equipment Data Strategy:
+**Priority Information Hierarchy:**
+1. **Specifications** - Technical details, materials, performance metrics
+2. **Professional Usage** - Which pros use this equipment
+3. **Tournament History** - Notable wins with equipment in bag
+4. **Community Reviews** - User-generated insights
 
-## Unique Platform Language - "Teed"
+**AI Implementation Approach:**
+- Specific, detailed prompt templates to prevent fabrication
+- Real-time query system for equipment details
+- Structured data collection and verification
+- Integration with golf databases and tour information
 
-Replace traditional "likes" with golf-themed "tees":
-- "Like" action becomes "Tee" or "Tee up"
-- "Liked" state becomes "Teed"
-- Like count shows as "X tees" or "X teed this"
-- Icon: Golf ball on tee (🏌️ or custom SVG)
-- Hover text: "Tee this up" / "Teed"
-- Past tense: "You teed this"
-- Feed language: "Sarah teed your bag setup"
+### Equipment Value Proposition:
+- Comprehensive club specifications
+- Professional tour usage tracking
+- Tournament performance correlation
+- Investment and resale value insights
 
-Implementation:
-- Database: Rename like tables to tee tables (bag_tees, equipment_tees, photo_tees)
-- UI: Replace heart icons with golf ball on tee icon
-- Copy: Update all instances of "like/liked" to "tee/teed"
+## Visual Bag Gallery System
 
-## Technical Architecture
+### Dynamic Collage Layout:
+**Equipment Size Hierarchy:**
+- **1.5x**: Drivers and Putters (hero clubs)
+- **1.25x**: Woods, Hybrids, Iron Sets
+- **1.0x**: Accessories (balls, speakers, towels, etc.)
+- **Visual Integration**: Vertical bag imagery to unify presentation
 
-Tech Stack:
-- Frontend: Vite + React + TypeScript (with PWA capabilities)
-- Styling: Tailwind CSS + shadcn/ui + Custom Glassmorphism
-- Database: Supabase (PostgreSQL) with Row Level Security
-- State Management: TanStack Query + React Context
-- Authentication: Supabase Auth (Email + Google OAuth)
-- File Storage: Supabase Storage (user photos)
+**Customization Features:**
+- Pinterest-style dynamic grid layout
+- Drag-and-drop tile positioning
+- User-controlled sizing and arrangement
+- Auto-arrange option with manual override
+- Custom backgrounds and color schemes
+- Save/share custom layouts
 
-Mobile Optimizations:
-- PWA manifest for installability
-- Service worker for offline capability
-- Touch gesture handling
-- Viewport meta tags
-- Mobile-first responsive breakpoints
+**Technical Requirements:**
+- Mobile-responsive grid system
+- Touch gesture support for repositioning
+- Real-time preview during editing
+- Gallery view optimized for social sharing
 
-Database Schema:
-- profiles -> user_bags -> bag_equipment -> equipment
-- Social: follows, bag_tees (formerly likes), equipment_saves
-- Content: feed_posts, equipment_photos, equipment_reviews
-- Commerce: equipment_prices, wishlist, affiliate_tracking
+## Key Design Standards
 
-Scripts System:
-- All database operations use scripts in /scripts folder
-- supabase-admin.js - Admin client with service key
-- seed-*.js - Data seeding scripts
-- migrate-*.js - Schema migration scripts
+**Visual Identity:**
+- Glassmorphism effects: `backdrop-filter: blur(10px)`, `background: rgba(255,255,255,0.1)`
+- Color Palette: Background #111111, Cards #1a1a1a, Primary #10B981 (green)
+- Mobile-first: Touch targets 44x44px+, bottom navigation, single column layouts
 
-## Key Features (Mobile-First Implementation)
-
-Bag Showcase System:
-- Featured Equipment: 6 clubs + 4 accessories
-- Mobile: 2x3 grid for clubs, horizontal scroll for accessories
-- Tap to view details, long-press for quick actions
-- Swipe between multiple bags
-
-Dynamic Feed:
-- Vertical scroll optimized
-- Pull-to-refresh
-- Infinite scroll with intersection observer
-- Card-based layout full width on mobile
-- Double-tap to tee
-
-Equipment Browser:
-- Single column on mobile
-- Sticky filter bar that collapses on scroll
-- Bottom sheet for detailed filters
-- Search with mobile keyboard optimization
-
-Social Features:
-- Bottom tab navigation: Feed, Bags, Add, Equipment, Profile
-- Quick action buttons thumb-reachable
-- Swipe gestures for tee/save
-- Native share sheets
-
-## Development Status & Priorities
-
-Current Status:
-- Bag builder and showcase complete (needs mobile optimization)
-- Equipment browser complete (needs mobile optimization)
-- Basic social features complete
-- Glassmorphism design system complete
-- Supabase integration in progress
-- Authentication flow in progress
-
-Next Steps:
-1. Redesign all components for mobile-first
-2. Implement bottom navigation
-3. Add touch gestures and haptic feedback
-4. Update color scheme to softer grays
-5. Implement "Tee" system replacing likes
-6. Connect Supabase to fetch real data
-7. Implement authentication with mobile-friendly flow
-8. Build camera integration for photos
-9. Create PWA manifest and service worker
-
-## Code Patterns
-
-Mobile-First Breakpoints:
-```css
-/* Mobile first - default styles for mobile */
-/* sm: 640px - larger phones */
-/* md: 768px - tablets */
-/* lg: 1024px - desktop */
+**Platform Language:**
+- "Tees" instead of "Likes" (golf ball on tee icon)
+- "Teed this up" / "X people teed this"
+- Database: bag_tees, equipment_tees tables

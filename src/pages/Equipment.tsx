@@ -346,6 +346,7 @@ const Equipment = () => {
                         src={item.primaryPhoto || item.image_url} 
                         alt={`${item.brand} ${item.model}`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                           const parent = e.currentTarget.parentElement;

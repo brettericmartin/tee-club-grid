@@ -42,6 +42,7 @@ export async function getBags(options?: {
         custom_photo_url,
         purchase_price,
         is_featured,
+        equipment_id,
         equipment:equipment (
           id,
           brand,

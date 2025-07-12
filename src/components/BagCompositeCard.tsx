@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Heart, ArrowUpRight, UserPlus, Loader2 } from "lucide-react";
+import { ArrowUpRight, UserPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { BagData } from "@/data/sampleBagsData";
 import EquipmentDetailModal from "./EquipmentDetailModal";
 import { supabase } from "@/lib/supabase";
 import { getEquipmentByOldId } from "@/lib/equipment-id-mapping";
+import { TeedBallLike } from "@/components/shared/TeedBallLike";
 import type { Database } from "@/lib/supabase";
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
@@ -106,7 +107,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
 
   if (loading) {
     return (
-      <div className="bg-card rounded-lg shadow-card hover:shadow-lg transition-all duration-300 p-6 flex items-center justify-center h-96">
+      <div className="bg-card rounded-lg shadow-card hover:shadow-lg transition-shadow duration-300 p-6 flex items-center justify-center h-96">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -115,7 +116,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
   return (
     <>
       <div
-        className="bg-card rounded-lg shadow-card hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
+        className="bg-card rounded-lg shadow-card hover:shadow-lg transition-shadow duration-300 cursor-pointer overflow-hidden"
         onClick={handleCardClick}
       >
         {/* Header with user info */}
@@ -126,6 +127,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
                 src={bag.userAvatar}
                 alt={bag.userName}
                 className="w-10 h-10 rounded-full object-cover"
+                loading="lazy"
               />
               <div>
                 <h3 className="font-semibold text-sm">{bag.userName}</h3>
@@ -175,6 +177,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
                           src={equipment.image_url || '/api/placeholder/150/150'}
                           alt={`${equipment.brand} ${equipment.model}`}
                           className="object-contain w-full h-full group-hover:scale-105 transition-transform"
+                          loading="lazy"
                         />
                       </AspectRatio>
                       {hoveredItem === id && (
@@ -209,6 +212,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
                           src={equipment.image_url || '/api/placeholder/150/150'}
                           alt={`${equipment.brand} ${equipment.model}`}
                           className="object-contain w-full h-full group-hover:scale-105 transition-transform"
+                          loading="lazy"
                         />
                       </AspectRatio>
                       {hoveredItem === id && (
@@ -230,17 +234,14 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
         {/* Footer with actions */}
         <div className="p-4 border-t flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
+            <TeedBallLike
+              isLiked={bag.isLiked || false}
+              likeCount={bag.likes}
+              onLike={handleLikeClick}
               size="sm"
-              onClick={handleLikeClick}
+              showCount={true}
               className="text-muted-foreground hover:text-primary"
-            >
-              <Heart
-                className={`w-4 h-4 mr-1 ${bag.isLiked ? 'fill-current text-primary' : ''}`}
-              />
-              <span className="text-xs">{bag.likes}</span>
-            </Button>
+            />
           </div>
           <Button
             variant="ghost"

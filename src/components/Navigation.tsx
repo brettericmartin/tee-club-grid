@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import TeedLogo from "@/components/shared/TeedLogo";
 
 interface NavLinkProps {
   to: string;
@@ -26,7 +27,7 @@ const NavLink = ({ to, children }: NavLinkProps) => {
   return (
     <Link 
       to={to}
-      className={`relative font-medium transition-all px-3 py-2 rounded-lg ${
+      className={`relative font-medium transition-colors px-3 py-2 rounded-lg ${
         isActive 
           ? 'text-white bg-white/10' 
           : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -62,13 +63,13 @@ const Navigation = () => {
       <nav className="fixed top-0 w-full z-50">
         {/* Glass Navigation Bar */}
         <div className="bg-white/10 backdrop-blur-[10px] border-b border-white/20">
-          <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-4 h-16 flex items-center">
             
             {/* Left Side - Logo & Main Nav */}
             <div className="flex items-center gap-8">
               <Link to="/" className="flex items-center gap-2 hover:scale-105 transition-transform">
-                <div className="w-8 h-8 bg-primary rounded-full" />
-                <span className="font-bold text-xl text-white">Teed.club</span>
+                <TeedLogo size="md" className="transition-transform" />
+                <span className="font-bold text-xl text-white hidden sm:block">Teed.club</span>
               </Link>
               
               <div className="hidden md:flex items-center gap-6">
@@ -77,20 +78,20 @@ const Navigation = () => {
               </div>
             </div>
 
-            {/* Center - Feed & My Bag Buttons */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-4">
+            {/* Center - Feed & My Bag Buttons (Hidden on mobile) */}
+            <div className="hidden sm:flex flex-1 justify-center items-center gap-4">
               <Link 
                 to="/feed"
                 className="group"
               >
                 <div className="relative">
                   {/* Glow effect */}
-                  <div className={`absolute inset-0 blur-xl transition-all ${
+                  <div className={`absolute inset-0 blur-xl transition-opacity ${
                     location.pathname === '/feed' ? 'bg-primary/40' : 'bg-primary/20 group-hover:bg-primary/30'
                   }`} />
                   
                   {/* Feed Button */}
-                  <div className={`relative text-white px-6 py-2.5 rounded-full font-medium flex items-center gap-2 hover:scale-105 transition-all duration-200 ${
+                  <div className={`relative text-white px-6 py-2.5 rounded-full font-medium flex items-center gap-2 hover:scale-105 transition-transform duration-200 ${
                     location.pathname === '/feed' 
                       ? 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-black' 
                       : 'bg-primary hover:bg-primary/90'
@@ -107,12 +108,12 @@ const Navigation = () => {
               >
                 <div className="relative">
                   {/* Glow effect */}
-                  <div className={`absolute inset-0 blur-xl transition-all ${
+                  <div className={`absolute inset-0 blur-xl transition-opacity ${
                     location.pathname === '/my-bag' ? 'bg-primary/40' : 'bg-primary/20 group-hover:bg-primary/30'
                   }`} />
                   
                   {/* Button with location pin icon */}
-                  <div className={`relative text-white px-6 py-2.5 rounded-full font-medium flex items-center gap-2 hover:scale-105 transition-all duration-200 ${
+                  <div className={`relative text-white px-6 py-2.5 rounded-full font-medium flex items-center gap-2 hover:scale-105 transition-transform duration-200 ${
                     location.pathname === '/my-bag' 
                       ? 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-black' 
                       : 'bg-primary hover:bg-primary/90'
@@ -134,7 +135,8 @@ const Navigation = () => {
               <div className="flex items-center gap-4">
                 <button 
                   onClick={() => setIsSearchOpen(true)}
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 hover:scale-110 transition-all"
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 hover:scale-110 transition-[colors,transform]"
+                  title="Search"
                 >
                   <Search className="w-5 h-5 text-white" />
                 </button>
@@ -143,7 +145,7 @@ const Navigation = () => {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="relative">
-                        <Avatar className="w-10 h-10 hover:scale-110 transition-all cursor-pointer">
+                        <Avatar className="w-10 h-10 hover:scale-110 transition-transform cursor-pointer">
                           <AvatarImage src={user.user_metadata?.avatar_url} />
                           <AvatarFallback className="bg-gradient-to-br from-gray-600 to-gray-800">
                             {user.user_metadata?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
@@ -179,7 +181,7 @@ const Navigation = () => {
                 ) : (
                   <button 
                     onClick={() => setShowSignIn(true)}
-                    className="relative w-10 h-10 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 hover:from-gray-500 hover:to-gray-700 hover:scale-110 transition-all flex items-center justify-center"
+                    className="relative w-10 h-10 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 hover:from-gray-500 hover:to-gray-700 hover:scale-110 transition-[colors,transform] flex items-center justify-center"
                   >
                     <User className="w-5 h-5 text-white" />
                   </button>
@@ -208,14 +210,13 @@ const Navigation = () => {
               <Users size={16} />
               <span className="text-xs">Following</span>
             </Link>
-            <Link to="/feed" className="p-2 text-white/70 hover:text-white flex flex-col items-center gap-1">
-              <Home size={16} />
-              <span className="text-xs">Feed</span>
-            </Link>
-            <Link to="/my-bag" className="p-2 text-white/70 hover:text-white flex flex-col items-center gap-1">
-              <Settings size={16} />
-              <span className="text-xs">My Bag</span>
-            </Link>
+            <button 
+              onClick={() => setIsSearchOpen(true)}
+              className="p-2 text-white/70 hover:text-white flex flex-col items-center gap-1"
+            >
+              <Search size={16} />
+              <span className="text-xs">Search</span>
+            </button>
           </div>
         </div>
       </nav>
@@ -228,7 +229,7 @@ const Navigation = () => {
               <h3 className="text-white text-lg font-medium">Search Equipment & Bags</h3>
               <button 
                 onClick={() => setIsSearchOpen(false)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-all duration-200"
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors duration-200"
               >
                 <X className="w-5 h-5 text-white" />
               </button>

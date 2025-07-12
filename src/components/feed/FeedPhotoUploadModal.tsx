@@ -109,7 +109,7 @@ export function FeedPhotoUploadModal({ isOpen, onClose, onPhotoUploaded }: FeedP
                 onChange={handleImageSelect}
                 className="hidden"
               />
-              <div className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-primary/50 hover:bg-white/5 transition-all cursor-pointer">
+              <div className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-primary/50 hover:bg-white/5 transition-colors cursor-pointer">
                 <Camera className="w-12 h-12 text-white/50 mx-auto mb-4" />
                 <p className="text-white/70">Click to upload a photo</p>
                 <p className="text-white/50 text-sm mt-1">JPG, PNG up to 10MB</p>

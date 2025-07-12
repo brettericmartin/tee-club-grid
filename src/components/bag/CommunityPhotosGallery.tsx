@@ -156,6 +156,7 @@ export function CommunityPhotosGallery({
                 src={selectedPhoto}
                 alt="Selected photo"
                 className="w-full h-full object-contain"
+                loading="lazy"
               />
             </div>
           )}
@@ -190,6 +191,7 @@ export function CommunityPhotosGallery({
                         src={photo.photo_url}
                         alt="Community photo"
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     </div>
                     

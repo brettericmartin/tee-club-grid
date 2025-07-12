@@ -13,7 +13,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { createBagEquipmentPhotoPost } from '@/services/feedServiceEnhanced';
+import { createEquipmentPhotoFeedPost } from '@/services/feedService';
 
 interface UnifiedPhotoUploadDialogProps {
   isOpen: boolean;
@@ -91,43 +91,19 @@ export function UnifiedPhotoUploadDialog({
         .getPublicUrl(fileName);
 
       // Create feed post if user opted in
-      if (shareToFeed) {
+      if (shareToFeed && context?.type === 'equipment' && context.equipmentId) {
         try {
-          if (context?.type === 'equipment' && context.equipmentId && context.bagId) {
-            // For equipment in a bag
-            await createBagEquipmentPhotoPost({
-              userId: user.id,
-              bagId: context.bagId,
-              equipmentId: context.equipmentId,
-              photoUrl: publicUrl,
-              caption: caption || `Check out my ${context.equipmentName || 'equipment'}! 📸`
-            });
-            toast.success('Photo shared to feed!');
-          } else {
-            // For general equipment photos (not in a bag)
-            const { error: postError } = await supabase
-              .from('feed_posts')
-              .insert({
-                user_id: user.id,
-                type: 'new_equipment',
-                content: {
-                  photo_url: publicUrl,
-                  caption: caption || 'Check out this equipment! 📸',
-                  is_photo: true,
-                  equipment_id: context?.equipmentId,
-                  equipment_name: context?.equipmentName
-                }
-              });
-
-            if (postError) {
-              console.error('Error creating feed post:', postError);
-              // Don't fail the whole upload if feed post fails
-            } else {
-              toast.success('Photo shared to feed!');
-            }
-          }
-        } catch (feedError) {
-          console.error('Error creating feed post:', feedError);
+          await createEquipmentPhotoFeedPost(
+            user.id,
+            context.equipmentId,
+            context.equipmentName || 'equipment',
+            publicUrl,
+            caption || `Check out my ${context.equipmentName || 'equipment'}! 📸`,
+            context.bagId
+          );
+          toast.success('Photo shared to feed!');
+        } catch (error) {
+          console.error('Error creating feed post:', error);
           // Don't fail the whole upload if feed post fails
         }
       }
@@ -183,7 +159,7 @@ export function UnifiedPhotoUploadDialog({
                 onChange={handleImageSelect}
                 className="hidden"
               />
-              <div className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-primary/50 hover:bg-white/5 transition-all cursor-pointer">
+              <div className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-primary/50 hover:bg-white/5 transition-colors cursor-pointer">
                 <Camera className="w-12 h-12 text-white/50 mx-auto mb-4" />
                 <p className="text-white/70">Click to upload a photo</p>
                 <p className="text-white/50 text-sm mt-1">JPG, PNG up to 10MB</p>

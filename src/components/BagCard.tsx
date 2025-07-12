@@ -1,10 +1,11 @@
-import { Heart, User } from "lucide-react";
+import { User } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { TeedBallLike } from "@/components/shared/TeedBallLike";
 
 interface BagData {
   id: string;
@@ -24,7 +25,7 @@ interface BagCardProps {
   bag: BagData;
 }
 
-const BagCard = ({ bag }: BagCardProps) => {
+const BagCard = memo(({ bag }: BagCardProps) => {
   const [isLiked, setIsLiked] = useState(bag.isLiked || false);
   const [likeCount, setLikeCount] = useState(bag.likeCount);
 
@@ -52,7 +53,7 @@ const BagCard = ({ bag }: BagCardProps) => {
       transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
     >
       <Link to={`/bag/${bag.id}`} className="block">
-        <div className="bg-white/10 backdrop-blur-[10px] rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3)] overflow-hidden cursor-pointer group border border-white/20 hover:bg-white/[0.15] hover:scale-105 transition-all duration-200">
+        <div className="bg-white/10 backdrop-blur-[10px] rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3)] overflow-hidden cursor-pointer group border border-white/20 hover:bg-white/[0.15] hover:scale-105 transition-[colors,transform] duration-200">
         {/* Image Container */}
         <div className="relative overflow-hidden">
           <img
@@ -86,18 +87,16 @@ const BagCard = ({ bag }: BagCardProps) => {
             )}
             {!bag.isHot && <div />}
             
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 rounded-full bg-white/10 backdrop-blur-sm shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white/20 hover:scale-110"
-              onClick={handleLike}
-            >
-              <Heart 
-                className={`w-4 h-4 transition-colors duration-200 ${
-                  isLiked ? 'fill-red-500 text-red-500' : 'text-muted-foreground'
-                }`} 
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <TeedBallLike
+                isLiked={isLiked}
+                likeCount={likeCount}
+                onLike={handleLike}
+                size="sm"
+                showCount={false}
+                className="bg-white/10 backdrop-blur-sm shadow-sm hover:bg-white/20"
               />
-            </Button>
+            </div>
           </div>
 
           {/* Value Badge */}
@@ -149,10 +148,15 @@ const BagCard = ({ bag }: BagCardProps) => {
                 <span className="w-2 h-2 bg-primary rounded-full"></span>
                 <span>{bag.clubCount} clubs</span>
               </span>
-              <span className="flex items-center space-x-1">
-                <Heart className="w-3 h-3" />
-                <span>{likeCount}</span>
-              </span>
+              <TeedBallLike
+                isLiked={isLiked}
+                likeCount={likeCount}
+                onLike={() => {}}
+                size="sm"
+                showCount={true}
+                disabled={true}
+                className="text-white/70"
+              />
             </div>
           </div>
         </div>
@@ -160,6 +164,6 @@ const BagCard = ({ bag }: BagCardProps) => {
       </Link>
     </motion.div>
   );
-};
+});
 
 export default BagCard;

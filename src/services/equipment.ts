@@ -445,7 +445,7 @@ export async function uploadEquipmentPhoto(
     }
 
     console.log('Photo uploaded successfully:', data);
-    return data;
+    return publicUrl;
   } catch (error) {
     console.error('Upload equipment photo error:', error);
     throw error;

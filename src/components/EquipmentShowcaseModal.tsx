@@ -119,7 +119,7 @@ export function EquipmentShowcaseModal({
                     <button
                       key={index}
                       onClick={() => setSelectedPhotoIndex(index)}
-                      className={`aspect-square rounded-md overflow-hidden border-2 transition-all ${
+                      className={`aspect-square rounded-md overflow-hidden border-2 transition-colors ${
                         selectedPhotoIndex === index
                           ? 'border-primary'
                           : 'border-transparent hover:border-gray-300'
@@ -129,6 +129,7 @@ export function EquipmentShowcaseModal({
                         src={photo}
                         alt={`View ${index + 1}`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     </button>
                   ))}

@@ -316,6 +316,7 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
                             src={item.image_url || '/api/placeholder/200/200'} 
                             alt={`${item.brand} ${item.model}`}
                             className="w-full h-full object-contain"
+                            loading="lazy"
                           />
                         </div>
                         <h4 className="font-medium text-sm">{item.brand}</h4>

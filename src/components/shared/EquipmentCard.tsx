@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, memo } from 'react';
 import { Heart, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -46,7 +46,7 @@ const EquipmentCard: FC<EquipmentCardProps> = ({
       <div
         className={cn(
           'glass-card p-4 flex items-center gap-4 cursor-pointer',
-          'hover:scale-[1.01] hover:shadow-lg transition-all duration-200',
+          'hover:scale-[1.01] hover:shadow-lg transition-[transform,shadow] duration-200',
           className
         )}
         onClick={onViewDetails}
@@ -102,7 +102,7 @@ const EquipmentCard: FC<EquipmentCardProps> = ({
     <div
       className={cn(
         'glass-card p-4 space-y-3 cursor-pointer',
-        'hover:scale-[1.02] hover:shadow-lg transition-all duration-200',
+        'hover:scale-[1.02] hover:shadow-lg transition-[transform,shadow] duration-200',
         className
       )}
       onClick={onViewDetails}
@@ -160,4 +160,4 @@ const EquipmentCard: FC<EquipmentCardProps> = ({
   );
 };
 
-export default EquipmentCard;
+export default memo(EquipmentCard);

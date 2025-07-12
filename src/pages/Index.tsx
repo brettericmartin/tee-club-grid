@@ -193,7 +193,7 @@ const Index = () => {
               >
                 Build Your Bag
               </Button>
-              <button className="px-8 py-4 bg-white/10 backdrop-blur-md text-white font-medium rounded-lg border border-white/30 hover:bg-white/20 transition-all">
+              <button className="px-8 py-4 bg-white/10 backdrop-blur-[10px] text-white font-medium rounded-lg border border-white/30 hover:bg-white/20 transition-colors">
                 Explore Bags
               </button>
             </motion.div>
@@ -228,7 +228,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className={`group relative overflow-hidden rounded-lg cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl ${getDynamicHeight(index)}`}
+                className={`group relative overflow-hidden rounded-lg cursor-pointer transition-[transform,shadow] duration-300 hover:scale-105 hover:shadow-2xl ${getDynamicHeight(index)}`}
               >
                 {/* Equipment Collage Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black">
@@ -236,6 +236,7 @@ const Index = () => {
                     src={bag.image}
                     alt={bag.title}
                     className="w-full h-full object-cover opacity-80"
+                    loading="lazy"
                   />
                 </div>
 
@@ -254,9 +255,9 @@ const Index = () => {
                 </div>
                 
                 {/* Hover Overlay with View Bag button */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-16 left-4 right-4">
-                    <button className="w-full px-3 py-2 bg-primary/20 backdrop-blur-sm text-white text-sm rounded-lg border border-primary/40 hover:bg-primary/30 transition-all">
+                    <button className="w-full px-3 py-2 bg-primary/20 backdrop-blur-sm text-white text-sm rounded-lg border border-primary/40 hover:bg-primary/30 transition-colors">
                       View Bag
                     </button>
                   </div>
@@ -292,7 +293,7 @@ const Index = () => {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className="flex-shrink-0 w-64 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4 hover:bg-white/15 transition-all cursor-pointer group"
+                    className="flex-shrink-0 w-64 bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 hover:bg-white/15 transition-colors cursor-pointer group"
                   >
                     {/* Equipment Image */}
                     <div className="aspect-square bg-white/5 rounded-lg mb-3 overflow-hidden">
@@ -300,6 +301,7 @@ const Index = () => {
                         src={equipment.image}
                         alt={`${equipment.brand} ${equipment.model}`}
                         className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform"
+                        loading="lazy"
                       />
                     </div>
                     
@@ -361,7 +363,7 @@ const Index = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
-                    className={`bg-gradient-to-br ${category.gradient} backdrop-blur-md border border-white/20 rounded-xl p-4 hover:bg-white/15 transition-all cursor-pointer group`}
+                    className={`bg-gradient-to-br ${category.gradient} backdrop-blur-[10px] border border-white/20 rounded-xl p-4 hover:bg-white/15 transition-colors cursor-pointer group`}
                   >
                     {/* Larger, more prominent icon */}
                     <div className="aspect-square bg-white/5 rounded-lg mb-3 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform">
@@ -377,7 +379,7 @@ const Index = () => {
 
               {/* Full Width Add Equipment Button with Dashed Border */}
               <div className="mt-8">
-                <button className="w-full px-6 py-4 bg-transparent text-white rounded-xl border-2 border-dashed border-white/30 hover:border-solid hover:border-primary/50 hover:bg-primary/10 transition-all flex items-center justify-center gap-3 group">
+                <button className="w-full px-6 py-4 bg-transparent text-white rounded-xl border-2 border-dashed border-white/30 hover:border-solid hover:border-primary/50 hover:bg-primary/10 transition-[colors,border] flex items-center justify-center gap-3 group">
                   <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
                   <span className="font-medium">Add Your Equipment</span>
                 </button>
@@ -398,7 +400,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center hover:bg-white/10 transition-all"
+                className="bg-white/5 backdrop-blur-[10px] border border-white/10 rounded-xl p-6 text-center hover:bg-white/10 transition-colors"
               >
                 <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
                 <div className="text-gray-400 text-sm">{stat.label}</div>

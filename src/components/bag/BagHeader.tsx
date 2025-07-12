@@ -66,7 +66,7 @@ const BagHeader = ({
       )}
 
       {/* Header Content */}
-      <header className="sticky top-0 z-20 bg-black/20 backdrop-blur-md border-b border-white/10">
+      <header className="sticky top-0 z-20 bg-black/20 backdrop-blur-[10px] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">

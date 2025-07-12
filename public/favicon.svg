@@ -1,0 +1,11 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Teed.club favicon - golf ball on tee -->
+  <!-- Background -->
+  <rect width="32" height="32" rx="4" fill="#0a0a0a"/>
+  
+  <!-- Golf ball - green outline -->
+  <circle cx="16" cy="12" r="7" fill="none" stroke="#10B981" stroke-width="2"/>
+  
+  <!-- Golf tee - green filled -->
+  <path d="M 8 20 L 24 20 C 24 20 23 21 22 21.5 L 19 23 L 19 28 C 19 29 18 30 16 30 C 14 30 13 29 13 28 L 13 23 L 10 21.5 C 9 21 8 20 8 20 Z" fill="#10B981"/>
+</svg>

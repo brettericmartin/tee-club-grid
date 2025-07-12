@@ -182,6 +182,7 @@ export function EquipmentEditor({
                   src={formData.custom_photo_url || equipment.equipment.most_liked_photo || equipment.equipment.image_url }
                   alt={`${equipment.equipment.brand} ${equipment.equipment.model}`}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div className="space-y-2">

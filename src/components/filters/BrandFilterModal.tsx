@@ -47,7 +47,7 @@ const BrandTile: FC<{
   return (
     <Card
       className={cn(
-        "glass-card p-4 cursor-pointer transition-all duration-200 group relative",
+        "glass-card p-4 cursor-pointer transition-colors duration-200 group relative",
         "hover:scale-[1.02] hover:bg-white/15",
         isSelected && "ring-2 ring-primary bg-primary/10"
       )}

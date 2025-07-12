@@ -141,6 +141,7 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                 src={backgroundImage}
                 alt="Bag background"
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
             </div>
           )}
@@ -201,6 +202,7 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                               src={item.custom_photo_url || item.equipment.image_url}
                               alt={`${item.equipment.brand} ${item.equipment.model}`}
                               className="w-full h-full object-cover"
+                              loading="lazy"
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
                                 const parent = e.currentTarget.parentElement;
@@ -262,6 +264,7 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                                   src={item.custom_photo_url || item.equipment.image_url}
                                   alt={`${item.equipment.brand} ${item.equipment.model}`}
                                   className="w-full h-full object-cover"
+                                  loading="lazy"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                     const parent = e.currentTarget.parentElement;

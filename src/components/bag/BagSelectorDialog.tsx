@@ -84,7 +84,7 @@ export function BagSelectorDialog({
                   {bags.map((bag) => (
                     <Card
                       key={bag.id}
-                      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-all group"
+                      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors group"
                       onClick={() => handleSelectBag(bag.id)}
                     >
                       <div className="flex items-start gap-3">

@@ -166,9 +166,19 @@
 
   /* Glassmorphism Effects - Premium Golf Aesthetic */
   .glass-card {
-    @apply bg-white/[0.08] backdrop-blur-[12px] border border-white/[0.12] rounded-xl;
+    @apply bg-white/[0.08] border border-white/[0.12] rounded-xl;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  /* Only apply blur to hero/important elements */
+  .glass-card-hero {
+    @apply backdrop-blur-[8px];
+  }
+  
+  /* Minimal blur for better performance */
+  .glass-card-blur {
+    @apply backdrop-blur-[8px];
   }
 
   .glass-card:hover {
@@ -176,20 +186,20 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
-  /* Dark glass for content areas */
+  /* Dark glass for content areas (no blur for performance) */
   .glass-dark {
-    @apply bg-gray-900/80 backdrop-blur-[10px] border-t border-white/[0.08];
+    @apply bg-gray-900/90 border-t border-white/[0.08];
   }
 
-  /* Button styles matching design system */
+  /* Button styles matching design system (reduced blur) */
   .glass-button {
-    @apply bg-white/[0.08] backdrop-blur-sm border border-white/[0.12] rounded-lg;
-    @apply hover:bg-white/[0.14] transition-all duration-200;
+    @apply bg-white/[0.08] border border-white/[0.12] rounded-lg;
+    @apply hover:bg-white/[0.14] transition-colors duration-200;
   }
 
   .primary-button {
     @apply bg-primary hover:bg-primary/90 text-white font-medium;
-    @apply px-6 py-3 rounded-lg transition-all duration-200;
+    @apply px-6 py-3 rounded-lg transition-colors duration-200;
   }
 
   /* Legacy class mapping */
@@ -207,7 +217,7 @@
   }
 
   .hover-glow {
-    @apply hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-200;
+    @apply hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-[shadow,transform] duration-200;
   }
 
   /* Text styling for premium feel */
@@ -260,7 +270,7 @@
 
   /* Luxury Card Hover */
   .luxury-card {
-    transition: all 0.4s var(--ease-luxury);
+    transition: transform 0.4s var(--ease-luxury), box-shadow 0.4s var(--ease-luxury);
   }
 
   .luxury-card:hover {
@@ -283,16 +293,16 @@
       rgba(15,15,15,0.7) 0%, 
       rgba(15,15,15,0.8) 50%, 
       rgba(15,15,15,0.9) 100%);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(8px);
   }
 
-  /* Smooth Animations */
+  /* Smooth Animations - Use sparingly for performance */
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
 
   .animate-ken-burns {
-    animation: kenBurns 5s ease-out infinite;
+    animation: kenBurns 20s ease-out infinite; /* Slower for less CPU usage */
   }
 
   @keyframes float {

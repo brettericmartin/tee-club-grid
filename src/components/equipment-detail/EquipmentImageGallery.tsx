@@ -36,6 +36,7 @@ const EquipmentImageGallery = ({
                 src={image}
                 alt={`View ${index + 1}`}
                 className="w-full h-full object-contain"
+                loading="lazy"
               />
             </button>
           ))}

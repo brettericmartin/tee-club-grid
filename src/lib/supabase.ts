@@ -59,6 +59,7 @@ export interface Database {
           likes_count?: number;
           views_count?: number;
           background_image?: string;
+          layout_data?: Record<string, any>;
           created_at: string;
           updated_at: string;
         };
