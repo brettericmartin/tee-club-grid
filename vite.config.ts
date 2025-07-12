@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   
   return {
     server: {
-      host: "localhost",
+      host: true,
       port: 5173,
     },
     plugins: [
