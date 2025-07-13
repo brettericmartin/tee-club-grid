@@ -9,6 +9,7 @@ import { ErrorBoundary, AsyncErrorBoundary } from "./components/ErrorBoundary";
 import Navigation from "./components/Navigation";
 import BottomNavigation from "./components/navigation/BottomNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Analytics } from "@vercel/analytics/react";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -66,6 +67,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <Analytics />
             <BrowserRouter>
               <div className="min-h-screen bg-background font-sans antialiased">
                 {/* Fixed background gradient */}
