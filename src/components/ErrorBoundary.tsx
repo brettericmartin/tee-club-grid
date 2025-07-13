@@ -26,7 +26,9 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    // Use safe error logging to avoid Symbol conversion issues
+    console.error('Uncaught error:', error.message, error.stack);
+    console.error('Component stack:', errorInfo.componentStack);
     this.setState({ errorInfo });
   }
 
@@ -62,7 +64,7 @@ export class ErrorBoundary extends Component<Props, State> {
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <div className="rounded-lg bg-muted p-4 font-mono text-sm">
                   <p className="font-semibold text-destructive mb-2">
-                    {this.state.error.toString()}
+                    {this.state.error.message || 'Unknown error'}
                   </p>
                   {this.state.errorInfo && (
                     <pre className="text-xs text-muted-foreground overflow-auto max-h-40">
@@ -122,8 +124,13 @@ export function AsyncErrorBoundary({ children }: { children: ReactNode }) {
 
   React.useEffect(() => {
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      console.error('Unhandled promise rejection:', event.reason);
-      captureError(new Error(event.reason?.message || 'Unhandled promise rejection'));
+      // Safe error logging to avoid Symbol conversion issues
+      const reason = event.reason;
+      const message = reason && typeof reason === 'object' && 'message' in reason 
+        ? String(reason.message) 
+        : 'Unhandled promise rejection';
+      console.error('Unhandled promise rejection:', message);
+      captureError(new Error(message));
     };
 
     window.addEventListener('unhandledrejection', handleUnhandledRejection);

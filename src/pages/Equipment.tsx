@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Grid, List, Heart, Camera, Loader2, Filter } from "lucide-react";
+import { Grid, List, Heart, Camera, Loader2, Filter, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import EquipmentDataInfo from "@/components/EquipmentDataInfo";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
 import EquipmentCard from "@/components/shared/EquipmentCard";
+import SubmitEquipmentModal from "@/components/SubmitEquipmentModal";
 
 const Equipment = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -24,6 +25,7 @@ const Equipment = () => {
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set());
   const [brands, setBrands] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
   const itemsPerPage = 20;
   
   const navigate = useNavigate();
@@ -149,6 +151,15 @@ const Equipment = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleEquipmentSubmit = (equipment: any) => {
+    // TODO: Implement actual submission to database
+    console.log('Equipment submitted:', equipment);
+    toast({
+      title: "Equipment Submitted",
+      description: "Thank you for your contribution! We'll review and add it to our database.",
+    });
   };
 
   const EquipmentGrid = () => {
@@ -280,7 +291,7 @@ const Equipment = () => {
             )}
           </div>
           
-          {/* View Toggle */}
+          {/* View Toggle and Submit Button */}
           <div className="flex gap-2">
             <Button
               variant={view === 'grid' ? 'default' : 'outline'}
@@ -295,6 +306,16 @@ const Equipment = () => {
               onClick={() => setView('list')}
             >
               <List className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSubmitModal(true)}
+              className="ml-2"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Submit Equipment</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           </div>
         </div>
@@ -398,6 +419,13 @@ const Equipment = () => {
           )}
         </div>
       </div>
+      
+      {/* Submit Equipment Modal */}
+      <SubmitEquipmentModal
+        isOpen={showSubmitModal}
+        onClose={() => setShowSubmitModal(false)}
+        onSubmit={handleEquipmentSubmit}
+      />
     </div>
   );
 };

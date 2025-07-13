@@ -37,19 +37,24 @@ const BagDisplayStyled = () => {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId);
       
-      // Count tees from posts (if feed_posts table exists)
-      const { count: postTees } = await supabase
-        .from('likes')
-        .select('*', { count: 'exact', head: true })
-        .in('post_id', 
-          supabase
-            .from('feed_posts')
-            .select('id')
-            .eq('user_id', userId)
-        )
-        .single() ?? { count: 0 };
+      // First get the user's post IDs
+      const { data: userPosts } = await supabase
+        .from('feed_posts')
+        .select('id')
+        .eq('user_id', userId);
       
-      const total = (bagTees || 0) + (postTees || 0);
+      // Count tees from posts if they have any
+      let postTees = 0;
+      if (userPosts && userPosts.length > 0) {
+        const postIds = userPosts.map(post => post.id);
+        const { count } = await supabase
+          .from('likes')
+          .select('*', { count: 'exact', head: true })
+          .in('post_id', postIds);
+        postTees = count || 0;
+      }
+      
+      const total = (bagTees || 0) + postTees;
       setTotalTees(total);
     } catch (error) {
       console.error('Error calculating total tees:', error);

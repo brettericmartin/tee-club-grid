@@ -451,3 +451,56 @@ export async function uploadEquipmentPhoto(
     throw error;
   }
 }
+
+// Get all unique brands from equipment
+export async function getEquipmentBrands() {
+  const { data, error } = await supabase
+    .from('equipment')
+    .select('brand')
+    .order('brand');
+
+  if (error) {
+    console.error('Error fetching brands:', error);
+    return [];
+  }
+
+  // Get unique brands
+  const uniqueBrands = Array.from(new Set(data.map(item => item.brand).filter(Boolean)));
+  return uniqueBrands.sort();
+}
+
+// Get models for a specific brand
+export async function getEquipmentModels(brand: string) {
+  const { data, error } = await supabase
+    .from('equipment')
+    .select('model, category')
+    .eq('brand', brand)
+    .order('model');
+
+  if (error) {
+    console.error('Error fetching models:', error);
+    return [];
+  }
+
+  // Return models with their categories for better context
+  return data.map(item => ({
+    model: item.model,
+    category: item.category
+  }));
+}
+
+// Search equipment by query (for autocomplete)
+export async function searchEquipmentByQuery(query: string) {
+  const { data, error } = await supabase
+    .from('equipment')
+    .select('id, brand, model, category')
+    .or(`brand.ilike.%${query}%,model.ilike.%${query}%`)
+    .limit(10);
+
+  if (error) {
+    console.error('Error searching equipment:', error);
+    return [];
+  }
+
+  return data;
+}

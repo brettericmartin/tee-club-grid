@@ -1,32 +1,130 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { X, Upload, Info } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X, Upload, Info, ChevronDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { SubmitEquipmentForm } from "@/lib/equipment-types";
 import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
+import { getEquipmentBrands, getEquipmentModels, searchEquipmentByQuery } from "@/services/equipment";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SubmitEquipmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (equipment: SubmitEquipmentForm) => void;
+  initialCategory?: string;
 }
 
-const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit }: SubmitEquipmentModalProps) => {
+const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: SubmitEquipmentModalProps) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState<SubmitEquipmentForm>({
     brand: "",
     model: "",
     year: new Date().getFullYear(),
     category: "",
     description: "",
-    imageUrl: ""
+    imageUrl: "",
+    isCustom: false
   });
+  
+  const [brands, setBrands] = useState<string[]>([]);
+  const [models, setModels] = useState<{ model: string; category: string }[]>([]);
+  const [showNewBrand, setShowNewBrand] = useState(false);
+  const [showNewModel, setShowNewModel] = useState(false);
+  const [brandSearch, setBrandSearch] = useState("");
+  const [modelSearch, setModelSearch] = useState("");
+  const [showBrandDropdown, setShowBrandDropdown] = useState(false);
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
+  const [loadingBrands, setLoadingBrands] = useState(false);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  
+  const brandDropdownRef = useRef<HTMLDivElement>(null);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
 
   const categories = Object.values(EQUIPMENT_CATEGORIES);
+  
+  // Load brands when modal opens and set initial category
+  useEffect(() => {
+    if (isOpen) {
+      loadBrands();
+      if (initialCategory) {
+        setFormData(prev => ({ ...prev, category: initialCategory }));
+      }
+    }
+  }, [isOpen, initialCategory]);
+  
+  // Load models when brand is selected
+  useEffect(() => {
+    if (formData.brand && !showNewBrand) {
+      loadModels(formData.brand);
+    }
+  }, [formData.brand, showNewBrand]);
+  
+  // Handle click outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (brandDropdownRef.current && !brandDropdownRef.current.contains(event.target as Node)) {
+        setShowBrandDropdown(false);
+      }
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
+        setShowModelDropdown(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+  const loadBrands = async () => {
+    setLoadingBrands(true);
+    try {
+      const brandList = await getEquipmentBrands();
+      setBrands(brandList);
+    } catch (error) {
+      console.error('Error loading brands:', error);
+    } finally {
+      setLoadingBrands(false);
+    }
+  };
+  
+  const loadModels = async (brand: string) => {
+    setLoadingModels(true);
+    try {
+      const modelList = await getEquipmentModels(brand);
+      setModels(modelList);
+    } catch (error) {
+      console.error('Error loading models:', error);
+    } finally {
+      setLoadingModels(false);
+    }
+  };
+  
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const filteredBrands = brandSearch 
+    ? brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()))
+    : brands;
+    
+  const filteredModels = modelSearch
+    ? models.filter(m => m.model.toLowerCase().includes(modelSearch.toLowerCase()))
+    : models;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +134,12 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit }: SubmitEquipmentModa
       return;
     }
 
-    onSubmit(formData);
+    const submitData = {
+      ...formData,
+      imageFile
+    };
+    
+    onSubmit(submitData);
     
     // Reset form
     setFormData({
@@ -45,8 +148,15 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit }: SubmitEquipmentModa
       year: new Date().getFullYear(),
       category: "",
       description: "",
-      imageUrl: ""
+      imageUrl: "",
+      isCustom: false
     });
+    setShowNewBrand(false);
+    setShowNewModel(false);
+    setBrandSearch("");
+    setModelSearch("");
+    setImageFile(null);
+    setImagePreview("");
     
     toast.success("Equipment submitted for review!");
     onClose();
@@ -89,28 +199,169 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit }: SubmitEquipmentModa
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Brand and Model */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="brand">Brand *</Label>
-                <Input
-                  id="brand"
-                  value={formData.brand}
-                  onChange={(e) => handleInputChange("brand", e.target.value)}
-                  placeholder="e.g., TaylorMade"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="model">Model *</Label>
-                <Input
-                  id="model"
-                  value={formData.model}
-                  onChange={(e) => handleInputChange("model", e.target.value)}
-                  placeholder="e.g., Stealth 2"
-                  required
-                />
-              </div>
+            {/* Brand Selection */}
+            <div>
+              <Label htmlFor="brand">Brand *</Label>
+              {!showNewBrand ? (
+                <div className="relative" ref={brandDropdownRef}>
+                  <Input
+                    id="brand"
+                    value={brandSearch || formData.brand}
+                    onChange={(e) => {
+                      setBrandSearch(e.target.value);
+                      setShowBrandDropdown(true);
+                    }}
+                    onFocus={() => setShowBrandDropdown(true)}
+                    placeholder="Search for a brand..."
+                    required
+                  />
+                  <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
+                  
+                  {showBrandDropdown && (
+                    <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-lg max-h-48 overflow-y-auto">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full justify-start text-primary hover:text-primary"
+                        onClick={() => {
+                          setShowNewBrand(true);
+                          setShowBrandDropdown(false);
+                          setBrandSearch("");
+                        }}
+                      >
+                        + Add New Brand
+                      </Button>
+                      {loadingBrands ? (
+                        <div className="p-2 text-center">
+                          <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                        </div>
+                      ) : (
+                        filteredBrands.map(brand => (
+                          <Button
+                            key={brand}
+                            type="button"
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              handleInputChange("brand", brand);
+                              setBrandSearch("");
+                              setShowBrandDropdown(false);
+                            }}
+                          >
+                            {brand}
+                          </Button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Input
+                    id="brand"
+                    value={formData.brand}
+                    onChange={(e) => handleInputChange("brand", e.target.value)}
+                    placeholder="Enter new brand name"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowNewBrand(false);
+                      setFormData({ ...formData, brand: "" });
+                    }}
+                  >
+                    Cancel New Brand
+                  </Button>
+                </div>
+              )}
+            </div>
+            
+            {/* Model Selection */}
+            <div>
+              <Label htmlFor="model">Model *</Label>
+              {!showNewModel ? (
+                <div className="relative" ref={modelDropdownRef}>
+                  <Input
+                    id="model"
+                    value={modelSearch || formData.model}
+                    onChange={(e) => {
+                      setModelSearch(e.target.value);
+                      setShowModelDropdown(true);
+                    }}
+                    onFocus={() => setShowModelDropdown(true)}
+                    placeholder="Search for a model..."
+                    required
+                    disabled={!formData.brand}
+                  />
+                  <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
+                  
+                  {showModelDropdown && formData.brand && (
+                    <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-lg max-h-48 overflow-y-auto">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full justify-start text-primary hover:text-primary"
+                        onClick={() => {
+                          setShowNewModel(true);
+                          setShowModelDropdown(false);
+                          setModelSearch("");
+                        }}
+                      >
+                        + Add New Model
+                      </Button>
+                      {loadingModels ? (
+                        <div className="p-2 text-center">
+                          <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                        </div>
+                      ) : (
+                        filteredModels.map(({ model, category }) => (
+                          <Button
+                            key={model}
+                            type="button"
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              handleInputChange("model", model);
+                              handleInputChange("category", category);
+                              setModelSearch("");
+                              setShowModelDropdown(false);
+                            }}
+                          >
+                            <span>{model}</span>
+                            <span className="ml-auto text-xs text-muted-foreground">
+                              {CATEGORY_DISPLAY_NAMES[category]}
+                            </span>
+                          </Button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Input
+                    id="model"
+                    value={formData.model}
+                    onChange={(e) => handleInputChange("model", e.target.value)}
+                    placeholder="Enter new model name"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowNewModel(false);
+                      setFormData({ ...formData, model: "" });
+                    }}
+                  >
+                    Cancel New Model
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Category and Year */}
@@ -157,22 +408,69 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit }: SubmitEquipmentModa
               />
             </div>
 
-            {/* Image URL */}
-            <div>
-              <Label htmlFor="imageUrl">Image URL (optional)</Label>
-              <Input
-                id="imageUrl"
-                value={formData.imageUrl}
-                onChange={(e) => handleInputChange("imageUrl", e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                type="url"
+            {/* Custom Equipment Checkbox */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isCustom"
+                checked={formData.isCustom}
+                onCheckedChange={(checked) => handleInputChange("isCustom", checked as boolean)}
               />
+              <Label htmlFor="isCustom" className="cursor-pointer">
+                Custom/Boutique Equipment
+              </Label>
+            </div>
+            
+            {/* Image Upload */}
+            <div>
+              <Label htmlFor="image">Equipment Photo</Label>
+              <div className="mt-2">
+                {imagePreview ? (
+                  <div className="relative">
+                    <img
+                      src={imagePreview}
+                      alt="Equipment preview"
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => {
+                        setImageFile(null);
+                        setImagePreview("");
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="image-upload"
+                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  >
+                    <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Click to upload image</p>
+                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
+                    <input
+                      id="image-upload"
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                  </label>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                After submission, you'll be redirected to upload more photos
+              </p>
             </div>
 
             {/* Submission Guidelines */}
-            <div className="bg-muted/20 rounded-lg p-4 space-y-2">
-              <h4 className="font-medium text-sm">Submission Guidelines</h4>
-              <ul className="text-xs text-muted-foreground space-y-1">
+            <div className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-4 space-y-2">
+              <h4 className="font-medium text-sm text-foreground">Submission Guidelines</h4>
+              <ul className="text-xs text-foreground/80 space-y-1">
                 <li>• Equipment must be authentic golf equipment</li>
                 <li>• Include accurate brand and model names</li>
                 <li>• Vintage equipment (pre-2020) is welcome</li>

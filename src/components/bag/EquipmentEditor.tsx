@@ -472,3 +472,4 @@ export function EquipmentEditor({
     </>
   );
 }
+export default EquipmentEditor;

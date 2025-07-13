@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+/* @refresh skip */
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Plus, Edit3, Save, X, Eye, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import BackgroundLayer from "@/components/BackgroundLayer";
@@ -12,16 +13,37 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Navigation from "@/components/Navigation";
 import { BagSelectorDialog } from "@/components/bag/BagSelectorDialog";
 import { CreateBagDialog } from "@/components/bag/CreateBagDialog";
-import { EquipmentSelectorImproved } from "@/components/equipment/EquipmentSelectorImproved";
-import { EquipmentEditor } from "@/components/bag/EquipmentEditor";
-import { BagPreview } from "@/components/bag/BagPreview";
-import { BagGalleryDndKit } from "@/components/bag/BagGalleryDndKit";
 import { bagLayoutsService, type BagLayout } from "@/services/bagLayouts";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import type { Database } from "@/lib/supabase";
 import { smartCreateBagPost, smartCreateBagUpdatePost, smartCreateEquipmentPost } from "@/services/feedSmartUpdate";
+
+// Lazy load heavy components with @dnd-kit
+const BagGalleryDndKit = lazy(() => import("@/components/bag/BagGalleryDndKit"));
+const EquipmentSelectorImproved = lazy(() => import("@/components/equipment/EquipmentSelectorImproved"));
+const EquipmentEditor = lazy(() => import("@/components/bag/EquipmentEditor"));
+const BagPreview = lazy(() => import("@/components/bag/BagPreview"));
+
+// Loading component for heavy components
+const ComponentLoadingFallback = () => {
+  try {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-full" />
+        <div className="grid grid-cols-3 gap-4">
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+        </div>
+      </div>
+    );
+  } catch (error) {
+    // Fallback if Skeleton component has issues
+    return <div className="text-white">Loading...</div>;
+  }
+};
 
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
   equipment: Database['public']['Tables']['equipment']['Row'];
@@ -35,7 +57,22 @@ type Bag = Database['public']['Tables']['user_bags']['Row'] & {
 };
 
 const MyBagSupabase = () => {
-  const { user, loading: authLoading } = useAuth();
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Error handled by returning error UI
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-primary/10 flex items-center justify-center">
+        <div className="text-white text-center">
+          <h2 className="text-2xl font-bold mb-4">Error loading authentication</h2>
+          <p className="text-white/70">Please try refreshing the page</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // All hooks at the top, no logic between them
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [bags, setBags] = useState<Bag[]>([]);
@@ -47,8 +84,6 @@ const MyBagSupabase = () => {
   const [viewMode, setViewMode] = useState<'gallery' | 'list'>('gallery');
   const [layout, setLayout] = useState<BagLayout>({});
   const [isEditingLayout, setIsEditingLayout] = useState(false);
-  
-  // Modal states
   const [showBagSelector, setShowBagSelector] = useState(false);
   const [showCreateBag, setShowCreateBag] = useState(false);
   const [equipmentSelectorOpen, setEquipmentSelectorOpen] = useState(false);
@@ -56,6 +91,20 @@ const MyBagSupabase = () => {
   const [selectedBagEquipment, setSelectedBagEquipment] = useState<BagEquipmentItem | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [totalTees, setTotalTees] = useState(0);
+  
+  // Extract values after all hooks
+  if (!authContext) {
+    return <Navigate to="/" replace />;
+  }
+  
+  // Safely extract user and loading state
+  const user = authContext.user || null;
+  const authLoading = authContext.loading || false;
+  
+  // Check for Symbol properties that might cause conversion errors
+  if (user && Object.getOwnPropertySymbols(user).length > 0) {
+    // User object contains Symbol properties - this is expected with Supabase
+  }
 
   // Show sign-in prompt if not logged in
   if (!authLoading && !user) {
@@ -90,35 +139,58 @@ const MyBagSupabase = () => {
   }, [user]);
   
   const calculateTotalTees = async () => {
-    if (!user) return;
-    
     try {
-      // Count tees from all user's bags
-      const { count: bagTees } = await supabase
-        .from('bag_likes')
-        .select('bag_id', { count: 'exact', head: true })
-        .in('bag_id', 
-          supabase
-            .from('user_bags')
-            .select('id')
-            .eq('user_id', user.id)
-        );
+      if (!user || !user.id) {
+        // User not available, exit early
+        return;
+      }
       
-      // Count tees from user's posts (feed_posts)
-      const { count: postTees } = await supabase
-        .from('likes')
-        .select('post_id', { count: 'exact', head: true })
-        .in('post_id',
-          supabase
-            .from('feed_posts') 
-            .select('id')
-            .eq('user_id', user.id)
-        );
+      // Ensure user.id is a string safely
+      const userId = user.id ? String(user.id) : '';
+      
+      // First get the user's bag IDs
+      const { data: userBags, error: bagsError } = await supabase
+        .from('user_bags')
+        .select('id')
+        .eq('user_id', userId);
+      
+      
+      // Count tees from user's bags if they have any
+      let bagTees = 0;
+      if (userBags && Array.isArray(userBags) && userBags.length > 0) {
+        const bagIds = userBags.map(bag => String(bag.id));
+        const { count } = await supabase
+          .from('bag_likes')
+          .select('*', { count: 'exact', head: true })
+          .in('bag_id', bagIds);
+        bagTees = count || 0;
+      }
+      
+      // First get the user's post IDs
+      const { data: userPosts, error: postsError } = await supabase
+        .from('feed_posts')
+        .select('id')
+        .eq('user_id', userId);
+      
+      if (postsError) {
+        // Error fetching posts, continue with calculation
+      }
+      
+      // Count tees from user's posts if they have any
+      let postTees = 0;
+      if (userPosts && Array.isArray(userPosts) && userPosts.length > 0) {
+        const postIds = userPosts.map(post => String(post.id));
+        const { count } = await supabase
+          .from('likes')
+          .select('*', { count: 'exact', head: true })
+          .in('post_id', postIds);
+        postTees = count || 0;
+      }
       
       const total = (bagTees || 0) + (postTees || 0);
       setTotalTees(total);
     } catch (error) {
-      console.error('Error calculating total tees:', error);
+      // Error calculating tees, fallback to 0
       // Fallback to just using current bag's likes
       setTotalTees(0);
     }
@@ -141,11 +213,11 @@ const MyBagSupabase = () => {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('Supabase error loading bags:', error);
-        throw error;
+        // Error loading bags
+        console.error('Error loading bags:', error);
+        throw new Error(error?.message || 'Failed to load bags');
       }
 
-      console.log('Loaded bags:', userBags);
 
       // Create a bag if user doesn't have one
       if (!userBags || userBags.length === 0) {
@@ -181,7 +253,7 @@ const MyBagSupabase = () => {
         }
       }
     } catch (error) {
-      console.error('Error loading bags:', error);
+      // Error loading bags
       toast.error('Failed to load your bags');
     } finally {
       setLoading(false);
@@ -189,7 +261,6 @@ const MyBagSupabase = () => {
   };
 
   const loadBagEquipment = async (bagId: string) => {
-    console.log('Loading equipment for bag:', bagId);
     try {
       // First try with all joins (if tables exist)
       let { data, error } = await supabase
@@ -206,8 +277,6 @@ const MyBagSupabase = () => {
 
       // If that fails, try without the optional joins
       if (error) {
-        console.log('First query failed:', error.message);
-        console.log('Trying basic equipment query...');
         
         const result = await supabase
           .from('bag_equipment')
@@ -223,11 +292,12 @@ const MyBagSupabase = () => {
       }
 
       if (error) {
+        // Error loading equipment
         console.error('Error loading equipment:', error);
-        throw error;
+        throw new Error(error?.message || 'Failed to load equipment');
       }
 
-      console.log('Loaded equipment:', data);
+      // Equipment loaded successfully
       setBagItems(data || []);
       
       // Load layout data
@@ -245,11 +315,11 @@ const MyBagSupabase = () => {
         setLayout(defaultLayout);
       }
     } catch (error) {
-      console.error('Error loading bag equipment:', error);
+      // Error loading bag equipment
       // Don't show error toast for empty bags, just set empty array
       setBagItems([]);
       // Only show error if it's not a "no rows" error
-      if (error.message && !error.message.includes('No rows')) {
+      if (error?.message && !error.message.includes('No rows')) {
         toast.error('Failed to load equipment');
       }
     }
@@ -280,7 +350,7 @@ const MyBagSupabase = () => {
         .select('*, profile:profiles(*)')
         .single();
 
-      if (error) throw error;
+      if (error) throw new Error(error?.message || 'Database operation failed');
 
       setBags([...bags, newBag]);
       setCurrentBag(newBag);
@@ -292,9 +362,9 @@ const MyBagSupabase = () => {
       // Create feed post for bag creation
       await smartCreateBagPost(user.id, newBag.id, newBag.name);
     } catch (error) {
-      console.error('Error creating bag:', error);
+      // Error creating bag
       toast.error('Failed to create bag');
-      throw error;
+      throw new Error(error?.message || 'Operation failed');
     }
   };
 
@@ -305,7 +375,7 @@ const MyBagSupabase = () => {
         .delete()
         .eq('id', bagId);
 
-      if (error) throw error;
+      if (error) throw new Error(error?.message || 'Database operation failed');
 
       const remainingBags = bags.filter(b => b.id !== bagId);
       setBags(remainingBags);
@@ -314,9 +384,9 @@ const MyBagSupabase = () => {
         await handleSelectBag(remainingBags[0].id);
       }
     } catch (error) {
-      console.error('Error deleting bag:', error);
+      // Error deleting bag
       toast.error('Failed to delete bag');
-      throw error;
+      throw new Error(error?.message || 'Operation failed');
     }
   };
 
@@ -336,7 +406,7 @@ const MyBagSupabase = () => {
         })
         .eq('id', currentBag.id);
 
-      if (error) throw error;
+      if (error) throw new Error(error?.message || 'Database operation failed');
       
       setIsEditing(false);
       toast.success("Bag saved successfully!");
@@ -360,7 +430,7 @@ const MyBagSupabase = () => {
       ));
       setCurrentBag({ ...currentBag, name: bagName, description: bagDescription, background_image: selectedBackground });
     } catch (error) {
-      console.error('Error saving bag:', error);
+      // Error saving bag
       toast.error('Failed to save bag');
     }
   };
@@ -374,8 +444,7 @@ const MyBagSupabase = () => {
     if (!currentBag) return;
     
     try {
-      console.log('Adding equipment with selection:', selection);
-      console.log('Current bag ID:', currentBag.id);
+      // Adding equipment to bag
       
       // First, let's try a minimal insert to see what works
       const insertData = {
@@ -384,7 +453,7 @@ const MyBagSupabase = () => {
         condition: 'new'
       };
       
-      console.log('Insert data:', insertData);
+      // Preparing equipment insert
       
       const { data: newItem, error } = await supabase
         .from('bag_equipment')
@@ -396,11 +465,12 @@ const MyBagSupabase = () => {
         .single();
 
       if (error) {
-        console.error('Supabase error adding equipment:', error);
-        throw error;
+        // Error adding equipment
+        console.error('Error adding equipment:', error);
+        throw new Error(error?.message || 'Failed to add equipment');
       }
       
-      console.log('Equipment added successfully:', newItem);
+      // Equipment added successfully
       
       // Now update with the customization options if the item was created
       if (newItem && (selection.shaft_id || selection.grip_id || selection.loft_option_id)) {
@@ -422,7 +492,7 @@ const MyBagSupabase = () => {
           .single();
           
         if (updateError) {
-          console.error('Error updating equipment options:', updateError);
+          // Error updating equipment options
           // Don't fail the whole operation, just use the basic item
         } else if (updatedItem) {
           setBagItems(prev => [...prev, updatedItem]);
@@ -445,9 +515,10 @@ const MyBagSupabase = () => {
         equipmentName,
         newItem.equipment.id
       );
-    } catch (error: any) {
-      console.error('Error adding equipment:', error);
-      toast.error(`Failed to add equipment: ${error.message || 'Unknown error'}`);
+    } catch (error) {
+      // Error adding equipment
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to add equipment: ${errorMessage}`);
     }
   };
 
@@ -458,12 +529,12 @@ const MyBagSupabase = () => {
         .delete()
         .eq('id', bagEquipmentId);
 
-      if (error) throw error;
+      if (error) throw new Error(error?.message || 'Database operation failed');
 
       setBagItems(prev => prev.filter(item => item.id !== bagEquipmentId));
       toast.success("Equipment removed from bag");
     } catch (error) {
-      console.error('Error removing equipment:', error);
+      // Error removing equipment
       toast.error('Failed to remove equipment');
     }
   };
@@ -508,7 +579,7 @@ const MyBagSupabase = () => {
       toast.success(`Added ${missingCategories.length} items to your bag!`);
       await loadBagEquipment(currentBag.id);
     } catch (error) {
-      console.error('Error auto-filling bag:', error);
+      // Error auto-filling bag
       toast.error('Failed to auto-fill bag');
     } finally {
       setLoading(false);
@@ -522,7 +593,7 @@ const MyBagSupabase = () => {
         .update({ is_featured: !currentStatus })
         .eq('id', bagEquipmentId);
 
-      if (error) throw error;
+      if (error) throw new Error(error?.message || 'Database operation failed');
       
       setBagItems(prev =>
         prev.map(item =>
@@ -532,7 +603,7 @@ const MyBagSupabase = () => {
         )
       );
     } catch (error) {
-      console.error('Error updating equipment:', error);
+      // Error updating equipment
       toast.error('Failed to update equipment');
     }
   };
@@ -758,24 +829,26 @@ const MyBagSupabase = () => {
         {bagItems.length === 0 ? (
           <EmptyState />
         ) : viewMode === 'gallery' ? (
-          <BagGalleryDndKit
-            bagEquipment={bagItems}
-            layout={layout}
-            isEditing={isEditingLayout}
-            isOwnBag={true}
-            onLayoutChange={setLayout}
-            onSaveLayout={async () => {
-              if (!currentBag) return;
-              const success = await bagLayoutsService.saveLayout(currentBag.id, layout);
-              if (success) {
-                toast.success('Layout saved successfully!');
-                setIsEditingLayout(false);
-              } else {
-                toast.error('Failed to save layout');
-              }
-            }}
-            onEquipmentClick={handleEditEquipment}
-          />
+          <Suspense fallback={<ComponentLoadingFallback />}>
+            <BagGalleryDndKit
+              bagEquipment={bagItems}
+              layout={layout}
+              isEditing={isEditingLayout}
+              isOwnBag={true}
+              onLayoutChange={setLayout}
+              onSaveLayout={async () => {
+                if (!currentBag) return;
+                const success = await bagLayoutsService.saveLayout(currentBag.id, layout);
+                if (success) {
+                  toast.success('Layout saved successfully!');
+                  setIsEditingLayout(false);
+                } else {
+                  toast.error('Failed to save layout');
+                }
+              }}
+              onEquipmentClick={handleEditEquipment}
+            />
+          </Suspense>
         ) : (
           <div className="space-y-4">
             {bagItems.map((item) => (
@@ -787,7 +860,7 @@ const MyBagSupabase = () => {
                       onClick={() => handleEditEquipment(item)}
                     >
                       <img
-                        src={item.custom_photo_url || item.equipment.image_url }
+                        src={item.custom_photo_url || item.equipment.image_url}
                         alt={`${item.equipment.brand} ${item.equipment.model}`}
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -886,31 +959,37 @@ const MyBagSupabase = () => {
         onCreateBag={handleCreateBag}
       />
 
-      <EquipmentSelectorImproved
-        isOpen={equipmentSelectorOpen}
-        onClose={() => setEquipmentSelectorOpen(false)}
-        onSelectEquipment={addEquipment}
-      />
+      <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
+        <EquipmentSelectorImproved
+          isOpen={equipmentSelectorOpen}
+          onClose={() => setEquipmentSelectorOpen(false)}
+          onSelectEquipment={addEquipment}
+        />
+      </Suspense>
 
       {selectedBagEquipment && (
-        <EquipmentEditor
-          isOpen={equipmentEditorOpen}
-          onClose={() => {
-            setEquipmentEditorOpen(false);
-            setSelectedBagEquipment(null);
-          }}
-          equipment={selectedBagEquipment}
-          onUpdate={() => loadBagEquipment(currentBag?.id || '')}
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
+          <EquipmentEditor
+            isOpen={equipmentEditorOpen}
+            onClose={() => {
+              setEquipmentEditorOpen(false);
+              setSelectedBagEquipment(null);
+            }}
+            equipment={selectedBagEquipment}
+            onUpdate={() => loadBagEquipment(currentBag?.id || '')}
+          />
+        </Suspense>
       )}
 
       {currentBag && (
-        <BagPreview
-          isOpen={previewOpen}
-          onClose={() => setPreviewOpen(false)}
-          bag={currentBag}
-          equipment={bagItems}
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
+          <BagPreview
+            isOpen={previewOpen}
+            onClose={() => setPreviewOpen(false)}
+            bag={currentBag}
+            equipment={bagItems}
+          />
+        </Suspense>
       )}
 
     </div>

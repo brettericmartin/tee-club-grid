@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ChevronRight, X } from 'lucide-react';
+import { Search, ChevronRight, X, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,6 +11,8 @@ import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
 import { EQUIPMENT_CATEGORIES as STANDARD_CATEGORIES, CATEGORY_DISPLAY_NAMES } from '@/lib/equipment-categories';
 import { useCategoryImages } from '@/hooks/useCategoryImages';
+import SubmitEquipmentModal from '@/components/SubmitEquipmentModal';
+import { toast } from 'sonner';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'] & {
   most_liked_photo?: string;
@@ -202,6 +204,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   // Search and filters
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
   
   // Category images for fallbacks
   const { categoryImages } = useCategoryImages(Object.values(STANDARD_CATEGORIES));
@@ -461,6 +464,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="glass-card border-white/20 text-white max-w-3xl max-h-[85vh]">
         <DialogHeader>
@@ -560,6 +564,18 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                 />
               </div>
 
+              {/* Submit New Equipment Button */}
+              <div className="mb-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSubmitModal(true)}
+                  className="w-full glass-button flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Can't find your brand? Submit new equipment
+                </Button>
+              </div>
+
               {/* Popular brands */}
               <div className="mb-4">
                 <h3 className="text-sm font-medium text-white/60 mb-2">Popular Brands</h3>
@@ -604,6 +620,19 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           {/* Equipment Selection */}
           {step === 'equipment' && (
             <div className="space-y-3">
+              {/* Submit New Equipment Button */}
+              <div className="flex justify-end mb-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowSubmitModal(true)}
+                  className="glass-button flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Can't find what you're looking for?
+                </Button>
+              </div>
+              
               {loading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin h-8 w-8 border-2 border-primary rounded-full border-t-transparent mx-auto" />
@@ -615,7 +644,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                   <p className="text-white/60 mb-4">
                     No {selectedCategory?.label.toLowerCase()} found for {selectedBrand}
                   </p>
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex gap-2 justify-center flex-wrap">
                     <Button
                       variant="outline"
                       onClick={() => {
@@ -626,6 +655,14 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                       className="glass-button"
                     >
                       Try Different Brand
+                    </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => setShowSubmitModal(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Submit New Equipment
                     </Button>
                     <Button
                       variant="outline"
@@ -849,5 +886,23 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
         </div>
       </DialogContent>
     </Dialog>
+    
+    {/* Submit Equipment Modal */}
+    <SubmitEquipmentModal
+      isOpen={showSubmitModal}
+      onClose={() => setShowSubmitModal(false)}
+      onSubmit={async (equipment) => {
+        // Handle equipment submission
+        toast.success('Equipment submitted for review!');
+        setShowSubmitModal(false);
+        // Optionally refresh the equipment list
+        if (selectedCategory && selectedBrand) {
+          await loadEquipment();
+        }
+      }}
+      initialCategory={selectedCategory?.value}
+    />
+  </>
   );
 }
+export default EquipmentSelectorImproved;

@@ -209,7 +209,7 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                                 if (parent) {
                                   parent.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
                                     <span class="text-white font-bold text-lg">
-                                      ${item.equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                                      ${item.equipment.brand?.split(' ').filter(w => w.length > 0).map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'NA'}
                                     </span>
                                   </div>`;
                                 }
@@ -218,7 +218,7 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
                               <span className="text-white font-bold text-lg">
-                                {item.equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                                {item.equipment.brand?.split(' ').filter(w => w.length > 0).map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'NA'}
                               </span>
                             </div>
                           )}
@@ -271,7 +271,7 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                                     if (parent) {
                                       parent.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
                                         <span class="text-white font-bold text-xs">
-                                          ${item.equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                                          ${item.equipment.brand?.split(' ').filter(w => w.length > 0).map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'NA'}
                                         </span>
                                       </div>`;
                                     }
@@ -280,7 +280,7 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
                                   <span className="text-white font-bold text-xs">
-                                    {item.equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                                    {item.equipment.brand?.split(' ').filter(w => w.length > 0).map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'NA'}
                                   </span>
                                 </div>
                               )}
@@ -344,3 +344,4 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
     </Dialog>
   );
 }
+export default BagPreview;

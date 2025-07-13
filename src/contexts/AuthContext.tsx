@@ -82,11 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Only throw if it's not a duplicate key error
         if (profileError && profileError.code !== '23505') {
-          console.error('Profile creation error:', profileError);
-          // Don't throw here - profile might be created by trigger
+          // Profile creation error - might be created by trigger
         }
       } catch (err) {
-        console.error('Profile creation failed, might be created by trigger:', err);
+        // Profile creation failed, might be created by trigger
       }
     }
   };

@@ -21,6 +21,8 @@ export interface SubmitEquipmentForm {
   category: string;
   description?: string;
   imageUrl?: string;
+  isCustom?: boolean;
+  imageFile?: File | null;
 }
 
 export interface EquipmentFilter {

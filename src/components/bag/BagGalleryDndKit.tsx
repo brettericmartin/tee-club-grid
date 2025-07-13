@@ -453,3 +453,4 @@ export function BagGalleryDndKit({
     </div>
   );
 }
+export default BagGalleryDndKit;
