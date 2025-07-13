@@ -78,8 +78,8 @@ const Navigation = () => {
               </div>
             </div>
 
-            {/* Center - Feed & My Bag Buttons (Hidden on mobile) */}
-            <div className="hidden sm:flex flex-1 justify-center items-center gap-4">
+            {/* Center - Feed & My Bag Buttons */}
+            <div className="flex sm:flex-1 justify-center items-center gap-4">
               <Link 
                 to="/feed"
                 className="group"
@@ -91,13 +91,13 @@ const Navigation = () => {
                   }`} />
                   
                   {/* Feed Button */}
-                  <div className={`relative text-white px-6 py-2.5 rounded-full font-medium flex items-center gap-2 hover:scale-105 transition-transform duration-200 ${
+                  <div className={`relative text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium flex items-center gap-2 hover:scale-105 transition-transform duration-200 ${
                     location.pathname === '/feed' 
                       ? 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-black' 
                       : 'bg-primary hover:bg-primary/90'
                   }`}>
                     <Home className="w-4 h-4" />
-                    <span>Feed</span>
+                    <span className="hidden sm:inline">Feed</span>
                   </div>
                 </div>
               </Link>
@@ -113,13 +113,13 @@ const Navigation = () => {
                   }`} />
                   
                   {/* Button with location pin icon */}
-                  <div className={`relative text-white px-6 py-2.5 rounded-full font-medium flex items-center gap-2 hover:scale-105 transition-transform duration-200 ${
+                  <div className={`relative text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium flex items-center gap-2 hover:scale-105 transition-transform duration-200 ${
                     location.pathname === '/my-bag' 
                       ? 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-black' 
                       : 'bg-primary hover:bg-primary/90'
                   }`}>
                     <MapPin className="w-4 h-4" />
-                    <span>My Bag</span>
+                    <span className="hidden sm:inline">My Bag</span>
                   </div>
                 </div>
               </Link>
@@ -191,34 +191,6 @@ const Navigation = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden bg-white/10 backdrop-blur-[10px] border-t border-white/20">
-          <div className="flex justify-around py-2">
-            <Link to="/bags" className="p-2 text-white/70 hover:text-white flex flex-col items-center gap-1">
-              <Home size={16} />
-              <span className="text-xs">Bags</span>
-            </Link>
-            <Link to="/equipment" className="p-2 text-white/70 hover:text-white flex flex-col items-center gap-1">
-              <Grid size={16} />
-              <span className="text-xs">Equipment</span>
-            </Link>
-            <Link to="/saved" className="p-2 text-white/70 hover:text-white flex flex-col items-center gap-1">
-              <Heart size={16} />
-              <span className="text-xs">Saved</span>
-            </Link>
-            <Link to="/following" className="p-2 text-white/70 hover:text-white flex flex-col items-center gap-1">
-              <Users size={16} />
-              <span className="text-xs">Following</span>
-            </Link>
-            <button 
-              onClick={() => setIsSearchOpen(true)}
-              className="p-2 text-white/70 hover:text-white flex flex-col items-center gap-1"
-            >
-              <Search size={16} />
-              <span className="text-xs">Search</span>
-            </button>
-          </div>
-        </div>
       </nav>
 
       {/* Search Modal */}
