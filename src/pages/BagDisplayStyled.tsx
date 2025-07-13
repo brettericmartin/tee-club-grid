@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Heart, Share2, Edit, ArrowLeft, Grid3x3, List } from "lucide-react";
+import { Loader2, Heart, Share2, Edit, ArrowLeft, Grid3x3, List, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,11 @@ import { toast } from "sonner";
 import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
 import { BagGalleryDndKit } from "@/components/bag/BagGalleryDndKit";
 import { bagLayoutsService, type BagLayout } from "@/services/bagLayouts";
+import BagStatsRow from "@/components/bag/BagStatsRow";
+import { BagCard } from "@/components/bags/BagCard";
+import BagEquipmentGallery from "@/components/bag/BagEquipmentGallery";
+import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
+import { BadgeService } from "@/services/badgeService";
 
 const BagDisplayStyled = () => {
   const { bagId } = useParams();
@@ -18,10 +23,11 @@ const BagDisplayStyled = () => {
   const [loading, setLoading] = useState(true);
   const [bagData, setBagData] = useState<any>(null);
   const [isLiked, setIsLiked] = useState(false);
-  const [viewMode, setViewMode] = useState<'gallery' | 'list'>('gallery');
+  const [viewMode, setViewMode] = useState<'card' | 'gallery' | 'list'>('card');
   const [layout, setLayout] = useState<BagLayout>({});
   const [isEditingLayout, setIsEditingLayout] = useState(false);
   const [totalTees, setTotalTees] = useState(0);
+  const [userBadges, setUserBadges] = useState<any[]>([]);
 
   useEffect(() => {
     if (bagId) {
@@ -113,6 +119,10 @@ const BagDisplayStyled = () => {
       // Calculate total tees for this user across all content
       if (data?.user_id) {
         await calculateTotalTees(data.user_id);
+        
+        // Load user badges
+        const badges = await BadgeService.getUserFeaturedBadges(data.user_id, 6);
+        setUserBadges(badges);
       }
     } catch (err: any) {
       console.error('Error loading bag:', err);
@@ -217,12 +227,25 @@ const BagDisplayStyled = () => {
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
-              <h1 className="text-2xl font-bold text-white">{bagData.name}</h1>
+              <h1 className="text-2xl font-bold text-white">
+                {viewMode === 'card' 
+                  ? `${bagData.profiles?.display_name || bagData.profiles?.username || 'Unknown'}: ${bagData.name}`
+                  : bagData.name
+                }
+              </h1>
             </div>
             
             <div className="flex items-center gap-2">
               {/* View Mode Toggle */}
               <div className="bg-white/10 rounded-lg p-1 flex">
+                <Button
+                  variant={viewMode === 'card' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('card')}
+                  className={viewMode === 'card' ? '' : 'text-white hover:text-white hover:bg-white/10'}
+                >
+                  <CreditCard className="w-4 h-4" />
+                </Button>
                 <Button
                   variant={viewMode === 'gallery' ? 'default' : 'ghost'}
                   size="sm"
@@ -281,44 +304,103 @@ const BagDisplayStyled = () => {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Owner Info */}
-        <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-6 mb-8 shadow-[0_4px_6px_rgba(0,0,0,0.3)]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Avatar className="w-16 h-16">
-                <AvatarImage src={bagData.profiles?.avatar_url} />
-                <AvatarFallback className="bg-primary/20 text-primary text-xl">
-                  {bagData.profiles?.username?.[0]?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-xl font-semibold text-white">
-                  {bagData.profiles?.display_name || bagData.profiles?.username}
-                </h2>
-                <p className="text-white/70">@{bagData.profiles?.username}</p>
-                {bagData.profiles?.handicap !== null && (
-                  <Badge variant="outline" className="mt-2 bg-primary/20 text-primary border-primary/30">
-                    {bagData.profiles.handicap > 0 ? '+' : ''}{bagData.profiles.handicap} Handicap
-                  </Badge>
-                )}
+        {/* Owner Info - hide in card view since it's in the BagCard */}
+        {viewMode !== 'card' && (
+          <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-6 mb-8 shadow-[0_4px_6px_rgba(0,0,0,0.3)]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Avatar className="w-16 h-16">
+                  <AvatarImage src={bagData.profiles?.avatar_url} />
+                  <AvatarFallback className="bg-primary/20 text-primary text-xl">
+                    {bagData.profiles?.username?.[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="text-xl font-semibold text-white">
+                    {bagData.profiles?.display_name || bagData.profiles?.username}
+                  </h2>
+                  <p className="text-white/70">@{bagData.profiles?.username}</p>
+                  {bagData.profiles?.handicap !== null && (
+                    <Badge variant="outline" className="mt-2 bg-primary/20 text-primary border-primary/30">
+                      {bagData.profiles.handicap > 0 ? '+' : ''}{bagData.profiles.handicap} Handicap
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              
+              <div className="text-right">
+                <p className="text-3xl font-bold text-primary">
+                  {totalTees.toLocaleString()}
+                </p>
+                <p className="text-white/70">Total Tees</p>
               </div>
             </div>
             
-            <div className="text-right">
-              <p className="text-3xl font-bold text-primary">
-                {totalTees.toLocaleString()}
-              </p>
-              <p className="text-white/70">Total Tees</p>
-            </div>
+            {bagData.description && (
+              <p className="mt-4 text-white/80">{bagData.description}</p>
+            )}
           </div>
-          
-          {bagData.description && (
-            <p className="mt-4 text-white/80">{bagData.description}</p>
-          )}
-        </div>
+        )}
 
         {/* Equipment Display */}
-        {viewMode === 'gallery' ? (
+        {viewMode === 'card' ? (
+          /* Card View */
+          <>
+            <div className="flex justify-center mb-8">
+              <div className="flex flex-col lg:flex-row gap-6 items-stretch">
+                {/* Stats - 1 column on left */}
+                <div className="flex-shrink-0 w-full lg:w-56">
+                  <div className="h-full bg-gray-900/50 rounded-lg p-4 border border-white/10">
+                    <BagStatsRow
+                      totalItems={bagData.bag_equipment?.length || 0}
+                      bagTees={bagData.likes_count || 0}
+                      views={bagData.views_count || 0}
+                      estimatedValue={totalValue}
+                    />
+                  </div>
+                </div>
+                
+                {/* Bag Card - center */}
+                <div className="flex-shrink-0 w-full max-w-sm">
+                  <BagCard
+                    bag={bagData}
+                    onView={() => {}} // Already on bag page
+                    onLike={handleLike}
+                    onFollow={async (userId: string) => {
+                      // TODO: Implement follow functionality
+                      console.log('Follow user:', userId);
+                    }}
+                    isLiked={isLiked}
+                    isFollowing={false} // TODO: Check following status
+                    currentUserId={currentUser?.id}
+                  />
+                </div>
+                
+                {/* Badges - 2x3 grid on right */}
+                <div className="flex-shrink-0 w-full lg:w-56">
+                  <div className="h-full bg-gray-900/50 rounded-lg p-4 border border-white/10">
+                    <BadgeDisplay
+                      badges={userBadges}
+                      size="lg"
+                      showEmpty={true}
+                      maxDisplay={6}
+                      onBadgeClick={(badge) => {
+                        // TODO: Show badge details modal
+                        console.log('Badge clicked:', badge);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Equipment Gallery below card layout */}
+            <BagEquipmentGallery
+              bagEquipment={bagData.bag_equipment || []}
+              onEquipmentClick={(item) => navigate(`/equipment/${item.equipment.id}`)}
+            />
+          </>
+        ) : viewMode === 'gallery' ? (
           <BagGalleryDndKit
             bagEquipment={bagData.bag_equipment || []}
             layout={layout}
@@ -383,33 +465,35 @@ const BagDisplayStyled = () => {
           </div>
         )}
 
-        {/* Stats */}
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{bagData.bag_equipment?.length || 0}</p>
-            <p className="text-white/70 text-sm">Total Items</p>
+        {/* Stats - only show for non-card views */}
+        {viewMode !== 'card' && (
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-primary">{bagData.bag_equipment?.length || 0}</p>
+              <p className="text-white/70 text-sm">Total Items</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-primary">{bagData.likes_count || 0}</p>
+              <p className="text-white/70 text-sm">Bag Tees</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-primary">{bagData.views_count || 0}</p>
+              <p className="text-white/70 text-sm">Views</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-primary">
+                {bagData.bag_equipment?.filter((i: any) => i.is_featured).length || 0}
+              </p>
+              <p className="text-white/70 text-sm">Featured</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
+              <p className="text-xl font-medium text-white/80">
+                ${totalValue.toLocaleString()}
+              </p>
+              <p className="text-white/70 text-xs">Est. Value</p>
+            </div>
           </div>
-          <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{bagData.likes_count || 0}</p>
-            <p className="text-white/70 text-sm">Bag Tees</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{bagData.views_count || 0}</p>
-            <p className="text-white/70 text-sm">Views</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-primary">
-              {bagData.bag_equipment?.filter((i: any) => i.is_featured).length || 0}
-            </p>
-            <p className="text-white/70 text-sm">Featured</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
-            <p className="text-xl font-medium text-white/80">
-              ${totalValue.toLocaleString()}
-            </p>
-            <p className="text-white/70 text-xs">Est. Value</p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

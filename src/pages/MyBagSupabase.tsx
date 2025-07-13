@@ -1,7 +1,7 @@
 /* @refresh skip */
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Plus, Edit3, Save, X, Eye, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle } from "lucide-react";
-import { Navigate } from "react-router-dom";
+import { Plus, Edit3, Save, X, Eye, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard } from "lucide-react";
+import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer from "@/components/BackgroundLayer";
 import BackgroundPicker from "@/components/BackgroundPicker";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,14 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import type { Database } from "@/lib/supabase";
 import { smartCreateBagPost, smartCreateBagUpdatePost, smartCreateEquipmentPost } from "@/services/feedSmartUpdate";
+import { badgeService, type UserBadge } from "@/services/badges";
+import { BadgeShowcase } from "@/components/badges/BadgeShowcase";
+import { useBadgeCheck } from "@/hooks/useBadgeCheck";
+import { BadgeNotificationToast } from "@/components/badges/BadgeNotificationToast";
+import { BagCard } from "@/components/bags/BagCard";
+import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
+import BagStatsRow from "@/components/bag/BagStatsRow";
+import { BadgeService } from "@/services/badgeService";
 
 // Lazy load heavy components with @dnd-kit
 const BagGalleryDndKit = lazy(() => import("@/components/bag/BagGalleryDndKit"));
@@ -81,7 +89,7 @@ const MyBagSupabase = () => {
   const [bagDescription, setBagDescription] = useState("");
   const [bagItems, setBagItems] = useState<BagEquipmentItem[]>([]);
   const [selectedBackground, setSelectedBackground] = useState('midwest-lush');
-  const [viewMode, setViewMode] = useState<'gallery' | 'list'>('gallery');
+  const [viewMode, setViewMode] = useState<'gallery' | 'list' | 'card'>('gallery');
   const [layout, setLayout] = useState<BagLayout>({});
   const [isEditingLayout, setIsEditingLayout] = useState(false);
   const [showBagSelector, setShowBagSelector] = useState(false);
@@ -91,6 +99,10 @@ const MyBagSupabase = () => {
   const [selectedBagEquipment, setSelectedBagEquipment] = useState<BagEquipmentItem | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [totalTees, setTotalTees] = useState(0);
+  const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
+  
+  // Badge check hook
+  const { checkBadgeProgress, newBadges, clearNewBadges } = useBadgeCheck();
   
   // Extract values after all hooks
   if (!authContext) {
@@ -135,6 +147,7 @@ const MyBagSupabase = () => {
     if (user) {
       loadBags();
       calculateTotalTees();
+      loadUserBadges();
     }
   }, [user]);
   
@@ -193,6 +206,17 @@ const MyBagSupabase = () => {
       // Error calculating tees, fallback to 0
       // Fallback to just using current bag's likes
       setTotalTees(0);
+    }
+  };
+
+  const loadUserBadges = async () => {
+    if (!user) return;
+    
+    try {
+      const badges = await badgeService.getUserBadges(user.id);
+      setUserBadges(badges);
+    } catch (error) {
+      console.error('Error loading badges:', error);
     }
   };
 
@@ -529,6 +553,9 @@ const MyBagSupabase = () => {
           setBagItems(prev => [...prev, updatedItem]);
           setEquipmentSelectorOpen(false);
           toast.success(`Equipment added to your bag!`);
+          
+          // Check badge progress after adding equipment
+          checkBadgeProgress();
           return;
         }
       }
@@ -546,6 +573,9 @@ const MyBagSupabase = () => {
         equipmentName,
         newItem.equipment.id
       );
+      
+      // Check badge progress after adding equipment
+      checkBadgeProgress();
     } catch (error) {
       // Error adding equipment
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -754,6 +784,14 @@ const MyBagSupabase = () => {
                   >
                     <List className="w-4 h-4" />
                   </Button>
+                  <Button
+                    variant={viewMode === 'card' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('card')}
+                    className={viewMode === 'card' ? '' : 'text-white hover:text-white hover:bg-white/10'}
+                  >
+                    <CreditCard className="w-4 h-4" />
+                  </Button>
                 </div>
                 {bags.length > 1 && (
                   <Button onClick={() => setShowBagSelector(true)} variant="outline">
@@ -856,6 +894,24 @@ const MyBagSupabase = () => {
           </Card>
         </div>
 
+        {/* Badge Showcase */}
+        <div className="mb-8 bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <BadgeShowcase 
+              userBadges={userBadges} 
+              userId={user.id}
+              isOwnProfile={true}
+            />
+            <Link 
+              to="/badges"
+              className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors"
+            >
+              <Trophy className="w-4 h-4" />
+              View All Badges
+            </Link>
+          </div>
+        </div>
+
         {/* Equipment Display */}
         {bagItems.length === 0 ? (
           <EmptyState />
@@ -880,7 +936,7 @@ const MyBagSupabase = () => {
               onEquipmentClick={handleEditEquipment}
             />
           </Suspense>
-        ) : (
+        ) : viewMode === 'list' ? (
           <div className="space-y-4">
             {bagItems.map((item) => (
               <Card key={item.id} className="bg-white/10 backdrop-blur-[10px] border-white/20">
@@ -953,6 +1009,55 @@ const MyBagSupabase = () => {
               </Card>
             ))}
           </div>
+        ) : (
+          /* Card View */
+          <div className="flex justify-center">
+            <div className="flex flex-col lg:flex-row gap-6 items-stretch">
+              {/* Stats - 1 column on left */}
+              <div className="flex-shrink-0 w-full lg:w-56">
+                <div className="h-full bg-gray-900/50 rounded-lg p-4 border border-white/10">
+                  <BagStatsRow
+                    totalItems={bagItems.length}
+                    bagTees={currentBag?.likes_count || 0}
+                    views={currentBag?.views_count || 0}
+                    estimatedValue={totalValue}
+                  />
+                </div>
+              </div>
+              
+              {/* Bag Card - center */}
+              <div className="flex-shrink-0 w-full max-w-sm">
+                <BagCard
+                  bag={{
+                    ...currentBag!,
+                    bag_equipment: bagItems,
+                    profiles: authContext.profile
+                  }}
+                  onView={() => {}} // No action needed, already on bag page
+                  onLike={async () => {}} // No like action in edit view
+                  onFollow={async () => {}} // No follow action in edit view
+                  isLiked={false}
+                  isFollowing={false}
+                  currentUserId={user?.id}
+                />
+              </div>
+              
+              {/* Badges - 2x3 grid on right */}
+              <div className="flex-shrink-0 w-full lg:w-56">
+                <div className="h-full bg-gray-900/50 rounded-lg p-4 border border-white/10">
+                  <BadgeDisplay
+                    badges={userBadges}
+                    size="lg"
+                    showEmpty={true}
+                    maxDisplay={6}
+                    onBadgeClick={(badge) => {
+                      console.log('Badge clicked:', badge);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Add Equipment Buttons */}
@@ -1021,6 +1126,19 @@ const MyBagSupabase = () => {
             equipment={bagItems}
           />
         </Suspense>
+      )}
+
+      {/* Badge Notification Toast */}
+      {newBadges.length > 0 && (
+        <BadgeNotificationToast
+          badge={newBadges[0]}
+          isVisible={true}
+          onClose={() => {
+            clearNewBadges();
+            // Reload badges to show updated progress
+            loadUserBadges();
+          }}
+        />
       )}
 
     </div>

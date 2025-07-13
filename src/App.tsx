@@ -22,6 +22,7 @@ const Feed = lazy(() => import("./pages/Feed"));
 const Saved = lazy(() => import("./pages/Saved"));
 const Following = lazy(() => import("./pages/Following"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
+const Badges = lazy(() => import("./pages/Badges"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin routes (rarely accessed)
@@ -90,6 +91,7 @@ const App = () => {
                         <Route path="/saved" element={<Saved />} />
                         <Route path="/following" element={<Following />} />
                         <Route path="/wishlist" element={<Wishlist />} />
+                        <Route path="/badges" element={<Badges />} />
                         <Route path="/admin/seed-equipment" element={<SeedEquipment />} />
                         <Route path="/admin/equipment-migration" element={<EquipmentMigration />} />
                         <Route path="/debug" element={<Debug />} />

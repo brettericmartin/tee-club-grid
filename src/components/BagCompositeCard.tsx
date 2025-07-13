@@ -126,32 +126,61 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
     );
   }
 
+  // Find the golf bag in the equipment
+  const golfBag = Object.values(equipmentData).find(item => 
+    item && item.category === 'bag'
+  );
+  const golfBagImage = golfBag?.image_url;
+
   return (
     <>
       <div
-        className="bg-card rounded-lg shadow-card hover:shadow-lg transition-shadow duration-300 cursor-pointer overflow-hidden"
+        className="group relative overflow-hidden transition-[transform,shadow] duration-300 hover:scale-[1.02] hover:shadow-2xl rounded-lg"
         onClick={handleCardClick}
       >
+        {/* Background with golf bag image or gradient */}
+        <div className="absolute inset-0">
+          {golfBagImage ? (
+            <>
+              <img 
+                src={golfBagImage} 
+                alt="Golf Bag"
+                className="w-full h-full object-cover object-center"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/60" />
+            </>
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+                <div className="absolute inset-0 bg-black/40" />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Content container */}
+        <div className="relative bg-white/5 min-h-[400px]">
         {/* Header with user info */}
-        <div className="p-4 border-b">
+        <div className="p-4 border-b border-white/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
                 src={bag.userAvatar}
                 alt={bag.userName}
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-10 h-10 rounded-full object-cover border-2 border-white/20"
                 loading="lazy"
               />
               <div>
-                <h3 className="font-semibold text-sm">{bag.userName}</h3>
-                <p className="text-xs text-muted-foreground">{bag.userHandicap} HCP</p>
+                <h3 className="font-semibold text-sm text-white">{bag.userName}</h3>
+                <p className="text-xs text-white/70">{bag.userHandicap} HCP</p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleFollowClick}
-              className="text-xs"
+              className="text-xs text-white hover:text-white/80"
             >
               <UserPlus className="w-3.5 h-3.5 mr-1" />
               {bag.isFollowing ? 'Following' : 'Follow'}
@@ -163,8 +192,8 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
         <div className="p-4">
           {/* Bag title and stats */}
           <div className="mb-4">
-            <h4 className="font-semibold text-lg mb-1">{bag.bagName}</h4>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <h4 className="font-semibold text-lg mb-1 text-white">{bag.bagName}</h4>
+            <div className="flex items-center gap-4 text-sm text-white/70">
               <span>${bag.totalValue.toLocaleString()}</span>
               <span>{bag.avgScore} avg</span>
             </div>
@@ -175,7 +204,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
             {/* Clubs */}
             {featuredClubs.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">CLUBS</p>
+                <p className="text-xs font-medium text-white/70 mb-2">CLUBS</p>
                 <div className="grid grid-cols-2 gap-2">
                   {featuredClubs.map(({ id, equipment }) => (
                     <div
@@ -210,7 +239,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
             {/* Accessories */}
             {featuredAccessories.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">ACCESSORIES</p>
+                <p className="text-xs font-medium text-white/70 mb-2">ACCESSORIES</p>
                 <div className="grid grid-cols-2 gap-2">
                   {featuredAccessories.map(({ id, equipment }) => (
                     <div
@@ -245,7 +274,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
         </div>
 
         {/* Footer with actions */}
-        <div className="p-4 border-t flex items-center justify-between">
+        <div className="p-4 border-t border-white/20 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <TeedBallLike
               isLiked={bag.isLiked || false}
@@ -253,17 +282,18 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
               onLike={handleLikeClick}
               size="sm"
               showCount={true}
-              className="text-muted-foreground hover:text-primary"
+              className="text-white/70 hover:text-primary"
             />
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="text-xs text-muted-foreground hover:text-primary"
+            className="text-xs text-white/70 hover:text-white"
           >
             View Full Bag
             <ArrowUpRight className="w-3 h-3 ml-1" />
           </Button>
+        </div>
         </div>
       </div>
 
