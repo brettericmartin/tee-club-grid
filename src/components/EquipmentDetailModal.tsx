@@ -13,7 +13,7 @@ import EquipmentSpecificationTabs from "./equipment-detail/EquipmentSpecificatio
 import EquipmentActionButtons from "./equipment-detail/EquipmentActionButtons";
 
 interface EquipmentDetailModalProps {
-  equipment: EquipmentDetail | null;
+  equipment: EquipmentDetail | any | null;
   isOpen: boolean;
   onClose: () => void;
   onToggleFeatured?: (equipmentId: string) => void;
@@ -28,6 +28,9 @@ const EquipmentDetailModal = ({ equipment, isOpen, onClose, onToggleFeatured, is
   const [isSaved, setIsSaved] = useState(false);
 
   if (!equipment) return null;
+
+  // Check if this is a full EquipmentDetail object with currentBuild
+  const hasFullDetails = equipment.currentBuild && equipment.popularShafts && equipment.popularGrips;
 
   const handleToggleFeatured = () => {
     if (onToggleFeatured) {
@@ -74,7 +77,7 @@ const EquipmentDetailModal = ({ equipment, isOpen, onClose, onToggleFeatured, is
             {/* Hero Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <EquipmentImageGallery
-                images={equipment.images}
+                images={equipment.images || [equipment.image || equipment.image_url || '/placeholder.svg']}
                 brand={equipment.brand}
                 model={equipment.model}
                 selectedImageIndex={selectedImageIndex}
@@ -88,12 +91,14 @@ const EquipmentDetailModal = ({ equipment, isOpen, onClose, onToggleFeatured, is
               />
             </div>
 
-            <EquipmentBuildConfiguration
-              equipment={equipment}
-              isOwnBag={isOwnBag}
-              onShaftChange={() => setShaftModalOpen(true)}
-              onGripChange={() => setGripModalOpen(true)}
-            />
+            {hasFullDetails && (
+              <EquipmentBuildConfiguration
+                equipment={equipment}
+                isOwnBag={isOwnBag}
+                onShaftChange={() => setShaftModalOpen(true)}
+                onGripChange={() => setGripModalOpen(true)}
+              />
+            )}
 
             <EquipmentSpecificationTabs equipment={equipment} />
 
@@ -107,27 +112,31 @@ const EquipmentDetailModal = ({ equipment, isOpen, onClose, onToggleFeatured, is
         </DialogContent>
       </Dialog>
 
-      <ShaftSelectionModal
-        isOpen={shaftModalOpen}
-        onClose={() => setShaftModalOpen(false)}
-        shafts={equipment.popularShafts}
-        currentShaft={equipment.currentBuild.shaft}
-        onSelect={(shaft) => {
-          // Handle shaft selection
-          setShaftModalOpen(false);
-        }}
-      />
+      {hasFullDetails && (
+        <>
+          <ShaftSelectionModal
+            isOpen={shaftModalOpen}
+            onClose={() => setShaftModalOpen(false)}
+            shafts={equipment.popularShafts}
+            currentShaft={equipment.currentBuild.shaft}
+            onSelect={(shaft) => {
+              // Handle shaft selection
+              setShaftModalOpen(false);
+            }}
+          />
 
-      <GripSelectionModal
-        isOpen={gripModalOpen}
-        onClose={() => setGripModalOpen(false)}
-        grips={equipment.popularGrips}
-        currentGrip={equipment.currentBuild.grip}
-        onSelect={(grip) => {
-          // Handle grip selection
-          setGripModalOpen(false);
-        }}
-      />
+          <GripSelectionModal
+            isOpen={gripModalOpen}
+            onClose={() => setGripModalOpen(false)}
+            grips={equipment.popularGrips}
+            currentGrip={equipment.currentBuild.grip}
+            onSelect={(grip) => {
+              // Handle grip selection
+              setGripModalOpen(false);
+            }}
+          />
+        </>
+      )}
     </>
   );
 };

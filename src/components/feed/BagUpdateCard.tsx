@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatCompactCurrency } from '@/lib/formatters';
 
 interface BagUpdateCardProps {
   post: any;
@@ -212,7 +213,7 @@ export function BagUpdateCard({ post, onLike, isLiked }: BagUpdateCardProps) {
           <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/20 backdrop-blur-sm">
             <div className="flex justify-between text-sm">
               <div className="text-center">
-                <p className="text-primary font-bold">${totalValue.toLocaleString()}</p>
+                <p className="text-primary font-bold">{formatCompactCurrency(totalValue)}</p>
                 <p className="text-white/50 text-xs">Total Value</p>
               </div>
               <div className="text-center">

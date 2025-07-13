@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { formatCompactCurrency } from '@/lib/formatters';
 
 interface BagCreatedCardProps {
   post: any;
@@ -73,7 +74,7 @@ export function BagCreatedCard({ post, onLike, isLiked }: BagCreatedCardProps) {
           {/* Stats */}
           <div className="flex items-center gap-4 mt-3">
             <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30">
-              ${totalValue.toLocaleString()}
+              {formatCompactCurrency(totalValue)}
             </Badge>
             <span className="text-white/70 text-sm">
               {bag.bag_equipment?.length || 0} items

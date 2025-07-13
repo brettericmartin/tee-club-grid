@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 interface TeedBallLikeProps {
   isLiked: boolean;
   likeCount: number;
-  onLike: () => Promise<void>;
+  onToggle: () => void;  // Changed from onLike to onToggle and removed async
   size?: 'sm' | 'md' | 'lg';
   showCount?: boolean;
   className?: string;
@@ -74,13 +74,12 @@ const TeedBallIcon = ({ className, filled = false }: { className?: string; fille
 export function TeedBallLike({
   isLiked,
   likeCount,
-  onLike,
+  onToggle,
   size = 'md',
   showCount = true,
   className,
   disabled = false
 }: TeedBallLikeProps) {
-  const [loading, setLoading] = useState(false);
   const [optimisticLiked, setOptimisticLiked] = useState(isLiked);
   const [optimisticCount, setOptimisticCount] = useState(likeCount);
 
@@ -102,25 +101,22 @@ export function TeedBallLike({
     lg: 'h-10 px-3 text-base'
   };
 
-  const handleLike = async () => {
-    if (loading || disabled) return;
+  const handleClick = () => {
+    if (disabled) return;
 
     // Optimistic update
     const wasLiked = optimisticLiked;
     setOptimisticLiked(!wasLiked);
     setOptimisticCount(wasLiked ? optimisticCount - 1 : optimisticCount + 1);
 
-    setLoading(true);
+    // Call the toggle function
     try {
-      await onLike();
+      onToggle();
     } catch (error) {
       console.error('Error toggling like:', error);
-      toast.error('Failed to update. Please try again.');
       // Revert optimistic update on error
       setOptimisticLiked(wasLiked);
       setOptimisticCount(likeCount);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -134,11 +130,10 @@ export function TeedBallLike({
         optimisticLiked 
           ? 'text-primary hover:text-primary/80' 
           : 'text-current hover:text-primary',
-        loading && 'opacity-50',
         className
       )}
-      onClick={handleLike}
-      disabled={loading || disabled}
+      onClick={handleClick}
+      disabled={disabled}
     >
       <TeedBallIcon 
         className={cn(

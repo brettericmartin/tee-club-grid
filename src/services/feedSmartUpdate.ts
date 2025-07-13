@@ -1,6 +1,29 @@
 import { supabase } from '@/lib/supabase';
 import { createBagCreationPost, createBagUpdatePost, createEquipmentAddedPost } from './feedService';
 
+// Helper to find recent equipment-specific posts
+async function findRecentEquipmentPost(
+  userId: string, 
+  equipmentId: string, 
+  hourLimit: number = 1
+): Promise<any | null> {
+  const recentTime = new Date();
+  recentTime.setHours(recentTime.getHours() - hourLimit);
+
+  const { data, error } = await supabase
+    .from('feed_posts')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('equipment_id', equipmentId)
+    .gte('created_at', recentTime.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error || !data) return null;
+  return data;
+}
+
 // Check if a recent bag creation post exists within 24 hours
 async function findRecentBagCreationPost(userId: string, bagId: string): Promise<any | null> {
   const twentyFourHoursAgo = new Date();
@@ -40,19 +63,27 @@ export async function smartCreateEquipmentPost(
   equipmentName: string,
   equipmentId: string
 ) {
-  console.log('Smart create equipment post:', { userId, bagId, bagName, equipmentName });
+  console.log('Smart create equipment post:', { userId, bagId, bagName, equipmentName, equipmentId });
+  
+  // First check if there's a recent post for this specific equipment
+  const recentEquipmentPost = await findRecentEquipmentPost(userId, equipmentId, 1);
+  
+  if (recentEquipmentPost) {
+    console.log('Found recent post for this equipment, skipping duplicate creation');
+    return; // Don't create duplicate
+  }
   
   // Check if there's a recent bag creation post we should update instead
-  const recentPost = await findRecentBagCreationPost(userId, bagId);
+  const recentBagPost = await findRecentBagCreationPost(userId, bagId);
   
-  if (recentPost) {
+  if (recentBagPost && (!recentBagPost.equipment_id || recentBagPost.equipment_id !== equipmentId)) {
     console.log('Found recent bag creation post, updating it instead of creating new one');
     
     // Update the existing post to mention the equipment
     const updatedContent = {
-      ...recentPost.content,
+      ...recentBagPost.content,
       recent_additions: [
-        ...(recentPost.content.recent_additions || []),
+        ...(recentBagPost.content.recent_additions || []),
         {
           equipment_name: equipmentName,
           equipment_id: equipmentId,
@@ -66,9 +97,10 @@ export async function smartCreateEquipmentPost(
       .from('feed_posts')
       .update({ 
         content: updatedContent,
+        equipment_id: equipmentId, // Track the equipment in the post
         updated_at: new Date().toISOString()
       })
-      .eq('id', recentPost.id);
+      .eq('id', recentBagPost.id);
 
     if (error) {
       console.error('Error updating feed post:', error);
@@ -78,7 +110,7 @@ export async function smartCreateEquipmentPost(
       console.log('Successfully updated existing feed post with equipment');
     }
   } else {
-    // No recent post found, create a new one
+    // No recent post found or it's for different equipment, create a new one
     await createEquipmentAddedPost(userId, bagId, bagName, equipmentName, equipmentId);
   }
 }

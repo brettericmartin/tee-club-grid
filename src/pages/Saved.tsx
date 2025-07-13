@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { getUserSavedEquipment, toggleEquipmentSave, getUserWishlist } from "@/services/equipment";
 import { getFollowedBags } from "@/services/users";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
 
 const Saved = () => {
   const { user } = useAuth();
@@ -164,7 +165,7 @@ const Saved = () => {
                 <h3 className="font-medium text-sm">{item.brand}</h3>
                 <p className="text-muted-foreground text-sm">{item.model}</p>
                 <div className="flex justify-between items-center mt-2">
-                  <span className="font-bold">${item.msrp || 'N/A'}</span>
+                  <span className="font-bold">{item.msrp ? formatCompactCurrency(item.msrp) : 'N/A'}</span>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -259,7 +260,7 @@ const Saved = () => {
                   {item.isWishlist && ` • ${item.wishlistPriority || 'Normal'} priority`}
                 </p>
                 <div className="flex gap-4 mt-1 text-sm">
-                  <span className="font-bold">${item.msrp || 'N/A'}</span>
+                  <span className="font-bold">{item.msrp ? formatCompactCurrency(item.msrp) : 'N/A'}</span>
                   {item.isWishlist && item.wishlistNotes && (
                     <span className="text-muted-foreground italic">{item.wishlistNotes}</span>
                   )}
@@ -370,7 +371,7 @@ const Saved = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">{bag.name}</span>
                     <span className="font-medium text-foreground">
-                      ${bag.totalValue?.toLocaleString() || '0'}
+                      {formatCompactCurrency(bag.totalValue || 0)}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">

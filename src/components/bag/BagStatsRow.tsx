@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { formatCompactNumber, formatCompactCurrency } from '@/lib/formatters';
 
 interface BagStatsRowProps {
   totalItems: number;
@@ -16,7 +17,7 @@ const BagStatsRow: FC<BagStatsRowProps> = ({
   className = ""
 }) => {
   const formatValue = (value: number) => {
-    return value.toLocaleString();
+    return formatCompactNumber(value);
   };
 
   const stats = [
@@ -38,7 +39,7 @@ const BagStatsRow: FC<BagStatsRowProps> = ({
     {
       label: "Est. Value",
       value: estimatedValue,
-      format: (val) => `$${formatValue(val)}`
+      format: (val) => formatCompactCurrency(val)
     }
   ];
 

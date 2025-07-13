@@ -1,6 +1,6 @@
 /* @refresh skip */
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Plus, Edit3, Save, X, Eye, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard } from "lucide-react";
+import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard } from "lucide-react";
 import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer from "@/components/BackgroundLayer";
 import BackgroundPicker from "@/components/BackgroundPicker";
@@ -27,12 +27,12 @@ import { BagCard } from "@/components/bags/BagCard";
 import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
 import BagStatsRow from "@/components/bag/BagStatsRow";
 import { BadgeService } from "@/services/badgeService";
+import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
 
 // Lazy load heavy components with @dnd-kit
 const BagGalleryDndKit = lazy(() => import("@/components/bag/BagGalleryDndKit"));
 const EquipmentSelectorImproved = lazy(() => import("@/components/equipment/EquipmentSelectorImproved"));
 const EquipmentEditor = lazy(() => import("@/components/bag/EquipmentEditor"));
-const BagPreview = lazy(() => import("@/components/bag/BagPreview"));
 
 // Loading component for heavy components
 const ComponentLoadingFallback = () => {
@@ -97,7 +97,6 @@ const MyBagSupabase = () => {
   const [equipmentSelectorOpen, setEquipmentSelectorOpen] = useState(false);
   const [equipmentEditorOpen, setEquipmentEditorOpen] = useState(false);
   const [selectedBagEquipment, setSelectedBagEquipment] = useState<BagEquipmentItem | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
   const [totalTees, setTotalTees] = useState(0);
   const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
   
@@ -144,17 +143,39 @@ const MyBagSupabase = () => {
   }
 
   useEffect(() => {
-    if (user) {
-      loadBags();
-      calculateTotalTees();
-      loadUserBadges();
-    }
+    const initializePage = async () => {
+      console.log('[MyBag] Initializing page for user:', user?.id);
+      try {
+        if (user) {
+          await Promise.all([
+            loadBags().catch(err => {
+              console.error('[MyBag] Error loading bags:', err);
+              toast.error('Failed to load bags');
+            }),
+            calculateTotalTees().catch(err => {
+              console.error('[MyBag] Error calculating tees:', err);
+              // Don't show error toast for tees calculation
+            }),
+            loadUserBadges().catch(err => {
+              console.error('[MyBag] Error loading badges:', err);
+              // Don't show error toast for badges
+            })
+          ]);
+        }
+      } catch (error) {
+        console.error('[MyBag] Critical error initializing page:', error);
+        toast.error('Failed to load bag data. Please refresh the page.');
+      }
+    };
+    
+    initializePage();
   }, [user]);
   
   const calculateTotalTees = async () => {
+    console.log('[MyBag] Calculating total tees');
     try {
       if (!user || !user.id) {
-        // User not available, exit early
+        console.log('[MyBag] No user available for tee calculation');
         return;
       }
       
@@ -202,10 +223,11 @@ const MyBagSupabase = () => {
       
       const total = (bagTees || 0) + (postTees || 0);
       setTotalTees(total);
+      console.log('[MyBag] Total tees calculated:', total);
     } catch (error) {
-      // Error calculating tees, fallback to 0
-      // Fallback to just using current bag's likes
+      console.error('[MyBag] Error in calculateTotalTees:', error);
       setTotalTees(0);
+      // Don't throw - this is not critical functionality
     }
   };
 
@@ -221,6 +243,7 @@ const MyBagSupabase = () => {
   };
 
   const loadBags = async () => {
+    console.log('[MyBag] Loading bags for user:', user?.id);
     if (!user) return;
     
     try {
@@ -237,8 +260,7 @@ const MyBagSupabase = () => {
         .order('created_at', { ascending: true });
 
       if (error) {
-        // Error loading bags
-        console.error('Error loading bags:', error);
+        console.error('[MyBag] Database error loading bags:', error);
         throw new Error(error?.message || 'Failed to load bags');
       }
 
@@ -285,6 +307,7 @@ const MyBagSupabase = () => {
   };
 
   const loadBagEquipment = async (bagId: string) => {
+    console.log('[MyBag] Loading equipment for bag:', bagId);
     try {
       // First try with all joins (if tables exist)
       let { data, error } = await supabase
@@ -798,10 +821,6 @@ const MyBagSupabase = () => {
                     Switch Bag
                   </Button>
                 )}
-                <Button onClick={() => setPreviewOpen(true)} variant="outline">
-                  <Eye className="w-4 h-4 mr-2" />
-                  Preview
-                </Button>
               </>
             )}
             {isEditing ? (
@@ -869,7 +888,7 @@ const MyBagSupabase = () => {
           <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
             <CardContent className="p-4 text-center">
               <p className="text-sm text-gray-200">Total Tees</p>
-              <p className="text-2xl font-bold text-white">{totalTees.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-white">{formatCompactNumber(totalTees)}</p>
             </CardContent>
           </Card>
           <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
@@ -889,7 +908,7 @@ const MyBagSupabase = () => {
           <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
             <CardContent className="p-4 text-center">
               <p className="text-xs text-gray-300">Est. Value</p>
-              <p className="text-lg font-medium text-white">${totalValue.toLocaleString()}</p>
+              <p className="text-lg font-medium text-white">{formatCompactCurrency(totalValue)}</p>
             </CardContent>
           </Card>
         </div>
@@ -1113,17 +1132,6 @@ const MyBagSupabase = () => {
             }}
             equipment={selectedBagEquipment}
             onUpdate={() => loadBagEquipment(currentBag?.id || '')}
-          />
-        </Suspense>
-      )}
-
-      {currentBag && (
-        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
-          <BagPreview
-            isOpen={previewOpen}
-            onClose={() => setPreviewOpen(false)}
-            bag={currentBag}
-            equipment={bagItems}
           />
         </Suspense>
       )}

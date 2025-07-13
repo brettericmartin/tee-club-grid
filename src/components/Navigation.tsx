@@ -1,4 +1,4 @@
-import { Search, User, Home, Grid, Heart, Settings, Users, MapPin, X, LogOut } from "lucide-react";
+import { User, Home, Grid, Heart, Settings, Users, MapPin, LogOut } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,7 +42,6 @@ const NavLink = ({ to, children }: NavLinkProps) => {
 };
 
 const Navigation = () => {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const { user, signOut } = useAuth();
@@ -79,7 +78,7 @@ const Navigation = () => {
             </div>
 
             {/* Center - Feed & My Bag Buttons */}
-            <div className="flex sm:flex-1 justify-center items-center gap-4">
+            <div className="flex flex-1 justify-center items-center gap-2 sm:gap-4">
               <Link 
                 to="/feed"
                 className="group"
@@ -91,13 +90,13 @@ const Navigation = () => {
                   }`} />
                   
                   {/* Feed Button */}
-                  <div className={`relative text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium flex items-center gap-2 hover:scale-105 transition-transform duration-200 ${
+                  <div className={`relative text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium flex items-center gap-1.5 sm:gap-2 hover:scale-105 transition-transform duration-200 ${
                     location.pathname === '/feed' 
                       ? 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-black' 
                       : 'bg-primary hover:bg-primary/90'
                   }`}>
                     <Home className="w-4 h-4" />
-                    <span className="hidden sm:inline">Feed</span>
+                    <span className="text-sm sm:text-base">Feed</span>
                   </div>
                 </div>
               </Link>
@@ -113,13 +112,13 @@ const Navigation = () => {
                   }`} />
                   
                   {/* Button with location pin icon */}
-                  <div className={`relative text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium flex items-center gap-2 hover:scale-105 transition-transform duration-200 ${
+                  <div className={`relative text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium flex items-center gap-1.5 sm:gap-2 hover:scale-105 transition-transform duration-200 ${
                     location.pathname === '/my-bag' 
                       ? 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-black' 
                       : 'bg-primary hover:bg-primary/90'
                   }`}>
                     <MapPin className="w-4 h-4" />
-                    <span className="hidden sm:inline">My Bag</span>
+                    <span className="text-sm sm:text-base">My Bag</span>
                   </div>
                 </div>
               </Link>
@@ -132,15 +131,7 @@ const Navigation = () => {
                 <NavLink to="/following">Following</NavLink>
               </div>
               
-              <div className="flex items-center gap-4">
-                <button 
-                  onClick={() => setIsSearchOpen(true)}
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 hover:scale-110 transition-[colors,transform]"
-                  title="Search"
-                >
-                  <Search className="w-5 h-5 text-white" />
-                </button>
-                
+              <div className="flex items-center">
                 {user ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -192,35 +183,6 @@ const Navigation = () => {
         </div>
 
       </nav>
-
-      {/* Search Modal */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center pt-20">
-          <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-6 w-full max-w-2xl mx-4 shadow-[0_4px_6px_rgba(0,0,0,0.3)]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-lg font-medium">Search Equipment & Bags</h3>
-              <button 
-                onClick={() => setIsSearchOpen(false)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors duration-200"
-              >
-                <X className="w-5 h-5 text-white" />
-              </button>
-            </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
-              <input 
-                type="text" 
-                placeholder="Search for equipment, bags, players..."
-                className="w-full pl-10 pr-4 py-3 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary focus:outline-none placeholder-white/50"
-                autoFocus
-              />
-            </div>
-            <div className="mt-4 text-white/50 text-sm">
-              Try: "TaylorMade Stealth", "Marcus Johnson", "Wedge Setup"
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Auth Modals */}
       <SignInModal 

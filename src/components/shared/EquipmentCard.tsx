@@ -3,6 +3,7 @@ import { Heart, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import EquipmentTile from './EquipmentTile';
+import { formatCurrency } from '@/lib/formatters';
 
 interface EquipmentCardProps {
   equipment: {
@@ -34,7 +35,7 @@ const EquipmentCard: FC<EquipmentCardProps> = ({
   className
 }) => {
   const formatPrice = (price: number) => {
-    return `$${price.toLocaleString()}`;
+    return formatCurrency(price);
   };
 
   const getCategoryDisplay = (category: string) => {

@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
 import EquipmentCard from "@/components/shared/EquipmentCard";
 import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
+import { formatCompactCurrency } from "@/lib/formatters";
 
 const Wishlist = () => {
   // Sample wishlist items - in real app, this would come from user data
@@ -105,7 +106,7 @@ const Wishlist = () => {
             
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="font-semibold text-lg">${totalValue.toLocaleString()}</p>
+                <p className="font-semibold text-lg">{formatCompactCurrency(totalValue)}</p>
                 <p className="text-sm text-muted-foreground">Total Value</p>
               </div>
               <Button variant="outline">

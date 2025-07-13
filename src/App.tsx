@@ -70,14 +70,14 @@ const App = () => {
             <Sonner />
             <Analytics />
             <BrowserRouter>
-              <div className="min-h-screen bg-background font-sans antialiased">
+              <div className="min-h-screen bg-background font-sans antialiased overflow-x-hidden">
                 {/* Fixed background gradient */}
                 <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-primary/10 -z-10" />
                 
                 <Navigation />
                 
                 {/* Main content with padding for fixed nav */}
-                <main className="pt-16 pb-16 md:pb-0">
+                <main className="pt-16 pb-16 md:pb-0 overflow-x-hidden">
                   <ErrorBoundary>
                     <Suspense fallback={<PageLoadingFallback />}>
                       <Routes>

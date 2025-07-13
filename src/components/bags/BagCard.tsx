@@ -10,6 +10,7 @@ import { EquipmentShowcaseModal } from '@/components/EquipmentShowcaseModal';
 import EquipmentTile from '@/components/shared/EquipmentTile';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import type { Database } from '@/lib/supabase';
+import { formatCompactCurrency } from '@/lib/formatters';
 
 interface BagEquipmentItem {
   id: string;
@@ -373,7 +374,7 @@ export const BagCard = memo(function BagCard({
                 <span className="text-xs text-white/70">pieces</span>
               </div>
               <div className="flex items-center gap-1">
-                <span className="font-semibold">${totalValue.toLocaleString()}</span>
+                <span className="font-semibold">{formatCompactCurrency(totalValue)}</span>
                 <span className="text-xs text-white/70">value</span>
               </div>
             </div>

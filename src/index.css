@@ -237,6 +237,15 @@
     @apply bg-gradient-to-br from-gray-900 via-gray-800 to-primary/10;
   }
 
+  /* 3D Flip Card Effects */
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
   /* Masonry Gallery */
   .gallery-masonry {
     display: grid;

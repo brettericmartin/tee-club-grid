@@ -11,9 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FeedCardEnhanced } from '@/components/feed/FeedCardEnhanced';
-import { UnifiedPhotoUploadDialog } from '@/components/shared/UnifiedPhotoUploadDialog';
-import { getEnhancedFeedPosts } from '@/services/feedServiceEnhanced';
+import { FeedItemCard } from '@/components/FeedItemCard';
+import { getFeedPosts } from '@/services/feedService';
+import { transformFeedPost } from '@/utils/feedTransformer';
+import { supabase } from '@/lib/supabase';
 
 const Feed = () => {
   const { user } = useAuth();
@@ -21,7 +22,6 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'following'>('all');
   const [displayCount, setDisplayCount] = useState(12);
-  const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
     loadFeed();
@@ -30,12 +30,108 @@ const Feed = () => {
   const loadFeed = async () => {
     try {
       setLoading(true);
-      const feedPosts = await getEnhancedFeedPosts(user?.id, filter);
-      setPosts(feedPosts);
+      const feedPosts = await getFeedPosts(user?.id, filter);
+      
+      // Check which users are followed if user is logged in
+      let followedUsers = new Set<string>();
+      if (user) {
+        const { data: follows } = await supabase
+          .from('user_follows')
+          .select('following_id')
+          .eq('follower_id', user.id);
+        
+        if (follows) {
+          followedUsers = new Set(follows.map(f => f.following_id));
+        }
+      }
+      
+      // Transform posts to UI format
+      const transformedPosts = feedPosts.map(post => {
+        const isFollowed = followedUsers.has(post.user_id);
+        return transformFeedPost({ ...post, isFollowed });
+      });
+      
+      setPosts(transformedPosts);
     } catch (error) {
       console.error('Error loading feed:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLike = async (postId: string) => {
+    if (!user) return;
+    
+    try {
+      // Toggle like in database
+      const { data: existingLike } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('post_id', postId)
+        .single();
+      
+      if (existingLike) {
+        // Unlike
+        await supabase
+          .from('likes')
+          .delete()
+          .eq('id', existingLike.id);
+      } else {
+        // Like
+        await supabase
+          .from('likes')
+          .insert({
+            user_id: user.id,
+            post_id: postId
+          });
+      }
+      
+      // Reload feed to get updated like counts
+      loadFeed();
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
+  };
+
+  const handleFollow = async (userId: string) => {
+    if (!user || user.id === userId) return;
+    
+    try {
+      // Toggle follow in database
+      const { data: existingFollow } = await supabase
+        .from('user_follows')
+        .select('id')
+        .eq('follower_id', user.id)
+        .eq('following_id', userId)
+        .single();
+      
+      if (existingFollow) {
+        // Unfollow
+        await supabase
+          .from('user_follows')
+          .delete()
+          .eq('id', existingFollow.id);
+      } else {
+        // Follow
+        await supabase
+          .from('user_follows')
+          .insert({
+            follower_id: user.id,
+            following_id: userId
+          });
+      }
+      
+      // Update local state
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.userId === userId 
+            ? { ...post, isFromFollowed: !post.isFromFollowed }
+            : post
+        )
+      );
+    } catch (error) {
+      console.error('Error toggling follow:', error);
     }
   };
 
@@ -70,7 +166,7 @@ const Feed = () => {
             <Button
               variant={filter === 'all' ? 'default' : 'outline'}
               onClick={() => setFilter('all')}
-              className={filter === 'all' ? 'bg-primary hover:bg-primary/90' : 'glass-button'}
+              className={filter === 'all' ? 'bg-primary hover:bg-primary/90' : 'bg-white/10 backdrop-blur-[10px] text-white border-white/20 hover:bg-white/20'}
             >
               <Sparkles className="w-4 h-4 mr-2" />
               All
@@ -79,7 +175,7 @@ const Feed = () => {
               <Button
                 variant={filter === 'following' ? 'default' : 'outline'}
                 onClick={() => setFilter('following')}
-                className={filter === 'following' ? 'bg-primary hover:bg-primary/90' : 'glass-button'}
+                className={filter === 'following' ? 'bg-primary hover:bg-primary/90' : 'bg-white/10 backdrop-blur-[10px] text-white border-white/20 hover:bg-white/20'}
               >
                 <Users className="w-4 h-4 mr-2" />
                 Following
@@ -89,25 +185,25 @@ const Feed = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="glass-button ml-auto">
+              <Button variant="outline" className="bg-white/10 backdrop-blur-[10px] text-white border-white/20 hover:bg-white/20 ml-auto">
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 glass-card">
+            <DropdownMenuContent align="end" className="w-56 bg-gray-900/95 backdrop-blur-[10px] border-white/20">
               <DropdownMenuLabel className="text-white">Filter by</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem className="text-white/70 hover:text-white">
+              <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
                 <Trophy className="w-4 h-4 mr-2" />
                 Equipment Photos
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-white/70 hover:text-white">
+              <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
                 Bag Updates
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-white/70 hover:text-white">
+              <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
                 New Equipment
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-white/70 hover:text-white">
+              <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
                 New Bags
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -118,7 +214,13 @@ const Feed = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {displayedPosts.length > 0 ? (
             displayedPosts.map((post) => (
-              <FeedCardEnhanced key={post.id} post={post} onUpdate={loadFeed} />
+              <FeedItemCard 
+                key={post.postId} 
+                post={post} 
+                currentUserId={user?.id}
+                onLike={handleLike}
+                onFollow={handleFollow}
+              />
             ))
           ) : (
             !loading && <div className="col-span-full text-center py-8 text-white/60">No posts to display</div>
@@ -132,7 +234,7 @@ const Feed = () => {
               onClick={() => setDisplayCount(prev => prev + 12)}
               variant="outline"
               size="lg"
-              className="glass-button"
+              className="bg-white/10 backdrop-blur-[10px] text-white border-white/20 hover:bg-white/20"
             >
               Load More
             </Button>
@@ -142,7 +244,7 @@ const Feed = () => {
         {/* Empty State */}
         {!loading && posts.length === 0 && (
           <div className="text-center py-20">
-            <div className="glass-card p-12 max-w-md mx-auto">
+            <div className="bg-gray-900/60 backdrop-blur-[10px] border border-white/20 rounded-xl p-12 max-w-md mx-auto">
               <Trophy className="w-16 h-16 text-white/50 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">No Posts Yet</h3>
               <p className="text-white/70">
@@ -175,17 +277,17 @@ const Feed = () => {
                 <Plus className="w-6 h-6" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="top" className="glass-card mb-2">
+            <DropdownMenuContent align="end" side="top" className="bg-gray-900/95 backdrop-blur-[10px] border-white/20 mb-2">
               <DropdownMenuItem 
-                onClick={() => setShowUploadModal(true)}
-                className="text-white/90 hover:text-white cursor-pointer"
+                onClick={() => window.location.href = '/equipment'}
+                className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
               >
                 <Camera className="w-4 h-4 mr-2" />
-                Share Equipment Photo
+                Browse Equipment
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => window.location.href = '/my-bag'}
-                className="text-white/90 hover:text-white cursor-pointer"
+                className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
               >
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Update My Bag
@@ -195,18 +297,6 @@ const Feed = () => {
         </div>
       )}
 
-      {/* Photo Upload Dialog */}
-      <UnifiedPhotoUploadDialog
-        isOpen={showUploadModal}
-        onClose={() => setShowUploadModal(false)}
-        onUploadComplete={() => {
-          loadFeed();
-        }}
-        context={{
-          type: 'general'
-        }}
-        initialCaption=""
-      />
     </div>
   );
 };

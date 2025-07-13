@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { getEquipmentByOldId } from "@/lib/equipment-id-mapping";
 import { TeedBallLike } from "@/components/shared/TeedBallLike";
 import type { Database } from "@/lib/supabase";
+import { formatCompactCurrency } from "@/lib/formatters";
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
 
@@ -194,7 +195,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
           <div className="mb-4">
             <h4 className="font-semibold text-lg mb-1 text-white">{bag.bagName}</h4>
             <div className="flex items-center gap-4 text-sm text-white/70">
-              <span>${bag.totalValue.toLocaleString()}</span>
+              <span>{formatCompactCurrency(bag.totalValue)}</span>
               <span>{bag.avgScore} avg</span>
             </div>
           </div>
@@ -279,7 +280,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
             <TeedBallLike
               isLiked={bag.isLiked || false}
               likeCount={bag.likes}
-              onLike={handleLikeClick}
+              onToggle={handleLikeClick}
               size="sm"
               showCount={true}
               className="text-white/70 hover:text-primary"

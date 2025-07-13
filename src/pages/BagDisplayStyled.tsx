@@ -15,6 +15,7 @@ import { BagCard } from "@/components/bags/BagCard";
 import BagEquipmentGallery from "@/components/bag/BagEquipmentGallery";
 import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
 import { BadgeService } from "@/services/badgeService";
+import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
 
 const BagDisplayStyled = () => {
   const { bagId } = useParams();
@@ -330,7 +331,7 @@ const BagDisplayStyled = () => {
               
               <div className="text-right">
                 <p className="text-3xl font-bold text-primary">
-                  {totalTees.toLocaleString()}
+                  {formatCompactNumber(totalTees)}
                 </p>
                 <p className="text-white/70">Total Tees</p>
               </div>
@@ -488,7 +489,7 @@ const BagDisplayStyled = () => {
             </div>
             <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
               <p className="text-xl font-medium text-white/80">
-                ${totalValue.toLocaleString()}
+                {formatCompactCurrency(totalValue)}
               </p>
               <p className="text-white/70 text-xs">Est. Value</p>
             </div>

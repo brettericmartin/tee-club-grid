@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { createEquipmentPhotoFeedPost } from '@/services/feedService';
+import { syncUserPhotoToEquipment } from '@/services/equipmentPhotoSync';
 
 interface UnifiedPhotoUploadDialogProps {
   isOpen: boolean;
@@ -90,6 +91,22 @@ export function UnifiedPhotoUploadDialog({
         .from(bucketName)
         .getPublicUrl(fileName);
 
+      // Sync photo to equipment_photos table for equipment page display
+      if (context?.type === 'equipment' && context.equipmentId) {
+        try {
+          await syncUserPhotoToEquipment(
+            user.id,
+            context.equipmentId,
+            publicUrl,
+            caption || `${context.equipmentName || 'Equipment'} photo`
+          );
+          console.log('Photo synced to equipment gallery');
+        } catch (error) {
+          console.error('Error syncing photo to equipment:', error);
+          // Don't fail the whole upload if sync fails
+        }
+      }
+
       // Create feed post if user opted in
       if (shareToFeed && context?.type === 'equipment' && context.equipmentId) {
         try {
@@ -152,19 +169,61 @@ export function UnifiedPhotoUploadDialog({
         <div className="space-y-4">
           {/* Image Upload Area */}
           {!imagePreview ? (
-            <label className="block">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="hidden"
-              />
-              <div className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-primary/50 hover:bg-white/5 transition-colors cursor-pointer">
-                <Camera className="w-12 h-12 text-white/50 mx-auto mb-4" />
-                <p className="text-white/70">Click to upload a photo</p>
-                <p className="text-white/50 text-sm mt-1">JPG, PNG up to 10MB</p>
-              </div>
-            </label>
+            <div className="space-y-3">
+              {/* Mobile Camera Button */}
+              <label className="block md:hidden">
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.parentElement?.querySelector('input');
+                    input?.click();
+                  }}
+                >
+                  <Camera className="w-5 h-5 mr-2" />
+                  Take Photo
+                </Button>
+              </label>
+
+              {/* File Upload Button */}
+              <label className="block">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12 md:hidden"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.parentElement?.querySelector('input');
+                    input?.click();
+                  }}
+                >
+                  <Upload className="w-5 h-5 mr-2" />
+                  Choose from Gallery
+                </Button>
+
+                {/* Desktop Upload Area */}
+                <div className="hidden md:block border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-primary/50 hover:bg-white/5 transition-colors cursor-pointer">
+                  <Camera className="w-12 h-12 text-white/50 mx-auto mb-4" />
+                  <p className="text-white/70">Click to upload a photo</p>
+                  <p className="text-white/50 text-sm mt-1">JPG, PNG up to 10MB</p>
+                </div>
+              </label>
+            </div>
           ) : (
             <div className="relative">
               <img

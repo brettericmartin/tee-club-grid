@@ -2,9 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import { EquipmentDetail } from "@/types/equipmentDetail";
+import { formatCurrency } from "@/lib/formatters";
 
 interface EquipmentHeaderProps {
-  equipment: EquipmentDetail;
+  equipment: EquipmentDetail | any;
   isOwnBag: boolean;
   onToggleFeatured: () => void;
 }
@@ -16,17 +17,19 @@ const EquipmentHeader = ({ equipment, isOwnBag, onToggleFeatured }: EquipmentHea
         <p className="text-sm text-muted-foreground font-medium mb-2">{equipment.brand}</p>
         <h1 className="text-3xl font-bold text-foreground mb-2">{equipment.model}</h1>
         <p className="text-muted-foreground">
-          {equipment.category} • {equipment.specs.loft}
+          {equipment.category} {equipment.specs?.loft && `• ${equipment.specs.loft}`}
         </p>
       </div>
 
       <div className="space-y-2">
         <p className="text-2xl font-bold text-foreground">
-          MSRP: ${equipment.msrp.toLocaleString()}
+          MSRP: {formatCurrency(equipment.msrp || 0)}
         </p>
-        <p className="text-lg text-muted-foreground">
-          Your Build: ${equipment.currentBuild.totalPrice.toLocaleString()}
-        </p>
+        {equipment.currentBuild && (
+          <p className="text-lg text-muted-foreground">
+            Your Build: {formatCurrency(equipment.currentBuild.totalPrice)}
+          </p>
+        )}
       </div>
 
       {isOwnBag ? (

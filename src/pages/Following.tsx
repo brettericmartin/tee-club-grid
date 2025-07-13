@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { getUserFollowing, toggleFollow } from "@/services/users";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { formatCompactCurrency } from "@/lib/formatters";
 
 interface FollowedUser {
   id: string;
@@ -246,7 +247,7 @@ const Following = () => {
                     {bagValue > 0 && (
                       <div className="flex items-center gap-2">
                         <DollarSign className="w-4 h-4 text-primary" />
-                        <span className="font-medium text-foreground">${bagValue.toLocaleString()}</span>
+                        <span className="font-medium text-foreground">{formatCompactCurrency(bagValue)}</span>
                         <span className="text-sm text-muted-foreground">Total Value</span>
                       </div>
                     )}

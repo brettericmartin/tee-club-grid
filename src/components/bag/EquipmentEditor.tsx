@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import { CommunityPhotosGallery } from './CommunityPhotosGallery';
 import { ImageCropper } from '@/components/ImageCropper';
 import { UnifiedPhotoUploadDialog } from '@/components/shared/UnifiedPhotoUploadDialog';
+import { syncUserPhotoToEquipment } from '@/services/equipmentPhotoSync';
 import type { Database } from '@/lib/supabase';
 
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
@@ -149,6 +150,28 @@ export function EquipmentEditor({
         .eq('id', equipment.id);
 
       if (error) throw error;
+
+      // Sync custom photo to equipment_photos if it was updated
+      if (formData.custom_photo_url && formData.custom_photo_url !== equipment.custom_photo_url) {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const syncResult = await syncUserPhotoToEquipment(
+              user.id,
+              equipment.equipment_id,
+              formData.custom_photo_url,
+              `Custom photo of ${equipment.equipment.brand} ${equipment.equipment.model}`
+            );
+            if (!syncResult.success) {
+              console.error('Failed to sync photo to equipment gallery:', syncResult.error);
+              // Don't fail the whole update - photo sync is not critical
+            }
+          }
+        } catch (syncError) {
+          console.error('Error syncing photo to equipment gallery:', syncError);
+          // Continue with success - the main update worked
+        }
+      }
 
       toast.success('Equipment updated successfully');
       onUpdate();

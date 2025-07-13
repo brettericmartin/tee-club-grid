@@ -3,6 +3,7 @@ import { MapPin, Share2, UserPlus, UserMinus, Edit3, Loader2 } from 'lucide-reac
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
+import { formatCompactCurrency } from '@/lib/formatters';
 
 interface BagHeaderProps {
   userProfile: {
@@ -135,7 +136,7 @@ const BagHeader = ({
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-8 text-white">
             <div className="flex items-center gap-2">
-              <span className="text-3xl font-bold">${bagStats.totalValue.toLocaleString()}</span>
+              <span className="text-3xl font-bold">{formatCompactCurrency(bagStats.totalValue)}</span>
               <span className="text-white/60">Total Value</span>
             </div>
             <div className="w-px h-8 bg-white/20" />

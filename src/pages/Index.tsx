@@ -7,6 +7,7 @@ import { Plus, UserPlus, Share2, DollarSign, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getEquipment } from "@/services/equipment";
 import type { Database } from "@/lib/supabase";
+import { formatCompactCurrency } from "@/lib/formatters";
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
 
@@ -250,7 +251,7 @@ const Index = () => {
                   <h3 className="text-white font-bold text-lg drop-shadow-lg">{bag.owner}</h3>
                   <div className="flex items-center gap-4 text-sm text-gray-300">
                     <span>{bag.handicap} HCP</span>
-                    <span className="text-primary font-bold">${bag.totalValue.toLocaleString()}</span>
+                    <span className="text-primary font-bold">{formatCompactCurrency(bag.totalValue)}</span>
                   </div>
                 </div>
                 

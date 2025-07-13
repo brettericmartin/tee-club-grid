@@ -1,22 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
 
-// Define FeedPost type since it might not be in the Database interface yet
-export interface FeedPost {
-  id: string;
-  user_id: string;
-  type: 'new_equipment' | 'bag_update' | 'milestone' | 'playing' | 'equipment_photo';
-  content: any; // JSONB field
-  equipment_id?: string | null;
-  bag_id?: string | null;
-  media_urls?: string[] | null;
-  likes_count: number;
-  created_at: string;
-  updated_at: string;
-  // Joined data
-  profile?: any;
-  bag?: any;
-}
+type FeedPost = Database['public']['Tables']['feed_posts']['Row'];
 
 // Helper function to find recent equipment posts
 async function findRecentEquipmentPost(
@@ -27,17 +12,22 @@ async function findRecentEquipmentPost(
   const recentTime = new Date();
   recentTime.setHours(recentTime.getHours() - hourLimit);
 
-  // Look for posts with this equipment
-  const { data, error } = await supabase
+  // Look for posts with this equipment in the content
+  const { data: posts, error } = await supabase
     .from('feed_posts')
     .select('*')
     .eq('user_id', userId)
-    .eq('equipment_id', equipmentId)
     .gte('created_at', recentTime.toISOString())
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+    .order('created_at', { ascending: false });
   
+  if (error || !posts) return null;
+  
+  // Find a post that mentions this equipment
+  const data = posts.find(post => 
+    post.content?.equipment_id === equipmentId ||
+    (typeof post.content === 'object' && post.content?.equipment_id === equipmentId)
+  );
+
   if (error || !data) return null;
   return data;
 }
@@ -56,25 +46,22 @@ async function updatePostWithPhoto(
 
   if (!existingPost) return null;
 
-  // Update media_urls array
-  const currentMediaUrls = existingPost.media_urls || [];
-  const updatedMediaUrls = [...currentMediaUrls, photoUrl];
+  // Update content with new photo
+  let updatedContent = typeof existingPost.content === 'object' 
+    ? { ...existingPost.content, photos: [...(existingPost.content.photos || []), photoUrl] }
+    : { caption: existingPost.content, photos: [photoUrl] };
   
-  // Update content with new photo and caption
-  let updatedContent = existingPost.content || {};
-  if (typeof updatedContent === 'object') {
-    updatedContent.photos = updatedContent.photos || [];
-    updatedContent.photos.push(photoUrl);
-    if (caption) {
-      updatedContent.caption = caption;
-    }
+  // Update caption if provided
+  if (caption) {
+    updatedContent = typeof updatedContent === 'object' 
+      ? { ...updatedContent, caption } 
+      : caption;
   }
 
   const { data, error } = await supabase
     .from('feed_posts')
     .update({
       content: updatedContent,
-      media_urls: updatedMediaUrls,
       updated_at: new Date().toISOString()
     })
     .eq('id', postId)
@@ -118,16 +105,12 @@ export async function createEquipmentPhotoFeedPost(
       .from('feed_posts')
       .insert({
         user_id: userId,
-        type: 'equipment_photo',
-        equipment_id: equipmentId,
-        bag_id: bagId,
-        media_urls: [photoUrl],
+        type: 'new_equipment',
         content: {
           equipment_id: equipmentId,
           equipment_name: equipmentName,
           photo_url: photoUrl,
-          caption: caption || `Check out my ${equipmentName}! 📸`,
-          bag_id: bagId
+          caption: caption || `Check out my ${equipmentName}! 📸`
         },
         likes_count: 0
       })
@@ -155,11 +138,10 @@ export async function createBagCreationPost(userId: string, bagId: string, bagNa
       .from('feed_posts')
       .insert({
         user_id: userId,
-        type: 'bag_update',
-        bag_id: bagId,
+        type: 'bag_update', // Using bag_update type with special content
         content: {
           bag_id: bagId,
-          bag_name: bagName,
+          bag_name: `Created a new bag: ${bagName}`,
           caption: `Just created a new bag setup: ${bagName}! Check it out 🏌️`,
           is_creation: true
         }
@@ -191,7 +173,6 @@ export async function createBagUpdatePost(
       .insert({
         user_id: userId,
         type: 'bag_update',
-        bag_id: bagId,
         content: {
           bag_id: bagId,
           bag_name: bagName,
@@ -228,8 +209,6 @@ export async function createEquipmentAddedPost(
       .insert({
         user_id: userId,
         type: 'new_equipment',
-        equipment_id: equipmentId,
-        bag_id: bagId,
         content: {
           bag_id: bagId,
           bag_name: bagName,
@@ -266,8 +245,6 @@ export async function createEquipmentPhotoPost(
       .insert({
         user_id: userId,
         type: 'equipment_photo',
-        equipment_id: equipmentId,
-        media_urls: [photoUrl],
         content: {
           equipment_id: equipmentId,
           equipment_name: equipmentName,
@@ -328,10 +305,7 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
     
     // For posts with bag_id, fetch the bag data separately
     const postsWithBags = await Promise.all((data || []).map(async (post) => {
-      // Check both the column and content for bag_id
-      const bagId = post.bag_id || post.content?.bag_id;
-      
-      if (bagId) {
+      if (post.content?.bag_id) {
         const { data: bagData } = await supabase
           .from('user_bags')
           .select(`
@@ -348,7 +322,7 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
               )
             )
           `)
-          .eq('id', bagId)
+          .eq('id', post.content.bag_id)
           .single();
         
         return { ...post, bag: bagData };

@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EquipmentDetail } from "@/types/equipmentDetail";
 
 interface EquipmentSpecificationTabsProps {
-  equipment: EquipmentDetail;
+  equipment: EquipmentDetail | any;
 }
 
 const EquipmentSpecificationTabs = ({ equipment }: EquipmentSpecificationTabsProps) => {
@@ -20,22 +20,24 @@ const EquipmentSpecificationTabs = ({ equipment }: EquipmentSpecificationTabsPro
           <h3 className="font-semibold mb-2">Description</h3>
           <p className="text-muted-foreground">{equipment.description}</p>
         </div>
-        <div>
-          <h3 className="font-semibold mb-2">Key Features</h3>
-          <ul className="space-y-1">
-            {equipment.features.map((feature, index) => (
-              <li key={index} className="flex items-start gap-2 text-muted-foreground">
-                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
-                {feature}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {equipment.features && equipment.features.length > 0 && (
+          <div>
+            <h3 className="font-semibold mb-2">Key Features</h3>
+            <ul className="space-y-1">
+              {equipment.features.map((feature, index) => (
+                <li key={index} className="flex items-start gap-2 text-muted-foreground">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </TabsContent>
 
       <TabsContent value="specs" className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          {Object.entries(equipment.specs).map(([key, value]) => (
+          {equipment.specs && Object.entries(equipment.specs).map(([key, value]) => (
             <div key={key} className="flex justify-between py-2 border-b border-border">
               <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
               <span className="text-muted-foreground">{value}</span>
