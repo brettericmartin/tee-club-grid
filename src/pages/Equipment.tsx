@@ -360,61 +360,16 @@ const Equipment = () => {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {equipment.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(item => (
-                <div key={item.id} className="glass-card p-4 cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => navigate(`/equipment/${item.id}`)}>
-                  <div className="aspect-square mb-3 rounded-lg overflow-hidden bg-white/5">
-                    {(item.primaryPhoto || item.image_url) ? (
-                      <img 
-                        src={item.primaryPhoto || item.image_url} 
-                        alt={`${item.brand} ${item.model}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          const parent = e.currentTarget.parentElement;
-                          if (parent) {
-                            parent.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
-                              <span class="text-white font-bold text-2xl">
-                                ${item.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-                              </span>
-                            </div>`;
-                          }
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
-                        <span className="text-white font-bold text-2xl">
-                          {item.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <h3 className="font-bold line-clamp-1">{item.brand} {item.model}</h3>
-                  <p className="text-sm text-muted-foreground capitalize">{item.category.replace(/_/g, ' ')}</p>
-                  <p className="font-bold mt-1">${item.msrp}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="flex-1 mr-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/equipment/${item.id}`);
-                      }}
-                    >
-                      View
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      onClick={(e) => handleSaveToggle(e, item.id)}
-                      className={savedItems.has(item.id) ? "text-primary" : ""}
-                    >
-                      <Heart className={`w-4 h-4 ${savedItems.has(item.id) ? 'fill-current' : ''}`} />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  <EquipmentCard
+                    key={item.id}
+                    equipment={item}
+                    variant="grid"
+                    isSaved={savedItems.has(item.id)}
+                    onSaveToggle={(e) => handleSaveToggle(e, item.id)}
+                    onViewDetails={() => navigate(`/equipment/${item.id}`)}
+                  />
+                ))}
+              </div>
             </>
           )}
         </div>

@@ -267,7 +267,15 @@ const MyBagSupabase = () => {
         .from('bag_equipment')
         .select(`
           *,
-          equipment(*),
+          equipment(
+            *,
+            equipment_photos (
+              id,
+              photo_url,
+              likes_count,
+              is_primary
+            )
+          ),
           shaft:shafts(*),
           grip:grips(*),
           loft_option:loft_options(*)
@@ -282,7 +290,15 @@ const MyBagSupabase = () => {
           .from('bag_equipment')
           .select(`
             *,
-            equipment(*)
+            equipment(
+              *,
+              equipment_photos (
+                id,
+                photo_url,
+                likes_count,
+                is_primary
+              )
+            )
           `)
           .eq('bag_id', bagId)
           .order('added_at');
@@ -297,8 +313,23 @@ const MyBagSupabase = () => {
         throw new Error(error?.message || 'Failed to load equipment');
       }
 
+      // Process the data to calculate most liked photos
+      const processedData = data?.map(item => {
+        if (item.equipment && item.equipment.equipment_photos) {
+          // Sort photos by likes_count to get the most liked one
+          const sortedPhotos = [...item.equipment.equipment_photos].sort((a, b) => 
+            (b.likes_count || 0) - (a.likes_count || 0)
+          );
+          
+          // Add most_liked_photo to equipment object
+          item.equipment.most_liked_photo = sortedPhotos[0]?.photo_url || null;
+          item.equipment.primaryPhoto = item.equipment.most_liked_photo || item.equipment.image_url;
+        }
+        return item;
+      }) || [];
+
       // Equipment loaded successfully
-      setBagItems(data || []);
+      setBagItems(processedData);
       
       // Load layout data
       const loadedLayout = await bagLayoutsService.loadLayout(bagId);

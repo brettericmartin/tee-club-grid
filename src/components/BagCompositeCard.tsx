@@ -52,7 +52,20 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
     for (const id of allIds) {
       const equipment = await getEquipmentByOldId(id, supabase);
       if (equipment) {
-        equipmentMap[id] = equipment;
+        // Fetch equipment photos
+        const { data: photos } = await supabase
+          .from('equipment_photos')
+          .select('photo_url, likes_count')
+          .eq('equipment_id', equipment.id)
+          .order('likes_count', { ascending: false });
+        
+        // Add most liked photo to equipment
+        const mostLikedPhoto = photos?.[0]?.photo_url || null;
+        equipmentMap[id] = {
+          ...equipment,
+          most_liked_photo: mostLikedPhoto,
+          primaryPhoto: mostLikedPhoto || equipment.image_url
+        } as Equipment;
       }
     }
 
@@ -174,7 +187,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
                     >
                       <AspectRatio ratio={1}>
                         <img
-                          src={equipment.image_url || '/api/placeholder/150/150'}
+                          src={(equipment as any).primaryPhoto || equipment.image_url || '/api/placeholder/150/150'}
                           alt={`${equipment.brand} ${equipment.model}`}
                           className="object-contain w-full h-full group-hover:scale-105 transition-transform"
                           loading="lazy"
@@ -209,7 +222,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
                     >
                       <AspectRatio ratio={1}>
                         <img
-                          src={equipment.image_url || '/api/placeholder/150/150'}
+                          src={(equipment as any).primaryPhoto || equipment.image_url || '/api/placeholder/150/150'}
                           alt={`${equipment.brand} ${equipment.model}`}
                           className="object-contain w-full h-full group-hover:scale-105 transition-transform"
                           loading="lazy"

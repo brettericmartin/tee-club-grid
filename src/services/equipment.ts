@@ -63,12 +63,14 @@ export async function getEquipment(options?: {
     );
     
     // Use the most liked photo, or the first one, or fall back to image_url
-    const primaryPhoto = sortedPhotos?.[0]?.photo_url || equipment.image_url;
+    const mostLikedPhoto = sortedPhotos?.[0]?.photo_url || null;
+    const primaryPhoto = mostLikedPhoto || equipment.image_url;
     
     return {
       ...equipment,
       averageRating: null,
       primaryPhoto,
+      most_liked_photo: mostLikedPhoto,
       savesCount: 0,
       totalLikes: 0
     };
