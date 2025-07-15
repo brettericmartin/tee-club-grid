@@ -1,4 +1,4 @@
-import { User, Home, Grid, Heart, Settings, Users, MapPin, LogOut } from "lucide-react";
+import { User, Grid, Heart, Settings, Users, LogOut } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -90,12 +90,12 @@ const Navigation = () => {
                   }`} />
                   
                   {/* Feed Button */}
-                  <div className={`relative text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium flex items-center gap-1.5 sm:gap-2 hover:scale-105 transition-transform duration-200 ${
+                  <div className={`relative text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium flex items-center gap-1 sm:gap-1.5 hover:scale-105 transition-transform duration-200 ${
                     location.pathname === '/feed' 
                       ? 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-black' 
                       : 'bg-primary hover:bg-primary/90'
                   }`}>
-                    <Home className="w-4 h-4" />
+                    <img src="/dog.png" alt="Feed" className="w-6 h-6" />
                     <span className="text-sm sm:text-base">Feed</span>
                   </div>
                 </div>
@@ -112,12 +112,12 @@ const Navigation = () => {
                   }`} />
                   
                   {/* Button with location pin icon */}
-                  <div className={`relative text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium flex items-center gap-1.5 sm:gap-2 hover:scale-105 transition-transform duration-200 ${
+                  <div className={`relative text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium flex items-center gap-1 sm:gap-1.5 hover:scale-105 transition-transform duration-200 ${
                     location.pathname === '/my-bag' 
                       ? 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-black' 
                       : 'bg-primary hover:bg-primary/90'
                   }`}>
-                    <MapPin className="w-4 h-4" />
+                    <img src="/MYBAG.png" alt="My Bag" className="w-6 h-6" />
                     <span className="text-sm sm:text-base">My Bag</span>
                   </div>
                 </div>

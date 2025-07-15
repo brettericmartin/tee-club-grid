@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Grid, MapPin, Heart, Users } from "lucide-react";
+import { Grid, Heart, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const BottomNavigation = () => {
@@ -8,7 +8,8 @@ const BottomNavigation = () => {
   const navItems = [
     {
       to: "/feed",
-      icon: Home,
+      icon: "custom",
+      customIcon: "/dog.png",
       label: "Feed",
     },
     {
@@ -18,7 +19,8 @@ const BottomNavigation = () => {
     },
     {
       to: "/my-bag",
-      icon: MapPin,
+      icon: "custom",
+      customIcon: "/MYBAG.png",
       label: "My Bag",
     },
     {
@@ -53,9 +55,20 @@ const BottomNavigation = () => {
                     : "text-white/70 hover:text-white"
                 )}
               >
-                <Icon size={20} className={cn(
-                  isActive && "scale-110"
-                )} />
+                {item.icon === "custom" ? (
+                  <img 
+                    src={item.customIcon} 
+                    alt={item.label} 
+                    className={cn(
+                      "w-6 h-6",
+                      isActive && "scale-110"
+                    )}
+                  />
+                ) : (
+                  <Icon size={20} className={cn(
+                    isActive && "scale-110"
+                  )} />
+                )}
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>
             );

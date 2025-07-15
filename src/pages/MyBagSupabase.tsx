@@ -1,6 +1,6 @@
 /* @refresh skip */
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard } from "lucide-react";
+import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, Star } from "lucide-react";
 import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer from "@/components/BackgroundLayer";
 import BackgroundPicker from "@/components/BackgroundPicker";
@@ -19,15 +19,18 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import type { Database } from "@/lib/supabase";
 import { smartCreateBagPost, smartCreateBagUpdatePost, smartCreateEquipmentPost } from "@/services/feedSmartUpdate";
-import { badgeService, type UserBadge } from "@/services/badges";
 import { BadgeShowcase } from "@/components/badges/BadgeShowcase";
 import { useBadgeCheck } from "@/hooks/useBadgeCheck";
 import { BadgeNotificationToast } from "@/components/badges/BadgeNotificationToast";
 import { BagCard } from "@/components/bags/BagCard";
 import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
+import { ManageBadgesDialog } from "@/components/badges/ManageBadgesDialog";
 import BagStatsRow from "@/components/bag/BagStatsRow";
-import { BadgeService } from "@/services/badgeService";
+import { BadgeService, type UserBadgeWithDetails } from "@/services/badgeService";
 import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
+import { cn } from "@/lib/utils";
+import { sortBadgesByPriority } from "@/utils/badgeSorting";
+import { UserFeedView } from "@/components/feed/UserFeedView";
 
 // Lazy load heavy components with @dnd-kit
 const BagGalleryDndKit = lazy(() => import("@/components/bag/BagGalleryDndKit"));
@@ -89,7 +92,7 @@ const MyBagSupabase = () => {
   const [bagDescription, setBagDescription] = useState("");
   const [bagItems, setBagItems] = useState<BagEquipmentItem[]>([]);
   const [selectedBackground, setSelectedBackground] = useState('midwest-lush');
-  const [viewMode, setViewMode] = useState<'gallery' | 'list' | 'card'>('gallery');
+  const [viewMode, setViewMode] = useState<'gallery' | 'list' | 'card' | 'feed'>('gallery');
   const [layout, setLayout] = useState<BagLayout>({});
   const [isEditingLayout, setIsEditingLayout] = useState(false);
   const [showBagSelector, setShowBagSelector] = useState(false);
@@ -98,7 +101,9 @@ const MyBagSupabase = () => {
   const [equipmentEditorOpen, setEquipmentEditorOpen] = useState(false);
   const [selectedBagEquipment, setSelectedBagEquipment] = useState<BagEquipmentItem | null>(null);
   const [totalTees, setTotalTees] = useState(0);
-  const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
+  const [userBadges, setUserBadges] = useState<UserBadgeWithDetails[]>([]);
+  const [expandedBadges, setExpandedBadges] = useState(false);
+  const [manageBadgesOpen, setManageBadgesOpen] = useState(false);
   
   // Badge check hook
   const { checkBadgeProgress, newBadges, clearNewBadges } = useBadgeCheck();
@@ -235,10 +240,12 @@ const MyBagSupabase = () => {
     if (!user) return;
     
     try {
-      const badges = await badgeService.getUserBadges(user.id);
+      console.log('[MyBag] Loading badges for user:', user.id);
+      const badges = await BadgeService.getUserBadges(user.id);
+      console.log('[MyBag] Loaded badges:', badges.length);
       setUserBadges(badges);
     } catch (error) {
-      console.error('Error loading badges:', error);
+      console.error('[MyBag] Error loading badges:', error);
     }
   };
 
@@ -815,12 +822,29 @@ const MyBagSupabase = () => {
                   >
                     <CreditCard className="w-4 h-4" />
                   </Button>
+                  <Button
+                    variant={viewMode === 'feed' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('feed')}
+                    className={viewMode === 'feed' ? '' : 'text-white hover:text-white hover:bg-white/10'}
+                  >
+                    <img src="/dog.png" alt="Feed" className="w-6 h-6" />
+                  </Button>
                 </div>
                 {bags.length > 1 && (
                   <Button onClick={() => setShowBagSelector(true)} variant="outline">
                     Switch Bag
                   </Button>
                 )}
+                <Button
+                  onClick={() => setManageBadgesOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="text-white hover:text-white hover:bg-white/20"
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Manage Badges
+                </Button>
               </>
             )}
             {isEditing ? (
@@ -884,7 +908,7 @@ const MyBagSupabase = () => {
         )}
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-5 gap-3 mb-8">
           <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
             <CardContent className="p-4 text-center">
               <p className="text-sm text-gray-200">Total Tees</p>
@@ -907,6 +931,14 @@ const MyBagSupabase = () => {
           </Card>
           <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
             <CardContent className="p-4 text-center">
+              <p className="text-sm text-gray-200">Badges</p>
+              <p className="text-2xl font-bold text-white">
+                {userBadges.filter(ub => ub.progress === 100).length}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
+            <CardContent className="p-4 text-center">
               <p className="text-xs text-gray-300">Est. Value</p>
               <p className="text-lg font-medium text-white">{formatCompactCurrency(totalValue)}</p>
             </CardContent>
@@ -914,22 +946,26 @@ const MyBagSupabase = () => {
         </div>
 
         {/* Badge Showcase */}
-        <div className="mb-8 bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-white/10">
-          <div className="flex items-center justify-between mb-4">
-            <BadgeShowcase 
-              userBadges={userBadges} 
-              userId={user.id}
-              isOwnProfile={true}
-            />
-            <Link 
-              to="/badges"
-              className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors"
-            >
-              <Trophy className="w-4 h-4" />
-              View All Badges
-            </Link>
+        {userBadges.filter(ub => ub.progress === 100).length > 0 && (
+          <div className="mb-8 flex justify-center">
+            <div className="inline-block">
+              <BadgeDisplay 
+                badges={sortBadgesByPriority(userBadges.filter(ub => ub.progress === 100))}
+                size="xl"
+                showEmpty={false}
+                maxDisplay={8}
+                onBadgeClick={async (badge) => {
+                  // Toggle featured status
+                  if (badge.badge_id) {
+                    await BadgeService.toggleBadgeFeatured(badge.id, !badge.is_featured);
+                    await loadUserBadges();
+                    toast.success(badge.is_featured ? 'Badge unfeatured' : 'Badge featured');
+                  }
+                }}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Equipment Display */}
         {bagItems.length === 0 ? (
@@ -1028,6 +1064,11 @@ const MyBagSupabase = () => {
               </Card>
             ))}
           </div>
+        ) : viewMode === 'feed' ? (
+          <UserFeedView 
+            userId={user?.id || ''} 
+            isOwnProfile={true}
+          />
         ) : (
           /* Card View */
           <div className="flex justify-center">
@@ -1061,18 +1102,53 @@ const MyBagSupabase = () => {
                 />
               </div>
               
-              {/* Badges - 2x3 grid on right */}
+              {/* Badges - 2x4 grid on right */}
               <div className="flex-shrink-0 w-full lg:w-56">
                 <div className="h-full bg-gray-900/50 rounded-lg p-4 border border-white/10">
-                  <BadgeDisplay
-                    badges={userBadges}
-                    size="lg"
-                    showEmpty={true}
-                    maxDisplay={6}
-                    onBadgeClick={(badge) => {
-                      console.log('Badge clicked:', badge);
-                    }}
-                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    {sortBadgesByPriority(userBadges.filter(ub => ub.progress === 100)).slice(0, 8).map((userBadge) => {
+                      const rarity = userBadge.badge.rarity || 'common';
+                      const badgeIcon = userBadge.badge.icon;
+                      const isImageUrl = badgeIcon?.startsWith('/') || badgeIcon?.startsWith('http');
+                      
+                      return (
+                        <div
+                          key={userBadge.id}
+                          className="relative group"
+                        >
+                          <div
+                            className={cn(
+                              "relative flex items-center justify-center transition-all duration-300 cursor-pointer overflow-hidden",
+                              "w-24 h-24",
+                              "hover:scale-110"
+                            )}
+                            onClick={() => {
+                              setManageBadgesOpen(true);
+                            }}
+                          >
+                            {isImageUrl ? (
+                              <img 
+                                src={badgeIcon}
+                                alt={userBadge.badge.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-2xl">{badgeIcon || '🏅'}</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {/* Fill empty slots */}
+                    {Array.from({ length: Math.max(0, 8 - Math.min(8, userBadges.filter(ub => ub.progress === 100).length)) }).map((_, index) => (
+                      <div
+                        key={`empty-${index}`}
+                        className="w-24 h-24 flex items-center justify-center"
+                      >
+                        <Trophy className="w-10 h-10 text-gray-700" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1148,6 +1224,15 @@ const MyBagSupabase = () => {
           }}
         />
       )}
+
+      {/* Manage Badges Dialog */}
+      <ManageBadgesDialog
+        open={manageBadgesOpen}
+        onOpenChange={setManageBadgesOpen}
+        userId={user?.id || ''}
+        badges={userBadges}
+        onBadgesUpdate={loadUserBadges}
+      />
 
     </div>
   );
