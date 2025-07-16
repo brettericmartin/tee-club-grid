@@ -933,7 +933,7 @@ const MyBagSupabase = () => {
             <CardContent className="p-4 text-center">
               <p className="text-sm text-gray-200">Badges</p>
               <p className="text-2xl font-bold text-white">
-                {userBadges.filter(ub => ub.progress === 100).length}
+                {(userBadges || []).filter(ub => ub.progress === 100).length}
               </p>
             </CardContent>
           </Card>
@@ -946,11 +946,11 @@ const MyBagSupabase = () => {
         </div>
 
         {/* Badge Showcase */}
-        {userBadges.filter(ub => ub.progress === 100).length > 0 && (
+        {(userBadges || []).filter(ub => ub.progress === 100).length > 0 && (
           <div className="mb-8 flex justify-center">
             <div className="inline-block">
               <BadgeDisplay 
-                badges={sortBadgesByPriority(userBadges.filter(ub => ub.progress === 100))}
+                badges={sortBadgesByPriority((userBadges || []).filter(ub => ub.progress === 100))}
                 size="xl"
                 showEmpty={false}
                 maxDisplay={8}
@@ -1115,7 +1115,9 @@ const MyBagSupabase = () => {
               <div className="flex-shrink-0 w-full lg:w-56">
                 <div className="h-full bg-gray-900/50 rounded-lg p-4 border border-white/10">
                   <div className="grid grid-cols-2 gap-3">
-                    {sortBadgesByPriority(userBadges.filter(ub => ub.progress === 100)).slice(0, 8).map((userBadge) => {
+                    {sortBadgesByPriority(
+                      userBadges?.filter(ub => ub.progress === 100) || []
+                    ).slice(0, 8).map((userBadge) => {
                       const rarity = userBadge.badge.rarity || 'common';
                       const badgeIcon = userBadge.badge.icon;
                       const isImageUrl = badgeIcon?.startsWith('/') || badgeIcon?.startsWith('http');
@@ -1149,7 +1151,7 @@ const MyBagSupabase = () => {
                       );
                     })}
                     {/* Fill empty slots */}
-                    {Array.from({ length: Math.max(0, 8 - Math.min(8, userBadges.filter(ub => ub.progress === 100).length)) }).map((_, index) => (
+                    {Array.from({ length: Math.max(0, 8 - Math.min(8, (userBadges || []).filter(ub => ub.progress === 100).length)) }).map((_, index) => (
                       <div
                         key={`empty-${index}`}
                         className="w-24 h-24 flex items-center justify-center"
