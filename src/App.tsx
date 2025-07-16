@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
+import { FeedProvider } from "./contexts/FeedContext";
 import { ErrorBoundary, AsyncErrorBoundary } from "./components/ErrorBoundary";
 import Navigation from "./components/Navigation";
 import BottomNavigation from "./components/navigation/BottomNavigation";
@@ -23,6 +24,7 @@ const Saved = lazy(() => import("./pages/Saved"));
 const Following = lazy(() => import("./pages/Following"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Badges = lazy(() => import("./pages/Badges"));
+const BadgePreview = lazy(() => import("./pages/BadgePreview"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin routes (rarely accessed)
@@ -65,11 +67,12 @@ const App = () => {
     <AsyncErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Analytics />
-            <BrowserRouter>
+          <FeedProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Analytics />
+              <BrowserRouter>
               <div className="min-h-screen bg-background font-sans antialiased overflow-x-hidden">
                 {/* Fixed background gradient */}
                 <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-primary/10 -z-10" />
@@ -92,6 +95,7 @@ const App = () => {
                         <Route path="/following" element={<Following />} />
                         <Route path="/wishlist" element={<Wishlist />} />
                         <Route path="/badges" element={<Badges />} />
+                        <Route path="/badge-preview" element={<BadgePreview />} />
                         <Route path="/admin/seed-equipment" element={<SeedEquipment />} />
                         <Route path="/admin/equipment-migration" element={<EquipmentMigration />} />
                         <Route path="/debug" element={<Debug />} />
@@ -108,6 +112,7 @@ const App = () => {
               </div>
             </BrowserRouter>
           </TooltipProvider>
+          </FeedProvider>
         </AuthProvider>
       </QueryClientProvider>
     </AsyncErrorBoundary>

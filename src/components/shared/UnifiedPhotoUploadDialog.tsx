@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Upload, Camera, Globe } from 'lucide-react';
+import { X, Upload, Camera, Globe, Crop } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -14,7 +14,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { createEquipmentPhotoFeedPost } from '@/services/feedService';
+import { useFeed } from '@/contexts/FeedContext';
 import { syncUserPhotoToEquipment } from '@/services/equipmentPhotoSync';
+import { ImageCropDialog } from './ImageCropDialog';
 
 interface UnifiedPhotoUploadDialogProps {
   isOpen: boolean;
@@ -38,22 +40,48 @@ export function UnifiedPhotoUploadDialog({
   initialCaption = ''
 }: UnifiedPhotoUploadDialogProps) {
   const { user } = useAuth();
+  const { refreshFeeds } = useFeed();
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState(initialCaption);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [shareToFeed, setShareToFeed] = useState(true);
+  const [showCropDialog, setShowCropDialog] = useState(false);
+  const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        const imageSrc = reader.result as string;
+        setOriginalImageSrc(imageSrc);
+        setImagePreview(imageSrc);
+        // For equipment photos, automatically open crop dialog
+        if (context?.type === 'equipment') {
+          setShowCropDialog(true);
+        } else {
+          // For other contexts, convert to file for direct upload
+          setImageFile(file);
+        }
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCropComplete = (croppedImageBlob: Blob) => {
+    // Convert blob to file
+    const croppedFile = new File([croppedImageBlob], 'cropped-image.png', {
+      type: 'image/png',
+    });
+    
+    setImageFile(croppedFile);
+    
+    // Create preview URL for the cropped image
+    const croppedPreviewUrl = URL.createObjectURL(croppedImageBlob);
+    setImagePreview(croppedPreviewUrl);
+    
+    setShowCropDialog(false);
   };
 
   const handleUpload = async () => {
@@ -119,6 +147,8 @@ export function UnifiedPhotoUploadDialog({
             context.bagId
           );
           toast.success('Photo shared to feed!');
+          // Refresh feeds to show the new post
+          await refreshFeeds();
         } catch (error) {
           console.error('Error creating feed post:', error);
           // Don't fail the whole upload if feed post fails
@@ -149,6 +179,8 @@ export function UnifiedPhotoUploadDialog({
     setImagePreview(null);
     setImageFile(null);
     setShareToFeed(true);
+    setShowCropDialog(false);
+    setOriginalImageSrc(null);
     onClose();
   };
 
@@ -231,17 +263,34 @@ export function UnifiedPhotoUploadDialog({
                 alt="Preview"
                 className="w-full rounded-xl object-cover max-h-96"
               />
-              <Button
-                onClick={() => {
-                  setImagePreview(null);
-                  setImageFile(null);
-                }}
-                size="icon"
-                variant="ghost"
-                className="absolute top-2 right-2 bg-black/50 hover:bg-black/70"
-              >
-                <X className="w-4 h-4" />
-              </Button>
+              <div className="absolute top-2 right-2 flex gap-2">
+                {/* Crop button for equipment photos */}
+                {context?.type === 'equipment' && originalImageSrc && (
+                  <Button
+                    onClick={() => setShowCropDialog(true)}
+                    size="icon"
+                    variant="ghost"
+                    className="bg-black/50 hover:bg-black/70"
+                    title="Crop photo"
+                  >
+                    <Crop className="w-4 h-4" />
+                  </Button>
+                )}
+                {/* Remove button */}
+                <Button
+                  onClick={() => {
+                    setImagePreview(null);
+                    setImageFile(null);
+                    setOriginalImageSrc(null);
+                  }}
+                  size="icon"
+                  variant="ghost"
+                  className="bg-black/50 hover:bg-black/70"
+                  title="Remove photo"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           )}
 
@@ -308,6 +357,17 @@ export function UnifiedPhotoUploadDialog({
           </div>
         </div>
       </DialogContent>
+      
+      {/* Crop Dialog */}
+      {originalImageSrc && (
+        <ImageCropDialog
+          isOpen={showCropDialog}
+          onClose={() => setShowCropDialog(false)}
+          imageSrc={originalImageSrc}
+          onCropComplete={handleCropComplete}
+          aspectRatio={context?.type === 'equipment' ? 4/3 : 1} // Equipment photos use 4:3, others use square
+        />
+      )}
     </Dialog>
   );
 }

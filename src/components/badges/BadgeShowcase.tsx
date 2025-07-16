@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { UserBadge } from '@/services/badges';
+import { UserBadgeWithDetails } from '@/services/badgeService';
 import { BadgeDisplay } from './BadgeDisplay';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BadgeShowcaseProps {
-  userBadges: UserBadge[];
+  userBadges: UserBadgeWithDetails[];
   userId: string;
   isOwnProfile?: boolean;
   className?: string;
@@ -18,14 +18,20 @@ export function BadgeShowcase({
   isOwnProfile = false,
   className 
 }: BadgeShowcaseProps) {
-  const [selectedBadge, setSelectedBadge] = useState<UserBadge | null>(null);
+  const [selectedBadge, setSelectedBadge] = useState<UserBadgeWithDetails | null>(null);
+  
+  console.log('[BadgeShowcase] Received badges:', userBadges.length);
+  console.log('[BadgeShowcase] First badge:', userBadges[0]);
   
   // Filter to only show earned badges
   const earnedBadges = userBadges.filter(ub => ub.progress === 100);
+  console.log('[BadgeShowcase] Earned badges:', earnedBadges.length);
+  
   const featuredBadges = earnedBadges.filter(ub => ub.is_featured).slice(0, 3);
   const displayBadges = featuredBadges.length > 0 ? featuredBadges : earnedBadges.slice(0, 3);
 
   if (earnedBadges.length === 0) {
+    console.log('[BadgeShowcase] No earned badges, returning null');
     return null;
   }
 
@@ -41,36 +47,13 @@ export function BadgeShowcase({
           )}
         </div>
         
-        <div className="flex gap-3">
-          {displayBadges.map((userBadge) => (
-            <button
-              key={userBadge.id}
-              onClick={() => setSelectedBadge(userBadge)}
-              className="relative group"
-            >
-              {userBadge.badge && (
-                <BadgeDisplay 
-                  badge={userBadge.badge} 
-                  size="sm"
-                  showTier={false}
-                  className="group-hover:scale-110 transition-transform"
-                />
-              )}
-              {userBadge.is_featured && (
-                <Star className="absolute -top-1 -right-1 w-3 h-3 text-yellow-500 fill-current" />
-              )}
-            </button>
-          ))}
-          
-          {earnedBadges.length > 3 && (
-            <button
-              onClick={() => {/* Navigate to full badges page */}}
-              className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
-            >
-              <span className="text-xs text-white/70">+{earnedBadges.length - 3}</span>
-            </button>
-          )}
-        </div>
+        <BadgeDisplay 
+          badges={displayBadges}
+          size="sm"
+          showEmpty={false}
+          maxDisplay={3}
+          onBadgeClick={(badge) => setSelectedBadge(badge)}
+        />
       </div>
 
       <Dialog open={!!selectedBadge} onOpenChange={() => setSelectedBadge(null)}>
@@ -82,9 +65,10 @@ export function BadgeShowcase({
           {selectedBadge?.badge && (
             <div className="flex flex-col items-center space-y-4 py-4">
               <BadgeDisplay 
-                badge={selectedBadge.badge} 
+                badges={[selectedBadge]}
                 size="lg"
-                showTier={true}
+                showEmpty={false}
+                maxDisplay={1}
               />
               
               <div className="text-center space-y-2">

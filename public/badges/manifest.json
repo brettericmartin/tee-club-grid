@@ -1,0 +1,500 @@
+{
+  "badges": [
+    {
+      "id": 1,
+      "name": "Rising Star",
+      "description": "Receive 10 tees on your bag",
+      "category": "social",
+      "icon": "star",
+      "color": "#10B981",
+      "rarity": "common",
+      "filename": "rising-star.svg"
+    },
+    {
+      "id": 2,
+      "name": "Crowd Favorite",
+      "description": "Receive 50 tees on your bag",
+      "category": "social",
+      "icon": "crown",
+      "color": "#FFD700",
+      "rarity": "uncommon",
+      "filename": "crowd-favorite.svg"
+    },
+    {
+      "id": 3,
+      "name": "Tee Legend",
+      "description": "Receive 100 tees on your bag",
+      "category": "social",
+      "icon": "trophy",
+      "color": "#FF6B6B",
+      "rarity": "rare",
+      "filename": "tee-legend.svg"
+    },
+    {
+      "id": 4,
+      "name": "First Review",
+      "description": "Write your first equipment review",
+      "category": "community",
+      "icon": "message-circle",
+      "color": "#10B981",
+      "rarity": "common",
+      "filename": "first-review.svg"
+    },
+    {
+      "id": 5,
+      "name": "Helpful Reviewer",
+      "description": "Write 5 equipment reviews",
+      "category": "community",
+      "icon": "edit",
+      "color": "#3B82F6",
+      "rarity": "uncommon",
+      "filename": "helpful-reviewer.svg"
+    },
+    {
+      "id": 6,
+      "name": "Review Expert",
+      "description": "Write 10 detailed equipment reviews",
+      "category": "community",
+      "icon": "award",
+      "color": "#8B5CF6",
+      "rarity": "rare",
+      "filename": "review-expert.svg"
+    },
+    {
+      "id": 7,
+      "name": "Photo Enthusiast",
+      "description": "Upload 10 equipment photos",
+      "category": "community",
+      "icon": "camera",
+      "color": "#06B6D4",
+      "rarity": "uncommon",
+      "filename": "photo-enthusiast.svg"
+    },
+    {
+      "id": 8,
+      "name": "Early Adopter",
+      "description": "Join Teed.club in the first year",
+      "category": "milestone",
+      "icon": "zap",
+      "color": "#F59E0B",
+      "rarity": "legendary",
+      "filename": "early-adopter.svg"
+    },
+    {
+      "id": 9,
+      "name": "Complete Profile",
+      "description": "Fill out all profile information",
+      "category": "milestone",
+      "icon": "user-check",
+      "color": "#10B981",
+      "rarity": "common",
+      "filename": "complete-profile.svg"
+    },
+    {
+      "id": 10,
+      "name": "Brand Curious",
+      "description": "Try equipment from 3 different brands",
+      "category": "explorer",
+      "icon": "compass",
+      "color": "#10B981",
+      "rarity": "common",
+      "filename": "brand-curious.svg"
+    },
+    {
+      "id": 11,
+      "name": "Brand Enthusiast",
+      "description": "Try equipment from 5 different brands",
+      "category": "explorer",
+      "icon": "map",
+      "color": "#3B82F6",
+      "rarity": "uncommon",
+      "filename": "brand-enthusiast.svg"
+    },
+    {
+      "id": 12,
+      "name": "Brand Connoisseur",
+      "description": "Try equipment from 10 different brands",
+      "category": "explorer",
+      "icon": "globe",
+      "color": "#8B5CF6",
+      "rarity": "epic",
+      "filename": "brand-connoisseur.svg"
+    },
+    {
+      "id": 13,
+      "name": "Starter Set",
+      "description": "Add 7 items to your bag",
+      "category": "collector",
+      "icon": "package",
+      "color": "#10B981",
+      "rarity": "common",
+      "filename": "starter-set.svg"
+    },
+    {
+      "id": 14,
+      "name": "Full Bag",
+      "description": "Add 14 items to your bag",
+      "category": "collector",
+      "icon": "briefcase",
+      "color": "#3B82F6",
+      "rarity": "uncommon",
+      "filename": "full-bag.svg"
+    },
+    {
+      "id": 15,
+      "name": "Premium Collection",
+      "description": "Own equipment worth over $5,000",
+      "category": "collector",
+      "icon": "gem",
+      "color": "#F59E0B",
+      "rarity": "epic",
+      "filename": "premium-collection.svg"
+    },
+    {
+      "id": 16,
+      "name": "Titleist Owner",
+      "description": "Own equipment from Titleist",
+      "category": "brand",
+      "brand": "Titleist",
+      "color": "#000000",
+      "rarity": "common",
+      "filename": "titleist-owner.svg"
+    },
+    {
+      "id": 17,
+      "name": "TaylorMade Owner",
+      "description": "Own equipment from TaylorMade",
+      "category": "brand",
+      "brand": "TaylorMade",
+      "color": "#FFFFFF",
+      "rarity": "common",
+      "filename": "taylormade-owner.svg"
+    },
+    {
+      "id": 18,
+      "name": "Callaway Owner",
+      "description": "Own equipment from Callaway",
+      "category": "brand",
+      "brand": "Callaway",
+      "color": "#FFD700",
+      "rarity": "common",
+      "filename": "callaway-owner.svg"
+    },
+    {
+      "id": 19,
+      "name": "Ping Owner",
+      "description": "Own equipment from Ping",
+      "category": "brand",
+      "brand": "Ping",
+      "color": "#FF6B6B",
+      "rarity": "common",
+      "filename": "ping-owner.svg"
+    },
+    {
+      "id": 20,
+      "name": "Cobra Owner",
+      "description": "Own equipment from Cobra",
+      "category": "brand",
+      "brand": "Cobra",
+      "color": "#F59E0B",
+      "rarity": "common",
+      "filename": "cobra-owner.svg"
+    },
+    {
+      "id": 21,
+      "name": "Mizuno Owner",
+      "description": "Own equipment from Mizuno",
+      "category": "brand",
+      "brand": "Mizuno",
+      "color": "#3B82F6",
+      "rarity": "common",
+      "filename": "mizuno-owner.svg"
+    },
+    {
+      "id": 22,
+      "name": "Srixon Owner",
+      "description": "Own equipment from Srixon",
+      "category": "brand",
+      "brand": "Srixon",
+      "color": "#10B981",
+      "rarity": "common",
+      "filename": "srixon-owner.svg"
+    },
+    {
+      "id": 23,
+      "name": "Cleveland Owner",
+      "description": "Own equipment from Cleveland",
+      "category": "brand",
+      "brand": "Cleveland",
+      "color": "#8B5CF6",
+      "rarity": "common",
+      "filename": "cleveland-owner.svg"
+    },
+    {
+      "id": 24,
+      "name": "Wilson Owner",
+      "description": "Own equipment from Wilson",
+      "category": "brand",
+      "brand": "Wilson",
+      "color": "#EF4444",
+      "rarity": "common",
+      "filename": "wilson-owner.svg"
+    },
+    {
+      "id": 25,
+      "name": "PXG Owner",
+      "description": "Own equipment from PXG",
+      "category": "brand",
+      "brand": "PXG",
+      "color": "#000000",
+      "rarity": "uncommon",
+      "filename": "pxg-owner.svg"
+    },
+    {
+      "id": 26,
+      "name": "Scotty Cameron Owner",
+      "description": "Own a Scotty Cameron putter",
+      "category": "brand",
+      "brand": "Scotty Cameron",
+      "color": "#FFD700",
+      "rarity": "rare",
+      "filename": "scotty-cameron-owner.svg"
+    },
+    {
+      "id": 27,
+      "name": "Odyssey Owner",
+      "description": "Own an Odyssey putter",
+      "category": "brand",
+      "brand": "Odyssey",
+      "color": "#FFFFFF",
+      "rarity": "common",
+      "filename": "odyssey-owner.svg"
+    },
+    {
+      "id": 28,
+      "name": "Bettinardi Owner",
+      "description": "Own a Bettinardi putter",
+      "category": "brand",
+      "brand": "Bettinardi",
+      "color": "#FF6B6B",
+      "rarity": "rare",
+      "filename": "bettinardi-owner.svg"
+    },
+    {
+      "id": 29,
+      "name": "Evnroll Owner",
+      "description": "Own an Evnroll putter",
+      "category": "brand",
+      "brand": "Evnroll",
+      "color": "#10B981",
+      "rarity": "uncommon",
+      "filename": "evnroll-owner.svg"
+    },
+    {
+      "id": 30,
+      "name": "L.A.B. Owner",
+      "description": "Own a L.A.B. putter",
+      "category": "brand",
+      "brand": "L.A.B.",
+      "color": "#3B82F6",
+      "rarity": "uncommon",
+      "filename": "l.a.b.-owner.svg"
+    },
+    {
+      "id": 31,
+      "name": "Honma Owner",
+      "description": "Own equipment from Honma",
+      "category": "brand",
+      "brand": "Honma",
+      "color": "#FFD700",
+      "rarity": "rare",
+      "filename": "honma-owner.svg"
+    },
+    {
+      "id": 32,
+      "name": "Bridgestone Owner",
+      "description": "Own equipment from Bridgestone",
+      "category": "brand",
+      "brand": "Bridgestone",
+      "color": "#000000",
+      "rarity": "common",
+      "filename": "bridgestone-owner.svg"
+    },
+    {
+      "id": 33,
+      "name": "Tour Edge Owner",
+      "description": "Own equipment from Tour Edge",
+      "category": "brand",
+      "brand": "Tour Edge",
+      "color": "#10B981",
+      "rarity": "uncommon",
+      "filename": "tour-edge-owner.svg"
+    },
+    {
+      "id": 34,
+      "name": "XXIO Owner",
+      "description": "Own equipment from XXIO",
+      "category": "brand",
+      "brand": "XXIO",
+      "color": "#3B82F6",
+      "rarity": "uncommon",
+      "filename": "xxio-owner.svg"
+    },
+    {
+      "id": 35,
+      "name": "Miura Owner",
+      "description": "Own equipment from Miura",
+      "category": "brand",
+      "brand": "Miura",
+      "color": "#8B5CF6",
+      "rarity": "epic",
+      "filename": "miura-owner.svg"
+    },
+    {
+      "id": 36,
+      "name": "Ben Hogan Owner",
+      "description": "Own equipment from Ben Hogan",
+      "category": "brand",
+      "brand": "Ben Hogan",
+      "color": "#EF4444",
+      "rarity": "rare",
+      "filename": "ben-hogan-owner.svg"
+    },
+    {
+      "id": 37,
+      "name": "Vice Owner",
+      "description": "Own Vice golf balls",
+      "category": "brand",
+      "brand": "Vice",
+      "color": "#FF6B6B",
+      "rarity": "uncommon",
+      "filename": "vice-owner.svg"
+    },
+    {
+      "id": 38,
+      "name": "Snell Owner",
+      "description": "Own Snell golf balls",
+      "category": "brand",
+      "brand": "Snell",
+      "color": "#10B981",
+      "rarity": "uncommon",
+      "filename": "snell-owner.svg"
+    },
+    {
+      "id": 39,
+      "name": "OnCore Owner",
+      "description": "Own OnCore golf balls",
+      "category": "brand",
+      "brand": "OnCore",
+      "color": "#F59E0B",
+      "rarity": "uncommon",
+      "filename": "oncore-owner.svg"
+    },
+    {
+      "id": 40,
+      "name": "Maxfli Owner",
+      "description": "Own Maxfli golf balls",
+      "category": "brand",
+      "brand": "Maxfli",
+      "color": "#3B82F6",
+      "rarity": "common",
+      "filename": "maxfli-owner.svg"
+    },
+    {
+      "id": 41,
+      "name": "FootJoy Owner",
+      "description": "Own FootJoy equipment",
+      "category": "brand",
+      "brand": "FootJoy",
+      "color": "#FFFFFF",
+      "rarity": "common",
+      "filename": "footjoy-owner.svg"
+    },
+    {
+      "id": 42,
+      "name": "Bushnell Owner",
+      "description": "Own a Bushnell rangefinder",
+      "category": "brand",
+      "brand": "Bushnell",
+      "color": "#10B981",
+      "rarity": "common",
+      "filename": "bushnell-owner.svg"
+    },
+    {
+      "id": 43,
+      "name": "Garmin Owner",
+      "description": "Own a Garmin device",
+      "category": "brand",
+      "brand": "Garmin",
+      "color": "#3B82F6",
+      "rarity": "common",
+      "filename": "garmin-owner.svg"
+    },
+    {
+      "id": 44,
+      "name": "SkyCaddie Owner",
+      "description": "Own a SkyCaddie device",
+      "category": "brand",
+      "brand": "SkyCaddie",
+      "color": "#06B6D4",
+      "rarity": "uncommon",
+      "filename": "skycaddie-owner.svg"
+    },
+    {
+      "id": 45,
+      "name": "Pride Owner",
+      "description": "Own Pride tees",
+      "category": "brand",
+      "brand": "Pride",
+      "color": "#8B5CF6",
+      "rarity": "common",
+      "filename": "pride-owner.svg"
+    },
+    {
+      "id": 46,
+      "name": "Zero Friction Owner",
+      "description": "Own Zero Friction equipment",
+      "category": "brand",
+      "brand": "Zero Friction",
+      "color": "#EF4444",
+      "rarity": "common",
+      "filename": "zero-friction-owner.svg"
+    },
+    {
+      "id": 47,
+      "name": "Nike Owner",
+      "description": "Own Nike golf equipment",
+      "category": "brand",
+      "brand": "Nike",
+      "color": "#000000",
+      "rarity": "rare",
+      "filename": "nike-owner.svg"
+    },
+    {
+      "id": 48,
+      "name": "Adams Owner",
+      "description": "Own Adams golf equipment",
+      "category": "brand",
+      "brand": "Adams",
+      "color": "#3B82F6",
+      "rarity": "rare",
+      "filename": "adams-owner.svg"
+    }
+  ],
+  "totalCount": 48,
+  "categories": [
+    "social",
+    "community",
+    "milestone",
+    "explorer",
+    "collector",
+    "brand"
+  ],
+  "rarities": [
+    "common",
+    "uncommon",
+    "rare",
+    "legendary",
+    "epic"
+  ]
+}

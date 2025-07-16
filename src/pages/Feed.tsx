@@ -3,6 +3,7 @@ import { Trophy, TrendingUp, Users, Filter, Sparkles, Loader2, Plus, Camera } fr
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFeed } from '@/contexts/FeedContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,52 +13,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FeedItemCard } from '@/components/FeedItemCard';
-import { getFeedPosts } from '@/services/feedService';
-import { transformFeedPost } from '@/utils/feedTransformer';
 import { supabase } from '@/lib/supabase';
 
 const Feed = () => {
   const { user } = useAuth();
-  const [posts, setPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { allPosts, loading, error, loadMainFeed } = useFeed();
   const [filter, setFilter] = useState<'all' | 'following'>('all');
   const [displayCount, setDisplayCount] = useState(12);
 
   useEffect(() => {
-    loadFeed();
-  }, [filter, user]);
-
-  const loadFeed = async () => {
-    try {
-      setLoading(true);
-      const feedPosts = await getFeedPosts(user?.id, filter);
-      
-      // Check which users are followed if user is logged in
-      let followedUsers = new Set<string>();
-      if (user) {
-        const { data: follows } = await supabase
-          .from('user_follows')
-          .select('following_id')
-          .eq('follower_id', user.id);
-        
-        if (follows) {
-          followedUsers = new Set(follows.map(f => f.following_id));
-        }
-      }
-      
-      // Transform posts to UI format
-      const transformedPosts = feedPosts.map(post => {
-        const isFollowed = followedUsers.has(post.user_id);
-        return transformFeedPost({ ...post, isFollowed });
-      });
-      
-      setPosts(transformedPosts);
-    } catch (error) {
-      console.error('Error loading feed:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadMainFeed(filter);
+  }, [filter, loadMainFeed]);
 
   const handleLike = async (postId: string) => {
     if (!user) return;
@@ -88,7 +54,7 @@ const Feed = () => {
       }
       
       // Reload feed to get updated like counts
-      loadFeed();
+      loadMainFeed(filter);
     } catch (error) {
       console.error('Error toggling like:', error);
     }
@@ -122,21 +88,15 @@ const Feed = () => {
           });
       }
       
-      // Update local state
-      setPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.userId === userId 
-            ? { ...post, isFromFollowed: !post.isFromFollowed }
-            : post
-        )
-      );
+      // Reload feed to get updated follow status
+      loadMainFeed(filter);
     } catch (error) {
       console.error('Error toggling follow:', error);
     }
   };
 
-  const displayedPosts = posts.slice(0, displayCount);
-  const hasMore = displayCount < posts.length;
+  const displayedPosts = allPosts.slice(0, displayCount);
+  const hasMore = displayCount < allPosts.length;
 
   if (loading) {
     return (
@@ -242,7 +202,7 @@ const Feed = () => {
         )}
 
         {/* Empty State */}
-        {!loading && posts.length === 0 && (
+        {!loading && allPosts.length === 0 && (
           <div className="text-center py-20">
             <div className="bg-gray-900/60 backdrop-blur-[10px] border border-white/20 rounded-xl p-12 max-w-md mx-auto">
               <Trophy className="w-16 h-16 text-white/50 mx-auto mb-4" />

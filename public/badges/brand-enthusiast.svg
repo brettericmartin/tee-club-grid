@@ -1,0 +1,72 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Glassmorphism filter -->
+    <filter id="glass-11" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8"/>
+      <feComponentTransfer>
+        <feFuncA type="discrete" tableValues="1 1"/>
+      </feComponentTransfer>
+    </filter>
+    
+    <!-- Badge gradient -->
+    <linearGradient id="grad-11" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:0.4" />
+    </linearGradient>
+    
+    <!-- Rarity glow -->
+    <filter id="glow-11">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with glow -->
+  <circle cx="128" cy="128" r="110" 
+    fill="rgba(0,0,0,0.5)" 
+    stroke="#10B981" 
+    stroke-width="4"
+    filter="url(#glow-11)"
+    style="filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.4))"/>
+  
+  <!-- Glass effect layer -->
+  <circle cx="128" cy="128" r="106" 
+    fill="url(#grad-11)" 
+    opacity="0.9"/>
+  
+  <!-- Inner glass rim -->
+  <circle cx="128" cy="128" r="106" 
+    fill="none" 
+    stroke="rgba(255,255,255,0.2)" 
+    stroke-width="1"/>
+  
+  <!-- Icon -->
+  <g transform="translate(128, 128)">
+    <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z M8 2v16 M16 6v16" 
+      fill="#FFFFFF" 
+      stroke="#FFFFFF" 
+      stroke-width="2" 
+      stroke-linecap="round" 
+      stroke-linejoin="round"
+      transform="scale(4) translate(-12, -12)"/>
+  </g>
+  <!-- Badge name -->
+  <text x="128" y="200" 
+    font-family="Arial, sans-serif" 
+    font-size="16" 
+    font-weight="600" 
+    fill="#FFFFFF" 
+    text-anchor="middle"
+    opacity="0.9">Brand Enthusiast</text>
+  
+  <!-- Tier indicator -->
+  <circle cx="108" cy="220" r="4" 
+    fill="#FFFFFF" />
+  <circle cx="128" cy="220" r="4" 
+    fill="#FFFFFF" />
+  <circle cx="148" cy="220" r="4" 
+    fill="rgba(255,255,255,0.3)" />
+</svg>

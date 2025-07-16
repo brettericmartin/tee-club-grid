@@ -76,6 +76,11 @@ export interface Database {
           purchase_price?: number;
           notes?: string;
           custom_specs?: Record<string, any>;
+          custom_photo_url?: string;
+          shaft_id?: string;
+          grip_id?: string;
+          loft_option_id?: string;
+          condition?: string;
           created_at: string;
         };
         Insert: Omit<Database['public']['Tables']['bag_equipment']['Row'], 'id' | 'created_at'>;

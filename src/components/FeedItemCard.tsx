@@ -54,13 +54,25 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
           setUserProfile(profile);
         }
 
-        // Get user's primary bag (most recent bag)
+        // Get user's primary bag (most recent bag) with full equipment relationships
         const { data: bags } = await supabase
           .from('user_bags')
           .select(`
             *,
             bag_equipment (
-              equipment (*)
+              *,
+              equipment (
+                *,
+                equipment_photos (
+                  id,
+                  photo_url,
+                  likes_count,
+                  is_primary
+                )
+              ),
+              shaft:shafts (*),
+              grip:grips (*),
+              loft_option:loft_options (*)
             )
           `)
           .eq('user_id', post.userId)

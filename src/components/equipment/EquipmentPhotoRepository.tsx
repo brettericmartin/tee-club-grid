@@ -9,11 +9,8 @@ import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle,
-  DialogDescription 
+  DialogTitle
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -26,8 +23,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { uploadEquipmentPhoto } from '@/services/equipment';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
+import { UnifiedPhotoUploadDialog } from '@/components/shared/UnifiedPhotoUploadDialog';
 
 interface EquipmentPhoto {
   id: string;
@@ -154,6 +151,13 @@ export function EquipmentPhotoRepository({
       console.error('Error toggling like:', error);
       throw error; // Let TeedBallLike component handle the error display
     }
+  };
+
+  const handleUploadComplete = async (photoUrl: string) => {
+    // The UnifiedPhotoUploadDialog already handles the upload to storage
+    // and creates the feed post, so we just need to reload the photos
+    await loadPhotos();
+    toast.success('Photo uploaded successfully!');
   };
 
 
@@ -316,52 +320,16 @@ export function EquipmentPhotoRepository({
 
 
       {/* Upload Dialog */}
-      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upload Photo</DialogTitle>
-            <DialogDescription>
-              Add a photo of the {equipmentName}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            {/* File Upload */}
-            <div>
-              <Label htmlFor="photo">Select Photo</Label>
-              <Input
-                id="photo"
-                type="file"
-                accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (file && user) {
-                    try {
-                      await uploadEquipmentPhoto(
-                        user.id,
-                        equipmentId,
-                        file,
-                        '',
-                        photos.length === 0
-                      );
-                      toast.success('Photo uploaded successfully!');
-                      setShowUploadDialog(false);
-                      loadPhotos();
-                    } catch (error: any) {
-                      console.error('Upload error:', error);
-                      const errorMessage = error?.message || 'Failed to upload photo';
-                      toast.error(errorMessage);
-                    }
-                  }
-                }}
-              />
-              <p className="text-sm text-muted-foreground mt-1">
-                JPG, PNG up to 10MB
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <UnifiedPhotoUploadDialog
+        isOpen={showUploadDialog}
+        onClose={() => setShowUploadDialog(false)}
+        onUploadComplete={handleUploadComplete}
+        context={{
+          type: 'equipment',
+          equipmentId: equipmentId,
+          equipmentName: equipmentName
+        }}
+      />
     </div>
   );
 }

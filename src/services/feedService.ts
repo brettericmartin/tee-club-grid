@@ -98,7 +98,7 @@ export async function createEquipmentPhotoFeedPost(
   caption?: string,
   bagId?: string
 ) {
-  console.log('Creating equipment photo feed post:', { userId, equipmentId, photoUrl });
+  console.log('Creating equipment photo feed post:', { userId, equipmentId, photoUrl, bagId });
   
   try {
     // Check for recent equipment post to update instead of creating new
@@ -108,7 +108,7 @@ export async function createEquipmentPhotoFeedPost(
       console.log('Found recent equipment post, updating with photo instead of creating new');
       const updatedPost = await updatePostWithPhoto(recentPost.id, photoUrl, caption);
       if (updatedPost) {
-        console.log('Successfully updated existing post with photo');
+        console.log('Successfully updated existing post with photo:', updatedPost.id);
         return updatedPost;
       }
     }
@@ -139,7 +139,7 @@ export async function createEquipmentPhotoFeedPost(
       throw error;
     }
     
-    console.log('Equipment photo feed post created successfully:', data);
+    console.log('Equipment photo feed post created successfully:', data.id, 'by user:', data.user_id);
     return data;
   } catch (error) {
     console.error('Error creating equipment photo feed post:', error);
@@ -363,6 +363,59 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
   }
 }
 
+// Get feed posts by a specific user with pagination support
+export async function getUserFeedPosts(userId: string, limit: number = 100, offset: number = 0) {
+  try {
+    console.log('[getUserFeedPosts] Called with userId:', userId, 'limit:', limit, 'offset:', offset);
+    
+    if (!userId) {
+      console.error('[getUserFeedPosts] No userId provided!');
+      return { posts: [], totalCount: 0 };
+    }
+    
+    const { data, error, count } = await supabase
+      .from('feed_posts')
+      .select(`
+        *,
+        profile:profiles!feed_posts_user_id_fkey(
+          username,
+          avatar_url,
+          handicap
+        ),
+        equipment:equipment(
+          id,
+          brand,
+          model,
+          category,
+          image_url
+        ),
+        bag:user_bags(
+          id,
+          name,
+          description,
+          background_image
+        )
+      `, { count: 'exact' })
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('[getUserFeedPosts] Supabase error:', error);
+      throw error;
+    }
+
+    console.log(`[getUserFeedPosts] Query returned ${data?.length || 0} posts for user ${userId}, total count: ${count}`);
+    if (data && data.length > 0) {
+      console.log('[getUserFeedPosts] Sample post types:', data.slice(0, 3).map(p => p.type));
+    }
+    return { posts: data || [], totalCount: count || 0 };
+  } catch (error) {
+    console.error('Error fetching user feed posts:', error);
+    return { posts: [], totalCount: 0 };
+  }
+}
+
 // Check if a post is liked by the current user
 export async function checkPostLiked(userId: string, postId: string) {
   try {
@@ -376,5 +429,111 @@ export async function checkPostLiked(userId: string, postId: string) {
     return !error && !!data;
   } catch (error) {
     return false;
+  }
+}
+
+// Update a feed post
+export async function updateFeedPost(
+  postId: string, 
+  updates: { 
+    caption?: string; 
+    media_urls?: string[];
+    content?: any;
+  }
+) {
+  try {
+    console.log('Updating feed post:', postId, updates);
+
+    // First, get the current post to preserve existing content
+    const { data: currentPost, error: fetchError } = await supabase
+      .from('feed_posts')
+      .select('content')
+      .eq('id', postId)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching current post:', fetchError);
+      throw fetchError;
+    }
+
+    // Prepare the update object
+    const updateObject: any = {};
+
+    if (updates.caption !== undefined) {
+      // Merge the new caption with existing content
+      const existingContent = currentPost.content || {};
+      updateObject.content = {
+        ...existingContent,
+        caption: updates.caption
+      };
+    }
+
+    if (updates.media_urls) {
+      updateObject.media_urls = updates.media_urls;
+    }
+
+    if (updates.content) {
+      updateObject.content = updates.content;
+    }
+
+    // Update timestamp
+    updateObject.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('feed_posts')
+      .update(updateObject)
+      .eq('id', postId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating feed post:', error);
+      throw error;
+    }
+
+    console.log('Feed post updated successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Error updating feed post:', error);
+    throw error;
+  }
+}
+
+// Delete a feed post
+export async function deleteFeedPost(postId: string, userId: string) {
+  try {
+    console.log('Deleting feed post:', postId, 'by user:', userId);
+
+    // First verify the post belongs to the user
+    const { data: post, error: fetchError } = await supabase
+      .from('feed_posts')
+      .select('user_id')
+      .eq('id', postId)
+      .single();
+
+    if (fetchError || !post) {
+      throw new Error('Post not found');
+    }
+
+    if (post.user_id !== userId) {
+      throw new Error('Unauthorized - cannot delete another user\'s post');
+    }
+
+    // Delete the post
+    const { error } = await supabase
+      .from('feed_posts')
+      .delete()
+      .eq('id', postId);
+
+    if (error) {
+      console.error('Error deleting feed post:', error);
+      throw error;
+    }
+
+    console.log('Feed post deleted successfully');
+    return true;
+  } catch (error) {
+    console.error('Error deleting feed post:', error);
+    throw error;
   }
 }

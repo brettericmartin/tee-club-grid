@@ -1,0 +1,72 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Glassmorphism filter -->
+    <filter id="glass-4" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8"/>
+      <feComponentTransfer>
+        <feFuncA type="discrete" tableValues="1 1"/>
+      </feComponentTransfer>
+    </filter>
+    
+    <!-- Badge gradient -->
+    <linearGradient id="grad-4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10B981;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#10B981;stop-opacity:0.4" />
+    </linearGradient>
+    
+    <!-- Rarity glow -->
+    <filter id="glow-4">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with glow -->
+  <circle cx="128" cy="128" r="110" 
+    fill="rgba(0,0,0,0.5)" 
+    stroke="#6B7280" 
+    stroke-width="4"
+    filter="url(#glow-4)"
+    style="filter: drop-shadow(0 0 20px rgba(107, 114, 128, 0.3))"/>
+  
+  <!-- Glass effect layer -->
+  <circle cx="128" cy="128" r="106" 
+    fill="url(#grad-4)" 
+    opacity="0.9"/>
+  
+  <!-- Inner glass rim -->
+  <circle cx="128" cy="128" r="106" 
+    fill="none" 
+    stroke="rgba(255,255,255,0.2)" 
+    stroke-width="1"/>
+  
+  <!-- Icon -->
+  <g transform="translate(128, 128)">
+    <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" 
+      fill="#FFFFFF" 
+      stroke="#FFFFFF" 
+      stroke-width="2" 
+      stroke-linecap="round" 
+      stroke-linejoin="round"
+      transform="scale(4) translate(-12, -12)"/>
+  </g>
+  <!-- Badge name -->
+  <text x="128" y="200" 
+    font-family="Arial, sans-serif" 
+    font-size="16" 
+    font-weight="600" 
+    fill="#FFFFFF" 
+    text-anchor="middle"
+    opacity="0.9">First Review</text>
+  
+  <!-- Tier indicator -->
+  <circle cx="108" cy="220" r="4" 
+    fill="#FFFFFF" />
+  <circle cx="128" cy="220" r="4" 
+    fill="rgba(255,255,255,0.3)" />
+  <circle cx="148" cy="220" r="4" 
+    fill="rgba(255,255,255,0.3)" />
+</svg>

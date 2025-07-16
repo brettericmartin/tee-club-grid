@@ -146,7 +146,7 @@ export function EquipmentShowcaseModal({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.location.href = `/equipment/${bagEquipment.equipment_id}`}
+                    onClick={() => window.location.href = `/equipment/${bagEquipment.equipment.id}`}
                     className="flex items-center gap-2"
                   >
                     <ExternalLink className="w-4 h-4" />

@@ -5,10 +5,7 @@ type Badge = Database['public']['Tables']['badges']['Row'];
 type UserBadge = Database['public']['Tables']['user_badges']['Row'];
 
 export interface BadgeWithCategory extends Badge {
-  category?: {
-    name: string;
-    display_name: string;
-  };
+  // category is already a string on the Badge type from the database
 }
 
 export interface UserBadgeWithDetails extends UserBadge {
@@ -270,76 +267,65 @@ export class BadgeService {
 
   // Get user's badges
   static async getUserBadges(userId: string): Promise<UserBadgeWithDetails[]> {
+    console.log('[BadgeService] Fetching badges for user:', userId);
+    
     const { data, error } = await supabase
       .from('user_badges')
       .select(`
         *,
-        badge:badges (
-          *,
-          category:badge_categories (
-            name,
-            display_name
-          )
-        )
+        badge:badges (*)
       `)
       .eq('user_id', userId)
       .order('earned_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching user badges:', error);
+      console.error('[BadgeService] Error fetching user badges:', error);
       return [];
     }
 
+    console.log('[BadgeService] Fetched badges:', data?.length || 0);
     return data || [];
   }
 
-  // Get featured badges for display
+  // Get featured badges for display with priority logic
   static async getUserFeaturedBadges(userId: string, limit: number = 6): Promise<UserBadgeWithDetails[]> {
-    const { data, error } = await supabase
+    // First get all earned badges
+    const { data: allBadges, error } = await supabase
       .from('user_badges')
       .select(`
         *,
-        badge:badges (
-          *,
-          category:badge_categories (
-            name,
-            display_name
-          )
-        )
+        badge:badges (*)
       `)
       .eq('user_id', userId)
-      .eq('is_featured', true)
-      .order('earned_at', { ascending: false })
-      .limit(limit);
+      .eq('progress', 100);
 
-    if (error) {
-      console.error('Error fetching featured badges:', error);
+    if (error || !allBadges) {
+      console.error('Error fetching badges:', error);
       return [];
     }
 
-    // If not enough featured badges, fill with recent badges
-    if (!data || data.length < limit) {
-      const { data: recentBadges } = await supabase
-        .from('user_badges')
-        .select(`
-          *,
-          badge:badges (
-            *,
-            category:badge_categories (
-              name,
-              display_name
-            )
-          )
-        `)
-        .eq('user_id', userId)
-        .eq('is_featured', false)
-        .order('earned_at', { ascending: false })
-        .limit(limit - (data?.length || 0));
+    // Sort badges by priority
+    const sortedBadges = allBadges.sort((a, b) => {
+      // Featured first
+      if (a.is_featured && !b.is_featured) return -1;
+      if (!a.is_featured && b.is_featured) return 1;
+      
+      // Then by rarity
+      const rarityOrder = { legendary: 1, epic: 2, rare: 3, uncommon: 4, common: 5 };
+      const aRarity = a.badge?.rarity || 'common';
+      const bRarity = b.badge?.rarity || 'common';
+      const rarityDiff = (rarityOrder[aRarity] || 5) - (rarityOrder[bRarity] || 5);
+      if (rarityDiff !== 0) return rarityDiff;
+      
+      // Then by sort order
+      const sortDiff = (a.badge?.sort_order || 999) - (b.badge?.sort_order || 999);
+      if (sortDiff !== 0) return sortDiff;
+      
+      // Finally by earned date (newest first)
+      return new Date(b.earned_at || 0).getTime() - new Date(a.earned_at || 0).getTime();
+    });
 
-      return [...(data || []), ...(recentBadges || [])];
-    }
-
-    return data;
+    return sortedBadges.slice(0, limit);
   }
 
   // Mark badge notification as seen

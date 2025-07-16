@@ -1,35 +1,20 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { 
-  Camera, Shield, Heart, DollarSign, Flag, Sunrise, 
-  Trophy, Star, Zap, Award, Crown, Gem
-} from 'lucide-react';
+import { Star, Trophy } from 'lucide-react';
 import type { UserBadgeWithDetails } from '@/services/badgeService';
 
 interface BadgeDisplayProps {
   badges: UserBadgeWithDetails[];
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   showEmpty?: boolean;
   maxDisplay?: number;
   onBadgeClick?: (badge: UserBadgeWithDetails) => void;
 }
 
-// Map icon names to components
-const iconMap: Record<string, any> = {
-  camera: Camera,
-  shield: Shield,
-  heart: Heart,
-  dollar: DollarSign,
-  flag: Flag,
-  sunrise: Sunrise,
-  trophy: Trophy,
-  star: Star,
-  'golf-club': Trophy, // Fallback for golf club
-  crown: Crown,
-  gem: Gem,
-  zap: Zap,
-  award: Award
-};
+// Helper function to get badge filename
+function getBadgeFilename(badgeName: string): string {
+  return badgeName.toLowerCase().replace(/\s+/g, '-') + '.svg';
+}
 
 // Rarity colors and effects
 const rarityStyles = {
@@ -60,13 +45,15 @@ const BadgeDisplay = ({
   const sizeClasses = {
     sm: 'w-12 h-12',
     md: 'w-16 h-16',
-    lg: 'w-20 h-20'
+    lg: 'w-20 h-20',
+    xl: 'w-24 h-24'
   };
 
   const iconSizes = {
     sm: 'w-6 h-6',
     md: 'w-8 h-8',
-    lg: 'w-10 h-10'
+    lg: 'w-10 h-10',
+    xl: 'w-12 h-12'
   };
 
   const displayBadges = badges.slice(0, maxDisplay);
@@ -76,10 +63,14 @@ const BadgeDisplay = ({
   const emptySlots = showEmpty ? Math.max(0, maxDisplay - displayBadges.length) : 0;
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className={cn(
+      "grid gap-3",
+      size === 'xl' ? "grid-cols-4 sm:grid-cols-8 gap-2" : "grid-cols-3 sm:grid-cols-6"
+    )}>
       {displayBadges.map((userBadge) => {
-        const Icon = iconMap[userBadge.badge.icon_name || 'trophy'] || Trophy;
         const rarity = userBadge.badge.rarity || 'common';
+        const badgeIcon = userBadge.badge.icon;
+        const isImageUrl = badgeIcon?.startsWith('/') || badgeIcon?.startsWith('http');
         
         return (
           <div
@@ -90,30 +81,21 @@ const BadgeDisplay = ({
           >
             <div
               className={cn(
-                "relative flex items-center justify-center rounded-xl border-2 transition-all duration-300 cursor-pointer",
+                "relative flex items-center justify-center transition-all duration-300 cursor-pointer overflow-hidden",
                 sizeClasses[size],
-                rarityStyles[rarity],
-                rarityGlow[rarity],
                 "hover:scale-110",
                 onBadgeClick && "hover:brightness-125"
               )}
               onClick={() => onBadgeClick?.(userBadge)}
             >
-              <Icon 
-                className={cn(iconSizes[size], "transition-colors")}
-                style={{ color: userBadge.badge.icon_color || '#10B981' }}
-              />
-              
-              {/* Tier indicator for tiered badges */}
-              {userBadge.badge.tier && userBadge.badge.tier > 1 && (
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-black rounded-full flex items-center justify-center border border-white/20">
-                  <span className="text-xs font-bold text-white">{userBadge.badge.tier}</span>
-                </div>
-              )}
-
-              {/* New badge indicator */}
-              {!userBadge.notification_seen && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+              {isImageUrl ? (
+                <img 
+                  src={badgeIcon}
+                  alt={userBadge.badge.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-2xl">{badgeIcon || '🏅'}</span>
               )}
             </div>
 
@@ -141,7 +123,7 @@ const BadgeDisplay = ({
         <div
           key={`empty-${index}`}
           className={cn(
-            "flex items-center justify-center rounded-xl border-2 border-dashed border-gray-700 bg-gray-900/30",
+            "flex items-center justify-center",
             sizeClasses[size]
           )}
         >
@@ -149,18 +131,6 @@ const BadgeDisplay = ({
         </div>
       ))}
 
-      {/* More badges indicator */}
-      {remainingCount > 0 && (
-        <div
-          className={cn(
-            "flex items-center justify-center rounded-xl border-2 border-gray-600 bg-gray-800 cursor-pointer hover:bg-gray-700 transition-colors",
-            sizeClasses[size]
-          )}
-          onClick={() => onBadgeClick?.(displayBadges[0])} // You might want to show all badges modal
-        >
-          <span className="text-white font-bold">+{remainingCount}</span>
-        </div>
-      )}
     </div>
   );
 };

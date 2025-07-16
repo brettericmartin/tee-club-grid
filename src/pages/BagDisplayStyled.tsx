@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Heart, Share2, Edit, ArrowLeft, Grid3x3, List, CreditCard } from "lucide-react";
+import { Loader2, Heart, Share2, Edit, ArrowLeft, Grid3x3, List, CreditCard, Trophy, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import BagEquipmentGallery from "@/components/bag/BagEquipmentGallery";
 import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
 import { BadgeService } from "@/services/badgeService";
 import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
+import { sortBadgesByPriority } from "@/utils/badgeSorting";
 
 const BagDisplayStyled = () => {
   const { bagId } = useParams();
@@ -122,7 +123,7 @@ const BagDisplayStyled = () => {
         await calculateTotalTees(data.user_id);
         
         // Load user badges
-        const badges = await BadgeService.getUserFeaturedBadges(data.user_id, 6);
+        const badges = await BadgeService.getUserBadges(data.user_id);
         setUserBadges(badges);
       }
     } catch (err: any) {
@@ -216,7 +217,7 @@ const BagDisplayStyled = () => {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <div className="bg-white/5 backdrop-blur-[10px] border-b border-white/10 sticky top-16 z-40">
+      <div className="bg-white/5 backdrop-blur-[10px] border-b border-white/10 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -377,19 +378,56 @@ const BagDisplayStyled = () => {
                   />
                 </div>
                 
-                {/* Badges - 2x3 grid on right */}
+                {/* Badges - 2x4 grid on right */}
                 <div className="flex-shrink-0 w-full lg:w-56">
                   <div className="h-full bg-gray-900/50 rounded-lg p-4 border border-white/10">
-                    <BadgeDisplay
-                      badges={userBadges}
-                      size="lg"
-                      showEmpty={true}
-                      maxDisplay={6}
-                      onBadgeClick={(badge) => {
-                        // TODO: Show badge details modal
-                        console.log('Badge clicked:', badge);
-                      }}
-                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      {sortBadgesByPriority(userBadges.filter(ub => ub.progress === 100)).slice(0, 8).map((userBadge) => {
+                        const rarity = userBadge.badge?.rarity || 'common';
+                        const badgeIcon = userBadge.badge?.icon;
+                        const isImageUrl = badgeIcon?.startsWith('/') || badgeIcon?.startsWith('http');
+                        
+                        return (
+                          <div
+                            key={userBadge.id}
+                            className="relative group"
+                          >
+                            <div
+                              className="relative flex items-center justify-center transition-all duration-300 cursor-pointer overflow-hidden w-24 h-24 hover:scale-110"
+                              onClick={() => {
+                                // TODO: Show badge details modal
+                                console.log('Badge clicked:', userBadge);
+                              }}
+                            >
+                              {isImageUrl ? (
+                                <img 
+                                  src={badgeIcon}
+                                  alt={userBadge.badge?.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-2xl">{badgeIcon || '🏅'}</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {/* Fill empty slots */}
+                      {Array.from({ length: Math.max(0, 8 - Math.min(8, userBadges.filter(ub => ub.progress === 100).length)) }).map((_, index) => (
+                        <div
+                          key={`empty-${index}`}
+                          className="w-24 h-24 flex items-center justify-center"
+                        >
+                          <Trophy className="w-10 h-10 text-gray-700" />
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Badge count stat */}
+                    <div className="col-span-2 mt-4 text-center border-t border-white/10 pt-3">
+                      <p className="text-2xl font-bold text-white">{userBadges.filter(ub => ub.progress === 100).length}</p>
+                      <p className="text-sm text-white/70">Badges Earned</p>
+                    </div>
                   </div>
                 </div>
               </div>

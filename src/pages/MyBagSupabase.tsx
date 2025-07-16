@@ -1065,10 +1065,19 @@ const MyBagSupabase = () => {
             ))}
           </div>
         ) : viewMode === 'feed' ? (
-          <UserFeedView 
-            userId={user?.id || ''} 
-            isOwnProfile={true}
-          />
+          user?.id ? (
+            <>
+              {console.log('[MyBagSupabase] Rendering UserFeedView with userId:', user.id, 'username:', authContext.profile?.username)}
+              <UserFeedView 
+                userId={user.id} 
+                isOwnProfile={true}
+              />
+            </>
+          ) : (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-white/50">Loading feed...</div>
+            </div>
+          )
         ) : (
           /* Card View */
           <div className="flex justify-center">
