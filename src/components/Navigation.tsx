@@ -1,9 +1,11 @@
-import { User, Grid, Heart, Settings, Users, LogOut } from "lucide-react";
+import { User, Grid, Heart, Users, LogOut } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { SignInModal } from "@/components/auth/SignInModal";
 import { SignUpModal } from "@/components/auth/SignUpModal";
+import { ProfileDialog } from "@/components/profile/ProfileDialog";
+import { getProfile } from "@/services/profileService";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,9 +46,32 @@ const NavLink = ({ to, children }: NavLinkProps) => {
 const Navigation = () => {
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Fetch profile data when user changes
+  useEffect(() => {
+    if (user) {
+      console.log('[Navigation] Fetching profile for user:', user.id);
+      getProfile(user.id).then(profile => {
+        if (profile) {
+          console.log('[Navigation] Profile loaded:', {
+            username: profile.username,
+            display_name: profile.display_name,
+            avatar_url: profile.avatar_url
+          });
+          setProfileData(profile);
+        }
+      }).catch(error => {
+        console.error('Error fetching profile:', error);
+      });
+    } else {
+      setProfileData(null);
+    }
+  }, [user, showProfile]); // Also refetch when profile dialog closes
 
   const handleSignOut = async () => {
     try {
@@ -137,9 +162,12 @@ const Navigation = () => {
                     <DropdownMenuTrigger asChild>
                       <button className="relative">
                         <Avatar className="w-10 h-10 hover:scale-110 transition-transform cursor-pointer">
-                          <AvatarImage src={user.user_metadata?.avatar_url} />
-                          <AvatarFallback className="bg-gradient-to-br from-gray-600 to-gray-800">
-                            {user.user_metadata?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
+                          <AvatarImage 
+                            src={profileData?.avatar_url || user.user_metadata?.avatar_url}
+                            alt="Profile"
+                          />
+                          <AvatarFallback className="bg-gradient-to-br from-gray-600 to-gray-800 text-white">
+                            {profileData?.username?.[0]?.toUpperCase() || user.user_metadata?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '?'}
                           </AvatarFallback>
                         </Avatar>
                         {/* Notification Badge */}
@@ -149,18 +177,14 @@ const Navigation = () => {
                     <DropdownMenuContent align="end" className="w-56">
                       <DropdownMenuLabel>
                         <div className="flex flex-col">
-                          <span>{user.user_metadata?.username || 'My Account'}</span>
+                          <span>{profileData?.display_name || profileData?.username || user.user_metadata?.username || 'My Account'}</span>
                           <span className="text-xs text-muted-foreground font-normal">{user.email}</span>
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      <DropdownMenuItem onClick={() => setShowProfile(true)}>
                         <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/settings')}>
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
+                        Edit Profile
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleSignOut}>
@@ -194,6 +218,12 @@ const Navigation = () => {
         isOpen={showSignUp} 
         onClose={() => setShowSignUp(false)}
         onSignInClick={() => setShowSignIn(true)}
+      />
+      
+      {/* Profile Dialog */}
+      <ProfileDialog
+        isOpen={showProfile}
+        onClose={() => setShowProfile(false)}
       />
     </>
   );

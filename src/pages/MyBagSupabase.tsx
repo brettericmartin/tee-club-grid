@@ -779,21 +779,21 @@ const MyBagSupabase = () => {
       
       <div className="container mx-auto px-4 pt-20 pb-8 relative z-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             {isEditing ? (
               <Input
                 value={bagName}
                 onChange={(e) => setBagName(e.target.value)}
-                className="text-3xl font-bold bg-transparent border-b border-white/20 text-white"
+                className="text-2xl sm:text-3xl font-bold bg-transparent border-b border-white/20 text-white"
                 placeholder="Bag Name"
               />
             ) : (
-              <h1 className="text-3xl font-bold text-white">{bagName}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">{bagName}</h1>
             )}
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
             {!isEditing && (
               <>
                 {/* View Mode Toggle */}
@@ -840,10 +840,10 @@ const MyBagSupabase = () => {
                   onClick={() => setManageBadgesOpen(true)}
                   variant="outline"
                   size="sm"
-                  className="text-white hover:text-white hover:bg-white/20"
+                  className="text-white hover:text-white hover:bg-white/20 whitespace-nowrap"
                 >
-                  <Trophy className="w-4 h-4 mr-2" />
-                  Manage Badges
+                  <Trophy className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Manage</span> Badges
                 </Button>
               </>
             )}
@@ -871,13 +871,17 @@ const MyBagSupabase = () => {
                   <Button
                     onClick={() => setIsEditingLayout(!isEditingLayout)}
                     variant={isEditingLayout ? 'destructive' : 'outline'}
+                    size="sm"
+                    className="whitespace-nowrap"
                   >
-                    {isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}
+                    <span className="hidden sm:inline">{isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}</span>
+                    <span className="sm:hidden">{isEditingLayout ? 'Cancel' : 'Layout'}</span>
                   </Button>
                 )}
-                <Button onClick={() => setIsEditing(true)} variant="outline">
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  Edit Bag
+                <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="whitespace-nowrap">
+                  <Edit3 className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Edit Bag</span>
+                  <span className="sm:hidden">Edit</span>
                 </Button>
               </>
             )}
@@ -908,39 +912,39 @@ const MyBagSupabase = () => {
         )}
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-5 gap-3 mb-8">
+        <div className="grid grid-cols-5 gap-2 sm:gap-3 mb-8">
           <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
-            <CardContent className="p-4 text-center">
-              <p className="text-sm text-gray-200">Total Tees</p>
-              <p className="text-2xl font-bold text-white">{formatCompactNumber(totalTees)}</p>
+            <CardContent className="p-2 sm:p-4 text-center">
+              <p className="text-xs sm:text-sm text-gray-200">Total Tees</p>
+              <p className="text-lg sm:text-2xl font-bold text-white">{formatCompactNumber(totalTees)}</p>
             </CardContent>
           </Card>
           <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
-            <CardContent className="p-4 text-center">
-              <p className="text-sm text-gray-200">Equipment</p>
-              <p className="text-2xl font-bold text-white">{bagItems.length}</p>
+            <CardContent className="p-2 sm:p-4 text-center">
+              <p className="text-xs sm:text-sm text-gray-200">Equipment</p>
+              <p className="text-lg sm:text-2xl font-bold text-white">{bagItems.length}</p>
             </CardContent>
           </Card>
           <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
-            <CardContent className="p-4 text-center">
-              <p className="text-sm text-gray-200">Featured</p>
-              <p className="text-2xl font-bold text-white">
+            <CardContent className="p-2 sm:p-4 text-center">
+              <p className="text-xs sm:text-sm text-gray-200">Featured</p>
+              <p className="text-lg sm:text-2xl font-bold text-white">
                 {bagItems.filter(item => item.is_featured).length}
               </p>
             </CardContent>
           </Card>
           <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
-            <CardContent className="p-4 text-center">
-              <p className="text-sm text-gray-200">Badges</p>
-              <p className="text-2xl font-bold text-white">
+            <CardContent className="p-2 sm:p-4 text-center">
+              <p className="text-xs sm:text-sm text-gray-200">Badges</p>
+              <p className="text-lg sm:text-2xl font-bold text-white">
                 {(userBadges || []).filter(ub => ub.progress === 100).length}
               </p>
             </CardContent>
           </Card>
           <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
-            <CardContent className="p-4 text-center">
-              <p className="text-xs text-gray-300">Est. Value</p>
-              <p className="text-lg font-medium text-white">{formatCompactCurrency(totalValue)}</p>
+            <CardContent className="p-2 sm:p-4 text-center">
+              <p className="text-[10px] sm:text-xs text-gray-300">Est. Value</p>
+              <p className="text-sm sm:text-lg font-medium text-white">{formatCompactCurrency(totalValue)}</p>
             </CardContent>
           </Card>
         </div>

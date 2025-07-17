@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { formatCompactCurrency } from '@/lib/formatters';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import EquipmentDetailModal from './EquipmentDetailModal';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
@@ -235,11 +236,15 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
       {/* Card Header */}
       <div className="flex items-center justify-between p-4 bg-black/50">
         <Link to={`/bag/${post.userName}`} className="flex items-center gap-3">
-          <img 
-            src={post.userAvatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop'} 
-            alt={post.userName}
-            className="w-10 h-10 rounded-full object-cover"
-          />
+          <Avatar className="w-10 h-10">
+            <AvatarImage 
+              src={post.userAvatar || undefined} 
+              alt={post.userName}
+            />
+            <AvatarFallback className="bg-gradient-to-br from-gray-600 to-gray-800 text-white">
+              {post.userName?.[0]?.toUpperCase() || '?'}
+            </AvatarFallback>
+          </Avatar>
           <div>
             <p className="text-white font-medium">{post.userName}</p>
             <p className="text-gray-400 text-xs">

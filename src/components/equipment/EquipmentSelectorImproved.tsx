@@ -201,6 +201,10 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   const [loftOptions, setLoftOptions] = useState<LoftOption[]>([]);
   const [selectedLoft, setSelectedLoft] = useState<LoftOption | null>(null);
   
+  // Double tap detection for mobile
+  const [lastTap, setLastTap] = useState(0);
+  const DOUBLE_TAP_DELAY = 300;
+  
   // Search and filters
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -463,10 +467,19 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     }
   };
 
+  // Handle double tap for mobile
+  const handleDoubleTap = (callback: () => void) => {
+    const now = Date.now();
+    if (now - lastTap < DOUBLE_TAP_DELAY) {
+      callback();
+    }
+    setLastTap(now);
+  };
+
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card border-white/20 text-white max-w-3xl max-h-[85vh]">
+      <DialogContent className="glass-card border-white/20 text-white max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-2xl">{getStepTitle()}</DialogTitle>
         </DialogHeader>
@@ -535,7 +548,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           )}
         </div>
 
-        <ScrollArea className="h-[500px] pr-4">
+        <ScrollArea className="flex-1 pr-4 -mr-4" style={{ maxHeight: 'calc(90vh - 280px)' }}>
           {/* Category Selection */}
           {step === 'category' && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -713,6 +726,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               <div className="mb-4 p-3 bg-white/10 rounded-lg">
                 <p className="text-sm text-white/60">Customizing</p>
                 <p className="font-medium">{selectedEquipment?.brand} {selectedEquipment?.model}</p>
+                <p className="text-xs text-white/40 mt-1 sm:hidden">Tap to select • Double-tap to continue</p>
               </div>
 
               {shafts.map((shaft) => (
@@ -723,7 +737,18 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                       ? 'ring-2 ring-primary bg-primary/10' 
                       : 'hover:bg-white/20'
                   }`}
-                  onClick={() => setSelectedShaft(shaft)}
+                  onClick={() => {
+                    setSelectedShaft(shaft);
+                    handleDoubleTap(() => {
+                      if (selectedCategory?.hasGrip) {
+                        setStep('grip');
+                      } else if (selectedCategory?.hasLoft) {
+                        setStep('loft');
+                      } else {
+                        handleComplete();
+                      }
+                    });
+                  }}
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -763,7 +788,16 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                       ? 'ring-2 ring-primary bg-primary/10' 
                       : 'hover:bg-white/20'
                   }`}
-                  onClick={() => setSelectedGrip(grip)}
+                  onClick={() => {
+                    setSelectedGrip(grip);
+                    handleDoubleTap(() => {
+                      if (selectedCategory?.hasLoft) {
+                        setStep('loft');
+                      } else {
+                        handleComplete();
+                      }
+                    });
+                  }}
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -792,6 +826,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               <div className="mb-4 p-3 bg-white/10 rounded-lg">
                 <p className="text-sm text-white/60">Customizing</p>
                 <p className="font-medium">{selectedEquipment?.brand} {selectedEquipment?.model}</p>
+                <p className="text-xs text-white/40 mt-1 sm:hidden">Tap to select • Double-tap to continue</p>
               </div>
 
               <Select
@@ -816,8 +851,8 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           )}
         </ScrollArea>
 
-        {/* Actions */}
-        <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
+        {/* Actions - Sticky footer */}
+        <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10 bg-[#1a1a1a] sticky bottom-0 -mx-6 px-6 pb-4">
           <Button
             variant="ghost"
             onClick={() => {

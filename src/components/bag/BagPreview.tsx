@@ -154,13 +154,13 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                 <Avatar className="h-12 w-12">
                   <AvatarImage src={bag.profile?.avatar_url || ''} />
                   <AvatarFallback>
-                    {bag.profile?.full_name?.charAt(0) || bag.profile?.username?.charAt(0) || 'U'}
+                    {bag.profile?.display_name?.charAt(0) || bag.profile?.username?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <h2 className="text-xl font-bold">{bag.name}</h2>
                   <p className="text-sm text-muted-foreground">
-                    {bag.profile?.full_name || bag.profile?.username || 'Unknown User'}
+                    {bag.profile?.display_name || bag.profile?.username || 'Unknown User'}
                   </p>
                 </div>
               </div>

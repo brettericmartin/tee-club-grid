@@ -119,9 +119,9 @@ const BagCard = memo(({ bag }: BagCardProps) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8 shadow-sm">
-                <AvatarImage src="/placeholder-avatar.jpg" />
-                <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">
-                  <User className="w-4 h-4" />
+                <AvatarImage src={undefined} />
+                <AvatarFallback className="bg-gradient-to-br from-gray-600 to-gray-800 text-white text-xs">
+                  {bag.owner?.[0]?.toUpperCase() || <User className="w-4 h-4" />}
                 </AvatarFallback>
               </Avatar>
               <div>
