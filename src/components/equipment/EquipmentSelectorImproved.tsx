@@ -973,7 +973,8 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
             category: equipmentData.category,
             year: equipmentData.year,
             msrp: undefined, // Will be set from form if provided
-            image_url: equipmentData.imageUrl
+            image_url: equipmentData.imageUrl,
+            imageFile: equipmentData.imageFile
           });
           
           if (result.success && result.equipment) {
@@ -985,14 +986,22 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               await loadEquipment();
             }
             
-            // If the new equipment matches current filters, select it
-            if (selectedCategory?.value === equipmentData.category && selectedBrand === equipmentData.brand) {
+            // Auto-select and add the new equipment to bag
+            if (result.equipment) {
               setSelectedEquipment(result.equipment);
-              // Move to next step based on category
-              if (selectedCategory.hasShaft) {
-                setStep('shaft');
+              
+              // If equipment doesn't need customization, add it directly
+              if (!selectedCategory || !selectedCategory.hasShaft) {
+                // Add directly to bag
+                onSelectEquipment({
+                  equipment_id: result.equipment.id
+                });
+                onClose();
+                toast.success('Equipment added to your bag!');
               } else {
-                handleComplete();
+                // Move to customization steps
+                setStep('shaft');
+                loadCustomizationOptions();
               }
             }
           } else {

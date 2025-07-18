@@ -171,8 +171,8 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
             <DialogTitle>Submit Equipment</DialogTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
@@ -181,7 +181,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
           </div>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto flex-1 pr-2">
           {/* Info Banner */}
           <div className="bg-muted/50 rounded-lg p-4 flex items-start gap-3">
             <Info className="w-5 h-5 text-muted-foreground mt-0.5" />
@@ -225,6 +225,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
                         className="w-full justify-start text-primary hover:text-primary"
                         onClick={() => {
                           setShowNewBrand(true);
+                          setShowNewModel(true); // Auto-select new model for new brand
                           setShowBrandDropdown(false);
                           setBrandSearch("");
                         }}

@@ -14,6 +14,7 @@ export interface EquipmentSubmission {
   year?: number;
   msrp?: number;
   image_url?: string;
+  imageFile?: File | null;
   specs?: Record<string, any>;
 }
 
@@ -75,6 +76,36 @@ export async function submitEquipment(submission: EquipmentSubmission) {
     }
   }
   
+  // Handle image upload if provided
+  let finalImageUrl = cleanedSubmission.image_url;
+  
+  if (submission.imageFile) {
+    try {
+      // Upload image to storage
+      const fileExt = submission.imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `equipment/${cleanedSubmission.brand}-${cleanedSubmission.model_cleaned}-${Date.now()}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('equipment-photos')
+        .upload(fileName, submission.imageFile, {
+          contentType: submission.imageFile.type,
+          upsert: false
+        });
+      
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('equipment-photos')
+        .getPublicUrl(fileName);
+      
+      finalImageUrl = publicUrl;
+    } catch (uploadError) {
+      console.error('Failed to upload equipment image:', uploadError);
+      // Continue without image rather than failing entirely
+    }
+  }
+  
   // Add directly to equipment table - no review needed!
   const { data: newEquipment, error } = await supabase
     .from('equipment')
@@ -83,7 +114,7 @@ export async function submitEquipment(submission: EquipmentSubmission) {
       model: cleanedSubmission.model_cleaned,
       category: cleanedSubmission.category,
       msrp: cleanedSubmission.msrp || 0,
-      image_url: cleanedSubmission.image_url,
+      image_url: finalImageUrl,
       specs: {
         ...cleanedSubmission.specs,
         year: cleanedSubmission.year,
