@@ -31,7 +31,7 @@ export interface AIAnalysis {
   notes: string;
 }
 
-// Submit new equipment
+// Submit new equipment - immediately available
 export async function submitEquipment(submission: EquipmentSubmission) {
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -75,23 +75,23 @@ export async function submitEquipment(submission: EquipmentSubmission) {
     }
   }
   
-  // Create submission record
-  const { data, error } = await supabase
-    .from('equipment_submissions')
+  // Add directly to equipment table - no review needed!
+  const { data: newEquipment, error } = await supabase
+    .from('equipment')
     .insert({
-      submitted_by: user.id,
       brand: cleanedSubmission.brand,
       model: cleanedSubmission.model_cleaned,
       category: cleanedSubmission.category,
-      year: cleanedSubmission.year,
-      msrp: cleanedSubmission.msrp,
+      msrp: cleanedSubmission.msrp || 0,
       image_url: cleanedSubmission.image_url,
-      specs: cleanedSubmission.specs || {},
-      status: 'pending',
-      ai_analysis: {
-        checked_at: new Date().toISOString(),
-        similar_equipment: existing || []
-      }
+      specs: {
+        ...cleanedSubmission.specs,
+        year: cleanedSubmission.year,
+        community_submitted: true,
+        submitted_by: user.id
+      },
+      popularity_score: 50,
+      created_at: new Date().toISOString()
     })
     .select()
     .single();
@@ -100,21 +100,11 @@ export async function submitEquipment(submission: EquipmentSubmission) {
     throw error;
   }
   
-  // If no similar equipment found, auto-approve
-  if (!existing || existing.length === 0) {
-    await autoApproveSubmission(data.id);
-    return {
-      success: true,
-      message: 'Equipment added successfully!',
-      submission: data
-    };
-  }
-  
   return {
     success: true,
-    message: 'Equipment submitted for review',
-    submission: data,
-    similar: existing
+    message: 'Equipment added successfully!',
+    equipment: newEquipment,
+    equipmentId: newEquipment.id
   };
 }
 
@@ -256,23 +246,54 @@ export async function getUserSubmissions(userId: string) {
   return data;
 }
 
-// Report duplicate equipment
-export async function reportDuplicate(equipmentId1: string, equipmentId2: string, notes?: string) {
+// Report equipment with reason code
+export async function reportEquipment(
+  equipmentId: string, 
+  reasonCode: 'duplicate' | 'incorrect_info' | 'spam' | 'other',
+  details?: string,
+  duplicateOfId?: string
+) {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
-    throw new Error('Must be logged in to report duplicates');
+    throw new Error('Must be logged in to report equipment');
   }
   
   const { error } = await supabase
-    .from('equipment_duplicate_reports')
+    .from('equipment_reports')
     .insert({
-      equipment_id_1: equipmentId1,
-      equipment_id_2: equipmentId2,
+      equipment_id: equipmentId,
       reported_by: user.id,
-      notes
+      reason_code: reasonCode,
+      details,
+      duplicate_of_id: duplicateOfId
     });
   
-  if (error) throw error;
+  if (error) {
+    if (error.code === '23505') { // Unique constraint violation
+      throw new Error('You have already reported this equipment');
+    }
+    throw error;
+  }
+  
   return { success: true };
+}
+
+// Get report stats for equipment
+export async function getEquipmentReportStats(equipmentId: string) {
+  const { data, error } = await supabase
+    .from('equipment_report_stats')
+    .select('*')
+    .eq('equipment_id', equipmentId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') { // Not found is ok
+    throw error;
+  }
+  
+  return data || {
+    total_reports: 0,
+    duplicate_reports: 0,
+    unique_reporters: 0
+  };
 }

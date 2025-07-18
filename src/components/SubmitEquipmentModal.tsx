@@ -158,7 +158,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
     setImageFile(null);
     setImagePreview("");
     
-    toast.success("Equipment submitted for review!");
+    toast.success("Equipment added successfully!");
     onClose();
   };
 
@@ -188,7 +188,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
             <div className="space-y-1">
               <p className="text-sm font-medium">Community Contributions</p>
               <p className="text-sm text-muted-foreground">
-                Help grow the database by submitting missing equipment. All submissions are reviewed before being added.
+                Help grow the database by submitting missing equipment. Your equipment will be available immediately!
               </p>
               <div className="flex gap-2 mt-2">
                 <Badge variant="secondary" className="text-xs">Vintage Equipment</Badge>

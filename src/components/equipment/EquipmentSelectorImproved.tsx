@@ -205,6 +205,11 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   const [lastTap, setLastTap] = useState(0);
   const DOUBLE_TAP_DELAY = 300;
   
+  // Swipe detection for mobile
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const minSwipeDistance = 50;
+  
   // Search and filters
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -475,11 +480,87 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     }
     setLastTap(now);
   };
+  
+  // Handle swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(0); // Reset
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+  
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isRightSwipe) {
+      // Navigate back
+      switch (step) {
+        case 'brand': 
+          setStep('category');
+          setSelectedCategory(null);
+          setSelectedBrand('');
+          setEquipment([]);
+          break;
+        case 'equipment': 
+          setStep('brand');
+          setSelectedBrand('');
+          setEquipment([]);
+          setSelectedEquipment(null);
+          break;
+        case 'shaft': 
+          setStep('equipment');
+          setSelectedEquipment(null);
+          break;
+        case 'grip': 
+          setStep('shaft');
+          setSelectedShaft(null);
+          break;
+        case 'loft': 
+          setStep('grip');
+          setSelectedGrip(null);
+          break;
+      }
+    } else if (isLeftSwipe && canProceed()) {
+      // Navigate forward
+      switch (step) {
+        case 'shaft':
+          if (selectedCategory?.hasGrip) {
+            setStep('grip');
+          } else if (selectedCategory?.hasLoft) {
+            setStep('loft');
+          } else {
+            handleComplete();
+          }
+          break;
+        case 'grip':
+          if (selectedCategory?.hasLoft) {
+            setStep('loft');
+          } else {
+            handleComplete();
+          }
+          break;
+        case 'loft':
+          handleComplete();
+          break;
+      }
+    }
+  };
 
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card border-white/20 text-white max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent 
+        className="glass-card border-white/20 text-white max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl">{getStepTitle()}</DialogTitle>
         </DialogHeader>
@@ -548,7 +629,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           )}
         </div>
 
-        <ScrollArea className="flex-1 pr-4 -mr-4" style={{ maxHeight: 'calc(90vh - 280px)' }}>
+        <ScrollArea className="flex-1 pr-4 -mr-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
           {/* Category Selection */}
           {step === 'category' && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -851,74 +932,30 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           )}
         </ScrollArea>
 
-        {/* Actions - Sticky footer */}
-        <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10 bg-[#1a1a1a] sticky bottom-0 -mx-6 px-6 pb-4">
-          <Button
-            variant="ghost"
-            onClick={() => {
-              switch (step) {
-                case 'brand': 
-                  setStep('category');
-                  setSelectedCategory(null);
-                  setSelectedBrand('');
-                  setEquipment([]);
-                  break;
-                case 'equipment': 
-                  setStep('brand');
-                  setSelectedBrand('');
-                  setEquipment([]);
-                  setSelectedEquipment(null);
-                  break;
-                case 'shaft': 
-                  setStep('equipment');
-                  setSelectedEquipment(null);
-                  break;
-                case 'grip': 
-                  setStep('shaft');
-                  setSelectedShaft(null);
-                  break;
-                case 'loft': 
-                  setStep('grip');
-                  setSelectedGrip(null);
-                  break;
-              }
-            }}
-            disabled={step === 'category'}
-            className="text-white/60 hover:text-white"
-          >
-            Back
-          </Button>
-
-          <Button
-            onClick={() => {
-              switch (step) {
-                case 'shaft':
-                  if (selectedCategory?.hasGrip) {
-                    setStep('grip');
-                  } else if (selectedCategory?.hasLoft) {
-                    setStep('loft');
-                  } else {
-                    handleComplete();
-                  }
-                  break;
-                case 'grip':
-                  if (selectedCategory?.hasLoft) {
-                    setStep('loft');
-                  } else {
-                    handleComplete();
-                  }
-                  break;
-                case 'loft':
-                  handleComplete();
-                  break;
-              }
-            }}
-            disabled={!canProceed()}
-            className="bg-primary hover:bg-primary/90"
-          >
-            {step === 'loft' || (!selectedCategory?.hasShaft && step === 'equipment') ? 'Add to Bag' : 'Next'}
-          </Button>
-        </div>
+        {/* Mobile swipe hint */}
+        {step !== 'category' && (
+          <div className="flex justify-center items-center mt-4 pt-4 border-t border-white/10 text-white/40 text-sm md:hidden">
+            <span>← Swipe to go back</span>
+            {canProceed() && step !== 'loft' && (
+              <span className="ml-4">Swipe to continue →</span>
+            )}
+          </div>
+        )}
+        
+        {/* Action button for completion steps */}
+        {(step === 'loft' || (step === 'equipment' && !selectedCategory?.hasShaft) || 
+          (step === 'shaft' && !selectedCategory?.hasGrip && !selectedCategory?.hasLoft) ||
+          (step === 'grip' && !selectedCategory?.hasLoft)) && (
+          <div className="mt-4 pt-4 border-t border-white/10">
+            <Button
+              onClick={handleComplete}
+              disabled={!canProceed()}
+              className="w-full bg-primary hover:bg-primary/90"
+            >
+              Add to Bag
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
     
@@ -926,13 +963,43 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     <SubmitEquipmentModal
       isOpen={showSubmitModal}
       onClose={() => setShowSubmitModal(false)}
-      onSubmit={async (equipment) => {
-        // Handle equipment submission
-        toast.success('Equipment submitted for review!');
-        setShowSubmitModal(false);
-        // Optionally refresh the equipment list
-        if (selectedCategory && selectedBrand) {
-          await loadEquipment();
+      onSubmit={async (equipmentData) => {
+        try {
+          // Submit equipment using the community service
+          const { submitEquipment } = await import('@/services/communityEquipment');
+          const result = await submitEquipment({
+            brand: equipmentData.brand,
+            model: equipmentData.model,
+            category: equipmentData.category,
+            year: equipmentData.year,
+            msrp: undefined, // Will be set from form if provided
+            image_url: equipmentData.imageUrl
+          });
+          
+          if (result.success && result.equipment) {
+            toast.success('Equipment added successfully!');
+            setShowSubmitModal(false);
+            
+            // Refresh equipment list to show the new item
+            if (selectedCategory && selectedBrand === equipmentData.brand) {
+              await loadEquipment();
+            }
+            
+            // If the new equipment matches current filters, select it
+            if (selectedCategory?.value === equipmentData.category && selectedBrand === equipmentData.brand) {
+              setSelectedEquipment(result.equipment);
+              // Move to next step based on category
+              if (selectedCategory.hasShaft) {
+                setStep('shaft');
+              } else {
+                handleComplete();
+              }
+            }
+          } else {
+            toast.error(result.error || 'Equipment already exists');
+          }
+        } catch (error: any) {
+          toast.error(error.message || 'Failed to add equipment');
         }
       }}
       initialCategory={selectedCategory?.value}
