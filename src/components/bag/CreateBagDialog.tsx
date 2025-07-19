@@ -9,21 +9,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
 interface CreateBagDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateBag: (name: string, type: string) => Promise<void>;
+  onCreateBag: (name: string, type: string, isPrimary?: boolean) => Promise<void>;
+  hasExistingBags?: boolean;
 }
 
 export function CreateBagDialog({
   isOpen,
   onClose,
   onCreateBag,
+  hasExistingBags = false,
 }: CreateBagDialogProps) {
   const [newBagName, setNewBagName] = useState('');
   const [newBagType, setNewBagType] = useState('real');
+  const [setAsPrimary, setSetAsPrimary] = useState(!hasExistingBags);
   const [creating, setCreating] = useState(false);
 
   const bagTypes = [
@@ -41,10 +45,11 @@ export function CreateBagDialog({
 
     setCreating(true);
     try {
-      await onCreateBag(newBagName, newBagType);
+      await onCreateBag(newBagName, newBagType, setAsPrimary);
       onClose();
       setNewBagName('');
       setNewBagType('real');
+      setSetAsPrimary(!hasExistingBags);
       toast.success('Bag created successfully!');
     } catch (error) {
       toast.error('Failed to create bag');
@@ -91,6 +96,19 @@ export function CreateBagDialog({
               ))}
             </RadioGroup>
           </div>
+
+          {hasExistingBags && (
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="set-primary" 
+                checked={setAsPrimary}
+                onCheckedChange={(checked) => setSetAsPrimary(checked as boolean)}
+              />
+              <Label htmlFor="set-primary" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Set as primary bag
+              </Label>
+            </div>
+          )}
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>

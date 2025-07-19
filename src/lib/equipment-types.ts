@@ -2,7 +2,7 @@ export interface Equipment {
   id: string;
   brand: string;
   model: string;
-  category: 'driver' | 'wood' | 'hybrid' | 'iron' | 'wedge' | 'putter' | 'ball' | 'bag' | 'rangefinder' | 'glove';
+  category: 'driver' | 'fairway_wood' | 'hybrid' | 'iron' | 'wedge' | 'putter' | 'shaft' | 'grip' | 'ball' | 'bag' | 'glove' | 'rangefinder' | 'gps' | 'tee' | 'towel' | 'ball_marker' | 'divot_tool' | 'accessories';
   year: number;
   msrp: number;
   image: string;
@@ -23,6 +23,12 @@ export interface SubmitEquipmentForm {
   imageUrl?: string;
   isCustom?: boolean;
   imageFile?: File | null;
+  // Shaft specific fields
+  flex?: string;
+  weight?: number;
+  // Grip specific fields  
+  size?: string;
+  color?: string;
 }
 
 export interface EquipmentFilter {

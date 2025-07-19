@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Heart, Star, Users, ExternalLink } from 'lucide-react';
+import { X, Heart, Star, Users, ExternalLink, Bookmark, BookmarkCheck } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/lib/supabase';
 import { getTopBagsWithEquipment } from '@/services/equipmentBags';
+import { savePhoto, unsavePhoto, arePhotosSaved } from '@/services/savedPhotos';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import type { Database } from '@/lib/supabase';
 
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
@@ -33,10 +36,13 @@ export function EquipmentShowcaseModal({
   onClose,
   bagEquipment,
 }: EquipmentShowcaseModalProps) {
+  const { user } = useAuth();
   const [equipmentPhotos, setEquipmentPhotos] = useState<any[]>([]);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [topBags, setTopBags] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [savedPhotos, setSavedPhotos] = useState<Record<string, boolean>>({});
+  const [savingPhoto, setSavingPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen && bagEquipment) {
@@ -61,6 +67,18 @@ export function EquipmentShowcaseModal({
       // Load top bags with this equipment
       const bags = await getTopBagsWithEquipment(bagEquipment.equipment_id);
       setTopBags(bags);
+
+      // Check saved status for all photos if user is logged in
+      if (user && photos) {
+        const allPhotoUrls = [
+          bagEquipment.custom_photo_url,
+          bagEquipment.equipment?.image_url,
+          ...photos.map(p => p.photo_url)
+        ].filter(Boolean);
+
+        const savedStatus = await arePhotosSaved(user.id, allPhotoUrls);
+        setSavedPhotos(savedStatus);
+      }
     } catch (error) {
       console.error('Error loading additional data:', error);
     } finally {
@@ -68,11 +86,45 @@ export function EquipmentShowcaseModal({
     }
   };
 
+  const handleSavePhoto = async (photoUrl: string, photoIndex: number) => {
+    if (!user) {
+      toast.error('Please sign in to save photos');
+      return;
+    }
+
+    setSavingPhoto(photoUrl);
+    try {
+      if (savedPhotos[photoUrl]) {
+        // Unsave the photo
+        await unsavePhoto(user.id, photoUrl);
+        setSavedPhotos(prev => ({ ...prev, [photoUrl]: false }));
+        toast.success('Photo removed from saved items');
+      } else {
+        // Save the photo
+        const photoData = equipmentPhotos.find(p => p.photo_url === photoUrl);
+        await savePhoto(user.id, {
+          photo_url: photoUrl,
+          source_type: photoData ? 'equipment_photo' : 'bag_equipment',
+          source_id: photoData?.id || bagEquipment.id,
+          equipment_id: bagEquipment.equipment_id,
+          saved_from_user_id: photoData?.user_id || bagEquipment.user_id,
+        });
+        setSavedPhotos(prev => ({ ...prev, [photoUrl]: true }));
+        toast.success('Photo saved! View in your Saved tab');
+      }
+    } catch (error) {
+      console.error('Error saving photo:', error);
+      toast.error('Failed to save photo');
+    } finally {
+      setSavingPhoto(null);
+    }
+  };
+
   if (!bagEquipment) return null;
 
   const allPhotos = [
-    bagEquipment.custom_photo_url,
-    bagEquipment.equipment.image_url,
+    bagEquipment?.custom_photo_url,
+    bagEquipment?.equipment?.image_url,
     ...equipmentPhotos.map(p => p.photo_url)
   ].filter(Boolean);
 
@@ -82,7 +134,7 @@ export function EquipmentShowcaseModal({
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-center justify-between">
             <DialogTitle>
-              {bagEquipment.equipment.brand} {bagEquipment.equipment.model}
+              {bagEquipment?.equipment?.brand || 'Unknown'} {bagEquipment?.equipment?.model || 'Equipment'}
             </DialogTitle>
             <Button
               variant="ghost"
@@ -99,13 +151,39 @@ export function EquipmentShowcaseModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Image Gallery */}
             <div className="space-y-4">
-              <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+              <div className="aspect-square rounded-lg overflow-hidden bg-muted relative group">
                 {allPhotos[selectedPhotoIndex] ? (
-                  <img
-                    src={allPhotos[selectedPhotoIndex]}
-                    alt={`${bagEquipment.equipment.brand} ${bagEquipment.equipment.model}`}
-                    className="w-full h-full object-cover"
-                  />
+                  <>
+                    <img
+                      src={allPhotos[selectedPhotoIndex]}
+                      alt={`${bagEquipment.equipment.brand} ${bagEquipment.equipment.model}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Save button overlay */}
+                    {user && (
+                      <Button
+                        size="sm"
+                        variant={savedPhotos[allPhotos[selectedPhotoIndex]] ? "default" : "secondary"}
+                        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleSavePhoto(allPhotos[selectedPhotoIndex], selectedPhotoIndex)}
+                        disabled={savingPhoto === allPhotos[selectedPhotoIndex]}
+                      >
+                        {savingPhoto === allPhotos[selectedPhotoIndex] ? (
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        ) : savedPhotos[allPhotos[selectedPhotoIndex]] ? (
+                          <>
+                            <BookmarkCheck className="w-4 h-4 mr-1" />
+                            Saved
+                          </>
+                        ) : (
+                          <>
+                            <Bookmark className="w-4 h-4 mr-1" />
+                            Save
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                     No image available
@@ -177,31 +255,56 @@ export function EquipmentShowcaseModal({
                 </div>
               </div>
 
-              {/* Customization */}
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Build Configuration</h3>
-                <div className="space-y-3">
-                  {bagEquipment.shaft && (
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-1">Shaft</p>
-                      <p className="font-medium">
-                        {bagEquipment.shaft.brand} {bagEquipment.shaft.model}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {bagEquipment.shaft.flex} flex
-                      </p>
+              {/* Customization - Only show for clubs */}
+              {bagEquipment?.equipment?.category && ['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'].includes(bagEquipment.equipment.category) && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Build Configuration</h3>
+                  <div className="space-y-3">
+                    {bagEquipment.shaft && (
+                    <div className="p-3 bg-muted rounded-lg flex items-center gap-3">
+                      {bagEquipment.shaft.image_url && (
+                        <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
+                          <img
+                            src={bagEquipment.shaft.image_url}
+                            alt={`${bagEquipment.shaft.brand} ${bagEquipment.shaft.model}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground mb-1">Shaft</p>
+                        <p className="font-medium">
+                          {bagEquipment.shaft.brand} {bagEquipment.shaft.model}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {bagEquipment.shaft.flex} flex
+                          {bagEquipment.shaft.weight && ` • ${bagEquipment.shaft.weight}g`}
+                        </p>
+                      </div>
                     </div>
                   )}
                   
                   {bagEquipment.grip && (
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-1">Grip</p>
-                      <p className="font-medium">
-                        {bagEquipment.grip.brand} {bagEquipment.grip.model}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {bagEquipment.grip.size} size
-                      </p>
+                    <div className="p-3 bg-muted rounded-lg flex items-center gap-3">
+                      {bagEquipment.grip.image_url && (
+                        <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
+                          <img
+                            src={bagEquipment.grip.image_url}
+                            alt={`${bagEquipment.grip.brand} ${bagEquipment.grip.model}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground mb-1">Grip</p>
+                        <p className="font-medium">
+                          {bagEquipment.grip.brand} {bagEquipment.grip.model}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {bagEquipment.grip.size} size
+                          {bagEquipment.grip.color && ` • ${bagEquipment.grip.color}`}
+                        </p>
+                      </div>
                     </div>
                   )}
                   
@@ -213,9 +316,63 @@ export function EquipmentShowcaseModal({
                   )}
                 </div>
               </div>
+              )}
 
-              {/* Condition & Notes */}
-              {(bagEquipment.condition || bagEquipment.notes) && (
+              {/* Special display for standalone shaft/grip equipment */}
+              {bagEquipment?.equipment?.category && ['shaft', 'grip'].includes(bagEquipment.equipment.category) && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    {bagEquipment.equipment.category === 'shaft' ? 'Shaft Details' : 'Grip Details'}
+                  </h3>
+                  <div className="p-4 bg-muted rounded-lg">
+                    <div className="space-y-3">
+                      {/* Display equipment-specific details */}
+                      <div className="text-sm space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Type</span>
+                          <span className="font-medium capitalize">{bagEquipment.equipment.category}</span>
+                        </div>
+                        {bagEquipment.equipment.specs && (
+                          <>
+                            {bagEquipment.equipment.specs.flex && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Flex</span>
+                                <span className="font-medium">{bagEquipment.equipment.specs.flex}</span>
+                              </div>
+                            )}
+                            {bagEquipment.equipment.specs.weight && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Weight</span>
+                                <span className="font-medium">{bagEquipment.equipment.specs.weight}g</span>
+                              </div>
+                            )}
+                            {bagEquipment.equipment.specs.size && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Size</span>
+                                <span className="font-medium">{bagEquipment.equipment.specs.size}</span>
+                              </div>
+                            )}
+                            {bagEquipment.equipment.specs.color && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Color</span>
+                                <span className="font-medium">{bagEquipment.equipment.specs.color}</span>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                      {bagEquipment.notes && (
+                        <div className="pt-3 border-t">
+                          <p className="text-sm text-muted-foreground">{bagEquipment.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Condition & Notes - Hide for shaft/grip as they're shown above */}
+              {(bagEquipment.condition || bagEquipment.notes) && bagEquipment?.equipment?.category && !['shaft', 'grip'].includes(bagEquipment.equipment.category) && (
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Additional Info</h3>
                   {bagEquipment.condition && (

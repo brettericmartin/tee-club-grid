@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -21,24 +21,64 @@ const BagsBrowser = () => {
   const [loading, setLoading] = useState(true);
   const [bags, setBags] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [handicapRange, setHandicapRange] = useState<HandicapRange>("all");
   const [priceRange, setPriceRange] = useState<PriceRange>("all");
   const { likedBags, toggleLike } = useLikedBags();
   const [followedBags, setFollowedBags] = useState<Set<string>>(new Set());
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
-    loadBags();
-  }, [sortBy, user]);
+    // Component unmount cleanup
+    return () => {
+      isMountedRef.current = false;
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
-  // Debug: Log user authentication status
+  // Debounce search query
   useEffect(() => {
-    console.log('BagsBrowser user auth status:', { 
-      user: user?.id, 
-      email: user?.email, 
-      isAuthenticated: !!user 
-    });
-  }, [user]);
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
+    // Clear any existing timeout
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+    }
+    
+    // Set new timeout
+    loadingTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        loadBags();
+      }
+    }, 300); // 300ms debounce
+    
+    // Cleanup function
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, [sortBy, user?.id]); // Fixed dependency to user?.id instead of user object
+
 
   const loadBags = async () => {
     try {
@@ -47,12 +87,21 @@ const BagsBrowser = () => {
         sortBy: sortBy,
         userId: user?.id
       });
-      setBags(data || []);
+      
+      // Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setBags(data || []);
+      }
     } catch (error) {
       console.error('Error loading bags:', error);
-      toast.error('Failed to load bags');
+      if (isMountedRef.current) {
+        toast.error('Failed to load bags. Please try refreshing the page.');
+        setBags([]); // Ensure bags is always an array
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -61,8 +110,8 @@ const BagsBrowser = () => {
     let filtered = bags;
 
     // Search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+    if (debouncedSearchQuery.trim()) {
+      const query = debouncedSearchQuery.toLowerCase();
       filtered = filtered.filter(bag => 
         bag.name.toLowerCase().includes(query) ||
         bag.profiles?.username?.toLowerCase().includes(query) ||
@@ -108,7 +157,7 @@ const BagsBrowser = () => {
     }
 
     return filtered;
-  }, [searchQuery, sortBy, handicapRange, priceRange, likedBags, followedBags, bags]);
+  }, [debouncedSearchQuery, handicapRange, priceRange, bags, sortBy]); // Use debouncedSearchQuery instead of searchQuery
 
   const handleToggleLike = async (bagId: string) => {
     if (!user) {

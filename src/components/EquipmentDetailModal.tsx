@@ -82,6 +82,7 @@ const EquipmentDetailModal = ({ equipment, isOpen, onClose, onToggleFeatured, is
                 model={equipment.model}
                 selectedImageIndex={selectedImageIndex}
                 onImageSelect={setSelectedImageIndex}
+                equipmentId={equipment.id}
               />
               
               <EquipmentHeader

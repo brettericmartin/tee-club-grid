@@ -82,7 +82,6 @@ export default defineConfig(({ mode }) => {
               './src/pages/MyBagSupabase',
               './src/pages/BagDisplayStyled',
               './src/components/bag/BagGalleryDndKit',
-              './src/components/bags/BagCard',
             ],
             'feature-feed': [
               './src/pages/Feed',

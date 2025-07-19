@@ -63,7 +63,7 @@ interface BagCardProps {
   currentUserId?: string;
 }
 
-export const BagCard = memo(function BagCard({ 
+const BagCardComponent = ({ 
   bag, 
   onView, 
   onLike, 
@@ -71,7 +71,7 @@ export const BagCard = memo(function BagCard({
   isLiked = false, 
   isFollowing = false,
   currentUserId 
-}: BagCardProps) {
+}: BagCardProps) => {
   const [imageError, setImageError] = useState<Record<string, boolean>>({});
   const [selectedBagEquipment, setSelectedBagEquipment] = useState<BagEquipmentItem | null>(null);
   const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
@@ -79,7 +79,8 @@ export const BagCard = memo(function BagCard({
   
   // Define club categories
   const CLUB_CATEGORIES = ['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'];
-  const ACCESSORY_CATEGORIES = ['ball', 'glove', 'rangefinder', 'gps', 'tee', 'towel', 'ball_marker', 'divot_tool', 'accessories'];
+  const ACCESSORY_CATEGORIES = ['ball', 'glove', 'rangefinder', 'gps', 'tee', 'towel', 'ball_marker', 'divot_tool', 'accessories', 'shaft', 'grip'];
+  const COMPONENT_CATEGORIES = ['shaft', 'grip']; // New category for club components
   
   // Find the actual golf bag equipment
   const allEquipment = bag.bag_equipment || [];
@@ -89,7 +90,6 @@ export const BagCard = memo(function BagCard({
   
   // Get the golf bag image
   const golfBagImage = golfBag?.custom_photo_url || golfBag?.equipment?.image_url;
-  console.log('Golf bag found:', golfBag?.equipment?.brand, golfBag?.equipment?.model, 'image:', golfBagImage);
   
   // Separate clubs and accessories
   const clubs = allEquipment.filter(item => 
@@ -103,10 +103,19 @@ export const BagCard = memo(function BagCard({
   const featuredClubs = clubs.filter(item => item.is_featured);
   const shouldIncludeBagInClubs = golfBag?.is_featured && featuredClubs.length < 6;
   
-  if (shouldIncludeBagInClubs && golfBag) {
-    clubs.push(golfBag);
-  } else if (golfBag && !shouldIncludeBagInClubs) {
-    accessories.push(golfBag);
+  // Ensure golf bag is only added once
+  if (golfBag) {
+    if (shouldIncludeBagInClubs) {
+      // Only add to clubs if it's not already there
+      if (!clubs.find(item => item.id === golfBag.id)) {
+        clubs.push(golfBag);
+      }
+    } else {
+      // Only add to accessories if it's not already there
+      if (!accessories.find(item => item.id === golfBag.id)) {
+        accessories.push(golfBag);
+      }
+    }
   }
   
   // Sort by featured first, then by creation date
@@ -143,7 +152,10 @@ export const BagCard = memo(function BagCard({
 
   const handleEquipmentClick = (e: React.MouseEvent, item: BagEquipmentItem) => {
     e.stopPropagation(); // Prevent card click
-    console.log('Equipment clicked:', item.equipment.brand, item.equipment.model);
+    if (!item?.equipment) {
+      console.error('Equipment data missing for item:', item);
+      return;
+    }
     setSelectedBagEquipment(item);
     setEquipmentModalOpen(true);
   };
@@ -151,20 +163,8 @@ export const BagCard = memo(function BagCard({
   const handleFollowClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!onFollow || !bag.profiles?.id || !bag.profiles?.username) {
-      console.error('Missing follow data:', { 
-        onFollow: !!onFollow, 
-        userId: bag.profiles?.id, 
-        username: bag.profiles?.username,
-        currentUserId
-      });
       return;
     }
-    
-    console.log('Follow button clicked:', {
-      currentUserId,
-      targetUserId: bag.profiles.id,
-      targetUsername: bag.profiles.username
-    });
     
     setFollowLoading(true);
     try {
@@ -237,7 +237,7 @@ export const BagCard = memo(function BagCard({
             </Avatar>
             <div>
               <h3 className="font-semibold text-white text-sm">
-                {bag.profiles?.display_name || bag.profiles?.username || 'Unknown'}
+                {bag.profiles?.display_name || bag.profiles?.username || 'Unknown'} • {bag.name}
               </h3>
               {bag.profiles?.handicap !== undefined && (
                 <p className="text-xs text-white/70">
@@ -282,9 +282,6 @@ export const BagCard = memo(function BagCard({
             )}
           </div>
         </div>
-
-        {/* Bag name */}
-        <h4 className="text-lg font-bold text-white mb-4">{bag.name}</h4>
 
         {/* 3x2 Clubs Grid */}
         <div className="grid grid-cols-3 gap-2 mb-3" onClick={(e) => e.stopPropagation()}>
@@ -424,4 +421,19 @@ export const BagCard = memo(function BagCard({
     />
   </>
   );
-});
+};
+
+// Custom comparison function to prevent unnecessary re-renders
+const areEqual = (prevProps: BagCardProps, nextProps: BagCardProps) => {
+  return (
+    prevProps.bag.id === nextProps.bag.id &&
+    prevProps.bag.likes_count === nextProps.bag.likes_count &&
+    prevProps.bag.views_count === nextProps.bag.views_count &&
+    prevProps.isLiked === nextProps.isLiked &&
+    prevProps.isFollowing === nextProps.isFollowing &&
+    prevProps.currentUserId === nextProps.currentUserId &&
+    prevProps.bag.bag_equipment?.length === nextProps.bag.bag_equipment?.length
+  );
+};
+
+export const BagCard = memo(BagCardComponent, areEqual);

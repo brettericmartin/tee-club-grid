@@ -1,4 +1,4 @@
-import { Plus, Briefcase, Trophy, Calendar } from 'lucide-react';
+import { Plus, Briefcase, Trophy, Calendar, Star, Settings } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -9,12 +9,18 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
+import { setPrimaryBag } from '@/services/bags';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 interface Bag {
   id: string;
   name: string;
   bag_type: string;
   created_at: string;
+  is_primary?: boolean;
+  user_id?: string;
 }
 
 interface BagSelectorDialogProps {
@@ -23,6 +29,7 @@ interface BagSelectorDialogProps {
   bags: Bag[];
   onSelectBag: (bagId: string) => void;
   onCreateNew: () => void;
+  onBagsUpdate?: () => void;
 }
 
 export function BagSelectorDialog({
@@ -31,10 +38,35 @@ export function BagSelectorDialog({
   bags,
   onSelectBag,
   onCreateNew,
+  onBagsUpdate,
 }: BagSelectorDialogProps) {
+  const [updatingPrimary, setUpdatingPrimary] = useState<string | null>(null);
+
   const handleSelectBag = (bagId: string) => {
     onSelectBag(bagId);
     onClose();
+  };
+
+  const handleSetPrimary = async (e: React.MouseEvent, bag: Bag) => {
+    e.stopPropagation();
+    if (!bag.user_id || bag.is_primary) return;
+
+    setUpdatingPrimary(bag.id);
+    try {
+      // setPrimaryBag will handle unsetting other bags via database trigger
+      await setPrimaryBag(bag.user_id, bag.id);
+      toast.success(`${bag.name} is now your primary bag`);
+      
+      // Call the update callback instead of reloading the page
+      if (onBagsUpdate) {
+        onBagsUpdate();
+      }
+    } catch (error) {
+      toast.error('Failed to update primary bag');
+      console.error('Error setting primary bag:', error);
+    } finally {
+      setUpdatingPrimary(null);
+    }
   };
 
   const getBagIcon = (bagType: string) => {
@@ -84,9 +116,32 @@ export function BagSelectorDialog({
                   {bags.map((bag) => (
                     <Card
                       key={bag.id}
-                      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors group"
+                      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors group relative"
                       onClick={() => handleSelectBag(bag.id)}
                     >
+                      {/* Primary Star Toggle - Always visible */}
+                      <button
+                        className={`absolute top-2 right-2 p-2 rounded-full transition-colors z-10 ${
+                          bag.is_primary ? 'bg-primary/20' : 'hover:bg-white/10'
+                        }`}
+                        onClick={(e) => {
+                          if (!bag.is_primary) {
+                            handleSetPrimary(e, bag);
+                          } else {
+                            e.stopPropagation();
+                          }
+                        }}
+                        disabled={bag.is_primary || updatingPrimary === bag.id}
+                        title={bag.is_primary ? "This is your primary bag" : "Set as primary bag"}
+                      >
+                        <Star 
+                          className={`w-5 h-5 transition-all ${
+                            bag.is_primary 
+                              ? 'fill-primary text-primary' 
+                              : 'text-white/50 hover:text-white'
+                          }`} 
+                        />
+                      </button>
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
                           {getBagIcon(bag.bag_type)}

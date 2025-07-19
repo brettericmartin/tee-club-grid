@@ -43,17 +43,17 @@ const BadgeDisplay = ({
   const [hoveredBadge, setHoveredBadge] = useState<string | null>(null);
 
   const sizeClasses = {
-    sm: 'w-12 h-12',
-    md: 'w-16 h-16',
-    lg: 'w-20 h-20',
-    xl: 'w-24 h-24'
+    sm: 'w-8 h-8 sm:w-12 sm:h-12',
+    md: 'w-10 h-10 sm:w-16 sm:h-16',
+    lg: 'w-12 h-12 sm:w-20 sm:h-20',
+    xl: 'w-14 h-14 sm:w-24 sm:h-24'
   };
 
   const iconSizes = {
-    sm: 'w-6 h-6',
-    md: 'w-8 h-8',
-    lg: 'w-10 h-10',
-    xl: 'w-12 h-12'
+    sm: 'w-4 h-4 sm:w-6 sm:h-6',
+    md: 'w-5 h-5 sm:w-8 sm:h-8',
+    lg: 'w-6 h-6 sm:w-10 sm:h-10',
+    xl: 'w-7 h-7 sm:w-12 sm:h-12'
   };
 
   const displayBadges = badges.slice(0, maxDisplay);

@@ -29,7 +29,11 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
     category: "",
     description: "",
     imageUrl: "",
-    isCustom: false
+    isCustom: false,
+    flex: "",
+    weight: undefined,
+    size: "",
+    color: ""
   });
   
   const [brands, setBrands] = useState<string[]>([]);
@@ -408,6 +412,59 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
                 rows={3}
               />
             </div>
+
+            {/* Shaft specific fields */}
+            {formData.category === 'shaft' && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="flex">Flex</Label>
+                    <Input
+                      id="flex"
+                      value={formData.flex || ''}
+                      onChange={(e) => handleInputChange("flex", e.target.value)}
+                      placeholder="e.g., Stiff, Regular, X-Stiff"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="weight">Weight (grams)</Label>
+                    <Input
+                      id="weight"
+                      type="number"
+                      value={formData.weight || ''}
+                      onChange={(e) => handleInputChange("weight", e.target.value ? parseFloat(e.target.value) : undefined)}
+                      placeholder="e.g., 65"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Grip specific fields */}
+            {formData.category === 'grip' && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="size">Size</Label>
+                    <Input
+                      id="size"
+                      value={formData.size || ''}
+                      onChange={(e) => handleInputChange("size", e.target.value)}
+                      placeholder="e.g., Standard, Midsize, Jumbo"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="color">Color</Label>
+                    <Input
+                      id="color"
+                      value={formData.color || ''}
+                      onChange={(e) => handleInputChange("color", e.target.value)}
+                      placeholder="e.g., Black, White, Red"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Custom Equipment Checkbox */}
             <div className="flex items-center space-x-2">

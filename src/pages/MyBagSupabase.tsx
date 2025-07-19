@@ -1,10 +1,10 @@
 /* @refresh skip */
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, Star } from "lucide-react";
+import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, Star, CheckCircle } from "lucide-react";
 import { Navigate, Link } from "react-router-dom";
-import BackgroundLayer from "@/components/BackgroundLayer";
-import BackgroundPicker from "@/components/BackgroundPicker";
+import BackgroundLayer, { bagBackgrounds } from "@/components/BackgroundLayer";
 import { Button } from "@/components/ui/button";
+import { SignInModal } from "@/components/auth/SignInModal";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +19,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import type { Database } from "@/lib/supabase";
 import { smartCreateBagPost, smartCreateBagUpdatePost, smartCreateEquipmentPost } from "@/services/feedSmartUpdate";
+import { setPrimaryBag } from "@/services/bags";
 import { BadgeShowcase } from "@/components/badges/BadgeShowcase";
 import { useBadgeCheck } from "@/hooks/useBadgeCheck";
 import { BadgeNotificationToast } from "@/components/badges/BadgeNotificationToast";
@@ -104,6 +105,7 @@ const MyBagSupabase = () => {
   const [userBadges, setUserBadges] = useState<UserBadgeWithDetails[]>([]);
   const [expandedBadges, setExpandedBadges] = useState(false);
   const [manageBadgesOpen, setManageBadgesOpen] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
   
   // Badge check hook
   const { checkBadgeProgress, newBadges, clearNewBadges } = useBadgeCheck();
@@ -135,7 +137,7 @@ const MyBagSupabase = () => {
                 Create an account to build and showcase your golf bag collection.
               </p>
               <Button 
-                onClick={() => window.location.href = '/?signin=true'} 
+                onClick={() => setShowSignIn(true)} 
                 className="bg-primary hover:bg-primary/90 text-white"
               >
                 Sign In
@@ -292,16 +294,18 @@ const MyBagSupabase = () => {
       } else {
         setBags(userBags);
         
-        if (userBags.length === 1) {
-          // Auto-select the only bag
-          const bag = userBags[0];
-          setCurrentBag(bag);
-          setBagName(bag.name);
-          setBagDescription(bag.description || '');
-          setSelectedBackground(bag.background_image || 'midwest-lush');
-          await loadBagEquipment(bag.id);
-        } else {
-          // Show bag selector for multiple bags
+        // Find primary bag or use the first/only bag
+        const primaryBag = userBags.find(bag => bag.is_primary) || userBags[0];
+        
+        if (primaryBag) {
+          // Auto-select the primary bag (or only bag)
+          setCurrentBag(primaryBag);
+          setBagName(primaryBag.name);
+          setBagDescription(primaryBag.description || '');
+          setSelectedBackground(primaryBag.background_image || 'midwest-lush');
+          await loadBagEquipment(primaryBag.id);
+        } else if (userBags.length > 0) {
+          // No primary bag set, show selector
           setShowBagSelector(true);
         }
       }
@@ -421,7 +425,7 @@ const MyBagSupabase = () => {
     }
   };
 
-  const handleCreateBag = async (name: string, type: string) => {
+  const handleCreateBag = async (name: string, type: string, isPrimary?: boolean) => {
     if (!user) return;
 
     try {
@@ -430,14 +434,30 @@ const MyBagSupabase = () => {
         .insert({
           user_id: user.id,
           name,
-          bag_type: type
+          bag_type: type,
+          is_primary: isPrimary || bags.length === 0
         })
         .select('*, profile:profiles(*)')
         .single();
 
       if (error) throw new Error(error?.message || 'Database operation failed');
 
-      setBags([...bags, newBag]);
+      // If this bag was set as primary, refresh all bags to update their primary status
+      if (isPrimary && bags.length > 0) {
+        const { data: updatedBags } = await supabase
+          .from('user_bags')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('is_primary', { ascending: false })
+          .order('updated_at', { ascending: false });
+        
+        if (updatedBags) {
+          setBags(updatedBags);
+        }
+      } else {
+        setBags([...bags, newBag]);
+      }
+      
       setCurrentBag(newBag);
       setBagName(newBag.name);
       setBagDescription('');
@@ -789,53 +809,40 @@ const MyBagSupabase = () => {
                 placeholder="Bag Name"
               />
             ) : (
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">{bagName}</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">{bagName}</h1>
+                {currentBag?.is_primary && (
+                  <span className="px-2 py-1 text-xs font-medium bg-primary/20 text-primary border border-primary/30 rounded-full">
+                    Primary
+                  </span>
+                )}
+              </div>
             )}
           </div>
           
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center sm:justify-end">
             {!isEditing && (
               <>
-                {/* View Mode Toggle */}
-                <div className="bg-white/10 rounded-lg p-1 flex">
-                  <Button
-                    variant={viewMode === 'gallery' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('gallery')}
-                    className={viewMode === 'gallery' ? '' : 'text-white hover:text-white hover:bg-white/10'}
-                  >
-                    <Grid3x3 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'list' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className={viewMode === 'list' ? '' : 'text-white hover:text-white hover:bg-white/10'}
-                  >
-                    <List className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'card' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('card')}
-                    className={viewMode === 'card' ? '' : 'text-white hover:text-white hover:bg-white/10'}
-                  >
-                    <CreditCard className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'feed' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('feed')}
-                    className={viewMode === 'feed' ? '' : 'text-white hover:text-white hover:bg-white/10'}
-                  >
-                    <img src="/dog.png" alt="Feed" className="w-6 h-6" />
-                  </Button>
-                </div>
-                {bags.length > 1 && (
-                  <Button onClick={() => setShowBagSelector(true)} variant="outline">
-                    Switch Bag
-                  </Button>
-                )}
+                {/* Add Equipment Button - Always visible */}
+                <Button
+                  onClick={() => setEquipmentSelectorOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="text-white hover:text-white hover:bg-white/20 whitespace-nowrap"
+                >
+                  <Plus className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Add Equipment</span>
+                  <span className="sm:hidden">Add</span>
+                </Button>
+                <Button 
+                  onClick={() => setShowBagSelector(true)} 
+                  variant="outline"
+                  size="sm"
+                  className="text-white hover:text-white hover:bg-white/20 whitespace-nowrap"
+                >
+                  <Settings className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Manage</span> Bags
+                </Button>
                 <Button
                   onClick={() => setManageBadgesOpen(true)}
                   variant="outline"
@@ -890,12 +897,98 @@ const MyBagSupabase = () => {
 
         {/* Background Picker in Edit Mode */}
         {isEditing && (
-          <div className="mb-6">
-            <label className="text-sm text-white/80 mb-2 block">Bag Background</label>
-            <BackgroundPicker
-              currentBackground={selectedBackground}
-              onBackgroundChange={setSelectedBackground}
-            />
+          <div className="mb-6 space-y-6">
+            {/* Background Selector */}
+            <div>
+              <label className="text-sm text-white/80 mb-3 block">Bag Background</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {bagBackgrounds.map((bg) => (
+                  <button
+                    key={bg.id}
+                    onClick={() => setSelectedBackground(bg.id)}
+                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                      selectedBackground === bg.id 
+                        ? 'border-primary shadow-lg shadow-primary/20' 
+                        : 'border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    {/* Preview */}
+                    <div className="aspect-[4/3] relative">
+                      <div className={`absolute inset-0 bg-gradient-to-br ${bg.gradient}`} />
+                      <div className={`absolute inset-0 ${bg.overlayOpacity}`} />
+                      
+                      {/* Selected indicator */}
+                      {selectedBackground === bg.id && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-primary rounded-full p-2">
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Info */}
+                    <div className="p-2 bg-black/60 backdrop-blur-sm">
+                      <h3 className="font-medium text-xs text-white">{bg.name}</h3>
+                      <p className="text-xs text-white/60 truncate">{bg.description}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Primary Bag Toggle - only show if user has multiple bags */}
+            {bags.length > 1 && (
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                <div>
+                  <h4 className="text-white font-medium">Primary Bag</h4>
+                  <p className="text-sm text-white/60 mt-1">
+                    This bag will be featured on your profile and feed posts
+                  </p>
+                </div>
+                <button
+                  className={`p-3 rounded-full transition-all ${
+                    currentBag?.is_primary 
+                      ? 'bg-primary/20' 
+                      : 'hover:bg-white/10 cursor-pointer'
+                  }`}
+                  onClick={async () => {
+                    if (!user || !currentBag || currentBag.is_primary) return;
+                    try {
+                      await setPrimaryBag(user.id, currentBag.id);
+                      toast.success('This bag is now your primary bag');
+                      // Refresh bags to update all primary statuses
+                      const { data: updatedBags } = await supabase
+                        .from('user_bags')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .order('is_primary', { ascending: false })
+                        .order('updated_at', { ascending: false });
+                      
+                      if (updatedBags) {
+                        setBags(updatedBags);
+                        const updatedCurrentBag = updatedBags.find(b => b.id === currentBag.id);
+                        if (updatedCurrentBag) {
+                          setCurrentBag(updatedCurrentBag);
+                        }
+                      }
+                    } catch (error) {
+                      toast.error('Failed to set as primary bag');
+                    }
+                  }}
+                  disabled={currentBag?.is_primary}
+                  title={currentBag?.is_primary ? "This is your primary bag" : "Click to set as primary bag"}
+                >
+                  <Star 
+                    className={`w-6 h-6 transition-all ${
+                      currentBag?.is_primary 
+                        ? 'fill-primary text-primary' 
+                        : 'text-white/50 hover:text-white hover:fill-white/20'
+                    }`} 
+                  />
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -970,6 +1063,48 @@ const MyBagSupabase = () => {
             </div>
           </div>
         )}
+        
+        {/* View Mode Toggle - Centered Below Badges */}
+        <div className="flex justify-center mb-6">
+          <div className="bg-white/10 rounded-lg p-1 flex">
+            <Button
+              variant={viewMode === 'gallery' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('gallery')}
+              className={viewMode === 'gallery' ? 'bg-primary hover:bg-primary/90' : 'text-white hover:text-white hover:bg-white/10'}
+            >
+              <Grid3x3 className="w-4 h-4 mr-2" />
+              Gallery
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className={viewMode === 'list' ? 'bg-primary hover:bg-primary/90' : 'text-white hover:text-white hover:bg-white/10'}
+            >
+              <List className="w-4 h-4 mr-2" />
+              List
+            </Button>
+            <Button
+              variant={viewMode === 'card' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('card')}
+              className={viewMode === 'card' ? 'bg-primary hover:bg-primary/90' : 'text-white hover:text-white hover:bg-white/10'}
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              Card
+            </Button>
+            <Button
+              variant={viewMode === 'feed' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('feed')}
+              className={viewMode === 'feed' ? 'bg-primary hover:bg-primary/90' : 'text-white hover:text-white hover:bg-white/10'}
+            >
+              <img src="/dog.png" alt="Feed" className="w-4 h-4 mr-2" />
+              Feed
+            </Button>
+          </div>
+        </div>
 
         {/* Equipment Display */}
         {bagItems.length === 0 ? (
@@ -1134,7 +1269,7 @@ const MyBagSupabase = () => {
                           <div
                             className={cn(
                               "relative flex items-center justify-center transition-all duration-300 cursor-pointer overflow-hidden",
-                              "w-24 h-24",
+                              "w-14 h-14 sm:w-24 sm:h-24",
                               "hover:scale-110"
                             )}
                             onClick={() => {
@@ -1148,7 +1283,7 @@ const MyBagSupabase = () => {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <span className="text-2xl">{badgeIcon || '🏅'}</span>
+                              <span className="text-lg sm:text-2xl">{badgeIcon || '🏅'}</span>
                             )}
                           </div>
                         </div>
@@ -1158,9 +1293,9 @@ const MyBagSupabase = () => {
                     {Array.from({ length: Math.max(0, 8 - Math.min(8, (userBadges || []).filter(ub => ub.progress === 100).length)) }).map((_, index) => (
                       <div
                         key={`empty-${index}`}
-                        className="w-24 h-24 flex items-center justify-center"
+                        className="w-14 h-14 sm:w-24 sm:h-24 flex items-center justify-center"
                       >
-                        <Trophy className="w-10 h-10 text-gray-700" />
+                        <Trophy className="w-6 h-6 sm:w-10 sm:h-10 text-gray-700" />
                       </div>
                     ))}
                   </div>
@@ -1197,12 +1332,33 @@ const MyBagSupabase = () => {
           setShowBagSelector(false);
           setShowCreateBag(true);
         }}
+        onBagsUpdate={async () => {
+          // Refresh bags list after primary bag update
+          if (user) {
+            const { data: updatedBags } = await supabase
+              .from('user_bags')
+              .select('*')
+              .eq('user_id', user.id)
+              .order('is_primary', { ascending: false })
+              .order('updated_at', { ascending: false });
+            
+            if (updatedBags) {
+              setBags(updatedBags);
+              // Update current bag if it's no longer primary
+              const updatedCurrentBag = updatedBags.find(b => b.id === currentBag?.id);
+              if (updatedCurrentBag) {
+                setCurrentBag(updatedCurrentBag);
+              }
+            }
+          }
+        }}
       />
 
       <CreateBagDialog
         isOpen={showCreateBag}
         onClose={() => setShowCreateBag(false)}
         onCreateBag={handleCreateBag}
+        hasExistingBags={bags.length > 0}
       />
 
       <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
@@ -1247,6 +1403,12 @@ const MyBagSupabase = () => {
         userId={user?.id || ''}
         badges={userBadges}
         onBadgesUpdate={loadUserBadges}
+      />
+
+      {/* Sign In Modal */}
+      <SignInModal
+        open={showSignIn}
+        onOpenChange={setShowSignIn}
       />
 
     </div>

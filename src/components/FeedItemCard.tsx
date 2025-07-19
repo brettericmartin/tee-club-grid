@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { MessageCircle, Eye, UserPlus, UserCheck, Loader2, Repeat } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { formatCompactCurrency } from '@/lib/formatters';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import EquipmentDetailModal from './EquipmentDetailModal';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
 import { FeedItemData, getPostTypeLabel, formatTimestamp } from '@/utils/feedTransformer';
 import { BagCard } from '@/components/bags/BagCard';
+import CommentModal from '@/components/comments/CommentModal';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
 type Bag = Database['public']['Tables']['user_bags']['Row'] & {
@@ -26,16 +26,17 @@ interface FeedItemCardProps {
 }
 
 export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItemCardProps) => {
+  const navigate = useNavigate();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(post.isFromFollowed);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
-  const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
   const [equipmentData, setEquipmentData] = useState<Record<string, Equipment>>({});
   const [userBag, setUserBag] = useState<Bag | null>(null);
   const [loadingBag, setLoadingBag] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [showComments, setShowComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(post.commentCount || 0);
 
   // Load user's bag data for flip card back
   useEffect(() => {
@@ -55,8 +56,8 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
           setUserProfile(profile);
         }
 
-        // Get user's primary bag (most recent bag) with full equipment relationships
-        const { data: bags } = await supabase
+        // Get user's primary bag with full equipment relationships
+        const { data: primaryBag } = await supabase
           .from('user_bags')
           .select(`
             *,
@@ -77,14 +78,14 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
             )
           `)
           .eq('user_id', post.userId)
-          .order('created_at', { ascending: false })
-          .limit(1);
+          .eq('is_primary', true)
+          .single();
         
-        if (bags && bags.length > 0) {
-          setUserBag(bags[0]);
+        if (primaryBag) {
+          setUserBag(primaryBag);
           
           // Load equipment data for featured clubs
-          const equipment = bags[0].bag_equipment
+          const equipment = primaryBag.bag_equipment
             ?.filter(be => be.equipment)
             .slice(0, 3)
             .map(be => be.equipment!)
@@ -108,24 +109,6 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
     loadUserBag();
   }, [post.userId]);
 
-  // Load equipment details if this is an equipment post
-  useEffect(() => {
-    const loadEquipmentDetails = async () => {
-      if (post.equipmentId && !selectedEquipment) {
-        const { data } = await supabase
-          .from('equipment')
-          .select('*')
-          .eq('id', post.equipmentId)
-          .single();
-        
-        if (data) {
-          setSelectedEquipment(data);
-        }
-      }
-    };
-    
-    loadEquipmentDetails();
-  }, [post.equipmentId, selectedEquipment]);
 
   const handleFollowToggle = () => {
     setIsFollowing(!isFollowing);
@@ -136,8 +119,8 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
 
   const handleEquipmentClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card flip
-    if (post.equipmentId && selectedEquipment) {
-      setEquipmentModalOpen(true);
+    if (post.equipmentId) {
+      navigate(`/equipment/${post.equipmentId}`);
     }
   };
 
@@ -216,7 +199,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
             ...userBag,
             profiles: userProfile
           }}
-          onView={() => {}}
+          onView={() => navigate(`/bag/${userBag.id}`)}
           onLike={async () => {
             if (onLike) onLike(post.postId);
           }}
@@ -232,87 +215,93 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
   };
 
   return (
-    <div className="relative bg-gray-900 rounded-xl overflow-hidden">
-      {/* Card Header */}
-      <div className="flex items-center justify-between p-4 bg-black/50">
-        <Link to={`/bag/${post.userName}`} className="flex items-center gap-3">
-          <Avatar className="w-10 h-10">
-            <AvatarImage 
-              src={post.userAvatar || undefined} 
-              alt={post.userName}
-            />
-            <AvatarFallback className="bg-gradient-to-br from-gray-600 to-gray-800 text-white">
-              {post.userName?.[0]?.toUpperCase() || '?'}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="text-white font-medium">{post.userName}</p>
-            <p className="text-gray-400 text-xs">
-              {post.userHandicap ? `${post.userHandicap} HCP` : 'Golfer'}
-            </p>
-          </div>
-        </Link>
-        
-        {currentUserId && currentUserId !== post.userId && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleFollowToggle}
-            className="text-white hover:text-primary"
-          >
-            {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-          </Button>
-        )}
-      </div>
-      
-      {/* Card Content - Toggleable */}
-      <div className="relative h-96">
-        {/* Toggle Button */}
-        <button
-          onClick={() => setIsFlipped(!isFlipped)}
-          className="absolute top-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-colors"
-          aria-label="Toggle view"
-        >
-          <Repeat className="w-4 h-4" />
-        </button>
-        
-        {/* Content */}
-        {isFlipped ? renderBackContent() : renderFrontContent()}
-      </div>
-      
-      {/* Card Footer */}
-      <div className="flex items-center justify-between p-4 bg-black/50">
-        <div className="flex items-center gap-4">
-          <TeedBallLike
-            isLiked={isLiked}
-            likeCount={post.likes}
-            onToggle={() => {
-              setIsLiked(!isLiked);
-              if (onLike) onLike(post.postId);
-            }}
-          />
+    <>
+      <div className="relative bg-gray-900 rounded-xl overflow-hidden">
+        {/* Card Header */}
+        <div className="flex items-center justify-between p-4 bg-black/50">
+          <Link to={`/bag/${post.userName}`} className="flex items-center gap-3">
+            <Avatar className="w-10 h-10">
+              <AvatarImage 
+                src={post.userAvatar || undefined} 
+                alt={post.userName}
+              />
+              <AvatarFallback className="bg-gradient-to-br from-gray-600 to-gray-800 text-white">
+                {post.userName?.[0]?.toUpperCase() || '?'}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-white font-medium">{post.userName}</p>
+              <p className="text-gray-400 text-xs">
+                {post.userHandicap ? `${post.userHandicap} HCP` : 'Golfer'}
+              </p>
+            </div>
+          </Link>
           
-          <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-sm">{post.commentCount}</span>
-          </button>
+          {currentUserId && currentUserId !== post.userId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleFollowToggle}
+              className="text-white hover:text-primary"
+            >
+              {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+            </Button>
+          )}
         </div>
         
-        <p className="text-gray-400 text-xs">
-          {formatTimestamp(post.timestamp)}
-        </p>
+        {/* Card Content - Toggleable */}
+        <div className="relative h-[450px]">
+          {/* Toggle Button */}
+          <button
+            onClick={() => setIsFlipped(!isFlipped)}
+            className="absolute top-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-colors"
+            aria-label="Toggle view"
+          >
+            <Repeat className="w-4 h-4" />
+          </button>
+          
+          {/* Content */}
+          {isFlipped ? renderBackContent() : renderFrontContent()}
+        </div>
+        
+        {/* Card Footer */}
+        <div className="flex items-center justify-between p-4 bg-black/50">
+          <div className="flex items-center gap-4">
+            <TeedBallLike
+              isLiked={isLiked}
+              likeCount={post.likes}
+              onToggle={() => {
+                setIsLiked(!isLiked);
+                if (onLike) onLike(post.postId);
+              }}
+            />
+            
+            <button 
+              onClick={() => setShowComments(true)}
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span className="text-sm">{commentCount}</span>
+            </button>
+          </div>
+          
+          <p className="text-gray-400 text-xs">
+            {formatTimestamp(post.timestamp)}
+          </p>
+        </div>
       </div>
       
-      {/* Equipment Detail Modal */}
-      {selectedEquipment && (
-        <EquipmentDetailModal
-          isOpen={equipmentModalOpen}
-          onClose={() => {
-            setEquipmentModalOpen(false);
-          }}
-          equipment={selectedEquipment}
-        />
-      )}
-    </div>
+      {/* Comment Modal */}
+      <CommentModal
+        isOpen={showComments}
+        onClose={() => setShowComments(false)}
+        post={post}
+        currentUserId={currentUserId}
+        onLike={onLike}
+        isLiked={isLiked}
+        commentCount={commentCount}
+        onCommentCountChange={setCommentCount}
+      />
+    </>
   );
 };

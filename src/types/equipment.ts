@@ -21,7 +21,7 @@ export interface Equipment {
   id: string;
   brand: string;
   model: string;
-  category: 'driver' | 'wood' | 'hybrid' | 'iron' | 'wedge' | 'putter' | 'ball' | 'glove' | 'rangefinder' | 'bag';
+  category: 'driver' | 'fairway_wood' | 'hybrid' | 'iron' | 'wedge' | 'putter' | 'shaft' | 'grip' | 'ball' | 'bag' | 'glove' | 'rangefinder' | 'gps' | 'tee' | 'towel' | 'ball_marker' | 'divot_tool' | 'accessories';
   image: string; // Changed from imageUrl to image to match database
   msrp: number; // Added msrp property
   customSpecs?: string; // "9.5° Ventus Black 6X"

@@ -12,8 +12,6 @@ export async function getBags(options?: {
   priceRange?: [number, number];
   userId?: string;
 }) {
-  console.log('getBags called with options:', options);
-  
   let query = supabase
     .from('user_bags')
     .select(`
@@ -88,8 +86,6 @@ export async function getBags(options?: {
     console.error('Error fetching bags:', error);
     throw error;
   }
-  
-  console.log('Fetched bags:', data?.length || 0);
   
   // Calculate total value for each bag
   return data?.map(bag => ({
@@ -284,4 +280,77 @@ export async function hasUserLikedBag(userId: string, bagId: string) {
     .single();
 
   return !!data;
+}
+
+// Set a bag as the primary bag for a user
+export async function setPrimaryBag(userId: string, bagId: string) {
+  // The database trigger will handle unsetting other bags
+  const { data, error } = await supabase
+    .from('user_bags')
+    .update({ is_primary: true })
+    .eq('id', bagId)
+    .eq('user_id', userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+// Get user's primary bag
+export async function getUserPrimaryBag(userId: string) {
+  const { data, error } = await supabase
+    .from('user_bags')
+    .select(`
+      *,
+      bag_equipment (
+        id,
+        position,
+        custom_photo_url,
+        purchase_price,
+        is_featured,
+        equipment:equipment (
+          id,
+          brand,
+          model,
+          category,
+          image_url,
+          msrp
+        )
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('is_primary', true)
+    .single();
+
+  if (error && error.code !== 'PGRST116') { // Not found is ok
+    throw error;
+  }
+  
+  return data;
+}
+
+// Get all user bags with primary status
+export async function getUserBags(userId: string) {
+  const { data, error } = await supabase
+    .from('user_bags')
+    .select(`
+      id,
+      name,
+      bag_type,
+      is_primary,
+      description,
+      background_image,
+      created_at,
+      updated_at,
+      likes_count,
+      views_count,
+      bag_equipment (count)
+    `)
+    .eq('user_id', userId)
+    .order('is_primary', { ascending: false })
+    .order('updated_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
 }

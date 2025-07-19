@@ -17,6 +17,7 @@ import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
 import { BadgeService } from "@/services/badgeService";
 import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
 import { sortBadgesByPriority } from "@/utils/badgeSorting";
+import BackgroundLayer from "@/components/BackgroundLayer";
 
 const BagDisplayStyled = () => {
   const { bagId } = useParams();
@@ -215,9 +216,14 @@ const BagDisplayStyled = () => {
   const categoryOrder = Object.values(EQUIPMENT_CATEGORIES);
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Header */}
-      <div className="bg-white/5 backdrop-blur-[10px] border-b border-white/10 sticky top-0 z-40">
+    <div className="min-h-screen bg-black relative">
+      {/* Background Layer */}
+      <BackgroundLayer backgroundId={bagData.background_image || 'midwest-lush'} />
+      
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="bg-white/5 backdrop-blur-[10px] border-b border-white/10 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -533,6 +539,7 @@ const BagDisplayStyled = () => {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

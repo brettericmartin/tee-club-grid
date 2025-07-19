@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Camera, Edit3, Star, StarOff, X, Images, Crop } from 'lucide-react';
+import { Camera, Edit3, Star, StarOff, X, Images, Crop, Trash2, Check, ChevronsUpDown, Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from '@/components/ui/command';
+import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { CommunityPhotosGallery } from './CommunityPhotosGallery';
@@ -55,6 +68,18 @@ export function EquipmentEditor({
   const [cropperImage, setCropperImage] = useState<string>('');
   const [pendingCropFile, setPendingCropFile] = useState<File | null>(null);
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
+  
+  // States for searchable dropdowns
+  const [shaftOpen, setShaftOpen] = useState(false);
+  const [gripOpen, setGripOpen] = useState(false);
+  const [shaftSearch, setShaftSearch] = useState('');
+  const [gripSearch, setGripSearch] = useState('');
+  
+  // States for add new shaft/grip
+  const [showAddShaft, setShowAddShaft] = useState(false);
+  const [showAddGrip, setShowAddGrip] = useState(false);
+  const [newShaft, setNewShaft] = useState({ brand: '', model: '', flex: '', weight: '' });
+  const [newGrip, setNewGrip] = useState({ brand: '', model: '', size: 'Standard', color: '' });
   
   // Check if equipment is a club (needs shaft/grip/loft options)
   const isClub = ['driver', 'fairway_wood', 'wood', 'woods', 'hybrid', 'utility_iron', 
@@ -184,6 +209,98 @@ export function EquipmentEditor({
     }
   };
 
+  const handleRemove = async () => {
+    if (!confirm(`Are you sure you want to remove ${equipment.equipment.brand} ${equipment.equipment.model} from your bag?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('bag_equipment')
+        .delete()
+        .eq('id', equipment.id);
+
+      if (error) throw error;
+
+      toast.success('Equipment removed from bag');
+      onUpdate();
+      onClose();
+    } catch (error) {
+      console.error('Error removing equipment:', error);
+      toast.error('Failed to remove equipment');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddNewShaft = async () => {
+    if (!newShaft.brand || !newShaft.model || !newShaft.flex) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('shafts')
+        .insert({
+          brand: newShaft.brand,
+          model: newShaft.model,
+          flex: newShaft.flex,
+          weight: newShaft.weight ? parseFloat(newShaft.weight) : null,
+          category: equipment.equipment.category,
+          is_stock: false
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Add to local state and select it
+      setShafts([...shafts, data]);
+      setFormData({ ...formData, shaft_id: data.id });
+      setShowAddShaft(false);
+      setNewShaft({ brand: '', model: '', flex: '', weight: '' });
+      toast.success('Shaft added successfully');
+    } catch (error) {
+      console.error('Error adding shaft:', error);
+      toast.error('Failed to add shaft');
+    }
+  };
+
+  const handleAddNewGrip = async () => {
+    if (!newGrip.brand || !newGrip.model) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('grips')
+        .insert({
+          brand: newGrip.brand,
+          model: newGrip.model,
+          size: newGrip.size,
+          color: newGrip.color || null,
+          is_stock: false
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Add to local state and select it
+      setGrips([...grips, data]);
+      setFormData({ ...formData, grip_id: data.id });
+      setShowAddGrip(false);
+      setNewGrip({ brand: '', model: '', size: 'Standard', color: '' });
+      toast.success('Grip added successfully');
+    } catch (error) {
+      console.error('Error adding grip:', error);
+      toast.error('Failed to add grip');
+    }
+  };
+
 
   return (
     <>
@@ -285,25 +402,91 @@ export function EquipmentEditor({
           {/* Configuration */}
           <div className="grid grid-cols-2 gap-4">
             {/* Shaft Selection - Only show for clubs */}
-            {isClub && shafts.length > 0 && (
+            {isClub && (
               <div>
                 <Label>Shaft</Label>
-                <Select
-                  value={formData.shaft_id}
-                  onValueChange={(value) => setFormData({ ...formData, shaft_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select shaft" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {shafts.map((shaft) => (
-                      <SelectItem key={shaft.id} value={shaft.id}>
-                        {shaft.brand} {shaft.model} - {shaft.flex}
-                        {shaft.is_stock && ' (Stock)'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={shaftOpen} onOpenChange={setShaftOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={shaftOpen}
+                      className="w-full justify-between"
+                    >
+                      {formData.shaft_id
+                        ? shafts.find((shaft) => shaft.id === formData.shaft_id)?.brand + ' ' +
+                          shafts.find((shaft) => shaft.id === formData.shaft_id)?.model + ' - ' +
+                          shafts.find((shaft) => shaft.id === formData.shaft_id)?.flex
+                        : "Select shaft..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput 
+                        placeholder="Search shafts..." 
+                        value={shaftSearch}
+                        onValueChange={setShaftSearch}
+                      />
+                      <CommandEmpty>
+                        <div className="p-4 text-sm text-center">
+                          <p className="mb-2">No shaft found.</p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setShaftOpen(false);
+                              setShowAddShaft(true);
+                            }}
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add New Shaft
+                          </Button>
+                        </div>
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {shafts.filter(shaft => {
+                          const searchTerm = shaftSearch.toLowerCase();
+                          return shaft.brand.toLowerCase().includes(searchTerm) ||
+                                 shaft.model.toLowerCase().includes(searchTerm) ||
+                                 shaft.flex.toLowerCase().includes(searchTerm);
+                        }).map((shaft) => (
+                          <CommandItem
+                            key={shaft.id}
+                            value={shaft.id}
+                            onSelect={() => {
+                              setFormData({ ...formData, shaft_id: shaft.id });
+                              setShaftOpen(false);
+                              setShaftSearch('');
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                formData.shaft_id === shaft.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium">
+                                {shaft.brand} {shaft.model} - {shaft.flex}
+                              </div>
+                              {(shaft.weight || shaft.is_stock) && (
+                                <div className="text-sm text-muted-foreground">
+                                  {shaft.weight && `${shaft.weight}g`}
+                                  {shaft.weight && shaft.is_stock && ' • '}
+                                  {shaft.is_stock && 'Stock Option'}
+                                </div>
+                              )}
+                            </div>
+                            {shaft.price > 0 && (
+                              <span className="text-sm text-muted-foreground">+${shaft.price}</span>
+                            )}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
             )}
 
@@ -311,22 +494,88 @@ export function EquipmentEditor({
             {isClub && (
               <div>
                 <Label>Grip</Label>
-                <Select
-                  value={formData.grip_id}
-                  onValueChange={(value) => setFormData({ ...formData, grip_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select grip" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {grips.map((grip) => (
-                      <SelectItem key={grip.id} value={grip.id}>
-                        {grip.brand} {grip.model} - {grip.size}
-                        {grip.is_stock && ' (Stock)'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={gripOpen} onOpenChange={setGripOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={gripOpen}
+                      className="w-full justify-between"
+                    >
+                      {formData.grip_id
+                        ? grips.find((grip) => grip.id === formData.grip_id)?.brand + ' ' +
+                          grips.find((grip) => grip.id === formData.grip_id)?.model + ' - ' +
+                          grips.find((grip) => grip.id === formData.grip_id)?.size
+                        : "Select grip..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput 
+                        placeholder="Search grips..." 
+                        value={gripSearch}
+                        onValueChange={setGripSearch}
+                      />
+                      <CommandEmpty>
+                        <div className="p-4 text-sm text-center">
+                          <p className="mb-2">No grip found.</p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setGripOpen(false);
+                              setShowAddGrip(true);
+                            }}
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add New Grip
+                          </Button>
+                        </div>
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {grips.filter(grip => {
+                          const searchTerm = gripSearch.toLowerCase();
+                          return grip.brand.toLowerCase().includes(searchTerm) ||
+                                 grip.model.toLowerCase().includes(searchTerm) ||
+                                 grip.size.toLowerCase().includes(searchTerm);
+                        }).map((grip) => (
+                          <CommandItem
+                            key={grip.id}
+                            value={grip.id}
+                            onSelect={() => {
+                              setFormData({ ...formData, grip_id: grip.id });
+                              setGripOpen(false);
+                              setGripSearch('');
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                formData.grip_id === grip.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium">
+                                {grip.brand} {grip.model} - {grip.size}
+                              </div>
+                              {(grip.color || grip.is_stock) && (
+                                <div className="text-sm text-muted-foreground">
+                                  {grip.color}
+                                  {grip.color && grip.is_stock && ' • '}
+                                  {grip.is_stock && 'Stock Option'}
+                                </div>
+                              )}
+                            </div>
+                            {grip.price > 0 && (
+                              <span className="text-sm text-muted-foreground">+${grip.price}</span>
+                            )}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
             )}
 
@@ -405,13 +654,24 @@ export function EquipmentEditor({
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
+          <div className="flex justify-between">
+            <Button 
+              variant="destructive" 
+              onClick={handleRemove} 
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Remove from Bag
             </Button>
-            <Button onClick={handleSave} disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={loading}>
+                {loading ? 'Saving...' : 'Save Equipment'}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
@@ -492,6 +752,139 @@ export function EquipmentEditor({
         }}
         initialCaption={`Check out my ${equipment.equipment.brand} ${equipment.equipment.model}!`}
       />
+      
+      {/* Add New Shaft Dialog */}
+      <Dialog open={showAddShaft} onOpenChange={setShowAddShaft}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Shaft</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="shaft-brand">Brand *</Label>
+              <Input
+                id="shaft-brand"
+                value={newShaft.brand}
+                onChange={(e) => setNewShaft({ ...newShaft, brand: e.target.value })}
+                placeholder="e.g., Fujikura"
+              />
+            </div>
+            <div>
+              <Label htmlFor="shaft-model">Model *</Label>
+              <Input
+                id="shaft-model"
+                value={newShaft.model}
+                onChange={(e) => setNewShaft({ ...newShaft, model: e.target.value })}
+                placeholder="e.g., Ventus Blue"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="shaft-flex">Flex *</Label>
+                <Select
+                  value={newShaft.flex}
+                  onValueChange={(value) => setNewShaft({ ...newShaft, flex: value })}
+                >
+                  <SelectTrigger id="shaft-flex">
+                    <SelectValue placeholder="Select flex" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="L">Ladies</SelectItem>
+                    <SelectItem value="A">Senior</SelectItem>
+                    <SelectItem value="R">Regular</SelectItem>
+                    <SelectItem value="S">Stiff</SelectItem>
+                    <SelectItem value="X">X-Stiff</SelectItem>
+                    <SelectItem value="TX">Tour X-Stiff</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="shaft-weight">Weight (grams)</Label>
+                <Input
+                  id="shaft-weight"
+                  type="number"
+                  value={newShaft.weight}
+                  onChange={(e) => setNewShaft({ ...newShaft, weight: e.target.value })}
+                  placeholder="e.g., 65"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddShaft(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddNewShaft}>
+                Add Shaft
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Add New Grip Dialog */}
+      <Dialog open={showAddGrip} onOpenChange={setShowAddGrip}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Grip</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="grip-brand">Brand *</Label>
+              <Input
+                id="grip-brand"
+                value={newGrip.brand}
+                onChange={(e) => setNewGrip({ ...newGrip, brand: e.target.value })}
+                placeholder="e.g., Golf Pride"
+              />
+            </div>
+            <div>
+              <Label htmlFor="grip-model">Model *</Label>
+              <Input
+                id="grip-model"
+                value={newGrip.model}
+                onChange={(e) => setNewGrip({ ...newGrip, model: e.target.value })}
+                placeholder="e.g., MCC Plus4"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="grip-size">Size</Label>
+                <Select
+                  value={newGrip.size}
+                  onValueChange={(value) => setNewGrip({ ...newGrip, size: value })}
+                >
+                  <SelectTrigger id="grip-size">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Undersize">Undersize</SelectItem>
+                    <SelectItem value="Standard">Standard</SelectItem>
+                    <SelectItem value="Midsize">Midsize</SelectItem>
+                    <SelectItem value="Jumbo">Jumbo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="grip-color">Color</Label>
+                <Input
+                  id="grip-color"
+                  value={newGrip.color}
+                  onChange={(e) => setNewGrip({ ...newGrip, color: e.target.value })}
+                  placeholder="e.g., Black/Red"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddGrip(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddNewGrip}>
+                Add Grip
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

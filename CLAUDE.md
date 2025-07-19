@@ -1,5 +1,32 @@
 # CLAUDE.md - Teed.club Development Guide
 
+## 🚨 CRITICAL DATA PROTECTION RULES 🚨
+
+**NEVER DELETE USER DATA WITHOUT EXPLICIT PERMISSION**
+- NEVER run cleanup scripts without explicit user confirmation showing exact data to be deleted
+- NEVER truncate or delete from tables containing user-generated content
+- ALWAYS ask "This will permanently delete X records. Are you absolutely sure?" with specific details
+- ALWAYS prefer soft deletes or archiving over hard deletes
+- ALWAYS check if data is user-generated vs seed data before ANY deletion
+- ALWAYS warn if a script contains DELETE, TRUNCATE, or DROP statements
+
+**Protected Tables (NEVER DELETE WITHOUT EXPLICIT PERMISSION):**
+- equipment (if added_by_user_id is not null)
+- equipment_photos (ALL rows - user uploads)
+- user_bags (ALL rows)
+- bag_equipment (ALL rows)
+- profiles (ALL rows)
+- feed_posts (ALL rows)
+- Any table with user_id foreign key
+- Any table with user-uploaded content
+
+**Before Running ANY Cleanup Script:**
+1. READ the entire script first
+2. IDENTIFY all DELETE/TRUNCATE operations
+3. WARN the user about what will be deleted
+4. REQUIRE explicit confirmation with details
+5. SUGGEST running a SELECT count first to show impact
+
 ## CRITICAL TASK EXECUTION RULES
 
 **For ANY script or database operation:**
@@ -9,10 +36,38 @@
 4. Always use scripts/ folder with './supabase-admin.js' import
 5. Add error handling + console.log for progress
 
+**BEFORE ANY DEVELOPMENT:**
+- Run full schema check: `node scripts/check-schema.js`
+- Review existing components and assets
+- Verify table structures match implementation plans
+- Check for existing utilities before creating new ones
+
 **Interaction Guidelines:**
 - Execute scripts directly when possible
 - Focus on specific task context, not entire project scope
 - Provide working code examples with clear implementation steps
+
+## DESIGN CONSISTENCY REQUIREMENTS
+
+**Component Reuse Mandate:**
+- ALWAYS use existing components before creating new ones
+- BagCompositeCard must be consistent across ALL contexts (feed, browser, profile)
+- Equipment photos must use same source/sizing logic everywhere
+- Feed posts must use standardized FeedItemCard component
+- Navigation elements must be identical across all pages
+
+**Asset Management:**
+- Check for existing images/icons before adding new ones
+- Use centralized image handling utilities
+- Maintain single source of truth for equipment photos
+- Prevent duplicate assets or redundant components
+
+**Performance-First Design:**
+- Glassmorphism ONLY for navigation bars and primary bag cards
+- Use solid grays (#1a1a1a, #2a2a2a, #3a3a3a) for content areas
+- Minimize backdrop-filter usage to reduce GPU load
+- Lazy load all images with blur placeholders
+- Virtual scrolling for lists over 50 items
 
 ## Platform Vision
 
@@ -26,7 +81,7 @@
 ## Technical Foundation
 
 **Stack:** Vite + React + TypeScript + Supabase + Tailwind CSS
-**Design:** Mobile-first, glassmorphism, golf-themed interactions ("Tees" not "Likes")
+**Design:** Mobile-first, performance-optimized, golf-themed interactions ("Tees" not "Likes")
 **Database:** PostgreSQL with Row Level Security
 
 ## Business Model & Monetization Strategy
@@ -53,7 +108,7 @@
 **Core Categories:**
 - **Early Bird**: Early adopter recognition
 - **Photo Mastery**: Tiered photo contributions (5, 50, 100+ photos)
-  - Introductory → Advanced → Expert → Master
+ - Introductory → Advanced → Expert → Master
 - **Equipment Connoisseur**: Adding equipment to platform
 - **Brand Specialist**: 3+ pieces from same brand (brand-specific badges)
 - **Brand Loyalist**: All clubs from single brand
@@ -134,11 +189,32 @@
 ## Key Design Standards
 
 **Visual Identity:**
-- Glassmorphism effects: `backdrop-filter: blur(10px)`, `background: rgba(255,255,255,0.1)`
-- Color Palette: Background #111111, Cards #1a1a1a, Primary #10B981 (green)
-- Mobile-first: Touch targets 44x44px+, bottom navigation, single column layouts
+- **Performance-Optimized Styling:**
+ - Glassmorphism ONLY for: Nav bars, primary bag cards
+ - Solid backgrounds for: Feed cards (#1a1a1a), content areas (#2a2a2a), modals (#1f1f1f)
+ - Reduced blur effects: Only where absolutely necessary
+- **Color Palette:** 
+ - Background #111111
+ - Card backgrounds #1a1a1a (no transparency)
+ - Elevated surfaces #2a2a2a
+ - Primary #10B981 (green CTAs)
+- **Mobile-first:** 
+ - Touch targets 44x44px minimum
+ - Bottom navigation
+ - Single column layouts
+ - Optimized for one-handed use
 
 **Platform Language:**
 - "Tees" instead of "Likes" (golf ball on tee icon)
 - "Teed this up" / "X people teed this"
 - Database: bag_tees, equipment_tees tables
+
+**Performance Standards:**
+- Lazy load all images below the fold
+- Use srcset for responsive images
+- Implement virtual scrolling for long lists
+- Minimize re-renders with proper React optimization
+- Cache equipment data aggressively
+**Data Security**
+- NEVER EVER DELETE DATA TIED TO USERS THAT THEY HAVE INPUT
+- We MAY come up with a workflow to manually review posts/photos that are reported, but YOU may NEVER delete data that wasnt' created for demo purposes. This will lose users faster than anything else. 

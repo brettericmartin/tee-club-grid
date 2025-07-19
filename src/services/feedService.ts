@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 
 // Define FeedPost type since it might not be in the Database interface yet
 export interface FeedPost {
@@ -98,17 +99,17 @@ export async function createEquipmentPhotoFeedPost(
   caption?: string,
   bagId?: string
 ) {
-  console.log('Creating equipment photo feed post:', { userId, equipmentId, photoUrl, bagId });
+  logger.debug('Creating equipment photo feed post:', { userId, equipmentId, photoUrl, bagId });
   
   try {
     // Check for recent equipment post to update instead of creating new
     const recentPost = await findRecentEquipmentPost(userId, equipmentId, 1);
     
     if (recentPost) {
-      console.log('Found recent equipment post, updating with photo instead of creating new');
+      logger.debug('Found recent equipment post, updating with photo instead of creating new');
       const updatedPost = await updatePostWithPhoto(recentPost.id, photoUrl, caption);
       if (updatedPost) {
-        console.log('Successfully updated existing post with photo:', updatedPost.id);
+        logger.debug('Successfully updated existing post with photo:', updatedPost.id);
         return updatedPost;
       }
     }
@@ -135,14 +136,14 @@ export async function createEquipmentPhotoFeedPost(
       .single();
 
     if (error) {
-      console.error('Equipment photo feed post creation failed:', error);
+      logger.error('Equipment photo feed post creation failed:', error);
       throw error;
     }
     
-    console.log('Equipment photo feed post created successfully:', data.id, 'by user:', data.user_id);
+    logger.debug('Equipment photo feed post created successfully:', data.id, 'by user:', data.user_id);
     return data;
   } catch (error) {
-    console.error('Error creating equipment photo feed post:', error);
+    logger.error('Error creating equipment photo feed post:', error);
     throw error;
   }
 }
