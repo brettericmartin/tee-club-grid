@@ -68,7 +68,12 @@ const Equipment = () => {
       // Load saved items if user is logged in
       if (user) {
         const saved = await getUserSavedEquipment(user.id);
-        setSavedItems(new Set(saved?.map(item => item.id) || []));
+        console.log('Saved equipment data:', saved);
+        
+        // getUserSavedEquipment returns equipment objects with their IDs at the top level
+        const savedIds = saved?.map(item => item.id).filter(Boolean) || [];
+        console.log('Saved equipment IDs:', savedIds);
+        setSavedItems(new Set(savedIds));
       }
     } catch (error) {
       console.error('Error loading equipment:', error);
@@ -86,26 +91,45 @@ const Equipment = () => {
     if (!user) return;
     try {
       const saved = await getUserSavedEquipment(user.id);
-      setSavedItems(new Set(saved?.map(item => item.id) || []));
+      console.log('loadSavedEquipment - Saved data:', saved);
+      
+      // getUserSavedEquipment returns equipment objects with their IDs at the top level
+      const savedIds = saved?.map(item => item.id).filter(Boolean) || [];
+      console.log('loadSavedEquipment - Saved IDs:', savedIds);
+      setSavedItems(new Set(savedIds));
     } catch (error) {
       console.error('Error loading saved equipment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load saved items.",
+        variant: "destructive"
+      });
     }
   };
 
   const filterEquipment = () => {
-    let filtered = allEquipment;
-    
-    // Filter by brand
-    if (brand !== 'all') {
-      filtered = filtered.filter(item => item.brand === brand);
+    try {
+      let filtered = allEquipment;
+      
+      // Filter by brand
+      if (brand !== 'all') {
+        filtered = filtered.filter(item => item.brand === brand);
+      }
+      
+      // Filter by saved only
+      if (showSavedOnly && user) {
+        filtered = filtered.filter(item => savedItems.has(item.id));
+      }
+      
+      setEquipment(filtered);
+    } catch (error) {
+      console.error('Error filtering equipment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to filter equipment. Please try again.",
+        variant: "destructive"
+      });
     }
-    
-    // Filter by saved only
-    if (showSavedOnly && user) {
-      filtered = filtered.filter(item => savedItems.has(item.id));
-    }
-    
-    setEquipment(filtered);
   };
 
   // Categories from our standardized list
@@ -125,7 +149,10 @@ const Equipment = () => {
     }
 
     try {
+      console.log('Toggling save for equipment:', equipmentId);
       const isSaved = await toggleEquipmentSave(user.id, equipmentId);
+      console.log('Toggle result - isSaved:', isSaved);
+      
       if (isSaved) {
         setSavedItems(prev => new Set(prev).add(equipmentId));
         toast({
@@ -142,6 +169,11 @@ const Equipment = () => {
           title: "Removed",
           description: "Equipment removed from your favorites."
         });
+        
+        // If we're showing saved only and this was the last item, refresh
+        if (showSavedOnly && savedItems.size === 1) {
+          filterEquipment();
+        }
       }
     } catch (error) {
       console.error('Error toggling save:', error);
@@ -153,13 +185,50 @@ const Equipment = () => {
     }
   };
 
-  const handleEquipmentSubmit = (equipment: any) => {
-    // TODO: Implement actual submission to database
-    console.log('Equipment submitted:', equipment);
-    toast({
-      title: "Equipment Submitted",
-      description: "Thank you for your contribution! We'll review and add it to our database.",
-    });
+  const handleEquipmentSubmit = async (equipment: any) => {
+    try {
+      // Import and use the community equipment service
+      const { submitEquipment } = await import('@/services/communityEquipment');
+      
+      const result = await submitEquipment({
+        brand: equipment.brand,
+        model: equipment.model,
+        category: equipment.category,
+        year: equipment.year,
+        msrp: equipment.msrp,
+        image_url: equipment.imageUrl,
+        imageFile: equipment.imageFile,
+        specs: equipment.specs
+      });
+      
+      if (result.success && result.equipment) {
+        toast({
+          title: "Equipment Added Successfully!",
+          description: `${equipment.brand} ${equipment.model} has been added to the database.`,
+        });
+        setShowSubmitModal(false);
+        
+        // Refresh equipment list if it matches current filters
+        if (category === 'all' || category === equipment.category) {
+          if (brand === 'all' || brand === equipment.brand) {
+            loadEquipment();
+          }
+        }
+      } else {
+        toast({
+          title: "Equipment Already Exists",
+          description: result.error || "This equipment is already in our database.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting equipment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit equipment. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const EquipmentGrid = () => {
@@ -174,7 +243,25 @@ const Equipment = () => {
     if (equipment.length === 0) {
       return (
         <div className="text-center py-20">
-          <p className="text-muted-foreground">No equipment found</p>
+          <Camera className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-lg font-medium text-foreground mb-2">
+            {showSavedOnly ? "No saved equipment yet" : "No equipment found"}
+          </p>
+          <p className="text-muted-foreground mb-4">
+            {showSavedOnly 
+              ? "Equipment you save will appear here" 
+              : brand !== 'all' 
+                ? `No ${brand} equipment found in this category`
+                : "Try adjusting your filters"}
+          </p>
+          {showSavedOnly && (
+            <Button 
+              variant="outline" 
+              onClick={() => setShowSavedOnly(false)}
+            >
+              Browse All Equipment
+            </Button>
+          )}
         </div>
       );
     }
@@ -207,7 +294,25 @@ const Equipment = () => {
     if (equipment.length === 0) {
       return (
         <div className="text-center py-20">
-          <p className="text-muted-foreground">No equipment found</p>
+          <Camera className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-lg font-medium text-foreground mb-2">
+            {showSavedOnly ? "No saved equipment yet" : "No equipment found"}
+          </p>
+          <p className="text-muted-foreground mb-4">
+            {showSavedOnly 
+              ? "Equipment you save will appear here" 
+              : brand !== 'all' 
+                ? `No ${brand} equipment found in this category`
+                : "Try adjusting your filters"}
+          </p>
+          {showSavedOnly && (
+            <Button 
+              variant="outline" 
+              onClick={() => setShowSavedOnly(false)}
+            >
+              Browse All Equipment
+            </Button>
+          )}
         </div>
       );
     }

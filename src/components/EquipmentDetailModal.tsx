@@ -11,6 +11,7 @@ import EquipmentHeader from "./equipment-detail/EquipmentHeader";
 import EquipmentBuildConfiguration from "./equipment-detail/EquipmentBuildConfiguration";
 import EquipmentSpecificationTabs from "./equipment-detail/EquipmentSpecificationTabs";
 import EquipmentActionButtons from "./equipment-detail/EquipmentActionButtons";
+import { ImageViewerModal } from "./shared/ImageViewerModal";
 
 interface EquipmentDetailModalProps {
   equipment: EquipmentDetail | any | null;
@@ -26,6 +27,7 @@ const EquipmentDetailModal = ({ equipment, isOpen, onClose, onToggleFeatured, is
   const [gripModalOpen, setGripModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
+  const [viewerImageUrl, setViewerImageUrl] = useState<string | null>(null);
 
   if (!equipment) return null;
 
@@ -83,6 +85,7 @@ const EquipmentDetailModal = ({ equipment, isOpen, onClose, onToggleFeatured, is
                 selectedImageIndex={selectedImageIndex}
                 onImageSelect={setSelectedImageIndex}
                 equipmentId={equipment.id}
+                onImageClick={(imageUrl) => setViewerImageUrl(imageUrl)}
               />
               
               <EquipmentHeader
@@ -138,6 +141,14 @@ const EquipmentDetailModal = ({ equipment, isOpen, onClose, onToggleFeatured, is
           />
         </>
       )}
+      
+      {/* High Resolution Image Viewer */}
+      <ImageViewerModal
+        isOpen={!!viewerImageUrl}
+        onClose={() => setViewerImageUrl(null)}
+        imageUrl={viewerImageUrl || ''}
+        alt={`${equipment.brand} ${equipment.model} - High Resolution`}
+      />
     </>
   );
 };

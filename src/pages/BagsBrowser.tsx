@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users, Loader2 } from "lucide-react";
+import { TeedBallIcon } from "@/components/shared/TeedBallLike";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { BagCard } from "@/components/bags/BagCard";
 import { getBags } from "@/services/bags";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLikedBags } from "@/hooks/useLikedBags";
-import { toggleFollow } from "@/services/users";
+import { toggleFollow, getUserFollowing } from "@/services/users";
 import { toast } from "sonner";
 
 type SortOption = "trending" | "newest" | "most-liked" | "following" | "price-high" | "price-low";
@@ -25,6 +26,7 @@ const BagsBrowser = () => {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [handicapRange, setHandicapRange] = useState<HandicapRange>("all");
   const [priceRange, setPriceRange] = useState<PriceRange>("all");
+  const [filterBy, setFilterBy] = useState<FilterOption>("all");
   const { likedBags, toggleLike } = useLikedBags();
   const [followedBags, setFollowedBags] = useState<Set<string>>(new Set());
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -68,6 +70,9 @@ const BagsBrowser = () => {
     loadingTimeoutRef.current = setTimeout(() => {
       if (isMountedRef.current) {
         loadBags();
+        if (user) {
+          loadFollowedUsers();
+        }
       }
     }, 300); // 300ms debounce
     
@@ -102,6 +107,20 @@ const BagsBrowser = () => {
       if (isMountedRef.current) {
         setLoading(false);
       }
+    }
+  };
+
+  const loadFollowedUsers = async () => {
+    if (!user) return;
+    
+    try {
+      const following = await getUserFollowing(user.id);
+      if (following && isMountedRef.current) {
+        const followingIds = new Set(following.map(f => f.id));
+        setFollowedBags(followingIds);
+      }
+    } catch (error) {
+      console.error('Error loading followed users:', error);
     }
   };
 
@@ -254,6 +273,30 @@ const BagsBrowser = () => {
             <span className="text-sm font-medium text-foreground">Filters:</span>
           </div>
 
+          {/* Main Filter */}
+          {user && (
+            <Select value={filterBy} onValueChange={(value: FilterOption) => setFilterBy(value)}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Bags</SelectItem>
+                <SelectItem value="teed">
+                  <div className="flex items-center gap-2">
+                    <TeedBallIcon className="w-4 h-4" />
+                    Teed Bags
+                  </div>
+                </SelectItem>
+                <SelectItem value="following">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Following
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+
           {/* Sort By */}
           <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
             <SelectTrigger className="w-48">
@@ -325,7 +368,7 @@ const BagsBrowser = () => {
           </Select>
 
           {/* Clear Filters */}
-          {(searchQuery || sortBy !== "newest" || handicapRange !== "all" || priceRange !== "all") && (
+          {(searchQuery || sortBy !== "newest" || handicapRange !== "all" || priceRange !== "all" || filterBy !== "all") && (
             <Button 
               variant="outline" 
               size="sm"
@@ -334,6 +377,7 @@ const BagsBrowser = () => {
                 setSortBy("newest");
                 setHandicapRange("all");
                 setPriceRange("all");
+                setFilterBy("all");
               }}
             >
               Clear Filters
@@ -347,6 +391,12 @@ const BagsBrowser = () => {
             Showing {filteredBags.length} bag{filteredBags.length !== 1 ? 's' : ''}
             {searchQuery && (
               <span> for "{searchQuery}"</span>
+            )}
+            {filterBy === "teed" && (
+              <span className="text-primary"> • Teed bags only</span>
+            )}
+            {filterBy === "following" && (
+              <span className="text-primary"> • From people you follow</span>
             )}
           </p>
         </div>

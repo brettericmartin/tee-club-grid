@@ -22,16 +22,6 @@ const BottomNavigation = () => {
       icon: Package,
       label: "Equipment",
     },
-    {
-      to: "/saved",
-      icon: Heart,
-      label: "Saved",
-    },
-    {
-      to: "/following",
-      icon: Users,
-      label: "Following",
-    },
   ];
 
   return (

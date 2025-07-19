@@ -230,6 +230,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
                         onClick={() => {
                           setShowNewBrand(true);
                           setShowNewModel(true); // Auto-select new model for new brand
+                          setFormData({ ...formData, brand: brandSearch }); // Pre-fill with search text
                           setShowBrandDropdown(false);
                           setBrandSearch("");
                         }}
@@ -275,6 +276,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
                     size="sm"
                     onClick={() => {
                       setShowNewBrand(false);
+                      setBrandSearch(formData.brand); // Restore the text to search box
                       setFormData({ ...formData, brand: "" });
                     }}
                   >
@@ -311,6 +313,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
                         className="w-full justify-start text-primary hover:text-primary"
                         onClick={() => {
                           setShowNewModel(true);
+                          setFormData({ ...formData, model: modelSearch }); // Pre-fill with search text
                           setShowModelDropdown(false);
                           setModelSearch("");
                         }}
@@ -360,6 +363,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
                     size="sm"
                     onClick={() => {
                       setShowNewModel(false);
+                      setModelSearch(formData.model); // Restore the text to search box
                       setFormData({ ...formData, model: "" });
                     }}
                   >

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Image Resize and Watermark</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-box {
+            border: 2px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .stats {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        button {
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #059669;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Image Resize and Watermark</h1>
+    <p>This test simulates the image processing that happens in the Teed.club app.</p>
+    
+    <input type="file" id="fileInput" accept="image/*">
+    <button onclick="processImage()">Process Image</button>
+    
+    <div class="container">
+        <div class="image-box">
+            <h3>Original Image</h3>
+            <img id="originalImage" alt="Original">
+            <div class="stats" id="originalStats"></div>
+        </div>
+        <div class="image-box">
+            <h3>Processed Image</h3>
+            <img id="processedImage" alt="Processed">
+            <div class="stats" id="processedStats"></div>
+        </div>
+    </div>
+
+    <script>
+        function processImage() {
+            const input = document.getElementById('fileInput');
+            if (!input.files || !input.files[0]) {
+                alert('Please select an image first');
+                return;
+            }
+
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Show original image
+                    document.getElementById('originalImage').src = e.target.result;
+                    document.getElementById('originalStats').textContent = 
+                        `Dimensions: ${img.width} x ${img.height} | Size: ${(file.size / 1024).toFixed(1)}KB`;
+
+                    // Process image
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // Calculate new dimensions (max 2048px)
+                    const maxDimension = 2048;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxDimension || height > maxDimension) {
+                        const ratio = Math.min(maxDimension / width, maxDimension / height);
+                        width = Math.round(width * ratio);
+                        height = Math.round(height * ratio);
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    // Enable high quality image smoothing
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+
+                    // Draw resized image
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Add watermark
+                    const userDisplayName = 'Test User';
+                    const fontSize = Math.max(14, Math.min(24, width / 40));
+                    const padding = fontSize * 0.8;
+
+                    ctx.font = `${fontSize}px Arial, sans-serif`;
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'bottom';
+
+                    // Add shadow for better readability
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                    ctx.shadowBlur = 4;
+                    ctx.shadowOffsetX = 1;
+                    ctx.shadowOffsetY = 1;
+
+                    // Draw watermark text
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                    ctx.fillText(`© ${userDisplayName}`, width - padding, height - padding);
+
+                    // Convert to JPEG and display
+                    canvas.toBlob(function(blob) {
+                        const processedUrl = URL.createObjectURL(blob);
+                        document.getElementById('processedImage').src = processedUrl;
+                        document.getElementById('processedStats').textContent = 
+                            `Dimensions: ${width} x ${height} | Size: ${(blob.size / 1024).toFixed(1)}KB | Format: JPEG`;
+                    }, 'image/jpeg', 0.85);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>

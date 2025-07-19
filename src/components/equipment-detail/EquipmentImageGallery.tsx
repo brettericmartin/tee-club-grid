@@ -12,6 +12,7 @@ interface EquipmentImageGalleryProps {
   selectedImageIndex: number;
   onImageSelect: (index: number) => void;
   equipmentId?: string;
+  onImageClick?: (imageUrl: string) => void;
 }
 
 const EquipmentImageGallery = ({ 
@@ -20,7 +21,8 @@ const EquipmentImageGallery = ({
   model, 
   selectedImageIndex, 
   onImageSelect,
-  equipmentId
+  equipmentId,
+  onImageClick
 }: EquipmentImageGalleryProps) => {
   const { user } = useAuth();
   const [savedPhotos, setSavedPhotos] = useState<Record<string, boolean>>({});
@@ -77,7 +79,8 @@ const EquipmentImageGallery = ({
         <img
           src={images[selectedImageIndex] || images[0]}
           alt={`${brand} ${model}`}
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain cursor-zoom-in"
+          onClick={() => onImageClick && onImageClick(images[selectedImageIndex] || images[0])}
         />
         {user && (
           <Button

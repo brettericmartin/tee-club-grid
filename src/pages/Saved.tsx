@@ -7,7 +7,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { getUserSavedEquipment, toggleEquipmentSave, getUserWishlist } from "@/services/equipment";
-import { getFollowedBags } from "@/services/users";
 import { getUserSavedPhotos, unsavePhoto, togglePhotoFavorite } from "@/services/savedPhotos";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
@@ -21,7 +20,6 @@ const Saved = () => {
   const [filter, setFilter] = useState<'all' | 'in-bag' | 'wishlist'>('all');
   const [savedEquipment, setSavedEquipment] = useState<any[]>([]);
   const [wishlistItems, setWishlistItems] = useState<any[]>([]);
-  const [followedBags, setFollowedBags] = useState<any[]>([]);
   const [savedPhotos, setSavedPhotos] = useState<SavedPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
@@ -40,16 +38,29 @@ const Saved = () => {
     
     setLoading(true);
     try {
-      const [savedData, wishlistData, bagsData, photosData] = await Promise.all([
+      const [savedData, wishlistData, photosData] = await Promise.all([
         getUserSavedEquipment(user.id),
         getUserWishlist(user.id),
-        getFollowedBags(user.id),
         getUserSavedPhotos(user.id)
       ]);
 
-      setSavedEquipment(savedData || []);
+      // Map the saved data to extract the equipment objects
+      const mappedSavedData = (savedData || []).map(item => {
+        if (!item.equipment) return null;
+        // Extract equipment data and add primaryPhoto
+        const equipment = item.equipment;
+        const primaryPhoto = equipment.equipment_photos?.find(p => p.is_primary)?.photo_url || 
+                           equipment.equipment_photos?.[0]?.photo_url ||
+                           equipment.image_url;
+        return {
+          ...equipment,
+          primaryPhoto,
+          saved_at: item.created_at
+        };
+      }).filter(Boolean);
+      
+      setSavedEquipment(mappedSavedData);
       setWishlistItems(wishlistData || []);
-      setFollowedBags(bagsData || []);
       setSavedPhotos(photosData || []);
     } catch (error) {
       console.error('Error fetching saved items:', error);
@@ -356,95 +367,6 @@ const Saved = () => {
     );
   };
 
-  const FollowedBagsGrid = () => {
-    if (loading) {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Skeleton className="w-12 h-12 rounded-full" />
-                  <div className="ml-3 space-y-2">
-                    <Skeleton className="h-5 w-24" />
-                    <Skeleton className="h-4 w-16" />
-                  </div>
-                </div>
-                <Skeleton className="h-4 w-20" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      );
-    }
-
-    if (followedBags.length === 0) {
-      return (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">You're not following any bags yet</p>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() => navigate('/bags')}
-          >
-            Discover Bags
-          </Button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {followedBags.map(bag => (
-          <Card key={bag.id} className="hover:shadow-card transition-shadow duration-200">
-            <CardContent className="p-6">
-              <Link to={`/bag/${bag.id}`} className="block">
-                <div className="flex items-center mb-4">
-                  {bag.profile?.avatar_url ? (
-                    <img 
-                      src={bag.profile.avatar_url} 
-                      alt={bag.profile.full_name || bag.profile.username}
-                      className="w-12 h-12 rounded-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm">
-                      {(bag.profile?.full_name || bag.profile?.username || 'U')
-                        .split(' ')
-                        .map(n => n[0])
-                        .join('')
-                        .toUpperCase()
-                        .slice(0, 2)}
-                    </div>
-                  )}
-                  <div className="ml-3">
-                    <h3 className="font-semibold text-foreground">
-                      {bag.profile?.full_name || bag.profile?.username}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {bag.profile?.handicap ? `${bag.profile.handicap} HCP` : 'Golf Enthusiast'}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{bag.name}</span>
-                    <span className="font-medium text-foreground">
-                      {formatCompactCurrency(bag.totalValue || 0)}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {bag.likesCount || 0} tees • {bag.bag_equipment?.length || 0} items
-                  </p>
-                </div>
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  };
 
   const SavedPhotosGrid = () => {
     if (loading) {
@@ -548,7 +470,7 @@ const Saved = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <Card>
             <CardContent className="p-6 text-center">
               {loading ? (
@@ -579,24 +501,13 @@ const Saved = () => {
               <p className="text-muted-foreground">Wishlist</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-6 text-center">
-              {loading ? (
-                <Skeleton className="h-10 w-16 mx-auto mb-2" />
-              ) : (
-                <p className="text-3xl font-bold text-primary">{followedBags.length}</p>
-              )}
-              <p className="text-muted-foreground">Following</p>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Tabs */}
         <Tabs defaultValue="equipment" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="equipment">Saved Equipment</TabsTrigger>
             <TabsTrigger value="photos">Saved Photos</TabsTrigger>
-            <TabsTrigger value="bags">Following Bags</TabsTrigger>
           </TabsList>
           
           <TabsContent value="equipment">
@@ -650,9 +561,6 @@ const Saved = () => {
             {view === 'grid' ? <SavedEquipmentGrid /> : <SavedEquipmentList />}
           </TabsContent>
 
-          <TabsContent value="bags">
-            <FollowedBagsGrid />
-          </TabsContent>
 
           <TabsContent value="photos">
             {/* Photos Filters */}

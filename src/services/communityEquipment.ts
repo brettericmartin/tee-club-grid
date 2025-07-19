@@ -1,4 +1,6 @@
 import { supabase } from '@/lib/supabase';
+import { syncUserPhotoToEquipment } from './equipmentPhotoSync';
+import { createEquipmentPhotoFeedPost } from './feedService';
 
 /**
  * Community Equipment Service
@@ -129,6 +131,33 @@ export async function submitEquipment(submission: EquipmentSubmission) {
   
   if (error) {
     throw error;
+  }
+  
+  // Sync photo to equipment_photos table if image was uploaded
+  if (finalImageUrl && user) {
+    try {
+      await syncUserPhotoToEquipment(
+        user.id,
+        newEquipment.id,
+        finalImageUrl,
+        `${newEquipment.brand} ${newEquipment.model}`
+      );
+      console.log('Photo synced to equipment_photos table');
+      
+      // Create feed post for the new equipment
+      await createEquipmentPhotoFeedPost(
+        user.id,
+        newEquipment.id,
+        `${newEquipment.brand} ${newEquipment.model}`,
+        finalImageUrl,
+        `Check out the ${newEquipment.brand} ${newEquipment.model} I just added! 🏌️`,
+        undefined // no bagId for general equipment submissions
+      );
+      console.log('Feed post created for new equipment');
+    } catch (syncError) {
+      console.error('Failed to sync photo or create feed post:', syncError);
+      // Don't fail the whole submission if sync fails
+    }
   }
   
   return {

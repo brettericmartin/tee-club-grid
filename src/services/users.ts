@@ -149,7 +149,7 @@ export async function getUserFollowing(userId: string) {
       following:profiles!user_follows_following_id_fkey (
         id,
         username,
-        full_name,
+        display_name,
         avatar_url,
         handicap
       )

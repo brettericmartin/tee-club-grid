@@ -14,7 +14,7 @@ interface TeedBallLikeProps {
 }
 
 // Custom teed golf ball SVG icon - based on provided designs
-const TeedBallIcon = ({ className, filled = false }: { className?: string; filled?: boolean }) => {
+export const TeedBallIcon = ({ className, filled = false }: { className?: string; filled?: boolean }) => {
   if (filled) {
     // Green filled version with outline ball
     return (

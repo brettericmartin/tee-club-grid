@@ -20,8 +20,6 @@ const MyBag = lazy(() => import("./pages/MyBag"));
 const Equipment = lazy(() => import("./pages/Equipment"));
 const EquipmentDetail = lazy(() => import("./pages/EquipmentDetail"));
 const Feed = lazy(() => import("./pages/Feed"));
-const Saved = lazy(() => import("./pages/Saved"));
-const Following = lazy(() => import("./pages/Following"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Badges = lazy(() => import("./pages/Badges"));
 const BadgePreview = lazy(() => import("./pages/BadgePreview"));
@@ -91,8 +89,6 @@ const App = () => {
                         <Route path="/equipment" element={<Equipment />} />
                         <Route path="/equipment/:id" element={<EquipmentDetail />} />
                         <Route path="/feed" element={<Feed />} />
-                        <Route path="/saved" element={<Saved />} />
-                        <Route path="/following" element={<Following />} />
                         <Route path="/wishlist" element={<Wishlist />} />
                         <Route path="/badges" element={<Badges />} />
                         <Route path="/badge-preview" element={<BadgePreview />} />

@@ -1,6 +1,6 @@
 /* @refresh skip */
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, Star, CheckCircle } from "lucide-react";
+import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
 import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer, { bagBackgrounds } from "@/components/BackgroundLayer";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
 import Navigation from "@/components/Navigation";
 import { BagSelectorDialog } from "@/components/bag/BagSelectorDialog";
 import { CreateBagDialog } from "@/components/bag/CreateBagDialog";
@@ -946,47 +947,39 @@ const MyBagSupabase = () => {
                     This bag will be featured on your profile and feed posts
                   </p>
                 </div>
-                <button
-                  className={`p-3 rounded-full transition-all ${
-                    currentBag?.is_primary 
-                      ? 'bg-primary/20' 
-                      : 'hover:bg-white/10 cursor-pointer'
-                  }`}
-                  onClick={async () => {
-                    if (!user || !currentBag || currentBag.is_primary) return;
-                    try {
-                      await setPrimaryBag(user.id, currentBag.id);
-                      toast.success('This bag is now your primary bag');
-                      // Refresh bags to update all primary statuses
-                      const { data: updatedBags } = await supabase
-                        .from('user_bags')
-                        .select('*')
-                        .eq('user_id', user.id)
-                        .order('is_primary', { ascending: false })
-                        .order('updated_at', { ascending: false });
-                      
-                      if (updatedBags) {
-                        setBags(updatedBags);
-                        const updatedCurrentBag = updatedBags.find(b => b.id === currentBag.id);
-                        if (updatedCurrentBag) {
-                          setCurrentBag(updatedCurrentBag);
+                <Switch
+                  checked={currentBag?.is_primary || false}
+                  onCheckedChange={async (checked) => {
+                    if (!user || !currentBag) return;
+                    
+                    // Only allow turning on, not off (must have at least one primary)
+                    if (checked && !currentBag.is_primary) {
+                      try {
+                        await setPrimaryBag(user.id, currentBag.id);
+                        toast.success('This bag is now your primary bag');
+                        
+                        // Refresh bags to update all primary statuses
+                        const { data: updatedBags } = await supabase
+                          .from('user_bags')
+                          .select('*')
+                          .eq('user_id', user.id)
+                          .order('is_primary', { ascending: false })
+                          .order('updated_at', { ascending: false });
+                        
+                        if (updatedBags) {
+                          setBags(updatedBags);
+                          const updatedCurrentBag = updatedBags.find(b => b.id === currentBag.id);
+                          if (updatedCurrentBag) {
+                            setCurrentBag(updatedCurrentBag);
+                          }
                         }
+                      } catch (error) {
+                        toast.error('Failed to set as primary bag');
                       }
-                    } catch (error) {
-                      toast.error('Failed to set as primary bag');
                     }
                   }}
-                  disabled={currentBag?.is_primary}
-                  title={currentBag?.is_primary ? "This is your primary bag" : "Click to set as primary bag"}
-                >
-                  <Star 
-                    className={`w-6 h-6 transition-all ${
-                      currentBag?.is_primary 
-                        ? 'fill-primary text-primary' 
-                        : 'text-white/50 hover:text-white hover:fill-white/20'
-                    }`} 
-                  />
-                </button>
+                  className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-white/20"
+                />
               </div>
             )}
           </div>

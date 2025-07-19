@@ -59,7 +59,7 @@ const EquipmentTile: FC<EquipmentTileProps> = ({
         <img
           src={imageUrl}
           alt={`${equipment.brand} ${equipment.model}`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           loading="lazy"
           onError={(e) => {
             e.currentTarget.style.display = 'none';

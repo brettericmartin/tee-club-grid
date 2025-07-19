@@ -228,6 +228,7 @@ export async function toggleEquipmentSave(userId: string, equipmentId: string) {
 
     if (existing) {
       // Unsave
+      console.log('Removing save for equipment:', equipmentId);
       const { error } = await supabase
         .from('equipment_saves')
         .delete()
@@ -237,9 +238,11 @@ export async function toggleEquipmentSave(userId: string, equipmentId: string) {
         console.error('Error removing save:', error);
         throw new Error(`Failed to remove from saved: ${error.message}`);
       }
+      console.log('Successfully removed save');
       return false; // unsaved
     } else {
       // Save
+      console.log('Creating save for equipment:', equipmentId);
       const { error } = await supabase
         .from('equipment_saves')
         .insert({
@@ -323,6 +326,8 @@ export async function getUserWishlist(userId: string) {
 
 // Get user's saved equipment
 export async function getUserSavedEquipment(userId: string) {
+  console.log('getUserSavedEquipment called for user:', userId);
+  
   const { data, error } = await supabase
     .from('equipment_saves')
     .select(`
@@ -339,7 +344,35 @@ export async function getUserSavedEquipment(userId: string) {
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
+  console.log('getUserSavedEquipment raw data:', data);
+  console.log('getUserSavedEquipment error:', error);
+  
   if (error) throw error;
+  
+  return data?.map(item => {
+    if (!item.equipment) return null;
+    
+    // Get most liked photo for saved equipment too
+    const sortedPhotos = item.equipment?.equipment_photos?.sort((a, b) => 
+      (b.likes_count || 0) - (a.likes_count || 0)
+    );
+    const primaryPhoto = sortedPhotos?.[0]?.photo_url || 
+                        item.equipment?.equipment_photos?.find(p => p.is_primary)?.photo_url || 
+                        item.equipment?.image_url;
+    
+    return {
+      ...item.equipment,
+      primaryPhoto,
+      most_liked_photo: sortedPhotos?.[0]?.photo_url,
+      created_at: item.created_at // Keep the save date
+    };
+  }).filter(Boolean);
+  
+  console.log('getUserSavedEquipment returning:', data?.map(item => ({
+    id: item.equipment?.id,
+    brand: item.equipment?.brand,
+    model: item.equipment?.model
+  })));
   
   return data?.map(item => {
     if (!item.equipment) return null;

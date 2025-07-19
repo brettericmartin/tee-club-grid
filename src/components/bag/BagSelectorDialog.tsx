@@ -1,4 +1,4 @@
-import { Plus, Briefcase, Trophy, Calendar, Star, Settings } from 'lucide-react';
+import { Plus, Briefcase, Trophy, Calendar, Settings } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -8,10 +8,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
 import { formatDistanceToNow } from 'date-fns';
 import { setPrimaryBag } from '@/services/bags';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface Bag {
@@ -35,12 +36,38 @@ interface BagSelectorDialogProps {
 export function BagSelectorDialog({
   isOpen,
   onClose,
-  bags,
+  bags: propBags,
   onSelectBag,
   onCreateNew,
   onBagsUpdate,
 }: BagSelectorDialogProps) {
   const [updatingPrimary, setUpdatingPrimary] = useState<string | null>(null);
+  const [bags, setBags] = useState<Bag[]>(propBags);
+  
+  // Update local state when props change
+  useEffect(() => {
+    setBags(propBags);
+  }, [propBags]);
+  
+  // Refresh bags when dialog opens to ensure latest state
+  useEffect(() => {
+    if (isOpen && propBags.length > 0 && propBags[0].user_id) {
+      const refreshBags = async () => {
+        const { data: freshBags } = await supabase
+          .from('user_bags')
+          .select('*')
+          .eq('user_id', propBags[0].user_id)
+          .order('is_primary', { ascending: false })
+          .order('updated_at', { ascending: false });
+          
+        if (freshBags) {
+          setBags(freshBags);
+        }
+      };
+      
+      refreshBags();
+    }
+  }, [isOpen]);
 
   const handleSelectBag = (bagId: string) => {
     onSelectBag(bagId);
@@ -52,16 +79,37 @@ export function BagSelectorDialog({
     if (!bag.user_id || bag.is_primary) return;
 
     setUpdatingPrimary(bag.id);
+    
+    // Optimistic update - immediately update UI
+    const optimisticBags = bags.map(b => ({
+      ...b,
+      is_primary: b.id === bag.id
+    }));
+    setBags(optimisticBags);
+    
     try {
-      // setPrimaryBag will handle unsetting other bags via database trigger
       await setPrimaryBag(bag.user_id, bag.id);
       toast.success(`${bag.name} is now your primary bag`);
       
-      // Call the update callback instead of reloading the page
+      // Fetch fresh data to ensure UI matches database
+      const { data: updatedBags } = await supabase
+        .from('user_bags')
+        .select('*')
+        .eq('user_id', bag.user_id)
+        .order('is_primary', { ascending: false })
+        .order('updated_at', { ascending: false });
+      
+      if (updatedBags) {
+        setBags(updatedBags);
+      }
+      
+      // Also call parent update if provided
       if (onBagsUpdate) {
         onBagsUpdate();
       }
     } catch (error) {
+      // Revert optimistic update on error
+      setBags(propBags);
       toast.error('Failed to update primary bag');
       console.error('Error setting primary bag:', error);
     } finally {
@@ -119,29 +167,24 @@ export function BagSelectorDialog({
                       className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors group relative"
                       onClick={() => handleSelectBag(bag.id)}
                     >
-                      {/* Primary Star Toggle - Always visible */}
-                      <button
-                        className={`absolute top-2 right-2 p-2 rounded-full transition-colors z-10 ${
-                          bag.is_primary ? 'bg-primary/20' : 'hover:bg-white/10'
-                        }`}
-                        onClick={(e) => {
-                          if (!bag.is_primary) {
-                            handleSetPrimary(e, bag);
-                          } else {
-                            e.stopPropagation();
-                          }
-                        }}
-                        disabled={bag.is_primary || updatingPrimary === bag.id}
-                        title={bag.is_primary ? "This is your primary bag" : "Set as primary bag"}
+                      {/* Primary Bag Toggle Switch */}
+                      <div 
+                        className="absolute top-3 right-3 z-10 flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <Star 
-                          className={`w-5 h-5 transition-all ${
-                            bag.is_primary 
-                              ? 'fill-primary text-primary' 
-                              : 'text-white/50 hover:text-white'
-                          }`} 
+                        <span className="text-xs text-white/50">Primary</span>
+                        <Switch
+                          checked={bag.is_primary || false}
+                          onCheckedChange={async (checked) => {
+                            if (checked && !bag.is_primary) {
+                              await handleSetPrimary(new MouseEvent('click') as any, bag);
+                            }
+                            // Don't allow unchecking if it's the only primary bag
+                          }}
+                          disabled={updatingPrimary === bag.id}
+                          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-white/20"
                         />
-                      </button>
+                      </div>
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
                           {getBagIcon(bag.bag_type)}

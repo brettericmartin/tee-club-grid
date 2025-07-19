@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Upload, Camera, Globe, Crop } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +17,7 @@ import { createEquipmentPhotoFeedPost } from '@/services/feedService';
 import { useFeed } from '@/contexts/FeedContext';
 import { syncUserPhotoToEquipment } from '@/services/equipmentPhotoSync';
 import { ImageCropDialog } from './ImageCropDialog';
+import { getProfile } from '@/services/profileService';
 
 interface UnifiedPhotoUploadDialogProps {
   isOpen: boolean;
@@ -48,31 +49,70 @@ export function UnifiedPhotoUploadDialog({
   const [shareToFeed, setShareToFeed] = useState(true);
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
+  const [userDisplayName, setUserDisplayName] = useState<string>('');
+
+  // Fetch user profile for watermark
+  useEffect(() => {
+    let isMounted = true;
+    
+    if (user && isOpen) {
+      getProfile(user.id).then(profile => {
+        if (isMounted && profile) {
+          setUserDisplayName(profile.display_name || profile.username || user.email?.split('@')[0] || 'User');
+        }
+      }).catch(error => {
+        console.error('Error fetching profile for watermark:', error);
+      });
+    }
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user, isOpen]);
+
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size (50MB limit)
+      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+      if (file.size > maxSize) {
+        toast.error('Image file is too large. Maximum size is 50MB.');
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         const imageSrc = reader.result as string;
         setOriginalImageSrc(imageSrc);
         setImagePreview(imageSrc);
-        // For equipment photos, automatically open crop dialog
-        if (context?.type === 'equipment') {
-          setShowCropDialog(true);
-        } else {
-          // For other contexts, convert to file for direct upload
-          setImageFile(file);
-        }
+        // Set the file for upload (cropping is now optional)
+        setImageFile(file);
+      };
+      reader.onerror = () => {
+        toast.error('Failed to read image file. Please try again.');
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleCropComplete = (croppedImageBlob: Blob) => {
-    // Convert blob to file
-    const croppedFile = new File([croppedImageBlob], 'cropped-image.png', {
-      type: 'image/png',
+    // Clean up previous preview URL if it exists
+    if (imagePreview && imagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    
+    // Convert blob to file with correct JPEG extension
+    const croppedFile = new File([croppedImageBlob], 'cropped-image.jpg', {
+      type: 'image/jpeg',
     });
     
     setImageFile(croppedFile);
@@ -175,6 +215,11 @@ export function UnifiedPhotoUploadDialog({
   };
 
   const handleClose = () => {
+    // Clean up blob URL if it exists
+    if (imagePreview && imagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    
     setCaption(initialCaption);
     setImagePreview(null);
     setImageFile(null);
@@ -252,7 +297,7 @@ export function UnifiedPhotoUploadDialog({
                 <div className="hidden md:block border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-primary/50 hover:bg-white/5 transition-colors cursor-pointer">
                   <Camera className="w-12 h-12 text-white/50 mx-auto mb-4" />
                   <p className="text-white/70">Click to upload a photo</p>
-                  <p className="text-white/50 text-sm mt-1">JPG, PNG up to 10MB</p>
+                  <p className="text-white/50 text-sm mt-1">JPG, PNG up to 50MB</p>
                 </div>
               </label>
             </div>
@@ -261,7 +306,7 @@ export function UnifiedPhotoUploadDialog({
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="w-full rounded-xl object-cover max-h-96"
+                className="w-full rounded-xl object-contain max-h-96"
               />
               <div className="absolute top-2 right-2 flex gap-2">
                 {/* Crop button for equipment photos */}
@@ -279,6 +324,10 @@ export function UnifiedPhotoUploadDialog({
                 {/* Remove button */}
                 <Button
                   onClick={() => {
+                    // Clean up blob URL if it exists
+                    if (imagePreview && imagePreview.startsWith('blob:')) {
+                      URL.revokeObjectURL(imagePreview);
+                    }
                     setImagePreview(null);
                     setImageFile(null);
                     setOriginalImageSrc(null);
@@ -366,6 +415,7 @@ export function UnifiedPhotoUploadDialog({
           imageSrc={originalImageSrc}
           onCropComplete={handleCropComplete}
           aspectRatio={context?.type === 'equipment' ? 4/3 : 1} // Equipment photos use 4:3, others use square
+          userDisplayName={userDisplayName}
         />
       )}
     </Dialog>

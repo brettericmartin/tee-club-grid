@@ -152,8 +152,6 @@ const Navigation = () => {
             {/* Right Side - Saved/Following + Search & Profile */}
             <div className="flex items-center gap-6">
               <div className="hidden md:flex items-center gap-6">
-                <NavLink to="/saved">Saved</NavLink>
-                <NavLink to="/following">Following</NavLink>
               </div>
               
               <div className="flex items-center">

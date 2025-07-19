@@ -16,13 +16,15 @@ interface ImageCropDialogProps {
   imageSrc: string;
   onCropComplete: (croppedImageBlob: Blob) => void;
   aspectRatio?: number; // 1 for square, 16/9 for landscape, etc.
+  userDisplayName?: string; // For watermark
 }
 
-// Helper function to create a canvas and crop the image
+// Helper function to create a canvas and crop the image with resizing and watermark
 function getCroppedImg(
   image: HTMLImageElement,
   crop: PixelCrop,
-  fileName: string = 'cropped-image.png'
+  userDisplayName?: string,
+  fileName: string = 'cropped-image.jpg'
 ): Promise<Blob> {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -34,27 +36,61 @@ function getCroppedImg(
   const scaleX = image.naturalWidth / image.width;
   const scaleY = image.naturalHeight / image.height;
 
-  canvas.width = crop.width;
-  canvas.height = crop.height;
+  // Calculate crop dimensions in natural resolution
+  const cropWidth = crop.width * scaleX;
+  const cropHeight = crop.height * scaleY;
 
+  // Use original dimensions without downsizing
+  canvas.width = cropWidth;
+  canvas.height = cropHeight;
+
+  // Enable image smoothing for better quality when resizing
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  // Draw the cropped and resized image
   ctx.drawImage(
     image,
     crop.x * scaleX,
     crop.y * scaleY,
-    crop.width * scaleX,
-    crop.height * scaleY,
+    cropWidth,
+    cropHeight,
     0,
     0,
-    crop.width,
-    crop.height
+    cropWidth,
+    cropHeight
   );
 
-  return new Promise((resolve) => {
+  // Add watermark if display name is provided
+  if (userDisplayName) {
+    // Calculate font size based on image dimensions
+    const fontSize = Math.max(14, Math.min(24, cropWidth / 40));
+    const padding = fontSize * 0.8;
+
+    // Set up text styling
+    ctx.font = `${fontSize}px Inter, system-ui, -apple-system, sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+
+    // Add shadow for better readability
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+
+    // Draw watermark text
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fillText(`© ${userDisplayName}`, cropWidth - padding, cropHeight - padding);
+  }
+
+  return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) {
         resolve(blob);
+      } else {
+        reject(new Error('Failed to create image blob'));
       }
-    }, 'image/png', 0.9);
+    }, 'image/jpeg', 0.95);
   });
 }
 
@@ -63,7 +99,8 @@ export function ImageCropDialog({
   onClose,
   imageSrc,
   onCropComplete,
-  aspectRatio = 1 // Default to square
+  aspectRatio = 1, // Default to square
+  userDisplayName
 }: ImageCropDialogProps) {
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
@@ -97,7 +134,8 @@ export function ImageCropDialog({
       const croppedImageBlob = await getCroppedImg(
         imgRef.current,
         completedCrop,
-        'equipment-photo.png'
+        userDisplayName,
+        'equipment-photo.jpg'
       );
       
       onCropComplete(croppedImageBlob);

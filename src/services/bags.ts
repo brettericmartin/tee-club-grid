@@ -284,15 +284,36 @@ export async function hasUserLikedBag(userId: string, bagId: string) {
 
 // Set a bag as the primary bag for a user
 export async function setPrimaryBag(userId: string, bagId: string) {
-  // The database trigger will handle unsetting other bags
-  const { data, error } = await supabase
+  // Step 1: First unset all bags as primary for this user
+  const { error: unsetError } = await supabase
+    .from('user_bags')
+    .update({ is_primary: false })
+    .eq('user_id', userId);
+  
+  if (unsetError) {
+    console.error('Error unsetting primary bags:', unsetError);
+    throw unsetError;
+  }
+  
+  // Step 2: Set the selected bag as primary
+  const { error: setError } = await supabase
     .from('user_bags')
     .update({ is_primary: true })
     .eq('id', bagId)
-    .eq('user_id', userId)
-    .select()
-    .single();
+    .eq('user_id', userId);
 
+  if (setError) {
+    console.error('Error setting primary bag:', setError);
+    throw setError;
+  }
+  
+  // Step 3: Return the updated bag
+  const { data, error } = await supabase
+    .from('user_bags')
+    .select()
+    .eq('id', bagId)
+    .single();
+    
   if (error) throw error;
   return data;
 }

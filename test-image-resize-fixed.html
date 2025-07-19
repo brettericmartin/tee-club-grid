@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Image Resize and Watermark - Fixed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-box {
+            border: 2px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .stats {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        button {
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #059669;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+        .error {
+            color: #dc2626;
+            margin: 10px 0;
+        }
+        .memory-info {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Image Resize and Watermark - Fixed Version</h1>
+    <p>This test includes memory leak fixes and proper error handling.</p>
+    
+    <div class="memory-info" id="memoryInfo">
+        Memory info will be displayed here after processing...
+    </div>
+    
+    <input type="file" id="fileInput" accept="image/*">
+    <button onclick="processImage()">Process Image</button>
+    
+    <div id="errorMessage" class="error"></div>
+    
+    <div class="container">
+        <div class="image-box">
+            <h3>Original Image</h3>
+            <img id="originalImage" alt="Original">
+            <div class="stats" id="originalStats"></div>
+        </div>
+        <div class="image-box">
+            <h3>Processed Image</h3>
+            <img id="processedImage" alt="Processed">
+            <div class="stats" id="processedStats"></div>
+        </div>
+    </div>
+
+    <script>
+        let previousBlobUrl = null;
+        let processCount = 0;
+
+        function updateMemoryInfo() {
+            if (performance.memory) {
+                const info = performance.memory;
+                const used = (info.usedJSHeapSize / 1048576).toFixed(2);
+                const total = (info.totalJSHeapSize / 1048576).toFixed(2);
+                const limit = (info.jsHeapSizeLimit / 1048576).toFixed(2);
+                document.getElementById('memoryInfo').innerHTML = 
+                    `Memory: ${used}MB / ${total}MB (Limit: ${limit}MB) | Images processed: ${processCount}`;
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            setTimeout(() => {
+                document.getElementById('errorMessage').textContent = '';
+            }, 5000);
+        }
+
+        function processImage() {
+            const input = document.getElementById('fileInput');
+            if (!input.files || !input.files[0]) {
+                showError('Please select an image first');
+                return;
+            }
+
+            const file = input.files[0];
+            
+            // Check file size (50MB limit)
+            const maxSize = 50 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showError('Image file is too large. Maximum size is 50MB.');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onerror = function() {
+                showError('Failed to read image file. Please try again.');
+            };
+
+            reader.onload = function(e) {
+                const img = new Image();
+                
+                img.onerror = function() {
+                    showError('Failed to load image. The file may be corrupted.');
+                };
+                
+                img.onload = function() {
+                    // Show original image
+                    document.getElementById('originalImage').src = e.target.result;
+                    document.getElementById('originalStats').textContent = 
+                        `Dimensions: ${img.width} x ${img.height} | Size: ${(file.size / 1024).toFixed(1)}KB`;
+
+                    try {
+                        // Process image
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        if (!ctx) {
+                            showError('Failed to create canvas context');
+                            return;
+                        }
+
+                        // Calculate new dimensions (max 2048px)
+                        const maxDimension = 2048;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxDimension || height > maxDimension) {
+                            const ratio = Math.min(maxDimension / width, maxDimension / height);
+                            width = Math.round(width * ratio);
+                            height = Math.round(height * ratio);
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        // Enable high quality image smoothing
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+
+                        // Draw resized image
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Add watermark
+                        const userDisplayName = 'Test User';
+                        const fontSize = Math.max(14, Math.min(24, width / 40));
+                        const padding = fontSize * 0.8;
+
+                        ctx.font = `${fontSize}px Arial, sans-serif`;
+                        ctx.textAlign = 'right';
+                        ctx.textBaseline = 'bottom';
+
+                        // Add shadow for better readability
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                        ctx.shadowBlur = 4;
+                        ctx.shadowOffsetX = 1;
+                        ctx.shadowOffsetY = 1;
+
+                        // Draw watermark text
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                        ctx.fillText(`© ${userDisplayName}`, width - padding, height - padding);
+
+                        // Convert to JPEG and display
+                        canvas.toBlob(function(blob) {
+                            if (blob) {
+                                // Clean up previous blob URL to prevent memory leak
+                                if (previousBlobUrl) {
+                                    URL.revokeObjectURL(previousBlobUrl);
+                                }
+                                
+                                const processedUrl = URL.createObjectURL(blob);
+                                previousBlobUrl = processedUrl;
+                                
+                                document.getElementById('processedImage').src = processedUrl;
+                                document.getElementById('processedStats').textContent = 
+                                    `Dimensions: ${width} x ${height} | Size: ${(blob.size / 1024).toFixed(1)}KB | Format: JPEG`;
+                                
+                                processCount++;
+                                updateMemoryInfo();
+                            } else {
+                                showError('Failed to create image blob');
+                            }
+                        }, 'image/jpeg', 0.85);
+                        
+                    } catch (error) {
+                        showError('Error processing image: ' + error.message);
+                        console.error('Processing error:', error);
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Update memory info on page load
+        updateMemoryInfo();
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            if (previousBlobUrl) {
+                URL.revokeObjectURL(previousBlobUrl);
+            }
+        });
+    </script>
+</body>
+</html>
