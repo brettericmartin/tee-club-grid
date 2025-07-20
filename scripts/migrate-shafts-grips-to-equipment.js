@@ -1,180 +1,183 @@
-import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { createClient } from '@supabase/supabase-js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: join(__dirname, '../.env.local') });
+dotenv.config({ path: '.env.local' });
 
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Missing Supabase URL or service key in .env.local');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 async function migrateShaftsAndGrips() {
-  console.log('🔧 Starting shaft and grip migration to equipment items...\n');
+  console.log('Starting migration of shafts and grips to equipment table...\n');
 
   try {
-    // 1. Get unique shafts from the shafts table
-    console.log('📊 Fetching unique shafts...');
-    const { data: shafts, error: shaftError } = await supabase
+    // Migrate shafts
+    console.log('--- Migrating Shafts ---');
+    const { data: shafts, error: shaftsError } = await supabase
       .from('shafts')
-      .select('brand, model, category')
-      .order('brand', { ascending: true });
+      .select('*');
 
-    if (shaftError) {
-      console.error('Error fetching shafts:', shaftError);
+    if (shaftsError) {
+      console.error('Error fetching shafts:', shaftsError);
       return;
     }
 
-    // Group shafts by brand and model to get unique combinations
-    const uniqueShafts = {};
-    shafts?.forEach(shaft => {
-      const key = `${shaft.brand}|${shaft.model}`;
-      if (!uniqueShafts[key]) {
-        uniqueShafts[key] = {
-          brand: shaft.brand,
-          model: shaft.model,
-          category: 'shaft'
-        };
+    console.log(`Found ${shafts.length} shafts to migrate`);
+
+    for (const shaft of shafts) {
+      // Check if this shaft already exists in equipment table
+      const { data: existing } = await supabase
+        .from('equipment')
+        .select('id')
+        .eq('brand', shaft.brand)
+        .eq('model', shaft.model)
+        .eq('category', 'shaft')
+        .single();
+
+      if (existing) {
+        console.log(`Shaft already exists: ${shaft.brand} ${shaft.model}`);
+        continue;
       }
-    });
 
-    console.log(`Found ${Object.keys(uniqueShafts).length} unique shafts`);
-
-    // 2. Get unique grips from the grips table
-    console.log('\n📊 Fetching unique grips...');
-    const { data: grips, error: gripError } = await supabase
-      .from('grips')
-      .select('brand, model')
-      .order('brand', { ascending: true });
-
-    if (gripError) {
-      console.error('Error fetching grips:', gripError);
-      return;
-    }
-
-    // Group grips by brand and model to get unique combinations
-    const uniqueGrips = {};
-    grips?.forEach(grip => {
-      const key = `${grip.brand}|${grip.model}`;
-      if (!uniqueGrips[key]) {
-        uniqueGrips[key] = {
-          brand: grip.brand,
-          model: grip.model,
-          category: 'grip'
-        };
-      }
-    });
-
-    console.log(`Found ${Object.keys(uniqueGrips).length} unique grips`);
-
-    // 3. Check which shafts already exist as equipment
-    console.log('\n🔍 Checking for existing shaft equipment...');
-    const { data: existingShaftEquipment } = await supabase
-      .from('equipment')
-      .select('brand, model')
-      .eq('category', 'shaft');
-
-    const existingShaftKeys = new Set(
-      existingShaftEquipment?.map(e => `${e.brand}|${e.model}`) || []
-    );
-
-    // 4. Check which grips already exist as equipment
-    console.log('🔍 Checking for existing grip equipment...');
-    const { data: existingGripEquipment } = await supabase
-      .from('equipment')
-      .select('brand, model')
-      .eq('category', 'grip');
-
-    const existingGripKeys = new Set(
-      existingGripEquipment?.map(e => `${e.brand}|${e.model}`) || []
-    );
-
-    // 5. Prepare new shaft equipment to insert
-    const newShafts = Object.values(uniqueShafts)
-      .filter(shaft => !existingShaftKeys.has(`${shaft.brand}|${shaft.model}`))
-      .map(shaft => ({
+      // Create equipment entry for shaft
+      const equipmentData = {
         brand: shaft.brand,
         model: shaft.model,
         category: 'shaft',
-        msrp: 0, // Will need to be updated manually
-        created_at: new Date().toISOString()
-      }));
+        msrp: shaft.price || 0,
+        specs: {
+          flex: shaft.flex,
+          weight: shaft.weight_grams,
+          launch_profile: shaft.launch_profile,
+          spin_profile: shaft.spin_profile,
+          torque: shaft.torque,
+          length: shaft.length,
+          tip_diameter: shaft.tip_diameter,
+          butt_diameter: shaft.butt_diameter,
+          is_stock: shaft.is_stock
+        },
+        added_by_user_id: shaft.added_by_user_id,
+        verified: shaft.verified || false,
+        popularity_score: shaft.times_used || 0
+      };
 
-    // 6. Prepare new grip equipment to insert
-    const newGrips = Object.values(uniqueGrips)
-      .filter(grip => !existingGripKeys.has(`${grip.brand}|${grip.model}`))
-      .map(grip => ({
+      const { data: newEquipment, error: insertError } = await supabase
+        .from('equipment')
+        .insert(equipmentData)
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error(`Error inserting shaft ${shaft.brand} ${shaft.model}:`, insertError);
+      } else {
+        console.log(`✅ Migrated shaft: ${shaft.brand} ${shaft.model} (ID: ${newEquipment.id})`);
+        
+        // Update shaft record with equipment_id reference
+        await supabase
+          .from('shafts')
+          .update({ equipment_id: newEquipment.id })
+          .eq('id', shaft.id);
+      }
+    }
+
+    // Migrate grips
+    console.log('\n--- Migrating Grips ---');
+    const { data: grips, error: gripsError } = await supabase
+      .from('grips')
+      .select('*');
+
+    if (gripsError) {
+      console.error('Error fetching grips:', gripsError);
+      return;
+    }
+
+    console.log(`Found ${grips.length} grips to migrate`);
+
+    for (const grip of grips) {
+      // Check if this grip already exists in equipment table
+      const { data: existing } = await supabase
+        .from('equipment')
+        .select('id')
+        .eq('brand', grip.brand)
+        .eq('model', grip.model)
+        .eq('category', 'grip')
+        .single();
+
+      if (existing) {
+        console.log(`Grip already exists: ${grip.brand} ${grip.model}`);
+        continue;
+      }
+
+      // Create equipment entry for grip
+      const equipmentData = {
         brand: grip.brand,
         model: grip.model,
         category: 'grip',
-        msrp: 0, // Will need to be updated manually
-        created_at: new Date().toISOString()
-      }));
+        msrp: grip.price || 0,
+        specs: {
+          size: grip.size,
+          weight: grip.weight_grams,
+          material: grip.material,
+          texture: grip.texture,
+          core_size: grip.core_size,
+          is_stock: grip.is_stock
+        },
+        added_by_user_id: grip.added_by_user_id,
+        verified: grip.verified || false,
+        popularity_score: grip.times_used || 0
+      };
 
-    // 7. Insert new shafts
-    if (newShafts.length > 0) {
-      console.log(`\n✅ Inserting ${newShafts.length} new shaft equipment items...`);
-      const { error: insertShaftError } = await supabase
+      const { data: newEquipment, error: insertError } = await supabase
         .from('equipment')
-        .insert(newShafts);
+        .insert(equipmentData)
+        .select()
+        .single();
 
-      if (insertShaftError) {
-        console.error('Error inserting shafts:', insertShaftError);
+      if (insertError) {
+        console.error(`Error inserting grip ${grip.brand} ${grip.model}:`, insertError);
       } else {
-        console.log('Shafts inserted successfully!');
-        console.log('Sample shafts added:');
-        newShafts.slice(0, 5).forEach(s => {
-          console.log(`  - ${s.brand} ${s.model}`);
-        });
-        if (newShafts.length > 5) {
-          console.log(`  ... and ${newShafts.length - 5} more`);
-        }
+        console.log(`✅ Migrated grip: ${grip.brand} ${grip.model} (ID: ${newEquipment.id})`);
+        
+        // Update grip record with equipment_id reference
+        await supabase
+          .from('grips')
+          .update({ equipment_id: newEquipment.id })
+          .eq('id', grip.id);
       }
-    } else {
-      console.log('\n✅ All shafts already exist as equipment items');
     }
 
-    // 8. Insert new grips
-    if (newGrips.length > 0) {
-      console.log(`\n✅ Inserting ${newGrips.length} new grip equipment items...`);
-      const { error: insertGripError } = await supabase
-        .from('equipment')
-        .insert(newGrips);
-
-      if (insertGripError) {
-        console.error('Error inserting grips:', insertGripError);
-      } else {
-        console.log('Grips inserted successfully!');
-        console.log('Sample grips added:');
-        newGrips.slice(0, 5).forEach(g => {
-          console.log(`  - ${g.brand} ${g.model}`);
-        });
-        if (newGrips.length > 5) {
-          console.log(`  ... and ${newGrips.length - 5} more`);
-        }
-      }
-    } else {
-      console.log('\n✅ All grips already exist as equipment items');
-    }
-
-    // 9. Summary
-    console.log('\n📊 Migration Summary:');
-    console.log(`Total unique shafts found: ${Object.keys(uniqueShafts).length}`);
-    console.log(`New shaft equipment created: ${newShafts.length}`);
-    console.log(`Total unique grips found: ${Object.keys(uniqueGrips).length}`);
-    console.log(`New grip equipment created: ${newGrips.length}`);
+    console.log('\n--- Migration Complete ---');
     
-    console.log('\n💡 Next Steps:');
-    console.log('1. Update MSRP values for the new equipment items');
-    console.log('2. Upload photos for shafts and grips using the equipment photo upload feature');
-    console.log('3. The existing shaft/grip tables remain unchanged for club customization');
+    // Verify migration
+    const { count: shaftCount } = await supabase
+      .from('equipment')
+      .select('*', { count: 'exact', head: true })
+      .eq('category', 'shaft');
+      
+    const { count: gripCount } = await supabase
+      .from('equipment')
+      .select('*', { count: 'exact', head: true })
+      .eq('category', 'grip');
+      
+    console.log(`\nTotal shafts in equipment table: ${shaftCount}`);
+    console.log(`Total grips in equipment table: ${gripCount}`);
 
   } catch (error) {
-    console.error('Migration error:', error);
+    console.error('Migration failed:', error);
+    process.exit(1);
   }
 }
 
-// Run the migration
-migrateShaftsAndGrips().catch(console.error);
+// Run migration
+migrateShaftsAndGrips();

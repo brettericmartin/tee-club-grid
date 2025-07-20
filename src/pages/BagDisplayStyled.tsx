@@ -85,7 +85,10 @@ const BagDisplayStyled = () => {
           profiles (*),
           bag_equipment (
             *,
-            equipment (*)
+            equipment (*),
+            shaft:equipment!shaft_id(*),
+            grip:equipment!grip_id(*),
+            loft_option:loft_options(*)
           )
         `)
         .eq('id', bagId)

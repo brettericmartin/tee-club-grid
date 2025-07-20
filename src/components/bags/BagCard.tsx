@@ -291,7 +291,7 @@ const BagCardComponent = ({
             const imageUrl = item ? getEquipmentImage(item) : null;
             
             return (
-              <div key={index} className="relative group/item">
+              <div key={index} className="relative group/item aspect-square">
                 {item ? (
                   <>
                     <EquipmentTile
@@ -313,14 +313,14 @@ const BagCardComponent = ({
                     )}
                     
                     {/* Hover overlay with equipment name */}
-                    <div className="absolute inset-0 bg-black/80 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center p-1 rounded-xl z-20 pointer-events-none">
+                    <div className="absolute inset-0 bg-black/80 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center p-1 rounded-lg z-20 pointer-events-none">
                       <p className="text-white text-xs text-center line-clamp-2">
                         {item.equipment?.brand} {item.equipment?.model}
                       </p>
                     </div>
                   </>
                 ) : (
-                  <div className="aspect-square rounded-xl bg-white/5" />
+                  <div className="aspect-square rounded-lg bg-white/5" />
                 )}
               </div>
             );

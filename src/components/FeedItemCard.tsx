@@ -76,8 +76,8 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
                   is_primary
                 )
               ),
-              shaft:shafts (*),
-              grip:grips (*),
+              shaft:equipment!shaft_id (*),
+              grip:equipment!grip_id (*),
               loft_option:loft_options (*)
             )
           `)

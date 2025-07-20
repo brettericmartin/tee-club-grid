@@ -341,35 +341,42 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
 
     setLoading(true);
     try {
-      // Load shafts if applicable
+      // Load shafts from equipment table
       if (selectedCategory.hasShaft) {
         const { data: shaftData } = await supabase
-          .from('shafts')
+          .from('equipment')
           .select('*')
-          .eq('category', selectedCategory.value)
-          .order('is_stock', { ascending: false })
-          .order('brand');
+          .eq('category', 'shaft')
+          .order('brand')
+          .order('model');
         
         if (shaftData) {
           setShafts(shaftData);
-          // Auto-select stock shaft
-          const stockShaft = shaftData.find(s => s.is_stock);
+          // Auto-select stock shaft if available
+          const stockShaft = shaftData.find(s => 
+            s.brand.toLowerCase() === 'stock' || 
+            (s.specs as any)?.is_stock === true
+          );
           if (stockShaft) setSelectedShaft(stockShaft);
         }
       }
 
-      // Load grips if applicable
+      // Load grips from equipment table
       if (selectedCategory.hasGrip) {
         const { data: gripData } = await supabase
-          .from('grips')
+          .from('equipment')
           .select('*')
-          .order('is_stock', { ascending: false })
-          .order('brand');
+          .eq('category', 'grip')
+          .order('brand')
+          .order('model');
         
         if (gripData) {
           setGrips(gripData);
-          // Auto-select stock grip
-          const stockGrip = gripData.find(g => g.is_stock);
+          // Auto-select stock grip if available
+          const stockGrip = gripData.find(g => 
+            g.brand.toLowerCase() === 'stock' || 
+            (g.specs as any)?.is_stock === true
+          );
           if (stockGrip) setSelectedGrip(stockGrip);
         }
       }
@@ -554,15 +561,33 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
 
   return (
     <>
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      // Only close if explicitly closing (not clicking outside)
+      if (!open) {
+        // Don't close on outside click - require explicit close
+        return;
+      }
+    }}>
       <DialogContent 
         className="glass-card border-white/20 text-white max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className="text-2xl">{getStepTitle()}</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-2xl">{getStepTitle()}</DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="text-white hover:bg-white/10"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
 
         {/* Progress breadcrumb - mobile-friendly navigation */}

@@ -20,8 +20,8 @@ import type { Database } from '@/lib/supabase';
 
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
   equipment: Database['public']['Tables']['equipment']['Row'];
-  shaft?: Database['public']['Tables']['shafts']['Row'];
-  grip?: Database['public']['Tables']['grips']['Row'];
+  shaft?: Database['public']['Tables']['equipment']['Row'];
+  grip?: Database['public']['Tables']['equipment']['Row'];
   loft_option?: Database['public']['Tables']['loft_options']['Row'];
 };
 
@@ -277,8 +277,8 @@ export function EquipmentShowcaseModal({
                           {bagEquipment.shaft.brand} {bagEquipment.shaft.model}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {bagEquipment.shaft.flex} flex
-                          {bagEquipment.shaft.weight && ` • ${bagEquipment.shaft.weight}g`}
+                          {bagEquipment.shaft.specs?.flex && `${bagEquipment.shaft.specs.flex} flex`}
+                          {bagEquipment.shaft.specs?.weight && ` • ${bagEquipment.shaft.specs.weight}g`}
                         </p>
                       </div>
                     </div>
@@ -301,8 +301,8 @@ export function EquipmentShowcaseModal({
                           {bagEquipment.grip.brand} {bagEquipment.grip.model}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {bagEquipment.grip.size} size
-                          {bagEquipment.grip.color && ` • ${bagEquipment.grip.color}`}
+                          {bagEquipment.grip.specs?.size && `${bagEquipment.grip.specs.size} size`}
+                          {bagEquipment.grip.specs?.color && ` • ${bagEquipment.grip.specs.color}`}
                         </p>
                       </div>
                     </div>

@@ -70,7 +70,7 @@ export default function ForumSearch({ open, onOpenChange }: ForumSearchProps) {
           .select(`
             *,
             category:forum_categories(id, name, slug, icon),
-            user:profiles(username, avatar_url)
+            user:profiles(username, display_name, avatar_url)
           `)
           .ilike('title', `%${searchQuery}%`)
           .limit(10);
@@ -90,7 +90,7 @@ export default function ForumSearch({ open, onOpenChange }: ForumSearchProps) {
               id, title, slug,
               category:forum_categories(id, name, slug, icon)
             ),
-            user:profiles(username, avatar_url)
+            user:profiles(username, display_name, avatar_url)
           `)
           .ilike('content', `%${searchQuery}%`)
           .limit(10);
@@ -231,7 +231,7 @@ export default function ForumSearch({ open, onOpenChange }: ForumSearchProps) {
                             </span>
                             <span className="flex items-center gap-1">
                               <User className="h-3 w-3" />
-                              {thread.user.username}
+                              {thread.user.display_name || thread.user.username}
                             </span>
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
@@ -278,7 +278,7 @@ export default function ForumSearch({ open, onOpenChange }: ForumSearchProps) {
                             </span>
                             <span className="flex items-center gap-1">
                               <User className="h-3 w-3" />
-                              {post.user.username}
+                              {post.user.display_name || post.user.username}
                             </span>
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />

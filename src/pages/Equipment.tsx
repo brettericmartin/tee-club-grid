@@ -329,7 +329,7 @@ const Equipment = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#111111]">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Show info if no equipment loaded - removed since we have data */}
         
@@ -341,7 +341,7 @@ const Equipment = () => {
             <select 
               value={category} 
               onChange={(e) => setCategory(e.target.value)}
-              className="px-4 py-2 border border-border rounded-lg bg-background"
+              className="px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
             >
               <option value="all">All Equipment</option>
               {categoryOptions.map(cat => (
@@ -353,7 +353,7 @@ const Equipment = () => {
             <select 
               value={sortBy} 
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-4 py-2 border border-border rounded-lg bg-background"
+              className="px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
             >
               <option value="popular">Most Liked</option>
               <option value="newest">Newest</option>
@@ -365,7 +365,7 @@ const Equipment = () => {
             <select 
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
-              className="px-4 py-2 border border-border rounded-lg bg-background"
+              className="px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
             >
               <option value="all">All Brands</option>
               {brands.map(b => (
@@ -411,7 +411,7 @@ const Equipment = () => {
               variant="outline"
               size="sm"
               onClick={() => setShowSubmitModal(true)}
-              className="ml-2"
+              className="ml-2 bg-[#10B981] text-white border-[#10B981] hover:bg-[#0ea674] hover:border-[#0ea674]"
             >
               <Plus className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Submit Equipment</span>

@@ -23,6 +23,7 @@ interface ThreadCardProps {
     user: {
       id: string;
       username: string;
+      display_name?: string;
       avatar_url: string;
     };
     post_count: number;
@@ -30,6 +31,7 @@ interface ThreadCardProps {
       created_at: string;
       user: {
         username: string;
+        display_name?: string;
         avatar_url: string;
       };
     };
@@ -73,7 +75,7 @@ export default function ThreadCard({ thread, onClick }: ThreadCardProps) {
             <span className="flex items-center gap-1">
               {thread.category.icon} {thread.category.name}
             </span>
-            <span>by {thread.user.username}</span>
+            <span>by {thread.user.display_name || thread.user.username}</span>
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {formatDistanceToNow(new Date(thread.created_at), { addSuffix: true })}
@@ -126,7 +128,7 @@ export default function ThreadCard({ thread, onClick }: ThreadCardProps) {
                 {lastActivityUser.username[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <span className="font-medium text-gray-300">{lastActivityUser.username}</span>
+            <span className="font-medium text-gray-300">{lastActivityUser.display_name || lastActivityUser.username}</span>
           </div>
           <p className="text-xs mt-1">
             {formatDistanceToNow(new Date(lastActivity), { addSuffix: true })}

@@ -11,8 +11,8 @@ import type { Database } from '@/lib/supabase';
 import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from '@/lib/equipment-categories';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
-type Shaft = Database['public']['Tables']['shafts']['Row'];
-type Grip = Database['public']['Tables']['grips']['Row'];
+type Shaft = Database['public']['Tables']['equipment']['Row'];
+type Grip = Database['public']['Tables']['equipment']['Row'];
 type LoftOption = Database['public']['Tables']['loft_options']['Row'];
 
 interface EquipmentSelectorProps {
@@ -206,17 +206,16 @@ export function EquipmentSelector({ isOpen, onClose, onSelectEquipment }: Equipm
       const compatibleCategories = shaftCompatibility[category] || [category];
       
       const { data } = await supabase
-        .from('shafts')
+        .from('equipment')
         .select('*')
-        .in('category', compatibleCategories)
-        .order('is_stock', { ascending: false })
-        .order('brand', { ascending: true });
+        .eq('category', 'shaft')
+        .order('brand', { ascending: true })
+        .order('model', { ascending: true });
 
       if (data) {
         setShaftResults(data);
-        // Auto-select stock shaft
-        const stockShaft = data.find(s => s.is_stock);
-        if (stockShaft) setSelectedShaft(stockShaft);
+        // Auto-select first shaft if available
+        if (data.length > 0) setSelectedShaft(data[0]);
       }
     } catch (err) {
       console.error('Error loading shafts:', err);
@@ -233,16 +232,16 @@ export function EquipmentSelector({ isOpen, onClose, onSelectEquipment }: Equipm
   const loadGrips = async () => {
     try {
       const { data } = await supabase
-        .from('grips')
+        .from('equipment')
         .select('*')
-        .order('is_stock', { ascending: false })
-        .order('brand', { ascending: true });
+        .eq('category', 'grip')
+        .order('brand', { ascending: true })
+        .order('model', { ascending: true });
 
       if (data) {
         setGripResults(data);
-        // Auto-select stock grip
-        const stockGrip = data.find(g => g.is_stock);
-        if (stockGrip) setSelectedGrip(stockGrip);
+        // Auto-select first grip if available
+        if (data.length > 0) setSelectedGrip(data[0]);
       }
     } catch (err) {
       console.error('Error loading grips:', err);
@@ -465,11 +464,11 @@ export function EquipmentSelector({ isOpen, onClose, onSelectEquipment }: Equipm
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-medium">
-                        {shaft.brand} {shaft.model} - {shaft.flex}
+                        {shaft.brand} {shaft.model} {shaft.specs?.flex && `- ${shaft.specs.flex}`}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {shaft.weight_grams}g • {shaft.launch_profile}/{shaft.spin_profile}
-                        {shaft.is_stock && ' • Stock Option'}
+                        {shaft.specs?.weight && `${shaft.specs.weight}g`}
+                        {shaft.specs?.launch_profile && ` • ${shaft.specs.launch_profile}/${shaft.specs.spin_profile || 'Med'}`}
                       </div>
                     </div>
                     {selectedShaft?.id === shaft.id && <Check className="w-4 h-4 text-primary" />}
@@ -511,11 +510,11 @@ export function EquipmentSelector({ isOpen, onClose, onSelectEquipment }: Equipm
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-medium">
-                        {grip.brand} {grip.model} - {grip.size}
+                        {grip.brand} {grip.model} {grip.specs?.size && `- ${grip.specs.size}`}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {grip.material} • {grip.weight_grams}g
-                        {grip.is_stock && ' • Stock Option'}
+                        {grip.specs?.material && `${grip.specs.material}`}
+                        {grip.specs?.weight && ` • ${grip.specs.weight}g`}
                       </div>
                     </div>
                     {selectedGrip?.id === grip.id && <Check className="w-4 h-4 text-primary" />}

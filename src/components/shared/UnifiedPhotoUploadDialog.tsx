@@ -414,8 +414,9 @@ export function UnifiedPhotoUploadDialog({
           onClose={() => setShowCropDialog(false)}
           imageSrc={originalImageSrc}
           onCropComplete={handleCropComplete}
-          aspectRatio={context?.type === 'equipment' ? 4/3 : 1} // Equipment photos use 4:3, others use square
+          aspectRatio={undefined} // Allow freeform cropping
           userDisplayName={userDisplayName}
+          showSquarePreview={context?.type === 'equipment'} // Show square preview for equipment photos
         />
       )}
     </Dialog>

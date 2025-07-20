@@ -71,7 +71,7 @@ export default function CategoryList() {
               id,
               title,
               created_at,
-              user:profiles(username)
+              user:profiles(username, display_name)
             `)
             .eq('category_id', category.id)
             .order('created_at', { ascending: false })
@@ -185,7 +185,7 @@ export default function CategoryList() {
                 <p className="text-gray-400 mb-1">Latest activity</p>
                 <p className="font-medium line-clamp-1 mb-1">{category.latest_thread.title}</p>
                 <div className="flex items-center gap-2 text-gray-400 justify-end">
-                  <span>by {category.latest_thread.user.username}</span>
+                  <span>by {category.latest_thread.user.display_name || category.latest_thread.user.username}</span>
                   <Clock className="w-3 h-3" />
                   <span>{formatTimeAgo(category.latest_thread.created_at)}</span>
                 </div>

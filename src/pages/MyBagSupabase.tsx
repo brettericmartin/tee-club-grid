@@ -125,31 +125,6 @@ const MyBagSupabase = () => {
     // User object contains Symbol properties - this is expected with Supabase
   }
 
-  // Show sign-in prompt if not logged in
-  if (!authLoading && !user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-primary/10">
-        <Navigation />
-        <div className="container mx-auto px-4 pt-32">
-          <div className="max-w-md mx-auto text-center">
-            <div className="glass-card p-8">
-              <h1 className="text-3xl font-bold text-white mb-4">Sign In to View Your Bag</h1>
-              <p className="text-white/70 mb-6">
-                Create an account to build and showcase your golf bag collection.
-              </p>
-              <Button 
-                onClick={() => setShowSignIn(true)} 
-                className="bg-primary hover:bg-primary/90 text-white"
-              >
-                Sign In
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   useEffect(() => {
     const initializePage = async () => {
       console.log('[MyBag] Initializing page for user:', user?.id);
@@ -178,6 +153,31 @@ const MyBagSupabase = () => {
     
     initializePage();
   }, [user]);
+
+  // Show sign-in prompt if not logged in
+  if (!authLoading && !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-primary/10">
+        <Navigation />
+        <div className="container mx-auto px-4 pt-32">
+          <div className="max-w-md mx-auto text-center">
+            <div className="glass-card p-8">
+              <h1 className="text-3xl font-bold text-white mb-4">Sign In to View Your Bag</h1>
+              <p className="text-white/70 mb-6">
+                Create an account to build and showcase your golf bag collection.
+              </p>
+              <Button 
+                onClick={() => setShowSignIn(true)} 
+                className="bg-primary hover:bg-primary/90 text-white"
+              >
+                Sign In
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   const calculateTotalTees = async () => {
     console.log('[MyBag] Calculating total tees');
@@ -335,8 +335,8 @@ const MyBagSupabase = () => {
               is_primary
             )
           ),
-          shaft:shafts(*),
-          grip:grips(*),
+          shaft:equipment!shaft_id(*),
+          grip:equipment!grip_id(*),
           loft_option:loft_options(*)
         `)
         .eq('bag_id', bagId)
@@ -556,7 +556,10 @@ const MyBagSupabase = () => {
       const insertData = {
         bag_id: currentBag.id,
         equipment_id: selection.equipment_id,
-        condition: 'new'
+        condition: 'new',
+        shaft_id: selection.shaft_id || null,
+        grip_id: selection.grip_id || null,
+        loft_option_id: selection.loft_option_id || null
       };
       
       // Preparing equipment insert
@@ -591,8 +594,6 @@ const MyBagSupabase = () => {
           .select(`
             *,
             equipment(*),
-            shaft:shafts(*),
-            grip:grips(*),
             loft_option:loft_options(*)
           `)
           .single();

@@ -101,7 +101,7 @@ export default function ThreadList({ categorySlug, sortBy: propSortBy }: ThreadL
         .select(`
           *,
           category:forum_categories!inner(id, name, slug, icon),
-          user:profiles!inner(id, username, avatar_url)
+          user:profiles!inner(id, username, display_name, avatar_url)
         `, { count: 'exact' });
 
       // Filter by category if provided
@@ -157,7 +157,7 @@ export default function ThreadList({ categorySlug, sortBy: propSortBy }: ThreadL
             .from('forum_posts')
             .select(`
               created_at,
-              user:profiles(username, avatar_url)
+              user:profiles(username, display_name, avatar_url)
             `)
             .eq('thread_id', thread.id)
             .order('created_at', { ascending: false })

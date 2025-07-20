@@ -97,7 +97,7 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
         .select(`
           *,
           category:forum_categories(id, name, slug, icon),
-          user:profiles(id, username, avatar_url)
+          user:profiles(id, username, display_name, avatar_url)
         `)
         .eq('id', threadId)
         .single();
@@ -124,7 +124,7 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
         .from('forum_posts')
         .select(`
           *,
-          user:profiles(id, username, avatar_url)
+          user:profiles(id, username, display_name, avatar_url)
         `, { count: 'exact' })
         .eq('thread_id', threadId)
         .order('created_at', { ascending: true })
@@ -208,7 +208,7 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
         })
         .select(`
           *,
-          user:profiles(id, username, avatar_url)
+          user:profiles(id, username, display_name, avatar_url)
         `)
         .single();
 
@@ -298,7 +298,7 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
           <span className="flex items-center gap-1">
             {thread.category.icon} {thread.category.name}
           </span>
-          <span>Started by {thread.user.username}</span>
+          <span>Started by {thread.user.display_name || thread.user.username}</span>
           <span className="flex items-center gap-1">
             <Eye className="h-4 w-4" />
             {thread.views} views

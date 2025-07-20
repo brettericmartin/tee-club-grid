@@ -28,6 +28,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -40,8 +41,8 @@ import type { Database } from '@/lib/supabase';
 
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
   equipment: Database['public']['Tables']['equipment']['Row'];
-  shaft?: Database['public']['Tables']['shafts']['Row'];
-  grip?: Database['public']['Tables']['grips']['Row'];
+  shaft?: Database['public']['Tables']['equipment']['Row'];
+  grip?: Database['public']['Tables']['equipment']['Row'];
   loft_option?: Database['public']['Tables']['loft_options']['Row'];
 };
 
@@ -59,8 +60,8 @@ export function EquipmentEditor({
   onUpdate,
 }: EquipmentEditorProps) {
   const [loading, setLoading] = useState(false);
-  const [shafts, setShafts] = useState<any[]>([]);
-  const [grips, setGrips] = useState<any[]>([]);
+  const [shafts, setShafts] = useState<Database['public']['Tables']['equipment']['Row'][]>([]);
+  const [grips, setGrips] = useState<Database['public']['Tables']['equipment']['Row'][]>([]);
   const [loftOptions, setLoftOptions] = useState<any[]>([]);
   const [equipmentPhotos, setEquipmentPhotos] = useState<any[]>([]);
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
@@ -122,20 +123,21 @@ export function EquipmentEditor({
     try {
       // Load shafts for this category
       const { data: shaftData } = await supabase
-        .from('shafts')
+        .from('equipment')
         .select('*')
-        .eq('category', equipment.equipment.category)
-        .order('is_stock', { ascending: false })
-        .order('brand');
+        .eq('category', 'shaft')
+        .order('brand')
+        .order('model');
       
       if (shaftData) setShafts(shaftData);
 
       // Load grips
       const { data: gripData } = await supabase
-        .from('grips')
+        .from('equipment')
         .select('*')
-        .order('is_stock', { ascending: false })
-        .order('brand');
+        .eq('category', 'grip')
+        .order('brand')
+        .order('model');
       
       if (gripData) setGrips(gripData);
 
@@ -242,14 +244,17 @@ export function EquipmentEditor({
 
     try {
       const { data, error } = await supabase
-        .from('shafts')
+        .from('equipment')
         .insert({
           brand: newShaft.brand,
           model: newShaft.model,
-          flex: newShaft.flex,
-          weight: newShaft.weight ? parseFloat(newShaft.weight) : null,
-          category: equipment.equipment.category,
-          is_stock: false
+          category: 'shaft',
+          msrp: 0,
+          specs: {
+            flex: newShaft.flex,
+            weight: newShaft.weight ? parseFloat(newShaft.weight) : null,
+            compatible_with: equipment.equipment.category
+          }
         })
         .select()
         .single();
@@ -276,13 +281,16 @@ export function EquipmentEditor({
 
     try {
       const { data, error } = await supabase
-        .from('grips')
+        .from('equipment')
         .insert({
           brand: newGrip.brand,
           model: newGrip.model,
-          size: newGrip.size,
-          color: newGrip.color || null,
-          is_stock: false
+          category: 'grip',
+          msrp: 0,
+          specs: {
+            size: newGrip.size,
+            color: newGrip.color || null
+          }
         })
         .select()
         .single();
@@ -444,14 +452,17 @@ export function EquipmentEditor({
                           </Button>
                         </div>
                       </CommandEmpty>
-                      <CommandGroup>
-                        {shafts.filter(shaft => {
-                          const searchTerm = shaftSearch.toLowerCase();
-                          return shaft.brand.toLowerCase().includes(searchTerm) ||
-                                 shaft.model.toLowerCase().includes(searchTerm) ||
-                                 shaft.flex.toLowerCase().includes(searchTerm);
-                        }).map((shaft) => (
-                          <CommandItem
+                      <CommandList>
+                        <CommandGroup>
+                          {shafts && shafts.length > 0 && shafts
+                            .filter(shaft => {
+                              const searchTerm = shaftSearch.toLowerCase();
+                              return shaft.brand.toLowerCase().includes(searchTerm) ||
+                                     shaft.model.toLowerCase().includes(searchTerm) ||
+                                     (shaft.specs?.flex && shaft.specs.flex.toLowerCase().includes(searchTerm));
+                            })
+                            .map((shaft) => (
+                              <CommandItem
                             key={shaft.id}
                             value={shaft.id}
                             onSelect={() => {
@@ -468,22 +479,21 @@ export function EquipmentEditor({
                             />
                             <div className="flex-1">
                               <div className="font-medium">
-                                {shaft.brand} {shaft.model} - {shaft.flex}
+                                {shaft.brand} {shaft.model} {shaft.specs?.flex && `- ${shaft.specs.flex}`}
                               </div>
-                              {(shaft.weight || shaft.is_stock) && (
+                              {shaft.specs?.weight && (
                                 <div className="text-sm text-muted-foreground">
-                                  {shaft.weight && `${shaft.weight}g`}
-                                  {shaft.weight && shaft.is_stock && ' • '}
-                                  {shaft.is_stock && 'Stock Option'}
+                                  {shaft.specs.weight}g
                                 </div>
                               )}
                             </div>
-                            {shaft.price > 0 && (
-                              <span className="text-sm text-muted-foreground">+${shaft.price}</span>
+                            {shaft.msrp > 0 && (
+                              <span className="text-sm text-muted-foreground">+${shaft.msrp}</span>
                             )}
                           </CommandItem>
-                        ))}
-                      </CommandGroup>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
                     </Command>
                   </PopoverContent>
                 </Popover>
@@ -533,14 +543,17 @@ export function EquipmentEditor({
                           </Button>
                         </div>
                       </CommandEmpty>
-                      <CommandGroup>
-                        {grips.filter(grip => {
-                          const searchTerm = gripSearch.toLowerCase();
-                          return grip.brand.toLowerCase().includes(searchTerm) ||
-                                 grip.model.toLowerCase().includes(searchTerm) ||
-                                 grip.size.toLowerCase().includes(searchTerm);
-                        }).map((grip) => (
-                          <CommandItem
+                      <CommandList>
+                        <CommandGroup>
+                          {grips && grips.length > 0 && grips
+                            .filter(grip => {
+                              const searchTerm = gripSearch.toLowerCase();
+                              return grip.brand.toLowerCase().includes(searchTerm) ||
+                                     grip.model.toLowerCase().includes(searchTerm) ||
+                                     (grip.specs?.size && grip.specs.size.toLowerCase().includes(searchTerm));
+                            })
+                            .map((grip) => (
+                              <CommandItem
                             key={grip.id}
                             value={grip.id}
                             onSelect={() => {
@@ -557,22 +570,21 @@ export function EquipmentEditor({
                             />
                             <div className="flex-1">
                               <div className="font-medium">
-                                {grip.brand} {grip.model} - {grip.size}
+                                {grip.brand} {grip.model} {grip.specs?.size && `- ${grip.specs.size}`}
                               </div>
-                              {(grip.color || grip.is_stock) && (
+                              {grip.specs?.color && (
                                 <div className="text-sm text-muted-foreground">
-                                  {grip.color}
-                                  {grip.color && grip.is_stock && ' • '}
-                                  {grip.is_stock && 'Stock Option'}
+                                  {grip.specs.color}
                                 </div>
                               )}
                             </div>
-                            {grip.price > 0 && (
-                              <span className="text-sm text-muted-foreground">+${grip.price}</span>
+                            {grip.msrp > 0 && (
+                              <span className="text-sm text-muted-foreground">+${grip.msrp}</span>
                             )}
                           </CommandItem>
-                        ))}
-                      </CommandGroup>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
                     </Command>
                   </PopoverContent>
                 </Popover>

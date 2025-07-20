@@ -26,6 +26,7 @@ interface PostCardProps {
     user: {
       id: string;
       username: string;
+      display_name?: string;
       avatar_url: string;
       badges?: any[];
     };
@@ -117,7 +118,7 @@ export default function PostCard({ post, threadLocked = false }: PostCardProps) 
               {post.user?.username?.[0]?.toUpperCase() || '?'}
             </AvatarFallback>
           </Avatar>
-          <p className="text-sm font-medium text-center">{post.user?.username || 'Unknown'}</p>
+          <p className="text-sm font-medium text-center">{post.user?.display_name || post.user?.username || 'Unknown'}</p>
           {/* User badges would go here */}
           <div className="flex flex-col gap-1 mt-2">
             {post.user.badges?.map((badge: any) => (

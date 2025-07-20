@@ -46,8 +46,8 @@ const EquipmentCard: FC<EquipmentCardProps> = ({
     return (
       <div
         className={cn(
-          'glass-card p-4 flex items-center gap-4 cursor-pointer',
-          'hover:scale-[1.01] hover:shadow-lg transition-[transform,shadow] duration-200',
+          'bg-[#1a1a1a] border border-white/10 rounded-xl p-4 flex items-center gap-4 cursor-pointer',
+          'hover:bg-[#2a2a2a] hover:border-white/20 hover:shadow-lg transition-all duration-200',
           className
         )}
         onClick={onViewDetails}
@@ -72,7 +72,7 @@ const EquipmentCard: FC<EquipmentCardProps> = ({
           <Button 
             variant="outline" 
             size="sm"
-            className="glass-button"
+            className="bg-[#2a2a2a] border border-white/10 hover:bg-[#3a3a3a] hover:border-white/20 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               onViewDetails?.();
@@ -85,8 +85,8 @@ const EquipmentCard: FC<EquipmentCardProps> = ({
               variant="ghost" 
               size="sm"
               className={cn(
-                "glass-button",
-                isSaved ? "text-primary" : "text-muted-foreground hover:text-primary"
+                "bg-[#2a2a2a] border border-white/10 hover:bg-[#3a3a3a] hover:border-white/20 transition-colors",
+                isSaved ? "text-[#10B981]" : "text-muted-foreground hover:text-[#10B981]"
               )}
               onClick={onSaveToggle}
             >
@@ -102,8 +102,8 @@ const EquipmentCard: FC<EquipmentCardProps> = ({
   return (
     <div
       className={cn(
-        'glass-card p-4 space-y-3 cursor-pointer',
-        'hover:scale-[1.02] hover:shadow-lg transition-[transform,shadow] duration-200',
+        'bg-[#1a1a1a] border border-white/10 rounded-xl p-4 space-y-3 cursor-pointer',
+        'hover:bg-[#2a2a2a] hover:border-white/20 hover:shadow-lg transition-all duration-200',
         className
       )}
       onClick={onViewDetails}
@@ -135,7 +135,7 @@ const EquipmentCard: FC<EquipmentCardProps> = ({
         <Button 
           variant="outline" 
           size="sm" 
-          className="flex-1 glass-button"
+          className="flex-1 bg-[#2a2a2a] border border-white/10 hover:bg-[#3a3a3a] hover:border-white/20 transition-colors"
           onClick={(e) => {
             e.stopPropagation();
             onViewDetails?.();
@@ -148,8 +148,8 @@ const EquipmentCard: FC<EquipmentCardProps> = ({
             variant="ghost" 
             size="sm"
             className={cn(
-              "glass-button",
-              isSaved ? "text-primary" : "text-muted-foreground hover:text-primary"
+              "bg-[#2a2a2a] border border-white/10 hover:bg-[#3a3a3a] hover:border-white/20 transition-colors",
+              isSaved ? "text-[#10B981]" : "text-muted-foreground hover:text-[#10B981]"
             )}
             onClick={onSaveToggle}
           >

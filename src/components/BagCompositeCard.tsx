@@ -210,7 +210,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
                   {featuredClubs.map(({ id, equipment }) => (
                     <div
                       key={id}
-                      className="group relative bg-muted/20 rounded-md p-3 hover:bg-muted/30 transition-colors cursor-pointer"
+                      className="group relative bg-muted/20 rounded-md overflow-hidden hover:bg-muted/30 transition-colors cursor-pointer"
                       onMouseEnter={() => setHoveredItem(id)}
                       onMouseLeave={() => setHoveredItem(null)}
                       onClick={(e) => handleEquipmentClick(id, e)}
@@ -245,7 +245,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
                   {featuredAccessories.map(({ id, equipment }) => (
                     <div
                       key={id}
-                      className="group relative bg-muted/20 rounded-md p-3 hover:bg-muted/30 transition-colors cursor-pointer"
+                      className="group relative bg-muted/20 rounded-md overflow-hidden hover:bg-muted/30 transition-colors cursor-pointer"
                       onMouseEnter={() => setHoveredItem(id)}
                       onMouseLeave={() => setHoveredItem(null)}
                       onClick={(e) => handleEquipmentClick(id, e)}
