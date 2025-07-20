@@ -39,7 +39,6 @@ const lazyImport = (importFn: () => Promise<any>) => {
 };
 
 const Index = lazyImport(() => import("./pages/Index"));
-const IndexTest = lazyImport(() => import("./pages/IndexTest"));
 const BagsBrowser = lazyImport(() => import("./pages/BagsBrowser"));
 const BagDisplay = lazyImport(() => import("./pages/BagDisplayStyled"));
 const MyBag = lazyImport(() => import("./pages/MyBag"));
