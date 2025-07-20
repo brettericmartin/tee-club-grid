@@ -89,11 +89,26 @@ export default defineConfig(({ mode }) => {
               './src/pages/Debug',
               './src/pages/DebugFeed',
             ],
+            'feature-forum': [
+              './src/pages/Forum',
+              './src/pages/ForumIndex',
+              './src/pages/ForumCategory',
+              './src/pages/ForumThread',
+            ],
           },
         },
       },
       // Increase chunk size warning limit since we're splitting intentionally
       chunkSizeWarningLimit: 600,
+    },
+    optimizeDeps: {
+      include: [
+        'react',
+        'react-dom',
+        'react-router-dom',
+        '@supabase/supabase-js',
+        '@tanstack/react-query',
+      ],
     },
   };
 });

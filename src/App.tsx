@@ -48,6 +48,10 @@ const Feed = lazyImport(() => import("./pages/Feed"));
 const Wishlist = lazyImport(() => import("./pages/Wishlist"));
 const Badges = lazyImport(() => import("./pages/Badges"));
 const BadgePreview = lazyImport(() => import("./pages/BadgePreview"));
+const Forum = lazyImport(() => import("./pages/Forum"));
+const ForumIndex = lazyImport(() => import("./pages/ForumIndex"));
+const ForumCategory = lazyImport(() => import("./pages/ForumCategory"));
+const ForumThread = lazyImport(() => import("./pages/ForumThread"));
 const NotFound = lazyImport(() => import("./pages/NotFound"));
 
 // Admin routes (rarely accessed)
@@ -117,6 +121,7 @@ const App = () => {
                         <Route path="/wishlist" element={<Wishlist />} />
                         <Route path="/badges" element={<Badges />} />
                         <Route path="/badge-preview" element={<BadgePreview />} />
+                        <Route path="/forum/*" element={<ForumIndex />} />
                         <Route path="/admin/seed-equipment" element={<SeedEquipment />} />
                         <Route path="/admin/equipment-migration" element={<EquipmentMigration />} />
                         <Route path="/debug" element={<Debug />} />
