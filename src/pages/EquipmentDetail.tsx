@@ -280,7 +280,7 @@ export default function EquipmentDetail() {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="font-semibold">{review.profile?.username}</p>
+                        <p className="font-semibold">{review.profile?.display_name || review.profile?.username}</p>
                         <div className="flex items-center gap-1">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <svg

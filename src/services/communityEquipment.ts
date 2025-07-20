@@ -1,6 +1,4 @@
 import { supabase } from '@/lib/supabase';
-import { syncUserPhotoToEquipment } from './equipmentPhotoSync';
-import { createEquipmentPhotoFeedPost } from './feedService';
 
 /**
  * Community Equipment Service
@@ -78,35 +76,9 @@ export async function submitEquipment(submission: EquipmentSubmission) {
     }
   }
   
-  // Handle image upload if provided
+  // For now, we don't handle image upload during submission
+  // Users will upload photos after equipment is created
   let finalImageUrl = cleanedSubmission.image_url;
-  
-  if (submission.imageFile) {
-    try {
-      // Upload image to storage
-      const fileExt = submission.imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const fileName = `equipment/${cleanedSubmission.brand}-${cleanedSubmission.model_cleaned}-${Date.now()}.${fileExt}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('equipment-photos')
-        .upload(fileName, submission.imageFile, {
-          contentType: submission.imageFile.type,
-          upsert: false
-        });
-      
-      if (uploadError) throw uploadError;
-      
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('equipment-photos')
-        .getPublicUrl(fileName);
-      
-      finalImageUrl = publicUrl;
-    } catch (uploadError) {
-      console.error('Failed to upload equipment image:', uploadError);
-      // Continue without image rather than failing entirely
-    }
-  }
   
   // Add directly to equipment table - no review needed!
   const { data: newEquipment, error } = await supabase
@@ -133,32 +105,8 @@ export async function submitEquipment(submission: EquipmentSubmission) {
     throw error;
   }
   
-  // Sync photo to equipment_photos table if image was uploaded
-  if (finalImageUrl && user) {
-    try {
-      await syncUserPhotoToEquipment(
-        user.id,
-        newEquipment.id,
-        finalImageUrl,
-        `${newEquipment.brand} ${newEquipment.model}`
-      );
-      console.log('Photo synced to equipment_photos table');
-      
-      // Create feed post for the new equipment
-      await createEquipmentPhotoFeedPost(
-        user.id,
-        newEquipment.id,
-        `${newEquipment.brand} ${newEquipment.model}`,
-        finalImageUrl,
-        `Check out the ${newEquipment.brand} ${newEquipment.model} I just added! 🏌️`,
-        undefined // no bagId for general equipment submissions
-      );
-      console.log('Feed post created for new equipment');
-    } catch (syncError) {
-      console.error('Failed to sync photo or create feed post:', syncError);
-      // Don't fail the whole submission if sync fails
-    }
-  }
+  // Photo uploads will be handled on the equipment detail page
+  // Users can upload multiple photos through the photo gallery there
   
   return {
     success: true,

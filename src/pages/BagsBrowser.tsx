@@ -15,6 +15,7 @@ import { toast } from "sonner";
 type SortOption = "trending" | "newest" | "most-liked" | "following" | "price-high" | "price-low";
 type HandicapRange = "all" | "0-5" | "6-15" | "16+";
 type PriceRange = "all" | "under-2k" | "2k-5k" | "5k+";
+type FilterOption = "all" | "teed" | "following";
 
 const BagsBrowser = () => {
   const navigate = useNavigate();
@@ -184,9 +185,32 @@ const BagsBrowser = () => {
       return;
     }
     
+    // Optimistically update the bag's like count
+    setBags(prevBags => prevBags.map(bag => {
+      if (bag.id === bagId) {
+        const isCurrentlyLiked = likedBags.has(bagId);
+        return {
+          ...bag,
+          likes_count: isCurrentlyLiked ? bag.likes_count - 1 : bag.likes_count + 1
+        };
+      }
+      return bag;
+    }));
+    
     const success = await toggleLike(bagId);
     if (!success) {
       toast.error('Failed to update like');
+      // Revert the optimistic update
+      setBags(prevBags => prevBags.map(bag => {
+        if (bag.id === bagId) {
+          const wasLiked = likedBags.has(bagId);
+          return {
+            ...bag,
+            likes_count: wasLiked ? bag.likes_count + 1 : bag.likes_count - 1
+          };
+        }
+        return bag;
+      }));
     }
   };
 

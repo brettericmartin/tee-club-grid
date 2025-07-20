@@ -197,7 +197,6 @@ const Equipment = () => {
         year: equipment.year,
         msrp: equipment.msrp,
         image_url: equipment.imageUrl,
-        imageFile: equipment.imageFile,
         specs: equipment.specs
       });
       
@@ -208,12 +207,8 @@ const Equipment = () => {
         });
         setShowSubmitModal(false);
         
-        // Refresh equipment list if it matches current filters
-        if (category === 'all' || category === equipment.category) {
-          if (brand === 'all' || brand === equipment.brand) {
-            loadEquipment();
-          }
-        }
+        // Redirect to equipment detail page where user can upload photos
+        navigate(`/equipment/${result.equipment.id}`);
       } else {
         toast({
           title: "Equipment Already Exists",

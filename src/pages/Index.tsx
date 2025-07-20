@@ -44,7 +44,7 @@ const Index = () => {
       const transformedBags = (data || []).map(bag => ({
         id: bag.id,
         title: bag.name,
-        owner: bag.profile?.full_name || bag.profile?.username || 'Unknown',
+        owner: bag.profile?.display_name || bag.profile?.username || 'Unknown',
         image: bag.background_image ? `/images/${bag.background_image}.jpg` : '/placeholder.svg',
         clubCount: bag.bag_equipment?.length || 0,
         handicap: '5.2',

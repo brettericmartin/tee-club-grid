@@ -78,6 +78,7 @@ export function EquipmentPhotoRepository({
           *,
           user:profiles!equipment_photos_user_id_fkey (
             username,
+            display_name,
             avatar_url
           ),
           user_liked:equipment_photo_likes!left (
@@ -207,7 +208,7 @@ export function EquipmentPhotoRepository({
           )}
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>by {photo.user?.username || 'Unknown'}</span>
+            <span>by {photo.user?.display_name || photo.user?.username || 'Unknown'}</span>
             <span>{new Date(photo.created_at).toLocaleDateString()}</span>
           </div>
         </CardContent>

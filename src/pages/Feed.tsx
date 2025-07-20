@@ -29,9 +29,9 @@ const Feed = () => {
     if (!user) return;
     
     try {
-      // Toggle like in database
+      // Toggle like in database using the correct table
       const { data: existingLike } = await supabase
-        .from('likes')
+        .from('feed_likes')
         .select('id')
         .eq('user_id', user.id)
         .eq('post_id', postId)
@@ -40,21 +40,21 @@ const Feed = () => {
       if (existingLike) {
         // Unlike
         await supabase
-          .from('likes')
+          .from('feed_likes')
           .delete()
           .eq('id', existingLike.id);
       } else {
         // Like
         await supabase
-          .from('likes')
+          .from('feed_likes')
           .insert({
             user_id: user.id,
             post_id: postId
           });
       }
       
-      // Reload feed to get updated like counts
-      loadMainFeed(filter);
+      // Don't reload the entire feed - let optimistic updates handle it
+      // The TeedBallLike component already handles optimistic updates
     } catch (error) {
       console.error('Error toggling like:', error);
     }
@@ -88,8 +88,7 @@ const Feed = () => {
           });
       }
       
-      // Reload feed to get updated follow status
-      loadMainFeed(filter);
+      // Don't reload the entire feed - let the UI handle optimistic updates
     } catch (error) {
       console.error('Error toggling follow:', error);
     }

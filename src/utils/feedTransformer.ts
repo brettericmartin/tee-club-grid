@@ -7,6 +7,7 @@ export interface FeedItemData {
   userName: string;
   userAvatar: string;
   userHandicap: number;
+  userTitle?: string;
   postType: string;
   imageUrl: string;
   caption: string;
@@ -14,6 +15,7 @@ export interface FeedItemData {
   commentCount: number;
   timestamp: Date;
   isFromFollowed: boolean;
+  isLiked: boolean;
   bagId?: string;
   equipmentId?: string;
   bagData?: {
@@ -84,9 +86,10 @@ export function transformFeedPost(post: FeedPost & {
   return {
     postId: post.id,
     userId: post.user_id,
-    userName: post.profile?.full_name || post.profile?.username || 'Unknown User',
+    userName: post.profile?.display_name || post.profile?.username || 'Unknown User',
     userAvatar: post.profile?.avatar_url || '',
     userHandicap: post.profile?.handicap || 0,
+    userTitle: post.profile?.title,
     postType: post.type,
     imageUrl,
     caption,
@@ -94,6 +97,7 @@ export function transformFeedPost(post: FeedPost & {
     commentCount: 0, // Comments not implemented yet
     timestamp: new Date(post.created_at),
     isFromFollowed: post.isFollowed || false,
+    isLiked: post.user_liked && post.user_liked.length > 0,
     bagId: post.bag_id || content.bag_id,
     equipmentId: post.equipment_id || content.equipment_id,
     bagData,

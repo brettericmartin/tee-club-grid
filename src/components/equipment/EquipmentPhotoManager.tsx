@@ -138,7 +138,7 @@ export function EquipmentPhotoManager({
                 {photo.caption || 'No caption'}
               </p>
               <p className="text-white/70 text-xs">
-                by {photo.user?.username || 'Unknown'}
+                by {photo.user?.display_name || photo.user?.username || 'Unknown'}
               </p>
             </div>
           </Card>

@@ -266,11 +266,11 @@ export const FeedCard = memo(function FeedCard({ post, onUpdate }: FeedCardProps
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10">
               <AvatarImage src={post.profiles?.avatar_url || post.profile?.avatar_url} />
-              <AvatarFallback>{(post.profiles?.username || post.profile?.username)?.[0]?.toUpperCase()}</AvatarFallback>
+              <AvatarFallback>{(post.profiles?.display_name || post.profiles?.username || post.profile?.display_name || post.profile?.username)?.[0]?.toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-medium text-white">{post.profiles?.username || post.profile?.username}</span>
+                <span className="font-medium text-white">{post.profiles?.display_name || post.profiles?.username || post.profile?.display_name || post.profile?.username}</span>
                 <div className="flex items-center gap-1 text-primary">
                   {getPostIcon()}
                   <span className="text-xs">{getPostTitle()}</span>

@@ -102,7 +102,7 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      const { posts: feedPosts } = await getUserFeedPosts(userId);
+      const { posts: feedPosts } = await getUserFeedPosts(userId, 100, 0, user?.id);
       console.log(`[FeedContext.loadUserFeed] Received ${feedPosts.length} posts for user ${userId}`);
       
       // Transform posts to UI format
@@ -126,7 +126,7 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [followedUsers]);
+  }, [followedUsers, user]);
 
   // Update a post in both feeds
   const updatePost = useCallback((postId: string, updates: Partial<FeedPost>) => {

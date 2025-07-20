@@ -1,5 +1,5 @@
 import { useState, memo, useEffect } from 'react';
-import { Eye, TrendingUp, Star, UserPlus, UserMinus, Loader2, ExternalLink } from 'lucide-react';
+import { TrendingUp, Star, UserPlus, UserMinus, Loader2, ExternalLink } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -52,6 +52,7 @@ interface BagCardProps {
       display_name: string;
       avatar_url?: string;
       handicap?: number;
+      title?: string;
     };
     bag_equipment?: BagEquipmentItem[];
   };
@@ -239,9 +240,9 @@ const BagCardComponent = ({
               <h3 className="font-semibold text-white text-sm">
                 {bag.profiles?.display_name || bag.profiles?.username || 'Unknown'} • {bag.name}
               </h3>
-              {bag.profiles?.handicap !== undefined && (
+              {bag.profiles?.title && (
                 <p className="text-xs text-white/70">
-                  Handicap: {bag.profiles.handicap}
+                  {bag.profiles.title}
                 </p>
               )}
             </div>
@@ -362,50 +363,48 @@ const BagCardComponent = ({
           })}
         </div>
 
-        {/* Stats bar */}
+        {/* Bottom Section */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-white/90 text-sm" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <span className="font-semibold">{equipmentCount}</span>
-                <span className="text-xs text-white/70">pieces</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="font-semibold">{formatCompactCurrency(totalValue)}</span>
-                <span className="text-xs text-white/70">value</span>
-              </div>
+          {/* Stats bar */}
+          <div className="flex items-center gap-4 text-white/90 text-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-1">
+              <span className="font-semibold">{equipmentCount}</span>
+              <span className="text-xs text-white/70">pieces</span>
             </div>
-            
-            <div className="flex items-center gap-3">
-              <TeedBallLike
-                isLiked={isLiked}
-                likeCount={bag.likes_count || 0}
-                onLike={() => onLike?.(bag.id)}
-                size="sm"
-                showCount={true}
-                className="text-white/70 hover:text-white"
-              />
-              
-              <div className="flex items-center gap-1">
-                <Eye className="w-4 h-4 text-white/70" />
-                <span className="text-xs">{bag.views_count || 0}</span>
-              </div>
+            <div className="flex items-center gap-1">
+              <span className="font-semibold">{formatCompactCurrency(totalValue)}</span>
+              <span className="text-xs text-white/70">value</span>
             </div>
           </div>
           
-          {/* View Bag Button */}
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onView(bag.id);
-            }}
-            variant="outline"
-            size="sm"
-            className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 group"
-          >
-            <span>View Full Bag</span>
-            <ExternalLink className="w-3 h-3 ml-2 opacity-50 group-hover:opacity-100 transition-opacity" />
-          </Button>
+          {/* Action Buttons Row */}
+          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+            {/* View Bag Button - Left side, smaller */}
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(bag.id);
+              }}
+              variant="outline"
+              size="sm"
+              className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20 group h-9 text-sm"
+            >
+              <span>View Full Bag</span>
+              <ExternalLink className="w-3 h-3 ml-1 opacity-50 group-hover:opacity-100 transition-opacity" />
+            </Button>
+            
+            {/* Tee Button - Right side, prominent */}
+            <div className="bg-white/10 border border-white/20 rounded-md hover:bg-white/20 transition-colors">
+              <TeedBallLike
+                isLiked={isLiked}
+                likeCount={bag.likes_count || 0}
+                onToggle={() => onLike?.(bag.id)}
+                size="md"
+                showCount={true}
+                className="text-white hover:text-primary h-9 px-3"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </Card>
@@ -428,7 +427,6 @@ const areEqual = (prevProps: BagCardProps, nextProps: BagCardProps) => {
   return (
     prevProps.bag.id === nextProps.bag.id &&
     prevProps.bag.likes_count === nextProps.bag.likes_count &&
-    prevProps.bag.views_count === nextProps.bag.views_count &&
     prevProps.isLiked === nextProps.isLiked &&
     prevProps.isFollowing === nextProps.isFollowing &&
     prevProps.currentUserId === nextProps.currentUserId &&

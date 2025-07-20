@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,11 +9,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { useAuth } from '@/contexts/AuthContext';
 import { getProfile, updateProfile, createProfile } from '@/services/profileService';
 import { AvatarUpload } from './AvatarUpload';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { golfTitles } from '@/lib/golf-titles';
+import { cn } from '@/lib/utils';
 
 interface ProfileDialogProps {
   isOpen: boolean;
@@ -29,12 +44,15 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
   const [displayName, setDisplayName] = useState('');
   const [handicap, setHandicap] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [title, setTitle] = useState('');
+  const [titleOpen, setTitleOpen] = useState(false);
   
   // Original values to detect changes
   const [originalValues, setOriginalValues] = useState({
     displayName: '',
     handicap: '',
-    avatarUrl: null as string | null
+    avatarUrl: null as string | null,
+    title: ''
   });
 
   useEffect(() => {
@@ -57,11 +75,13 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
         setDisplayName(profile.display_name || '');
         setHandicap(profile.handicap?.toString() || '');
         setAvatarUrl(profile.avatar_url);
+        setTitle(profile.title || 'Golfer');
         
         setOriginalValues({
           displayName: profile.display_name || '',
           handicap: profile.handicap?.toString() || '',
-          avatarUrl: profile.avatar_url
+          avatarUrl: profile.avatar_url,
+          title: profile.title || 'Golfer'
         });
       } else {
         // Profile doesn't exist yet - this is okay for new users
@@ -69,6 +89,7 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
         // Use metadata as defaults
         setDisplayName(user.user_metadata?.display_name || user.user_metadata?.username || '');
         setAvatarUrl(user.user_metadata?.avatar_url || null);
+        setTitle('Golfer'); // Default title for new users
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -145,6 +166,10 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
         console.log('[ProfileDialog] Avatar URL changed:', avatarUrl);
       }
       
+      if (title !== originalValues.title) {
+        updates.title = title;
+      }
+      
       console.log('[ProfileDialog] Updates to save:', updates);
       
       if (Object.keys(updates).length > 0 || !profileExists) {
@@ -198,13 +223,15 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
     setDisplayName(originalValues.displayName);
     setHandicap(originalValues.handicap);
     setAvatarUrl(originalValues.avatarUrl);
+    setTitle(originalValues.title);
     onClose();
   };
 
   const hasChanges = 
     displayName !== originalValues.displayName ||
     handicap !== originalValues.handicap ||
-    avatarUrl !== originalValues.avatarUrl;
+    avatarUrl !== originalValues.avatarUrl ||
+    title !== originalValues.title;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel}>
@@ -257,6 +284,56 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
               />
               <p className="text-xs text-white/60">Your official golf handicap (0-54)</p>
+            </div>
+            
+            {/* Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-white">Title</Label>
+              <Popover open={titleOpen} onOpenChange={setTitleOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={titleOpen}
+                    className="w-full justify-between bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  >
+                    {title || "Select a title..."}
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0 bg-gray-900 border-gray-700">
+                  <Command className="bg-gray-900">
+                    <CommandInput 
+                      placeholder="Search titles or type your own..." 
+                      className="text-white"
+                      value={title}
+                      onValueChange={setTitle}
+                    />
+                    <CommandList>
+                      <CommandEmpty className="text-white/60 p-4 text-center">
+                        <p>No title found.</p>
+                        <p className="text-sm mt-1">Press enter to use "{title}" as a custom title.</p>
+                      </CommandEmpty>
+                      <CommandGroup className="max-h-64 overflow-auto">
+                        {golfTitles.map((golfTitle) => (
+                          <CommandItem
+                            key={golfTitle}
+                            value={golfTitle}
+                            onSelect={(currentValue) => {
+                              setTitle(currentValue);
+                              setTitleOpen(false);
+                            }}
+                            className="text-white hover:bg-white/10 cursor-pointer"
+                          >
+                            {golfTitle}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <p className="text-xs text-white/60">How you want to be known in the golf community</p>
             </div>
             
             {/* Actions */}

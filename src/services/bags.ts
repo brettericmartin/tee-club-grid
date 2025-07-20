@@ -31,7 +31,8 @@ export async function getBags(options?: {
         display_name,
         avatar_url,
         handicap,
-        location
+        location,
+        title
       ),
       bag_likes (count),
       bag_equipment (
@@ -118,7 +119,8 @@ export async function getUserBag(username: string) {
         avatar_url,
         handicap,
         location,
-        bio
+        bio,
+        title
       ),
       bag_equipment (
         *,

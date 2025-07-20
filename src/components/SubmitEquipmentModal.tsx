@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, Upload, Info, ChevronDown, Loader2 } from "lucide-react";
+import { X, Upload, Info, ChevronDown, Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { SubmitEquipmentForm } from "@/lib/equipment-types";
 import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
@@ -46,8 +46,6 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [loadingBrands, setLoadingBrands] = useState(false);
   const [loadingModels, setLoadingModels] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
   
   const brandDropdownRef = useRef<HTMLDivElement>(null);
   const modelDropdownRef = useRef<HTMLDivElement>(null);
@@ -110,17 +108,6 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
     }
   };
   
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
   
   const filteredBrands = brandSearch 
     ? brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()))
@@ -139,8 +126,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
     }
 
     const submitData = {
-      ...formData,
-      imageFile
+      ...formData
     };
     
     onSubmit(submitData);
@@ -159,8 +145,6 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
     setShowNewModel(false);
     setBrandSearch("");
     setModelSearch("");
-    setImageFile(null);
-    setImagePreview("");
     
     toast.success("Equipment added successfully!");
     onClose();
@@ -482,51 +466,15 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
               </Label>
             </div>
             
-            {/* Image Upload */}
-            <div>
-              <Label htmlFor="image">Equipment Photo</Label>
-              <div className="mt-2">
-                {imagePreview ? (
-                  <div className="relative">
-                    <img
-                      src={imagePreview}
-                      alt="Equipment preview"
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => {
-                        setImageFile(null);
-                        setImagePreview("");
-                      }}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <label
-                    htmlFor="image-upload"
-                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                  >
-                    <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Click to upload image</p>
-                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
-                    <input
-                      id="image-upload"
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
-                  </label>
-                )}
+            {/* Photo Upload Info */}
+            <div className="bg-muted/50 rounded-lg p-4 flex items-start gap-3">
+              <Camera className="w-5 h-5 text-muted-foreground mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Photos</p>
+                <p className="text-sm text-muted-foreground">
+                  After adding the equipment, you'll be taken to the equipment page where you can upload photos and contribute to the community gallery.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                After submission, you'll be redirected to upload more photos
-              </p>
             </div>
 
             {/* Submission Guidelines */}

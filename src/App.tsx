@@ -12,26 +12,51 @@ import BottomNavigation from "./components/navigation/BottomNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Analytics } from "@vercel/analytics/react";
 
-// Lazy load pages for code splitting
-const Index = lazy(() => import("./pages/Index"));
-const BagsBrowser = lazy(() => import("./pages/BagsBrowser"));
-const BagDisplay = lazy(() => import("./pages/BagDisplayStyled"));
-const MyBag = lazy(() => import("./pages/MyBag"));
-const Equipment = lazy(() => import("./pages/Equipment"));
-const EquipmentDetail = lazy(() => import("./pages/EquipmentDetail"));
-const Feed = lazy(() => import("./pages/Feed"));
-const Wishlist = lazy(() => import("./pages/Wishlist"));
-const Badges = lazy(() => import("./pages/Badges"));
-const BadgePreview = lazy(() => import("./pages/BadgePreview"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+// Lazy load pages for code splitting with error handling
+const lazyImport = (importFn: () => Promise<any>) => {
+  return lazy(() =>
+    importFn().catch((error) => {
+      console.error('Failed to load module:', error);
+      // Return a fallback component
+      return {
+        default: () => (
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold mb-2">Failed to load page</h2>
+              <p className="text-muted-foreground mb-4">Please refresh the page to try again</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+              >
+                Refresh Page
+              </button>
+            </div>
+          </div>
+        ),
+      };
+    })
+  );
+};
+
+const Index = lazyImport(() => import("./pages/Index"));
+const BagsBrowser = lazyImport(() => import("./pages/BagsBrowser"));
+const BagDisplay = lazyImport(() => import("./pages/BagDisplayStyled"));
+const MyBag = lazyImport(() => import("./pages/MyBag"));
+const Equipment = lazyImport(() => import("./pages/Equipment"));
+const EquipmentDetail = lazyImport(() => import("./pages/EquipmentDetail"));
+const Feed = lazyImport(() => import("./pages/Feed"));
+const Wishlist = lazyImport(() => import("./pages/Wishlist"));
+const Badges = lazyImport(() => import("./pages/Badges"));
+const BadgePreview = lazyImport(() => import("./pages/BadgePreview"));
+const NotFound = lazyImport(() => import("./pages/NotFound"));
 
 // Admin routes (rarely accessed)
-const SeedEquipment = lazy(() => import("./pages/admin/SeedEquipment"));
-const EquipmentMigration = lazy(() => import("./pages/admin/EquipmentMigration"));
+const SeedEquipment = lazyImport(() => import("./pages/admin/SeedEquipment"));
+const EquipmentMigration = lazyImport(() => import("./pages/admin/EquipmentMigration"));
 
 // Debug routes (developer-only)
-const Debug = lazy(() => import("./pages/Debug"));
-const DebugFeed = lazy(() => import("./pages/DebugFeed"));
+const Debug = lazyImport(() => import("./pages/Debug"));
+const DebugFeed = lazyImport(() => import("./pages/DebugFeed"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

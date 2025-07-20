@@ -367,31 +367,6 @@ export async function getUserSavedEquipment(userId: string) {
       created_at: item.created_at // Keep the save date
     };
   }).filter(Boolean);
-  
-  console.log('getUserSavedEquipment returning:', data?.map(item => ({
-    id: item.equipment?.id,
-    brand: item.equipment?.brand,
-    model: item.equipment?.model
-  })));
-  
-  return data?.map(item => {
-    if (!item.equipment) return null;
-    
-    // Get most liked photo for saved equipment too
-    const sortedPhotos = item.equipment?.equipment_photos?.sort((a, b) => 
-      (b.likes_count || 0) - (a.likes_count || 0)
-    );
-    const primaryPhoto = sortedPhotos?.[0]?.photo_url || 
-                        item.equipment?.equipment_photos?.find(p => p.is_primary)?.photo_url || 
-                        item.equipment?.image_url;
-    
-    return {
-      ...item.equipment,
-      primaryPhoto,
-      most_liked_photo: sortedPhotos?.[0]?.photo_url,
-      created_at: item.created_at // Keep the save date
-    };
-  }).filter(Boolean);
 }
 
 // Upload equipment photo

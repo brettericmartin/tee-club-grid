@@ -10,6 +10,8 @@ import type { Database } from '@/lib/supabase';
 import { FeedItemData, getPostTypeLabel, formatTimestamp } from '@/utils/feedTransformer';
 import { BagCard } from '@/components/bags/BagCard';
 import CommentModal from '@/components/comments/CommentModal';
+import { toggleBagLike } from '@/services/bags';
+import { toast } from 'sonner';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
 type Bag = Database['public']['Tables']['user_bags']['Row'] & {
@@ -28,7 +30,7 @@ interface FeedItemCardProps {
 export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItemCardProps) => {
   const navigate = useNavigate();
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [isFollowing, setIsFollowing] = useState(post.isFromFollowed);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [equipmentData, setEquipmentData] = useState<Record<string, Equipment>>({});
@@ -37,6 +39,8 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showComments, setShowComments] = useState(false);
   const [commentCount, setCommentCount] = useState(post.commentCount || 0);
+  const [bagLiked, setBagLiked] = useState(false);
+  const [bagLikeCount, setBagLikeCount] = useState(0);
 
   // Load user's bag data for flip card back
   useEffect(() => {
@@ -83,6 +87,19 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
         
         if (primaryBag) {
           setUserBag(primaryBag);
+          setBagLikeCount(primaryBag.likes_count || 0);
+          
+          // Check if current user has liked this bag
+          if (currentUserId) {
+            const { data: likeData } = await supabase
+              .from('bag_likes')
+              .select('id')
+              .eq('user_id', currentUserId)
+              .eq('bag_id', primaryBag.id)
+              .single();
+            
+            setBagLiked(!!likeData);
+          }
           
           // Load equipment data for featured clubs
           const equipment = primaryBag.bag_equipment
@@ -107,7 +124,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
     };
     
     loadUserBag();
-  }, [post.userId]);
+  }, [post.userId, currentUserId]);
 
 
   const handleFollowToggle = () => {
@@ -197,16 +214,29 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
         <BagCard
           bag={{
             ...userBag,
-            profiles: userProfile
+            profiles: userProfile,
+            likes_count: bagLikeCount
           }}
           onView={() => navigate(`/bag/${userBag.id}`)}
           onLike={async () => {
-            if (onLike) onLike(post.postId);
+            if (!currentUserId) {
+              toast.error('Please sign in to like bags');
+              return;
+            }
+            
+            try {
+              const newLikedState = await toggleBagLike(currentUserId, userBag.id);
+              setBagLiked(newLikedState);
+              setBagLikeCount(prev => newLikedState ? prev + 1 : prev - 1);
+            } catch (error) {
+              console.error('Error toggling bag like:', error);
+              toast.error('Failed to update like');
+            }
           }}
           onFollow={async () => {
             if (onFollow) onFollow(post.userId);
           }}
-          isLiked={isLiked}
+          isLiked={bagLiked}
           isFollowing={isFollowing}
           currentUserId={currentUserId}
         />
@@ -219,7 +249,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
       <div className="relative bg-gray-900 rounded-xl overflow-hidden">
         {/* Card Header */}
         <div className="flex items-center justify-between p-4 bg-black/50">
-          <Link to={`/bag/${post.userName}`} className="flex items-center gap-3">
+          <Link to={userBag ? `/bag/${userBag.id}` : '#'} className="flex items-center gap-3">
             <Avatar className="w-10 h-10">
               <AvatarImage 
                 src={post.userAvatar || undefined} 
@@ -232,7 +262,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
             <div>
               <p className="text-white font-medium">{post.userName}</p>
               <p className="text-gray-400 text-xs">
-                {post.userHandicap ? `${post.userHandicap} HCP` : 'Golfer'}
+                {post.userTitle || (post.userHandicap ? `${post.userHandicap} HCP` : 'Golfer')}
               </p>
             </div>
           </Link>

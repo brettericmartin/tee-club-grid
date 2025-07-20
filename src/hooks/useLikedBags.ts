@@ -54,12 +54,6 @@ export function useLikedBags() {
           newSet.delete(bagId);
           return newSet;
         });
-        
-        // Update likes count
-        await supabase
-          .from('user_bags')
-          .update({ likes_count: supabase.raw('likes_count - 1') })
-          .eq('id', bagId);
       } else {
         // Like
         await supabase
@@ -70,12 +64,6 @@ export function useLikedBags() {
           });
         
         setLikedBags(prev => new Set([...prev, bagId]));
-        
-        // Update likes count
-        await supabase
-          .from('user_bags')
-          .update({ likes_count: supabase.raw('likes_count + 1') })
-          .eq('id', bagId);
       }
       
       return true;

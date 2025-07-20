@@ -17,6 +17,7 @@ export interface FeedPost {
   // Joined data
   profile?: any;
   bag?: any;
+  user_liked?: any[];
 }
 
 // Helper function to find recent equipment posts
@@ -288,18 +289,42 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
   try {
     console.log('Getting feed posts with filter:', filter, 'userId:', userId);
     
-    let query = supabase
-      .from('feed_posts')
-      .select(`
+    // Build the select query with conditional user_liked join
+    const selectQuery = userId
+      ? `
         *,
         profile:profiles!feed_posts_user_id_fkey(
           username,
+          display_name,
           avatar_url,
-          handicap
+          handicap,
+          title
+        ),
+        user_liked:feed_likes!left(
+          id
         )
-      `)
+      `
+      : `
+        *,
+        profile:profiles!feed_posts_user_id_fkey(
+          username,
+          display_name,
+          avatar_url,
+          handicap,
+          title
+        )
+      `;
+    
+    let query = supabase
+      .from('feed_posts')
+      .select(selectQuery)
       .order('created_at', { ascending: false })
       .limit(50);
+    
+    // If we have a userId, filter the likes join
+    if (userId) {
+      query = query.eq('feed_likes.user_id', userId);
+    }
 
     // If filtering by following, join with follows table
     if (filter === 'following' && userId) {
@@ -365,7 +390,7 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
 }
 
 // Get feed posts by a specific user with pagination support
-export async function getUserFeedPosts(userId: string, limit: number = 100, offset: number = 0) {
+export async function getUserFeedPosts(userId: string, limit: number = 100, offset: number = 0, currentUserId?: string) {
   try {
     console.log('[getUserFeedPosts] Called with userId:', userId, 'limit:', limit, 'offset:', offset);
     
@@ -374,14 +399,42 @@ export async function getUserFeedPosts(userId: string, limit: number = 100, offs
       return { posts: [], totalCount: 0 };
     }
     
-    const { data, error, count } = await supabase
-      .from('feed_posts')
-      .select(`
+    // Build the select query with conditional user_liked join
+    const selectQuery = currentUserId
+      ? `
         *,
         profile:profiles!feed_posts_user_id_fkey(
           username,
+          display_name,
           avatar_url,
-          handicap
+          handicap,
+          title
+        ),
+        equipment:equipment(
+          id,
+          brand,
+          model,
+          category,
+          image_url
+        ),
+        bag:user_bags(
+          id,
+          name,
+          description,
+          background_image
+        ),
+        user_liked:feed_likes!left(
+          id
+        )
+      `
+      : `
+        *,
+        profile:profiles!feed_posts_user_id_fkey(
+          username,
+          display_name,
+          avatar_url,
+          handicap,
+          title
         ),
         equipment:equipment(
           id,
@@ -396,10 +449,21 @@ export async function getUserFeedPosts(userId: string, limit: number = 100, offs
           description,
           background_image
         )
-      `, { count: 'exact' })
+      `;
+    
+    let query = supabase
+      .from('feed_posts')
+      .select(selectQuery, { count: 'exact' })
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
+    
+    // If we have a currentUserId, filter the likes join
+    if (currentUserId) {
+      query = query.eq('feed_likes.user_id', currentUserId);
+    }
+    
+    const { data, error, count } = await query;
 
     if (error) {
       console.error('[getUserFeedPosts] Supabase error:', error);

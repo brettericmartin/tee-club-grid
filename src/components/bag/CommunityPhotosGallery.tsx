@@ -52,7 +52,7 @@ export function CommunityPhotosGallery({
         .from('equipment_photos')
         .select(`
           *,
-          profile:profiles(username, avatar_url)
+          profile:profiles(username, display_name, avatar_url)
         `)
         .eq('equipment_id', equipmentId)
         .order('likes_count', { ascending: false });
@@ -200,7 +200,7 @@ export function CommunityPhotosGallery({
                       <div className="absolute bottom-0 left-0 right-0 p-2">
                         <div className="flex items-center justify-between text-white">
                           <span className="text-xs truncate">
-                            @{photo.profile?.username || 'Anonymous'}
+                            @{photo.profile?.display_name || photo.profile?.username || 'Anonymous'}
                           </span>
                           <div onClick={(e) => e.stopPropagation()}>
                             <TeedBallLike

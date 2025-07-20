@@ -70,23 +70,18 @@ export default defineConfig(({ mode }) => {
               '@dnd-kit/sortable',
               '@dnd-kit/utilities',
             ],
-            // Feature chunks
+            // Feature chunks - simplified to avoid circular dependencies
             'feature-equipment': [
               './src/pages/Equipment',
               './src/pages/EquipmentDetail',
-              './src/components/equipment/EquipmentSelector',
-              './src/components/equipment/EquipmentSelectorImproved',
-              './src/components/equipment/EquipmentSelectorSimple',
             ],
             'feature-bags': [
+              './src/pages/BagsBrowser',
               './src/pages/MyBagSupabase',
               './src/pages/BagDisplayStyled',
-              './src/components/bag/BagGalleryDndKit',
             ],
             'feature-feed': [
               './src/pages/Feed',
-              './src/components/feed/FeedCard',
-              './src/pages/Following',
             ],
             'feature-admin': [
               './src/pages/admin/SeedEquipment',

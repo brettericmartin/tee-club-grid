@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Heart, Share2, Edit, ArrowLeft, Grid3x3, List, CreditCard, Trophy, Star } from "lucide-react";
+import { Loader2, Share2, Edit, ArrowLeft, Grid3x3, List, CreditCard, Trophy, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,8 @@ import { BadgeService } from "@/services/badgeService";
 import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
 import { sortBadgesByPriority } from "@/utils/badgeSorting";
 import BackgroundLayer from "@/components/BackgroundLayer";
+import { TeedBallLike } from "@/components/shared/TeedBallLike";
+import { toggleBagLike } from "@/services/bags";
 
 const BagDisplayStyled = () => {
   const { bagId } = useParams();
@@ -137,29 +139,21 @@ const BagDisplayStyled = () => {
 
   const handleLike = async () => {
     if (!currentUser) {
-      toast.error('Please sign in to like bags');
+      toast.error('Please sign in to tee bags');
       return;
     }
 
     try {
-      if (isLiked) {
-        await supabase
-          .from('bag_likes')
-          .delete()
-          .eq('bag_id', bagId)
-          .eq('user_id', currentUser.id);
-      } else {
-        await supabase
-          .from('bag_likes')
-          .insert({
-            bag_id: bagId,
-            user_id: currentUser.id
-          });
-      }
-      setIsLiked(!isLiked);
-      toast.success(isLiked ? 'Removed from likes' : 'Added to likes');
-    } catch (err) {
-      toast.error('Failed to update like');
+      const newLikedState = await toggleBagLike(currentUser.id, bagId!);
+      setIsLiked(newLikedState);
+      // Update local likes count
+      setBagData((prev: any) => ({
+        ...prev,
+        likes_count: newLikedState ? (prev.likes_count || 0) + 1 : Math.max(0, (prev.likes_count || 0) - 1)
+      }));
+    } catch (error) {
+      console.error('Error toggling bag like:', error);
+      toast.error('Failed to update tee');
     }
   };
 
@@ -272,14 +266,16 @@ const BagDisplayStyled = () => {
                 </Button>
               </div>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleLike}
-                className={`${isLiked ? 'text-red-500' : 'text-white'} hover:bg-white/10`}
-              >
-                <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-              </Button>
+              <div className="bg-white/10 border border-white/20 rounded-md hover:bg-white/20 transition-colors">
+                <TeedBallLike
+                  isLiked={isLiked}
+                  likeCount={bagData?.likes_count || 0}
+                  onToggle={handleLike}
+                  size="md"
+                  showCount={true}
+                  className="text-white hover:text-primary h-10 px-3"
+                />
+              </div>
               <Button
                 variant="ghost"
                 size="icon"

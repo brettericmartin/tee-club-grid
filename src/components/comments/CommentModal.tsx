@@ -108,7 +108,7 @@ export default function CommentModal({
                   <div>
                     <p className="text-white font-medium">{post.userName}</p>
                     <p className="text-gray-400 text-xs">
-                      {post.userHandicap ? `${post.userHandicap} HCP` : 'Golfer'}
+                      {post.userTitle || (post.userHandicap ? `${post.userHandicap} HCP` : 'Golfer')}
                     </p>
                   </div>
                 </div>
@@ -129,7 +129,7 @@ export default function CommentModal({
                 <TeedBallLike
                   isLiked={isLiked}
                   likeCount={post.likes}
-                  onLike={() => onLike?.(post.postId)}
+                  onToggle={() => onLike?.(post.postId)}
                   size="sm"
                 />
                 
