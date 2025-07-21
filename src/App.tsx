@@ -6,30 +6,43 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
 import { FeedProvider } from "./contexts/FeedContext";
-import { ErrorBoundary, AsyncErrorBoundary } from "./components/ErrorBoundary";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Navigation from "./components/Navigation";
 import BottomNavigation from "./components/navigation/BottomNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Analytics } from "@vercel/analytics/react";
 
-// Lazy load pages for code splitting with error handling
-const lazyImport = (importFn: () => Promise<any>) => {
+// Lazy load pages for code splitting with simple error handling
+const lazyImport = (importFn: () => Promise<any>, componentName?: string) => {
   return lazy(() =>
     importFn().catch((error) => {
-      console.error('Failed to load module:', error);
-      // Return a fallback component
+      console.error(`Failed to load ${componentName || 'module'}:`, error);
+      // Return a simple fallback component without hooks
       return {
         default: () => (
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold mb-2">Failed to load page</h2>
-              <p className="text-muted-foreground mb-4">Please refresh the page to try again</p>
-              <button 
-                onClick={() => window.location.reload()} 
-                className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
-              >
-                Refresh Page
-              </button>
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="text-center max-w-md">
+              <h2 className="text-2xl font-bold mb-2 text-white">Unable to Load Page</h2>
+              <p className="text-white/70 mb-6">
+                {componentName ? `The ${componentName} page` : 'This page'} failed to load.
+              </p>
+              <div className="space-y-3">
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="w-full px-6 py-3 bg-primary text-black font-medium rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Reload Page
+                </button>
+                <button 
+                  onClick={() => window.location.href = '/'}
+                  className="w-full px-6 py-3 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors"
+                >
+                  Go to Home
+                </button>
+              </div>
+              <p className="text-white/50 text-sm mt-6">
+                If this problem persists, try clearing your browser cache.
+              </p>
             </div>
           </div>
         ),
@@ -38,29 +51,29 @@ const lazyImport = (importFn: () => Promise<any>) => {
   );
 };
 
-const Index = lazyImport(() => import("./pages/Index"));
-const BagsBrowser = lazyImport(() => import("./pages/BagsBrowser"));
-const BagDisplay = lazyImport(() => import("./pages/BagDisplayStyled"));
-const MyBag = lazyImport(() => import("./pages/MyBag"));
-const Equipment = lazyImport(() => import("./pages/Equipment"));
-const EquipmentDetail = lazyImport(() => import("./pages/EquipmentDetail"));
-const Feed = lazyImport(() => import("./pages/Feed"));
-const Wishlist = lazyImport(() => import("./pages/Wishlist"));
-const Badges = lazyImport(() => import("./pages/Badges"));
-const BadgePreview = lazyImport(() => import("./pages/BadgePreview"));
-const Forum = lazyImport(() => import("./pages/Forum"));
-const ForumIndex = lazyImport(() => import("./pages/ForumIndex"));
-const ForumCategory = lazyImport(() => import("./pages/ForumCategory"));
-const ForumThread = lazyImport(() => import("./pages/ForumThread"));
-const NotFound = lazyImport(() => import("./pages/NotFound"));
+const Index = lazyImport(() => import("./pages/Index"), "Home");
+const BagsBrowser = lazyImport(() => import("./pages/BagsBrowser"), "Bags Browser");
+const BagDisplay = lazyImport(() => import("./pages/BagDisplayStyled"), "Bag Display");
+const MyBag = lazyImport(() => import("./pages/MyBag"), "My Bag");
+const Equipment = lazyImport(() => import("./pages/Equipment"), "Equipment");
+const EquipmentDetail = lazyImport(() => import("./pages/EquipmentDetail"), "Equipment Detail");
+const Feed = lazyImport(() => import("./pages/Feed"), "Feed");
+const Wishlist = lazyImport(() => import("./pages/Wishlist"), "Wishlist");
+const Badges = lazyImport(() => import("./pages/Badges"), "Badges");
+const BadgePreview = lazyImport(() => import("./pages/BadgePreview"), "Badge Preview");
+const Forum = lazyImport(() => import("./pages/Forum"), "Forum");
+const ForumIndex = lazyImport(() => import("./pages/ForumIndex"), "Forum Index");
+const ForumCategory = lazyImport(() => import("./pages/ForumCategory"), "Forum Category");
+const ForumThread = lazyImport(() => import("./pages/ForumThread"), "Forum Thread");
+const NotFound = lazyImport(() => import("./pages/NotFound"), "Not Found");
 
 // Admin routes (rarely accessed)
-const SeedEquipment = lazyImport(() => import("./pages/admin/SeedEquipment"));
-const EquipmentMigration = lazyImport(() => import("./pages/admin/EquipmentMigration"));
+const SeedEquipment = lazyImport(() => import("./pages/admin/SeedEquipment"), "Seed Equipment");
+const EquipmentMigration = lazyImport(() => import("./pages/admin/EquipmentMigration"), "Equipment Migration");
 
 // Debug routes (developer-only)
-const Debug = lazyImport(() => import("./pages/Debug"));
-const DebugFeed = lazyImport(() => import("./pages/DebugFeed"));
+const Debug = lazyImport(() => import("./pages/Debug"), "Debug");
+const DebugFeed = lazyImport(() => import("./pages/DebugFeed"), "Debug Feed");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,7 +104,6 @@ const App = () => {
   
   return (
   <ErrorBoundary>
-    <AsyncErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <FeedProvider>
@@ -141,7 +153,6 @@ const App = () => {
           </FeedProvider>
         </AuthProvider>
       </QueryClientProvider>
-    </AsyncErrorBoundary>
   </ErrorBoundary>
   );
 };

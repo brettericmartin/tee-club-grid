@@ -61,7 +61,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
         }
 
         // Get user's primary bag with full equipment relationships
-        const { data: primaryBag } = await supabase
+        const { data: primaryBag, error: bagError } = await supabase
           .from('user_bags')
           .select(`
             *,
@@ -75,15 +75,43 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
                   likes_count,
                   is_primary
                 )
-              ),
-              shaft:equipment!shaft_id (*),
-              grip:equipment!grip_id (*),
-              loft_option:loft_options (*)
+              )
             )
           `)
           .eq('user_id', post.userId)
           .eq('is_primary', true)
           .single();
+        
+        if (bagError) {
+          console.error('Error fetching user bag:', bagError);
+          // Try simpler query without foreign key joins
+          const { data: simpleBag } = await supabase
+            .from('user_bags')
+            .select(`
+              *,
+              bag_equipment (
+                *,
+                equipment (
+                  *,
+                  equipment_photos (
+                    id,
+                    photo_url,
+                    likes_count,
+                    is_primary
+                  )
+                )
+              )
+            `)
+            .eq('user_id', post.userId)
+            .eq('is_primary', true)
+            .single();
+          
+          if (simpleBag) {
+            setUserBag(simpleBag);
+            setBagLikeCount(simpleBag.likes_count || 0);
+          }
+          return;
+        }
         
         if (primaryBag) {
           setUserBag(primaryBag);

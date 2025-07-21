@@ -13,9 +13,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FeedItemCard } from '@/components/FeedItemCard';
+import { FeedErrorBoundary } from '@/components/FeedErrorBoundary';
 import { supabase } from '@/lib/supabase';
 
-const Feed = () => {
+const FeedContent = () => {
   const { user } = useAuth();
   const { allPosts, loading, error, loadMainFeed } = useFeed();
   const [filter, setFilter] = useState<'all' | 'following'>('all');
@@ -257,6 +258,14 @@ const Feed = () => {
       )}
 
     </div>
+  );
+};
+
+const Feed = () => {
+  return (
+    <FeedErrorBoundary>
+      <FeedContent />
+    </FeedErrorBoundary>
   );
 };
 

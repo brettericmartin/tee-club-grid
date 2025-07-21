@@ -334,10 +334,7 @@ const MyBagSupabase = () => {
               likes_count,
               is_primary
             )
-          ),
-          shaft:equipment!shaft_id(*),
-          grip:equipment!grip_id(*),
-          loft_option:loft_options(*)
+          )
         `)
         .eq('bag_id', bagId)
         .order('added_at');

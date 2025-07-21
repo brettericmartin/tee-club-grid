@@ -1,99 +1,69 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, RefreshCw, Home } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
-interface Props {
+interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
 }
 
-interface State {
+interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
-  errorInfo: ErrorInfo | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-    errorInfo: null
-  };
-
-  public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error, errorInfo: null };
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Use safe error logging to avoid Symbol conversion issues
-    console.error('Uncaught error:', error.message, error.stack);
-    console.error('Component stack:', errorInfo.componentStack);
-    this.setState({ errorInfo });
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
   }
 
-  private handleReset = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  handleReset = () => {
+    this.setState({ hasError: false, error: null });
     window.location.reload();
   };
 
-  private handleGoHome = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
-    window.location.href = '/';
-  };
-
-  public render() {
+  render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return <>{this.props.fallback}</>;
       }
 
       return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-          <Card className="max-w-lg w-full">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-6 w-6 text-destructive" />
-                <CardTitle>Something went wrong</CardTitle>
-              </div>
-              <CardDescription>
-                We're sorry, but something unexpected happened. Don't worry, we've been notified and will look into it.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {process.env.NODE_ENV === 'development' && this.state.error && (
-                <div className="rounded-lg bg-muted p-4 font-mono text-sm">
-                  <p className="font-semibold text-destructive mb-2">
-                    {this.state.error.message || 'Unknown error'}
-                  </p>
-                  {this.state.errorInfo && (
-                    <pre className="text-xs text-muted-foreground overflow-auto max-h-40">
-                      {this.state.errorInfo.componentStack}
-                    </pre>
-                  )}
-                </div>
-              )}
-              
-              <div className="flex gap-2">
-                <Button 
-                  onClick={this.handleReset}
-                  variant="default"
-                  className="flex items-center gap-2"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  Try Again
-                </Button>
-                <Button 
-                  onClick={this.handleGoHome}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Home className="h-4 w-4" />
-                  Go Home
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="min-h-[400px] flex items-center justify-center p-8">
+          <div className="text-center max-w-md">
+            <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Something went wrong
+            </h2>
+            <p className="text-gray-400 mb-6">
+              We encountered an error while loading this content. Please try refreshing the page.
+            </p>
+            <Button
+              onClick={this.handleReset}
+              className="bg-[#10B981] hover:bg-[#0ea674]"
+            >
+              Refresh Page
+            </Button>
+            {process.env.NODE_ENV === 'development' && this.state.error && (
+              <details className="mt-4 text-left">
+                <summary className="text-sm text-gray-500 cursor-pointer">
+                  Error details
+                </summary>
+                <pre className="mt-2 text-xs text-red-400 overflow-auto p-2 bg-black/50 rounded">
+                  {this.state.error.toString()}
+                </pre>
+              </details>
+            )}
+          </div>
         </div>
       );
     }
@@ -102,43 +72,4 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// Hook for functional components to catch errors
-export function useErrorHandler() {
-  const [error, setError] = React.useState<Error | null>(null);
-
-  React.useEffect(() => {
-    if (error) {
-      throw error;
-    }
-  }, [error]);
-
-  const resetError = () => setError(null);
-  const captureError = (error: Error) => setError(error);
-
-  return { resetError, captureError };
-}
-
-// Async error boundary for handling promise rejections
-export function AsyncErrorBoundary({ children }: { children: ReactNode }) {
-  const { captureError } = useErrorHandler();
-
-  React.useEffect(() => {
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      // Safe error logging to avoid Symbol conversion issues
-      const reason = event.reason;
-      const message = reason && typeof reason === 'object' && 'message' in reason 
-        ? String(reason.message) 
-        : 'Unhandled promise rejection';
-      console.error('Unhandled promise rejection:', message);
-      captureError(new Error(message));
-    };
-
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-
-    return () => {
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-    };
-  }, [captureError]);
-
-  return <>{children}</>;
-}
+export default ErrorBoundary;

@@ -19,7 +19,8 @@
     "collect:screenshots": "node scripts/collect-equipment-screenshots.js",
     "collect:2ndswing": "node scripts/collect-2ndswing-images.js",
     "collect:manual": "node scripts/collect-manual-urls.js",
-    "test:build": "npm run build && npm run preview"
+    "test:build": "npm run build && npm run preview",
+    "rank:equipment": "node scripts/rank-equipment-simple.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

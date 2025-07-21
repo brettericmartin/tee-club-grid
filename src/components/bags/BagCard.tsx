@@ -222,9 +222,9 @@ const BagCardComponent = ({
         )}
       </div>
 
-      {/* Container - removed backdrop blur */}
+      {/* Container - fully transparent to show background image */}
       <div 
-        className="relative bg-white/5 p-4 h-full min-h-[400px] cursor-pointer"
+        className="relative p-4 h-full min-h-[400px] cursor-pointer"
         onClick={() => onView(bag.id)}
       >
         {/* Header with user info */}
@@ -256,7 +256,7 @@ const BagCardComponent = ({
                 size="sm"
                 onClick={handleFollowClick}
                 disabled={followLoading}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                className="bg-[#2a2a2a] border-[#3a3a3a] text-white hover:bg-[#3a3a3a]"
               >
                 {followLoading ? (
                   <Loader2 className="w-3 h-3 animate-spin" />
@@ -320,7 +320,7 @@ const BagCardComponent = ({
                     </div>
                   </>
                 ) : (
-                  <div className="aspect-square rounded-lg bg-white/5" />
+                  <div className="aspect-square rounded-lg bg-[#1a1a1a]" />
                 )}
               </div>
             );
@@ -356,7 +356,7 @@ const BagCardComponent = ({
                     </div>
                   </>
                 ) : (
-                  <div className="aspect-square rounded-lg bg-white/5" />
+                  <div className="aspect-square rounded-lg bg-[#1a1a1a]" />
                 )}
               </div>
             );
@@ -387,14 +387,14 @@ const BagCardComponent = ({
               }}
               variant="outline"
               size="sm"
-              className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20 group h-9 text-sm"
+              className="flex-1 bg-[#2a2a2a] border-[#3a3a3a] text-white hover:bg-[#3a3a3a] group h-9 text-sm"
             >
               <span>View Full Bag</span>
               <ExternalLink className="w-3 h-3 ml-1 opacity-50 group-hover:opacity-100 transition-opacity" />
             </Button>
             
             {/* Tee Button - Right side, prominent */}
-            <div className="bg-white/10 border border-white/20 rounded-md hover:bg-white/20 transition-colors">
+            <div className="bg-[#2a2a2a] border border-[#3a3a3a] rounded-md hover:bg-[#3a3a3a] transition-colors">
               <TeedBallLike
                 isLiked={isLiked}
                 likeCount={bag.likes_count || 0}

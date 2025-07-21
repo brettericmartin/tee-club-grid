@@ -1,29 +1,69 @@
-import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { Button } from "@/components/ui/button";
 import { Loader2, MessageCircle, Camera, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { SignInModal } from "@/components/auth/SignInModal";
 import { BagCard } from "@/components/bags/BagCard";
 import { getBags } from "@/services/bags";
 import { getEquipment } from "@/services/equipment";
+import EquipmentCard from "@/components/shared/EquipmentCard";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import type { Database } from "@/lib/supabase";
 
 type Equipment = Database['public']['Tables']['equipment']['Row'] & {
-  equipment_photos?: any[];
+  equipment_photos?: Array<{
+    id: string;
+    photo_url: string;
+    likes_count: number;
+    is_primary: boolean;
+  }>;
   primaryPhoto?: string;
+  most_liked_photo?: string;
+  savesCount?: number;
+  totalLikes?: number;
 };
-type Bag = any; // Using any since getBags returns a complex type
+
+type Bag = {
+  id: string;
+  name: string;
+  bag_type?: string;
+  background_image?: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+  likes_count: number;
+  views_count: number;
+  user_id: string;
+  profiles?: {
+    id: string;
+    username: string;
+    display_name: string;
+    avatar_url?: string;
+    handicap?: number;
+    location?: string;
+    title?: string;
+  };
+  bag_equipment?: Array<{
+    id: string;
+    position?: number;
+    custom_photo_url?: string;
+    purchase_price?: number;
+    is_featured: boolean;
+    equipment_id: string;
+    equipment: Equipment;
+  }>;
+  totalValue?: number;
+  likesCount?: number;
+}
 
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showSignIn, setShowSignIn] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [topBags, setTopBags] = useState<Bag[]>([]);
@@ -33,14 +73,36 @@ const Index = () => {
     totalPhotos: 0,
     totalPosts: 0
   });
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
   
-  // Hero equipment images for carousel - using database equipment images
-  const heroImages = equipment.slice(0, 4).map(eq => eq.image_url).filter(Boolean) as string[];
+  // Hero equipment images for carousel - using primaryPhoto from ranked equipment
+  const heroImages = useMemo(() => {
+    if (!Array.isArray(equipment)) return [];
+    
+    return equipment
+      .filter(eq => eq && (eq.primaryPhoto || eq.image_url))
+      .slice(0, 10)
+      .map(eq => ({
+        url: eq.primaryPhoto || eq.image_url || '',
+        brand: eq.brand || '',
+        model: eq.model || '',
+        category: eq.category || ''
+      }));
+  }, [equipment]);
 
   // Load data
   useEffect(() => {
     console.log('Index page mounted, loading data...');
+    const controller = new AbortController();
+    setAbortController(controller);
+    
     loadAllData();
+    
+    // Cleanup function
+    return () => {
+      console.log('Index page unmounting, aborting requests...');
+      controller.abort();
+    };
   }, []);
 
   const loadAllData = async () => {
@@ -48,21 +110,40 @@ const Index = () => {
       setLoading(true);
       console.log('Starting to load all data...');
       
-      const results = await Promise.allSettled([
-        loadEquipment(),
-        loadTopBags(),
-        loadStats()
-      ]);
+      // Load data sequentially to better track errors
+      try {
+        await loadEquipment();
+        console.log('Equipment loaded successfully');
+      } catch (error) {
+        console.error('Failed to load equipment:', error);
+      }
       
-      results.forEach((result, index) => {
-        if (result.status === 'rejected') {
-          console.error(`Failed to load data ${index}:`, result.reason);
-        }
-      });
+      try {
+        await loadTopBags();
+        console.log('Top bags loaded successfully');
+      } catch (error) {
+        console.error('Failed to load top bags:', error);
+      }
+      
+      try {
+        await loadStats();
+        console.log('Stats loaded successfully');
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
       
       console.log('All data loading completed');
     } catch (error) {
-      console.error('Error loading page data:', error);
+      console.error('Critical error loading page data:', error);
+      // Set empty data as fallback
+      setEquipment([]);
+      setTopBags([]);
+      setStats({
+        totalBags: 0,
+        totalEquipment: 0,
+        totalPhotos: 0,
+        totalPosts: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -71,7 +152,8 @@ const Index = () => {
   const loadEquipment = async () => {
     try {
       console.log('Loading equipment...');
-      // Get popular equipment using the service
+      
+      // Always try popular equipment first for stability
       const allEquipment = await getEquipment({ sortBy: 'popular' });
       
       if (!allEquipment || allEquipment.length === 0) {
@@ -80,27 +162,47 @@ const Index = () => {
         return;
       }
       
-      // Filter to get one from each category that has an image
-      const categories = ['driver', 'putter', 'wedges', 'hybrid', 'irons', 'fairway_wood'];
-      const equipmentByCategory: Equipment[] = [];
+      // Group by category
+      const equipmentByCategory = allEquipment.reduce((acc, eq) => {
+        if (!eq || !eq.category) return acc;
+        if (!acc[eq.category]) acc[eq.category] = [];
+        acc[eq.category].push(eq);
+        return acc;
+      }, {} as Record<string, typeof allEquipment>);
       
-      categories.forEach(category => {
-        // Find the first equipment in this category that has an image
-        const equipmentWithImage = allEquipment.find(eq => 
-          eq.category === category && 
-          (eq.image_url || (eq.equipment_photos && eq.equipment_photos.length > 0))
-        );
-        
-        if (equipmentWithImage) {
-          equipmentByCategory.push(equipmentWithImage);
+      // Get one from each main category
+      const mainCategories = ['driver', 'iron', 'putter', 'wedge', 'fairway_wood', 'hybrid'];
+      const accessoryCategories = ['ball', 'glove', 'rangefinder', 'gps', 'bag', 'tee'];
+      
+      const selectedEquipment: typeof allEquipment = [];
+      
+      // Get top item from each main category
+      mainCategories.forEach(category => {
+        const items = equipmentByCategory[category];
+        if (items && Array.isArray(items) && items.length > 0) {
+          const withPhotos = items.filter(eq => eq && (eq.primaryPhoto || eq.image_url));
+          if (withPhotos.length > 0) {
+            selectedEquipment.push(withPhotos[0]);
+          }
         }
       });
       
-      console.log('Loaded equipment with images:', equipmentByCategory.length, 'items');
-      setEquipment(equipmentByCategory);
+      // Get top accessories
+      accessoryCategories.forEach(category => {
+        const items = equipmentByCategory[category];
+        if (items && Array.isArray(items) && items.length > 0 && selectedEquipment.length < 12) {
+          const withPhotos = items.filter(eq => eq && (eq.primaryPhoto || eq.image_url));
+          if (withPhotos.length > 0) {
+            selectedEquipment.push(withPhotos[0]);
+          }
+        }
+      });
+      
+      console.log('Selected equipment:', selectedEquipment.length, 'items from various categories');
+      setEquipment(selectedEquipment.slice(0, 12));
     } catch (error) {
       console.error('Error loading equipment:', error);
-      throw error;
+      setEquipment([]);
     }
   };
   
@@ -120,7 +222,8 @@ const Index = () => {
       }
     } catch (error) {
       console.error('Error loading top bags:', error);
-      throw error;
+      setTopBags([]);
+      // Don't throw, just log the error
     }
   };
 
@@ -128,7 +231,8 @@ const Index = () => {
     try {
       console.log('Loading stats...');
       // Get real stats from database with correct table names
-      const [bagsCount, equipmentCount, photosCount, postsCount] = await Promise.all([
+      // Use Promise.allSettled to handle individual failures
+      const results = await Promise.allSettled([
         supabase.from('user_bags').select('*', { count: 'exact', head: true }),
         supabase.from('equipment').select('*', { count: 'exact', head: true }),
         supabase.from('equipment_photos').select('*', { count: 'exact', head: true }),
@@ -136,32 +240,34 @@ const Index = () => {
       ]);
 
       const stats = {
-        totalBags: bagsCount.count || 0,
-        totalEquipment: equipmentCount.count || 0,
-        totalPhotos: photosCount.count || 0,
-        totalPosts: postsCount.count || 0
+        totalBags: results[0].status === 'fulfilled' ? (results[0].value.count || 0) : 0,
+        totalEquipment: results[1].status === 'fulfilled' ? (results[1].value.count || 0) : 0,
+        totalPhotos: results[2].status === 'fulfilled' ? (results[2].value.count || 0) : 0,
+        totalPosts: results[3].status === 'fulfilled' ? (results[3].value.count || 0) : 0
       };
+      
+      // Log any failures
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.warn(`Failed to load stat ${index}:`, result.reason);
+        }
+      });
       
       console.log('Stats loaded:', stats);
       setStats(stats);
     } catch (error) {
       console.error('Error loading stats:', error);
+      // Set default stats on complete failure
+      setStats({
+        totalBags: 0,
+        totalEquipment: 0,
+        totalPhotos: 0,
+        totalPosts: 0
+      });
     }
   };
   
-  // Auto-scroll carousel every 5 seconds
-  useEffect(() => {
-    if (heroImages.length > 0) {
-      const interval = setInterval(() => {
-        setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [heroImages.length]);
 
-  // Parallax scroll hook
-  const { scrollY } = useScroll();
-  const heroTextY = useTransform(scrollY, [0, 500], [0, -100]);
 
   const handleBuildBagClick = () => {
     if (user) {
@@ -175,20 +281,6 @@ const Index = () => {
     navigate('/bags');
   };
 
-  // Equipment category icons
-  const getCategoryIcon = (category: string) => {
-    const iconMap: { [key: string]: string } = {
-      'driver': '🏌️',
-      'irons': '⚡',
-      'putter': '🏁',
-      'wedges': '🎯',
-      'fairway_wood': '🌲',
-      'hybrid': '🔄',
-      'golf_ball': '⚪'
-    };
-    return iconMap[category] || '🏌️';
-  };
-
   // Stats data - Real data from database
   const statsData = [
     { value: `${stats.totalBags}`, label: "Bags Shared" },
@@ -198,111 +290,107 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black font-body">
       <Navigation />
       
       {/* Dynamic Hero Section with Equipment Carousel */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="h-[60vh] relative overflow-hidden bg-black"
-      >
-        {/* Auto-scrolling Equipment Carousel Background */}
+      <section className="h-[45vh] relative overflow-hidden bg-black">
+        {/* Revolving Equipment Carousel Background */}
         <div className="absolute inset-0">
           {loading ? (
             <div className="w-full h-full flex items-center justify-center">
               <Loader2 className="w-8 h-8 animate-spin text-white/60" />
             </div>
           ) : heroImages.length > 0 ? (
-            heroImages.map((image, index) => (
-              <div
-                key={index}
-                className={`absolute inset-0 transition-opacity duration-1000 ${
-                  index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                <div className="w-full h-full overflow-hidden">
-                  <img 
-                    src={image}
-                    className="w-full h-full object-cover animate-ken-burns filter brightness-50"
-                    alt=""
-                  />
+            <div className="relative w-full h-full overflow-hidden">
+              {/* Gradient overlays for fade effect on edges */}
+              <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none" />
+              
+              {/* Static equipment showcase - performance optimized */}
+              <div className="h-full flex items-center justify-center overflow-hidden">
+                <div className="flex gap-8 px-12">
+                  {heroImages.slice(0, 5).map((item, index) => (
+                    <div
+                      key={`hero-${index}`}
+                      className="h-[35vh] w-[300px] flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity"
+                    >
+                      {item.url ? (
+                        <img 
+                          src={item.url}
+                          className="max-w-full max-h-full object-contain drop-shadow-2xl"
+                          alt={`${item.brand || 'Equipment'} ${item.model || ''}`}
+                          loading={index > 2 ? "lazy" : "eager"}
+                          onError={(e) => {
+                            console.warn(`Failed to load hero image ${index}:`, item.url);
+                            const target = e.currentTarget as HTMLImageElement;
+                            // Hide the broken image
+                            target.style.display = 'none';
+                            // Remove from DOM to prevent memory leak
+                            target.remove();
+                          }}
+                          onLoad={(e) => {
+                            // Ensure image is visible once loaded
+                            const target = e.currentTarget as HTMLImageElement;
+                            target.style.opacity = '1';
+                          }}
+                          style={{ opacity: 0, transition: 'opacity 0.3s' }}
+                        />
+                      ) : null}
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))
+            </div>
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-gray-900 to-black" />
+            <div className="w-full h-full bg-gradient-to-br from-[#0d3b0d] via-[#0a0a0a] to-black" />
           )}
           {/* Dark gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90 pointer-events-none" />
         </div>
 
-        {/* Hero Content with Parallax Effect */}
-        <motion.div 
-          className="relative z-10 h-full flex flex-col justify-center items-center px-4"
-          style={{ y: heroTextY }}
-        >
+        {/* Hero Content */}
+        <div className="relative z-10 h-full flex flex-col justify-center items-center px-4">
           <div className="text-center max-w-4xl">
-            <motion.h1 
-              className="text-5xl md:text-7xl font-bold text-white mb-6"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
+            <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-4">
               Your Bag, Your Story
-            </motion.h1>
+            </h1>
             
-            <motion.p 
-              className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-            >
+            <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto font-body">
               Share your golf setup. Connect with fellow golfers. Build the ultimate gear community.
-            </motion.p>
+            </p>
 
             {/* Updated CTAs */}
-            <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.7 }}
-            >
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 onClick={handleBuildBagClick}
                 className="bg-[#10B981] hover:bg-[#0ea674] px-8 py-4 text-lg font-bold hover:scale-105 transition-transform"
               >
                 Build Your Bag
               </Button>
-              <button 
+              <Button 
                 onClick={handleExploreBagsClick}
-                className="px-8 py-4 bg-white/10 backdrop-blur-[10px] text-white font-medium rounded-lg border border-white/30 hover:bg-white/20 transition-colors"
+                variant="outline"
+                className="px-8 py-4 bg-[#1a1a1a] text-white font-medium border border-white/20 hover:bg-[#2a2a2a] transition-colors"
               >
                 Explore Bags
-              </button>
-            </motion.div>
+              </Button>
+            </div>
           </div>
-        </motion.div>
-      </motion.section>
+        </div>
+      </section>
 
       {/* Top Bags Section - Using Real BagCard Components */}
       <section className="py-20 bg-[#0a0a0a]">
         <div className="max-w-7xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
+          <div className="text-center mb-12">
             <h2 className="text-4xl font-display font-bold text-white mb-4">
               Top Bags
             </h2>
-            <p className="text-gray-400 text-lg">
+            <p className="text-gray-400 text-lg font-body">
               Most teed bags from our community
             </p>
-          </motion.div>
+          </div>
 
           {/* Top 3 Bags Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -312,18 +400,15 @@ const Index = () => {
                 <div className="h-96 bg-[#1a1a1a] rounded-lg animate-pulse" />
                 <div className="h-96 bg-[#1a1a1a] rounded-lg animate-pulse" />
               </>
-            ) : topBags.length > 0 ? (
-              topBags.map((bag, index) => (
-                <motion.div
-                  key={bag.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
-                  <BagCard bag={bag} />
-                </motion.div>
-              ))
+            ) : topBags && topBags.length > 0 ? (
+              topBags.map((bag, index) => bag && bag.id ? (
+                <ErrorBoundary key={bag.id}>
+                  <BagCard 
+                    bag={bag} 
+                    onView={(bagId) => navigate(`/bags/${bagId}`)}
+                  />
+                </ErrorBoundary>
+              ) : null)
             ) : (
               <div className="col-span-3 text-center py-12">
                 <p className="text-gray-400">No bags available yet. Be the first to create one!</p>
@@ -332,61 +417,20 @@ const Index = () => {
           </div>
 
           {/* Popular Equipment Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="mt-20"
-          >
-            <h3 className="text-2xl font-bold text-white mb-6">Popular Equipment</h3>
+          <div className="mt-20">
+            <h3 className="text-2xl font-display font-bold text-white mb-6">Popular Equipment</h3>
             
-            {/* Horizontal Scrolling Equipment Cards */}
-            <div className="overflow-x-auto pb-4">
-              <div className="flex gap-4 min-w-max">
-                {equipment.map((item, index) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: 50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    onClick={() => navigate(`/equipment/${item.id}`)}
-                    className="flex-shrink-0 w-64 bg-[#1a1a1a] border border-white/10 rounded-xl p-4 hover:bg-[#2a2a2a] transition-colors cursor-pointer group"
-                  >
-                    {/* Equipment Image */}
-                    <div className="aspect-square bg-[#0a0a0a] rounded-lg mb-3 overflow-hidden">
-                      {item.image_url ? (
-                        <img 
-                          src={item.image_url}
-                          alt={`${item.brand} ${item.model}`}
-                          className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl">
-                          {getCategoryIcon(item.category)}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Equipment Info */}
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-white font-medium text-sm">{item.brand}</h4>
-                      <span className="text-2xl">{getCategoryIcon(item.category)}</span>
-                    </div>
-                    <p className="text-gray-300 text-xs mb-2 line-clamp-1">{item.model}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-xs capitalize">{item.category.replace('_', ' ')}</span>
-                      {item.msrp && (
-                        <span className="text-[#10B981] font-bold text-sm">${item.msrp}</span>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+            {/* Equipment Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {equipment && Array.isArray(equipment) && equipment.map((item) => item && item.id ? (
+                <EquipmentCard 
+                  key={item.id}
+                  equipment={item} 
+                  onViewDetails={() => navigate(`/equipment/${item.id}`)}
+                />
+              ) : null)}
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -395,17 +439,13 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             {statsData.map((stat, i) => (
-              <motion.div 
+              <div 
                 key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
                 className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 text-center hover:bg-[#2a2a2a] transition-colors"
               >
-                <div className="text-3xl font-bold text-[#10B981] mb-2">{stat.value}</div>
-                <div className="text-gray-400 text-sm">{stat.label}</div>
-              </motion.div>
+                <div className="text-3xl font-display font-bold text-[#10B981] mb-2">{stat.value}</div>
+                <div className="text-gray-400 text-sm font-body">{stat.label}</div>
+              </div>
             ))}
           </div>
         </div>
@@ -414,84 +454,56 @@ const Index = () => {
       {/* Community Features Section */}
       <section className="py-20 bg-[#0a0a0a]">
         <div className="max-w-4xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl font-bold text-white mb-4">Join the Community</h2>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-display font-bold text-white mb-4">Join the Community</h2>
             <p className="text-gray-400">Connect with golfers who share your passion for the game and gear</p>
-          </motion.div>
+          </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-center"
-            >
+            <div className="text-center">
               <div className="w-16 h-16 bg-[#10B981]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Camera className="w-8 h-8 text-[#10B981]" />
               </div>
-              <h3 className="text-white font-bold mb-2">Share Your Setup</h3>
+              <h3 className="text-white font-display font-bold mb-2">Share Your Setup</h3>
               <p className="text-gray-400 text-sm">Showcase your clubs with photos and detailed specs</p>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="text-center"
-            >
+            <div className="text-center">
               <div className="w-16 h-16 bg-[#10B981]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageCircle className="w-8 h-8 text-[#10B981]" />
               </div>
-              <h3 className="text-white font-bold mb-2">Discuss Equipment</h3>
+              <h3 className="text-white font-display font-bold mb-2">Discuss Equipment</h3>
               <p className="text-gray-400 text-sm">Join forums to talk about gear, tips, and experiences</p>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="text-center"
-            >
+            <div className="text-center">
               <div className="w-16 h-16 bg-[#10B981]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-[#10B981]" />
               </div>
-              <h3 className="text-white font-bold mb-2">Follow Other Golfers</h3>
+              <h3 className="text-white font-display font-bold mb-2">Follow Other Golfers</h3>
               <p className="text-gray-400 text-sm">See what's in the bags of players you admire</p>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 relative overflow-hidden bg-black">
-        <motion.div 
-          className="relative z-10 max-w-4xl mx-auto px-4 text-center"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
+      <section className="py-20 relative overflow-hidden bg-gradient-to-b from-black via-[#0a1a0a] to-black">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-5xl font-display font-bold text-white mb-6">
-            Ready to Show Your Bag?
+            Ready to Tee Off?
           </h2>
-          <p className="text-xl text-gray-400 mb-12">
-            Join the growing community of golf gear enthusiasts
+          <p className="text-xl text-gray-400 mb-12 font-body">
+            Join thousands of golfers sharing their passion for the game
           </p>
 
           <Button 
             onClick={handleBuildBagClick}
-            className="bg-[#10B981] hover:bg-[#0ea674] px-12 py-5 text-xl hover:scale-105 transition-transform"
+            className="bg-[#10B981] hover:bg-[#0ea674] px-12 py-5 text-xl hover:scale-105 transition-transform shadow-lg shadow-[#10B981]/20"
           >
-            Get Started
+            Build Your Bag
           </Button>
-        </motion.div>
+        </div>
       </section>
       
       {/* Floating Action Button */}

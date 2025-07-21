@@ -34,7 +34,6 @@ export async function getBags(options?: {
         location,
         title
       ),
-      bag_likes (count),
       bag_equipment (
         id,
         position,
@@ -94,7 +93,7 @@ export async function getBags(options?: {
     totalValue: bag.bag_equipment?.reduce((sum, item) => 
       sum + (item.purchase_price || item.equipment?.msrp || 0), 0
     ) || 0,
-    likesCount: bag.bag_likes?.[0]?.count || 0
+    likesCount: bag.likes_count || 0
   })) || [];
 }
 
