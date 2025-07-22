@@ -12,43 +12,72 @@ import BottomNavigation from "./components/navigation/BottomNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Analytics } from "@vercel/analytics/react";
 
-// Lazy load pages for code splitting with simple error handling
+// Lazy load pages for code splitting with retry logic
 const lazyImport = (importFn: () => Promise<any>, componentName?: string) => {
-  return lazy(() =>
-    importFn().catch((error) => {
-      console.error(`Failed to load ${componentName || 'module'}:`, error);
-      // Return a simple fallback component without hooks
-      return {
-        default: () => (
-          <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="text-center max-w-md">
-              <h2 className="text-2xl font-bold mb-2 text-white">Unable to Load Page</h2>
-              <p className="text-white/70 mb-6">
-                {componentName ? `The ${componentName} page` : 'This page'} failed to load.
-              </p>
-              <div className="space-y-3">
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="w-full px-6 py-3 bg-primary text-black font-medium rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  Reload Page
-                </button>
-                <button 
-                  onClick={() => window.location.href = '/'}
-                  className="w-full px-6 py-3 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors"
-                >
-                  Go to Home
-                </button>
-              </div>
-              <p className="text-white/50 text-sm mt-6">
-                If this problem persists, try clearing your browser cache.
-              </p>
+  return lazy(async () => {
+    const maxRetries = 3;
+    let lastError: any;
+    
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        // Try to import the module
+        const module = await importFn();
+        return module;
+      } catch (error) {
+        lastError = error;
+        console.warn(`Attempt ${i + 1} failed to load ${componentName || 'module'}:`, error);
+        
+        // Wait before retrying (exponential backoff)
+        if (i < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        }
+      }
+    }
+    
+    console.error(`Failed to load ${componentName || 'module'} after ${maxRetries} attempts:`, lastError);
+    
+    // Return a simple fallback component
+    return {
+      default: () => (
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="text-center max-w-md">
+            <h2 className="text-2xl font-bold mb-2 text-white">Unable to Load Page</h2>
+            <p className="text-white/70 mb-6">
+              {componentName ? `The ${componentName} page` : 'This page'} failed to load after multiple attempts.
+            </p>
+            <div className="space-y-3">
+              <button 
+                onClick={() => window.location.reload()}
+                className="w-full px-6 py-3 bg-primary text-black font-medium rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Reload Page
+              </button>
+              <button 
+                onClick={() => window.location.href = '/'}
+                className="w-full px-6 py-3 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors"
+              >
+                Go to Home
+              </button>
             </div>
+            <p className="text-white/50 text-sm mt-6">
+              If this problem persists, try clearing your browser cache.
+            </p>
+            {process.env.NODE_ENV === 'development' && (
+              <details className="mt-4 text-left">
+                <summary className="text-sm text-gray-500 cursor-pointer">
+                  Error details
+                </summary>
+                <pre className="mt-2 text-xs text-red-400 overflow-auto p-2 bg-black/50 rounded">
+                  {lastError?.toString() || 'Unknown error'}
+                  {lastError?.stack && '\n\nStack trace:\n' + lastError.stack}
+                </pre>
+              </details>
+            )}
           </div>
-        ),
-      };
-    })
-  );
+        </div>
+      ),
+    };
+  });
 };
 
 const Index = lazyImport(() => import("./pages/Index"), "Home");

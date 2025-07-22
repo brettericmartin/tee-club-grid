@@ -30,8 +30,8 @@ const FilterModal: FC<FilterModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
         className={cn(
-          "glass-card border-white/20 text-white",
-          "max-w-2xl w-[95vw] max-h-[85vh]",
+          "bg-[#1a1a1a] sm:glass-card border-white/20 text-white",
+          "w-full max-w-full sm:max-w-2xl sm:w-[95vw] h-full sm:h-auto max-h-[100vh] sm:max-h-[85vh]",
           "p-0 gap-0",
           className
         )}
