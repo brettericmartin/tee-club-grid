@@ -214,14 +214,19 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
   
   // Category images for fallbacks
   const { categoryImages } = useCategoryImages(Object.values(STANDARD_CATEGORIES));
 
   // Reset state when dialog closes
+  // Only reset state when dialog opens, not when it closes
   useEffect(() => {
-    if (!isOpen) {
-      resetState();
+    if (isOpen) {
+      // Don't reset if we have selections (user might have accidentally closed)
+      if (!selectedCategory && !selectedBrand && !selectedEquipment) {
+        resetState();
+      }
     }
   }, [isOpen]);
 
@@ -239,6 +244,21 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     setLoftOptions([]);
     setSelectedLoft(null);
     setSearchQuery('');
+  };
+
+  const handleCloseAttempt = () => {
+    // Check if user has made any selections
+    if (selectedCategory || selectedBrand || selectedEquipment || selectedShaft || selectedGrip || selectedLoft) {
+      setShowCloseConfirmation(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleConfirmClose = () => {
+    setShowCloseConfirmation(false);
+    resetState();
+    onClose();
   };
 
   // Load brands when category is selected
@@ -562,12 +582,12 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   return (
     <>
     <Dialog open={isOpen} onOpenChange={(open) => {
-      // Only close if explicitly closing (not clicking outside)
+      // Prevent closing from outside clicks or ESC key
+      // Only allow closing through our explicit close button
       if (!open) {
-        // Don't close on outside click - require explicit close
         return;
       }
-    }}>
+    }} modal={true}>
       <DialogContent 
         className="glass-card border-white/20 text-white max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
         onTouchStart={handleTouchStart}
@@ -582,7 +602,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
             <Button
               variant="ghost"
               size="icon"
-              onClick={onClose}
+              onClick={handleCloseAttempt}
               className="text-white hover:bg-white/10"
             >
               <X className="h-4 w-4" />
@@ -1038,6 +1058,35 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
       }}
       initialCategory={selectedCategory?.value}
     />
+    
+    {/* Confirmation Dialog */}
+    <Dialog open={showCloseConfirmation} onOpenChange={setShowCloseConfirmation}>
+      <DialogContent className="glass-card border-white/20 text-white max-w-md">
+        <DialogHeader>
+          <DialogTitle>Discard Equipment Selection?</DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <p className="text-white/80">
+            You have unsaved equipment selections. Are you sure you want to close? Your progress will be lost.
+          </p>
+        </div>
+        <div className="flex gap-3 justify-end">
+          <Button
+            variant="outline"
+            onClick={() => setShowCloseConfirmation(false)}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+          >
+            Continue Selecting
+          </Button>
+          <Button
+            onClick={handleConfirmClose}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            Discard & Close
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   </>
   );
 }

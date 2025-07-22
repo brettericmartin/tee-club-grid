@@ -135,10 +135,9 @@ export function CommunityPhotosGallery({
   };
 
   const handleSelectPhoto = () => {
-    if (selectedPhoto) {
-      onSelectPhoto(selectedPhoto);
-      onClose();
-    }
+    // Always call onSelectPhoto, even with empty string to allow clearing
+    onSelectPhoto(selectedPhoto || '');
+    onClose();
   };
 
   return (
@@ -231,7 +230,7 @@ export function CommunityPhotosGallery({
             </Button>
             <Button 
               onClick={handleSelectPhoto} 
-              disabled={!selectedPhoto}
+              disabled={false}
             >
               Use Selected Photo
             </Button>
