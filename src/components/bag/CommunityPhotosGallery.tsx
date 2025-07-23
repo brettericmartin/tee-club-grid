@@ -1,4 +1,4 @@
-// Force cache invalidation - v2
+// Force cache invalidation - v3
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
 import {
@@ -177,51 +177,51 @@ export function CommunityPhotosGallery({
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 pb-4">
                   {photos.map((photo) => (
-                  <div
-                    key={photo.id}
-                    className={`relative group cursor-pointer rounded-lg overflow-hidden ${
-                      selectedPhoto === photo.photo_url 
-                        ? 'ring-2 ring-primary ring-offset-2' 
-                        : 'hover:ring-2 hover:ring-primary/50'
-                    }`}
-                    onClick={() => setSelectedPhoto(photo.photo_url)}
-                  >
-                    <div className="aspect-square bg-accent">
-                      <img
-                        src={photo.photo_url}
-                        alt="Community photo"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                    
-                    {/* Overlay with info */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-0 left-0 right-0 p-2">
-                        <div className="flex items-center justify-between text-white">
-                          <span className="text-xs truncate">
-                            @{photo.profile?.display_name || photo.profile?.username || 'Anonymous'}
-                          </span>
-                          <div onClick={(e) => e.stopPropagation()}>
-                            <TeedBallLike
-                              isLiked={photo.is_liked_by_user || false}
-                              likeCount={photo.likes_count || 0}
-                              onLike={async () => {
-                                await toggleLike(photo.id, photo.is_liked_by_user || false);
-                              }}
-                              size="sm"
-                              showCount={true}
-                              className="text-white hover:text-primary"
-                            />
+                    <div
+                      key={photo.id}
+                      className={`relative group cursor-pointer rounded-lg overflow-hidden ${
+                        selectedPhoto === photo.photo_url 
+                          ? 'ring-2 ring-primary ring-offset-2' 
+                          : 'hover:ring-2 hover:ring-primary/50'
+                      }`}
+                      onClick={() => setSelectedPhoto(photo.photo_url)}
+                    >
+                      <div className="aspect-square bg-accent">
+                        <img
+                          src={photo.photo_url}
+                          alt="Community photo"
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      
+                      {/* Overlay with info */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute bottom-0 left-0 right-0 p-2">
+                          <div className="flex items-center justify-between text-white">
+                            <span className="text-xs truncate">
+                              @{photo.profile?.display_name || photo.profile?.username || 'Anonymous'}
+                            </span>
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <TeedBallLike
+                                isLiked={photo.is_liked_by_user || false}
+                                likeCount={photo.likes_count || 0}
+                                onLike={async () => {
+                                  await toggleLike(photo.id, photo.is_liked_by_user || false);
+                                }}
+                                size="sm"
+                                showCount={true}
+                                className="text-white hover:text-primary"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Actions - Fixed at bottom on mobile */}
