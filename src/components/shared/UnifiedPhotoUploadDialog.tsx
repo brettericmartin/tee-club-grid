@@ -238,7 +238,7 @@ export function UnifiedPhotoUploadDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-black/95 border-white/20 text-white max-w-2xl">
+      <DialogContent className="w-full max-w-full sm:max-w-2xl bg-[#1a1a1a] sm:bg-black/95 border-white/20 text-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">{getTitle()}</DialogTitle>
         </DialogHeader>

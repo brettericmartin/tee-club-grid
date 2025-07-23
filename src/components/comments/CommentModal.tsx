@@ -47,7 +47,7 @@ export default function CommentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+      <DialogContent className="w-full max-w-full sm:max-w-4xl h-full sm:h-auto max-h-[100vh] sm:max-h-[90vh] p-0 overflow-hidden">
         <DialogHeader className="sr-only">
           <DialogTitle>Comments</DialogTitle>
         </DialogHeader>

@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
 import { EQUIPMENT_CATEGORIES as STANDARD_CATEGORIES, CATEGORY_DISPLAY_NAMES } from '@/lib/equipment-categories';
@@ -214,6 +213,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
   
   // Category images for fallbacks
   const { categoryImages } = useCategoryImages(Object.values(STANDARD_CATEGORIES));
@@ -240,6 +240,21 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     setLoftOptions([]);
     setSelectedLoft(null);
     setSearchQuery('');
+  };
+
+  const handleCloseAttempt = () => {
+    // Check if user has made any selections
+    if (selectedCategory || selectedBrand || selectedEquipment || selectedShaft || selectedGrip || selectedLoft) {
+      setShowCloseConfirmation(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleConfirmClose = () => {
+    setShowCloseConfirmation(false);
+    resetState();
+    onClose();
   };
 
   // Load brands when category is selected
@@ -572,7 +587,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
       modal={true}
     >
       <DialogContent 
-        className="glass-card border-white/20 text-white max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="w-full max-w-full sm:max-w-3xl h-full sm:h-auto max-h-[100vh] sm:max-h-[90vh] p-0 sm:p-6 flex flex-col bg-[#1a1a1a] sm:glass-card border-white/20 text-white"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -588,14 +603,14 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           e.preventDefault();
         }}
       >
-        <DialogHeader>
+        <DialogHeader className="p-4 sm:p-0 pb-2 sm:pb-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl">{getStepTitle()}</DialogTitle>
+            <DialogTitle className="text-xl sm:text-2xl">{getStepTitle()}</DialogTitle>
             <Button
               variant="ghost"
               size="icon"
-              onClick={onClose}
-              className="text-white hover:bg-white/10"
+              onClick={handleCloseAttempt}
+              className="text-white hover:bg-white/10 -mr-2 sm:mr-0"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -603,10 +618,10 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
         </DialogHeader>
 
         {/* Progress breadcrumb - mobile-friendly navigation */}
-        <div className="flex items-center flex-wrap gap-2 mb-6 p-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
+        <div className="flex items-center flex-wrap gap-1 sm:gap-2 mx-4 sm:mx-0 mb-4 sm:mb-6 p-2 sm:p-3 bg-white/5 sm:backdrop-blur-sm rounded-lg border border-white/10">
           <Badge 
             variant="secondary" 
-            className="bg-white/20 text-white hover:bg-white/30 cursor-pointer transition-colors text-sm py-2 px-3 min-h-[40px] flex items-center"
+            className="bg-white/20 text-white hover:bg-white/30 cursor-pointer transition-colors text-xs sm:text-sm py-1 sm:py-2 px-2 sm:px-3 min-h-[32px] sm:min-h-[40px] flex items-center"
             onClick={() => {
               setStep('category');
               setSelectedCategory(null);
@@ -623,7 +638,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               <ChevronRight className="w-4 h-4 text-white/50" />
               <Badge 
                 variant="outline" 
-                className="bg-primary/20 text-white border-primary/40 hover:bg-primary/30 cursor-pointer transition-colors text-sm py-2 px-3 min-h-[40px] flex items-center"
+                className="bg-primary/20 text-white border-primary/40 hover:bg-primary/30 cursor-pointer transition-colors text-xs sm:text-sm py-1 sm:py-2 px-2 sm:px-3 min-h-[32px] sm:min-h-[40px] flex items-center"
                 onClick={() => {
                   setStep('brand');
                   setSelectedBrand('');
@@ -641,7 +656,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               <ChevronRight className="w-4 h-4 text-white/50" />
               <Badge 
                 variant="outline" 
-                className="bg-primary/20 text-white border-primary/40 hover:bg-primary/30 cursor-pointer transition-colors text-sm py-2 px-3 min-h-[40px] flex items-center"
+                className="bg-primary/20 text-white border-primary/40 hover:bg-primary/30 cursor-pointer transition-colors text-xs sm:text-sm py-1 sm:py-2 px-2 sm:px-3 min-h-[32px] sm:min-h-[40px] flex items-center"
                 onClick={() => {
                   setStep('equipment');
                   setEquipment([]);
@@ -658,7 +673,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               <ChevronRight className="w-4 h-4 text-white/50" />
               <Badge 
                 variant="default" 
-                className="bg-primary text-white text-sm py-2 px-3 min-h-[40px] flex items-center"
+                className="bg-primary text-white text-xs sm:text-sm py-1 sm:py-2 px-2 sm:px-3 min-h-[32px] sm:min-h-[40px] flex items-center"
               >
                 {selectedEquipment.model}
               </Badge>
@@ -666,7 +681,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           )}
         </div>
 
-        <ScrollArea className="flex-1 pr-4 -mr-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+        <div className="flex-1 overflow-y-auto px-4 sm:px-0 pb-4">
           {/* Category Selection */}
           {step === 'category' && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -967,7 +982,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               </Select>
             </div>
           )}
-        </ScrollArea>
+        </div>
 
         {/* Mobile swipe hint */}
         {step !== 'category' && (
@@ -1050,6 +1065,35 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
       }}
       initialCategory={selectedCategory?.value}
     />
+    
+    {/* Confirmation Dialog */}
+    <Dialog open={showCloseConfirmation} onOpenChange={setShowCloseConfirmation}>
+      <DialogContent className="w-full max-w-full sm:max-w-md bg-[#1a1a1a] sm:glass-card border-white/20 text-white">
+        <DialogHeader>
+          <DialogTitle>Discard Equipment Selection?</DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <p className="text-white/80">
+            You have unsaved equipment selections. Are you sure you want to close? Your progress will be lost.
+          </p>
+        </div>
+        <div className="flex gap-3 justify-end">
+          <Button
+            variant="outline"
+            onClick={() => setShowCloseConfirmation(false)}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+          >
+            Continue Selecting
+          </Button>
+          <Button
+            onClick={handleConfirmClose}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            Discard & Close
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   </>
   );
 }

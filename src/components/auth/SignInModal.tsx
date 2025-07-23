@@ -56,7 +56,7 @@ export function SignInModal({ isOpen, onClose, onSignUpClick }: SignInModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-full max-w-full sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Sign In</DialogTitle>
         </DialogHeader>
