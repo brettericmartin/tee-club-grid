@@ -12,68 +12,95 @@ import BottomNavigation from "./components/navigation/BottomNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Analytics } from "@vercel/analytics/react";
 
-// Lazy load pages for code splitting with simple error handling
+// Lazy load pages for code splitting with enhanced error handling and debugging
 const lazyImport = (importFn: () => Promise<any>, componentName?: string) => {
+  console.log(`[DEBUG] Attempting to lazy load: ${componentName || 'unknown module'}`);
+  
   return lazy(() =>
-    importFn().catch((error) => {
-      console.error(`Failed to load ${componentName || 'module'}:`, error);
-      // Return a simple fallback component without hooks
-      return {
-        default: () => (
-          <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="text-center max-w-md">
-              <h2 className="text-2xl font-bold mb-2 text-white">Unable to Load Page</h2>
-              <p className="text-white/70 mb-6">
-                {componentName ? `The ${componentName} page` : 'This page'} failed to load.
-              </p>
-              <div className="space-y-3">
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="w-full px-6 py-3 bg-primary text-black font-medium rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  Reload Page
-                </button>
-                <button 
-                  onClick={() => window.location.href = '/'}
-                  className="w-full px-6 py-3 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors"
-                >
-                  Go to Home
-                </button>
+    importFn()
+      .then((module) => {
+        console.log(`[DEBUG] Successfully loaded: ${componentName || 'module'}`);
+        return module;
+      })
+      .catch((error) => {
+        console.error(`[DEBUG] Failed to load ${componentName || 'module'}:`, error);
+        console.error(`[DEBUG] Error details:`, {
+          message: error.message,
+          stack: error.stack,
+          componentName,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Return a simple fallback component without hooks
+        return {
+          default: () => (
+            <div className="min-h-screen flex items-center justify-center p-4">
+              <div className="text-center max-w-md">
+                <h2 className="text-2xl font-bold mb-2 text-white">Unable to Load Page</h2>
+                <p className="text-white/70 mb-6">
+                  {componentName ? `The ${componentName} page` : 'This page'} failed to load.
+                </p>
+                <div className="space-y-3">
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="w-full px-6 py-3 bg-primary text-black font-medium rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Reload Page
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = '/'}
+                    className="w-full px-6 py-3 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors"
+                  >
+                    Go to Home
+                  </button>
+                </div>
+                <p className="text-white/50 text-sm mt-6">
+                  If this problem persists, try clearing your browser cache.
+                </p>
+                {/* Debug info in development */}
+                {import.meta.env.DEV && (
+                  <details className="mt-4 text-left">
+                    <summary className="cursor-pointer text-white/50 text-xs">Debug Info</summary>
+                    <pre className="mt-2 p-2 bg-black/50 rounded text-xs text-white/70 overflow-auto">
+                      {JSON.stringify({ 
+                        error: error.message, 
+                        component: componentName,
+                        time: new Date().toISOString()
+                      }, null, 2)}
+                    </pre>
+                  </details>
+                )}
               </div>
-              <p className="text-white/50 text-sm mt-6">
-                If this problem persists, try clearing your browser cache.
-              </p>
             </div>
-          </div>
-        ),
-      };
-    })
+          ),
+        };
+      })
   );
 };
 
-const Index = lazyImport(() => import("./pages/Index"), "Home");
-const BagsBrowser = lazyImport(() => import("./pages/BagsBrowser"), "Bags Browser");
-const BagDisplay = lazyImport(() => import("./pages/BagDisplayStyled"), "Bag Display");
-const MyBag = lazyImport(() => import("./pages/MyBag"), "My Bag");
-const Equipment = lazyImport(() => import("./pages/Equipment"), "Equipment");
-const EquipmentDetail = lazyImport(() => import("./pages/EquipmentDetail"), "Equipment Detail");
-const Feed = lazyImport(() => import("./pages/Feed"), "Feed");
-const Wishlist = lazyImport(() => import("./pages/Wishlist"), "Wishlist");
-const Badges = lazyImport(() => import("./pages/Badges"), "Badges");
-const BadgePreview = lazyImport(() => import("./pages/BadgePreview"), "Badge Preview");
-const Forum = lazyImport(() => import("./pages/Forum"), "Forum");
-const ForumIndex = lazyImport(() => import("./pages/ForumIndex"), "Forum Index");
-const ForumCategory = lazyImport(() => import("./pages/ForumCategory"), "Forum Category");
-const ForumThread = lazyImport(() => import("./pages/ForumThread"), "Forum Thread");
-const NotFound = lazyImport(() => import("./pages/NotFound"), "Not Found");
+const Index = lazyImport(() => import("@/pages/Index"), "Home");
+const BagsBrowser = lazyImport(() => import("@/pages/BagsBrowser"), "Bags Browser");
+const BagDisplay = lazyImport(() => import("@/pages/BagDisplayStyled"), "Bag Display");
+const MyBag = lazyImport(() => import("@/pages/MyBag"), "My Bag");
+const Equipment = lazyImport(() => import("@/pages/Equipment"), "Equipment");
+const EquipmentDetail = lazyImport(() => import("@/pages/EquipmentDetail"), "Equipment Detail");
+const Feed = lazyImport(() => import("@/pages/Feed"), "Feed");
+const Wishlist = lazyImport(() => import("@/pages/Wishlist"), "Wishlist");
+const Badges = lazyImport(() => import("@/pages/Badges"), "Badges");
+const BadgePreview = lazyImport(() => import("@/pages/BadgePreview"), "Badge Preview");
+const Forum = lazyImport(() => import("@/pages/Forum"), "Forum");
+const ForumIndex = lazyImport(() => import("@/pages/ForumIndex"), "Forum Index");
+const ForumCategory = lazyImport(() => import("@/pages/ForumCategory"), "Forum Category");
+const ForumThread = lazyImport(() => import("@/pages/ForumThread"), "Forum Thread");
+const NotFound = lazyImport(() => import("@/pages/NotFound"), "Not Found");
 
 // Admin routes (rarely accessed)
-const SeedEquipment = lazyImport(() => import("./pages/admin/SeedEquipment"), "Seed Equipment");
-const EquipmentMigration = lazyImport(() => import("./pages/admin/EquipmentMigration"), "Equipment Migration");
+const SeedEquipment = lazyImport(() => import("@/pages/admin/SeedEquipment"), "Seed Equipment");
+const EquipmentMigration = lazyImport(() => import("@/pages/admin/EquipmentMigration"), "Equipment Migration");
 
 // Debug routes (developer-only)
-const Debug = lazyImport(() => import("./pages/Debug"), "Debug");
-const DebugFeed = lazyImport(() => import("./pages/DebugFeed"), "Debug Feed");
+const Debug = lazyImport(() => import("@/pages/Debug"), "Debug");
+const DebugFeed = lazyImport(() => import("@/pages/DebugFeed"), "Debug Feed");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -101,6 +128,14 @@ const PageLoadingFallback = () => (
 
 const App = () => {
   // App component rendering
+  console.log('[DEBUG] App component initializing...');
+  console.log('[DEBUG] Environment:', {
+    mode: import.meta.env.MODE,
+    dev: import.meta.env.DEV,
+    prod: import.meta.env.PROD,
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'Set' : 'Not set',
+    supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Not set',
+  });
   
   return (
   <ErrorBoundary>

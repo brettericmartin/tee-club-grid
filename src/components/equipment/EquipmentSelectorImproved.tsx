@@ -218,9 +218,10 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   // Category images for fallbacks
   const { categoryImages } = useCategoryImages(Object.values(STANDARD_CATEGORIES));
 
-  // Reset state when dialog closes
+  // Reset state only when dialog is initially opened, not when closing
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      // Dialog is opening, start fresh
       resetState();
     }
   }, [isOpen]);
@@ -561,20 +562,31 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
 
   return (
     <>
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      // Only close if explicitly closing (not clicking outside)
-      if (!open) {
-        // Don't close on outside click - require explicit close
-        return;
-      }
-    }}>
+    {/* Equipment selection modal with prevented outside clicks to maintain state */}
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={() => {
+        // Intentionally empty - we don't want the dialog to close on outside clicks
+        // Only the X button and completion should close it
+      }}
+      modal={true}
+    >
       <DialogContent 
         className="glass-card border-white/20 text-white max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onInteractOutside={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+        }}
       >
         <DialogHeader>
           <div className="flex items-center justify-between">
