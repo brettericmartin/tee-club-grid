@@ -1,3 +1,4 @@
+// Force cache invalidation - v2
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
 import {
