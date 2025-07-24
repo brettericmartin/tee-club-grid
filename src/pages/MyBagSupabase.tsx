@@ -209,55 +209,46 @@ const MyBagSupabase = () => {
         return;
       }
       
-      // Ensure user.id is a string safely
       const userId = user.id ? String(user.id) : '';
       
-      // First get the user's bag IDs
-      const { data: userBags, error: bagsError } = await supabase
-        .from('user_bags')
-        .select('id')
-        .eq('user_id', userId);
+      const [userBagsResult, userPostsResult] = await Promise.all([
+        supabase
+          .from('user_bags')
+          .select('id')
+          .eq('user_id', userId),
+        supabase
+          .from('feed_posts')
+          .select('id')
+          .eq('user_id', userId)
+      ]);
       
+      const bagIds = userBagsResult.data?.map(bag => bag.id) || [];
+      const postIds = userPostsResult.data?.map(post => post.id) || [];
       
-      // Count tees from user's bags if they have any
-      let bagTees = 0;
-      if (userBags && Array.isArray(userBags) && userBags.length > 0) {
-        const bagIds = userBags.map(bag => String(bag.id));
-        const { count } = await supabase
-          .from('bag_likes')
-          .select('*', { count: 'exact', head: true })
-          .in('bag_id', bagIds);
-        bagTees = count || 0;
-      }
+      const [bagTeesResult, postTeesResult] = await Promise.all([
+        bagIds.length > 0 
+          ? supabase
+              .from('bag_likes')
+              .select('*', { count: 'exact', head: true })
+              .in('bag_id', bagIds)
+          : Promise.resolve({ count: 0 }),
+        postIds.length > 0
+          ? supabase
+              .from('likes')
+              .select('*', { count: 'exact', head: true })
+              .in('post_id', postIds)
+          : Promise.resolve({ count: 0 })
+      ]);
       
-      // First get the user's post IDs
-      const { data: userPosts, error: postsError } = await supabase
-        .from('feed_posts')
-        .select('id')
-        .eq('user_id', userId);
+      const bagTees = bagTeesResult.count || 0;
+      const postTees = postTeesResult.count || 0;
+      const total = bagTees + postTees;
       
-      if (postsError) {
-        // Error fetching posts, continue with calculation
-      }
-      
-      // Count tees from user's posts if they have any
-      let postTees = 0;
-      if (userPosts && Array.isArray(userPosts) && userPosts.length > 0) {
-        const postIds = userPosts.map(post => String(post.id));
-        const { count } = await supabase
-          .from('likes')
-          .select('*', { count: 'exact', head: true })
-          .in('post_id', postIds);
-        postTees = count || 0;
-      }
-      
-      const total = (bagTees || 0) + (postTees || 0);
       setTotalTees(total);
-      console.log('[MyBag] Total tees calculated:', total);
+      console.log('[MyBag] Total tees calculated:', total, '(bags:', bagTees, 'posts:', postTees, ')');
     } catch (error) {
       console.error('[MyBag] Error in calculateTotalTees:', error);
       setTotalTees(0);
-      // Don't throw - this is not critical functionality
     }
   };
 
