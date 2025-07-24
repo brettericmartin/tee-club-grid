@@ -23,24 +23,35 @@ interface PostCardProps {
     is_edited: boolean;
     edited_at: string | null;
     created_at: string;
+    parent_post_id?: string | null;
     user: {
       id: string;
       username: string;
       display_name?: string;
-      avatar_url: string;
+      avatar_url?: string;
       badges?: any[];
     };
-    reactions: {
+    reactions?: {
       tee: number;
       helpful: number;
       fire: number;
       user_reactions?: string[]; // Changed to array for multiple reactions
     };
+    depth?: number;
   };
   threadLocked?: boolean;
+  showActions?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export default function PostCard({ post, threadLocked = false }: PostCardProps) {
+export default function PostCard({ 
+  post, 
+  threadLocked = false, 
+  showActions = true,
+  onEdit,
+  onDelete 
+}: PostCardProps) {
   const { user } = useAuth();
   const [reactions, setReactions] = useState({
     tee: post.reactions?.tee || 0,
@@ -147,7 +158,7 @@ export default function PostCard({ post, threadLocked = false }: PostCardProps) 
               )}
             </div>
 
-            {user && (
+            {user && showActions && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -155,10 +166,19 @@ export default function PostCard({ post, threadLocked = false }: PostCardProps) 
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-white/10">
-                  {isOwner && !threadLocked && (
-                    <DropdownMenuItem>
+                  {isOwner && !threadLocked && onEdit && (
+                    <DropdownMenuItem onClick={onEdit}>
                       <Edit2 className="h-4 w-4 mr-2" />
                       Edit Post
+                    </DropdownMenuItem>
+                  )}
+                  {isOwner && !threadLocked && onDelete && (
+                    <DropdownMenuItem 
+                      onClick={onDelete}
+                      className="text-red-400 focus:text-red-400"
+                    >
+                      <Flag className="h-4 w-4 mr-2" />
+                      Delete Post
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem>

@@ -220,6 +220,52 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['user_onboarding']['Row'], 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Database['public']['Tables']['user_onboarding']['Insert']>;
       };
+      forum_posts: {
+        Row: {
+          id: string;
+          thread_id: string;
+          user_id: string;
+          content: string;
+          parent_post_id?: string | null;
+          is_edited: boolean;
+          edited_at?: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['forum_posts']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Database['public']['Tables']['forum_posts']['Insert']>;
+      };
+      forum_threads: {
+        Row: {
+          id: string;
+          category_id: string;
+          user_id: string;
+          title: string;
+          slug: string;
+          view_count: number;
+          reply_count: number;
+          last_post_at?: string | null;
+          last_post_by?: string | null;
+          is_pinned: boolean;
+          is_locked: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['forum_threads']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['forum_threads']['Insert']>;
+      };
+      forum_categories: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          description?: string | null;
+          icon?: string | null;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['forum_categories']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Database['public']['Tables']['forum_categories']['Insert']>;
+      };
     };
   };
 }
