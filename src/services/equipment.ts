@@ -30,7 +30,9 @@ export async function getEquipment(options?: {
   }
 
   if (options?.search) {
-    query = query.or(`brand.ilike.%${options.search}%,model.ilike.%${options.search}%`);
+    // Sanitize search input to prevent SQL injection
+    const sanitizedSearch = options.search.replace(/[%_]/g, '\\$&');
+    query = query.or(`brand.ilike.%${sanitizedSearch}%,model.ilike.%${sanitizedSearch}%`);
   }
 
   // Sort options
@@ -156,10 +158,13 @@ export async function getEquipmentDetails(equipmentId: string) {
 
 // Search equipment
 export async function searchEquipment(query: string) {
+  // Sanitize search input to prevent SQL injection
+  const sanitizedQuery = query.replace(/[%_]/g, '\\$&');
+  
   const { data, error } = await supabase
     .from('equipment')
     .select('*')
-    .or(`brand.ilike.%${query}%,model.ilike.%${query}%`)
+    .or(`brand.ilike.%${sanitizedQuery}%,model.ilike.%${sanitizedQuery}%`)
     .limit(10);
 
   if (error) throw error;
@@ -501,10 +506,13 @@ export async function getEquipmentModels(brand: string) {
 
 // Search equipment by query (for autocomplete)
 export async function searchEquipmentByQuery(query: string) {
+  // Sanitize search input to prevent SQL injection
+  const sanitizedQuery = query.replace(/[%_]/g, '\\$&');
+  
   const { data, error } = await supabase
     .from('equipment')
     .select('id, brand, model, category')
-    .or(`brand.ilike.%${query}%,model.ilike.%${query}%`)
+    .or(`brand.ilike.%${sanitizedQuery}%,model.ilike.%${sanitizedQuery}%`)
     .limit(10);
 
   if (error) {

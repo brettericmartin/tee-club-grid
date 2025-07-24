@@ -12,6 +12,7 @@ import EquipmentBuildConfiguration from "./equipment-detail/EquipmentBuildConfig
 import EquipmentSpecificationTabs from "./equipment-detail/EquipmentSpecificationTabs";
 import EquipmentActionButtons from "./equipment-detail/EquipmentActionButtons";
 import { ImageViewerModal } from "./shared/ImageViewerModal";
+import { secureStorage, validators } from "@/utils/secureStorage";
 
 interface EquipmentDetailModalProps {
   equipment: EquipmentDetail | any | null;
@@ -41,17 +42,20 @@ const EquipmentDetailModal = ({ equipment, isOpen, onClose, onToggleFeatured, is
   };
 
   const handleSaveEquipment = () => {
-    const saved = localStorage.getItem('savedEquipment') || '[]';
-    const savedList = JSON.parse(saved);
+    const savedList = secureStorage.getItem('savedEquipment', validators.savedEquipment) || [];
     
-    if (!savedList.find((item: any) => item.id === equipment.id)) {
-      savedList.push({
+    if (!savedList.find((item) => item.id === equipment.id)) {
+      const updatedList = [...savedList, {
         id: equipment.id,
         savedDate: new Date().toISOString()
-      });
-      localStorage.setItem('savedEquipment', JSON.stringify(savedList));
-      setIsSaved(true);
-      toast.success('Equipment saved to your wishlist!');
+      }];
+      
+      if (secureStorage.setItem('savedEquipment', updatedList)) {
+        setIsSaved(true);
+        toast.success('Equipment saved to your wishlist!');
+      } else {
+        toast.error('Failed to save equipment. Please try again.');
+      }
     } else {
       toast.info('Equipment already in your wishlist');
     }

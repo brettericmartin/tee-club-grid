@@ -207,11 +207,14 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                                 e.currentTarget.style.display = 'none';
                                 const parent = e.currentTarget.parentElement;
                                 if (parent) {
-                                  parent.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
-                                    <span class="text-white font-bold text-lg">
-                                      ${item.equipment.brand?.split(' ').filter(w => w.length > 0).map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'NA'}
-                                    </span>
-                                  </div>`;
+                                  // Create React elements instead of using innerHTML
+                                  const fallbackDiv = document.createElement('div');
+                                  fallbackDiv.className = 'w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40';
+                                  const fallbackSpan = document.createElement('span');
+                                  fallbackSpan.className = 'text-white font-bold text-lg';
+                                  fallbackSpan.textContent = item.equipment.brand?.split(' ').filter(w => w.length > 0).map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'NA';
+                                  fallbackDiv.appendChild(fallbackSpan);
+                                  parent.appendChild(fallbackDiv);
                                 }
                               }}
                             />
@@ -269,11 +272,14 @@ export function BagPreview({ isOpen, onClose, bag, equipment }: BagPreviewProps)
                                     e.currentTarget.style.display = 'none';
                                     const parent = e.currentTarget.parentElement;
                                     if (parent) {
-                                      parent.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
-                                        <span class="text-white font-bold text-xs">
-                                          ${item.equipment.brand?.split(' ').filter(w => w.length > 0).map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'NA'}
-                                        </span>
-                                      </div>`;
+                                      // Create React elements instead of using innerHTML
+                                      const fallbackDiv = document.createElement('div');
+                                      fallbackDiv.className = 'w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40';
+                                      const fallbackSpan = document.createElement('span');
+                                      fallbackSpan.className = 'text-white font-bold text-xs';
+                                      fallbackSpan.textContent = item.equipment.brand?.split(' ').filter(w => w.length > 0).map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'NA';
+                                      fallbackDiv.appendChild(fallbackSpan);
+                                      parent.appendChild(fallbackDiv);
                                     }
                                   }}
                                 />

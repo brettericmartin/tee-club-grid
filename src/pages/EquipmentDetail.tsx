@@ -127,11 +127,14 @@ export default function EquipmentDetail() {
                       e.currentTarget.style.display = 'none';
                       const parent = e.currentTarget.parentElement;
                       if (parent) {
-                        parent.innerHTML = `<div class="w-full h-96 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40 rounded-lg">
-                          <span class="text-white font-bold text-4xl">
-                            ${equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-                          </span>
-                        </div>`;
+                        // Create React elements instead of using innerHTML
+                        const fallbackDiv = document.createElement('div');
+                        fallbackDiv.className = 'w-full h-96 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40 rounded-lg';
+                        const fallbackSpan = document.createElement('span');
+                        fallbackSpan.className = 'text-white font-bold text-4xl';
+                        fallbackSpan.textContent = equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'NA';
+                        fallbackDiv.appendChild(fallbackSpan);
+                        parent.appendChild(fallbackDiv);
                       }
                     }}
                   />
