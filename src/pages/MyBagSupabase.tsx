@@ -5,6 +5,7 @@ import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer, { bagBackgrounds } from "@/components/BackgroundLayer";
 import { Button } from "@/components/ui/button";
 import { SignInModal } from "@/components/auth/SignInModal";
+import { SignUpModal } from "@/components/auth/SignUpModal";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -107,6 +108,7 @@ const MyBagSupabase = () => {
   const [expandedBadges, setExpandedBadges] = useState(false);
   const [manageBadgesOpen, setManageBadgesOpen] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
   
   // Badge check hook
   const { checkBadgeProgress, newBadges, clearNewBadges } = useBadgeCheck();
@@ -175,6 +177,26 @@ const MyBagSupabase = () => {
             </div>
           </div>
         </div>
+        
+        {/* Sign In Modal */}
+        <SignInModal
+          isOpen={showSignIn}
+          onClose={() => setShowSignIn(false)}
+          onSignUpClick={() => {
+            setShowSignIn(false);
+            setShowSignUp(true);
+          }}
+        />
+        
+        {/* Sign Up Modal */}
+        <SignUpModal
+          isOpen={showSignUp}
+          onClose={() => setShowSignUp(false)}
+          onSignInClick={() => {
+            setShowSignUp(false);
+            setShowSignIn(true);
+          }}
+        />
       </div>
     );
   }
@@ -1398,8 +1420,22 @@ const MyBagSupabase = () => {
 
       {/* Sign In Modal */}
       <SignInModal
-        open={showSignIn}
-        onOpenChange={setShowSignIn}
+        isOpen={showSignIn}
+        onClose={() => setShowSignIn(false)}
+        onSignUpClick={() => {
+          setShowSignIn(false);
+          setShowSignUp(true);
+        }}
+      />
+      
+      {/* Sign Up Modal */}
+      <SignUpModal
+        isOpen={showSignUp}
+        onClose={() => setShowSignUp(false)}
+        onSignInClick={() => {
+          setShowSignUp(false);
+          setShowSignIn(true);
+        }}
       />
 
     </div>

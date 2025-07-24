@@ -7,6 +7,7 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { SignInModal } from "@/components/auth/SignInModal";
+import { SignUpModal } from "@/components/auth/SignUpModal";
 import { BagCard } from "@/components/bags/BagCard";
 import { getBags } from "@/services/bags";
 import { getEquipment } from "@/services/equipment";
@@ -64,6 +65,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [topBags, setTopBags] = useState<Bag[]>([]);
@@ -513,6 +515,20 @@ const Index = () => {
       <SignInModal 
         isOpen={showSignIn}
         onClose={() => setShowSignIn(false)}
+        onSignUpClick={() => {
+          setShowSignIn(false);
+          setShowSignUp(true);
+        }}
+      />
+      
+      {/* Sign Up Modal */}
+      <SignUpModal
+        isOpen={showSignUp}
+        onClose={() => setShowSignUp(false)}
+        onSignInClick={() => {
+          setShowSignUp(false);
+          setShowSignIn(true);
+        }}
       />
     </div>
   );
