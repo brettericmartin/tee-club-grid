@@ -6,7 +6,7 @@ import { analyzeGolfBagImage, validateEquipmentData } from '../utils/openai';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Maximum file size (10MB)
@@ -30,8 +30,16 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
  * }
  */
 async function handler(req: AuthenticatedRequest, res: VercelResponse) {
+  console.log('[analyze-image] Request received:', {
+    method: req.method,
+    hasAuth: !!req.headers.authorization,
+    userId: req.userId,
+    bodySize: JSON.stringify(req.body || {}).length
+  });
+
   // Only allow POST requests
   if (req.method !== 'POST') {
+    console.log('[analyze-image] Rejecting non-POST request');
     return res.status(405).json({ 
       error: 'Method Not Allowed',
       message: 'Only POST requests are allowed' 
@@ -109,19 +117,37 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     });
 
   } catch (error) {
-    console.error('Image analysis error:', error);
+    console.error('[analyze-image] Error occurred:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    
+    // Always return JSON error responses
+    res.setHeader('Content-Type', 'application/json');
     
     // Check if it's an OpenAI API error
-    if (error instanceof Error && error.message.includes('OpenAI')) {
-      return res.status(503).json({
-        error: 'Service Unavailable',
-        message: 'AI analysis service is temporarily unavailable. Please try again later.'
-      });
+    if (error instanceof Error) {
+      if (error.message.includes('OpenAI') || error.message.includes('Failed to analyze')) {
+        return res.status(503).json({
+          error: 'Service Unavailable',
+          message: 'AI analysis service is temporarily unavailable. Please try again later.',
+          details: error.message
+        });
+      }
+      
+      if (error.message.includes('parse') || error.message.includes('JSON')) {
+        return res.status(502).json({
+          error: 'Bad Gateway',
+          message: 'AI service returned invalid response format',
+          details: error.message
+        });
+      }
     }
 
     return res.status(500).json({
       error: 'Internal Server Error',
-      message: 'Failed to analyze image'
+      message: 'Failed to analyze image',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }

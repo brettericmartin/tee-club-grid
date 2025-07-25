@@ -23,6 +23,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       supabase_url_configured: !!process.env.SUPABASE_URL,
       vite_supabase_url_configured: !!process.env.VITE_SUPABASE_URL,
       supabase_service_key_configured: !!process.env.SUPABASE_SERVICE_KEY,
+      supabase_service_role_key_configured: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
       // Show partial values for debugging (first few chars only)
       supabase_url_prefix: process.env.SUPABASE_URL?.substring(0, 20) || process.env.VITE_SUPABASE_URL?.substring(0, 20) || 'not set',
       openai_key_prefix: process.env.OPENAI_API_KEY ? 'sk-...' + process.env.OPENAI_API_KEY.substring(process.env.OPENAI_API_KEY.length - 4) : 'not set'
