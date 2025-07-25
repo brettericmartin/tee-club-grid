@@ -21,6 +21,7 @@ export interface EquipmentAnalysisResult {
       grip?: string;
       loft?: string;
       color?: string;
+      condition?: string;
     };
     position?: {
       x: number;
@@ -28,6 +29,22 @@ export interface EquipmentAnalysisResult {
       width: number;
       height: number;
     };
+    // New properties for enhanced workflow
+    searchKeywords?: string[];
+    alternativeMatches?: Array<{
+      brand: string;
+      model: string;
+      confidence: number;
+    }>;
+    requiresManualReview?: boolean;
+    databaseMatches?: any[];
+    matchConfidence?: number;
+    requiresUserConfirmation?: boolean;
+    requiresManualAddition?: boolean;
+    matchedEquipmentId?: string;
+    verifiedBrand?: string;
+    verifiedModel?: string;
+    specs?: any;
   }>;
   bagInfo?: {
     brand?: string;
@@ -41,135 +58,60 @@ export interface EquipmentAnalysisResult {
   overallConfidence: number;
   rawResponse?: string;
   error?: string;
+  metadata?: {
+    totalItemsFound: number;
+    overallConfidence: number;
+    imageQuality: string;
+    lightingConditions: string;
+    recommendManualReview: boolean;
+  };
+  requiresManualReview?: boolean;
 }
 
 /**
- * Extract JSON from various OpenAI response formats
+ * Robust JSON extraction function for OpenAI responses
  * Handles markdown code blocks, mixed text responses, and partial JSON
  */
-function extractJSON(content: string): any {
-  if (!content || typeof content !== 'string') {
-    throw new Error('Invalid content: expected non-empty string');
-  }
-
-  // Attempt 1: Try direct JSON parse (fastest path)
+function extractJSON(text: string): any {
   try {
-    return JSON.parse(content.trim());
+    // First try direct parsing
+    return JSON.parse(text);
   } catch (e) {
-    // Continue to other extraction methods
-  }
-
-  // Attempt 2: Remove markdown code blocks
-  // Handles ```json ... ``` and ``` ... ```
-  const markdownPatterns = [
-    /```json\s*\n?([\s\S]*?)\n?```/i,
-    /```\s*\n?([\s\S]*?)\n?```/
-  ];
-
-  for (const pattern of markdownPatterns) {
-    const match = content.match(pattern);
-    if (match && match[1]) {
+    // Try to extract JSON from markdown code blocks
+    const jsonMatch = text.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+    if (jsonMatch) {
       try {
-        return JSON.parse(match[1].trim());
-      } catch (e) {
-        // Continue to next pattern
+        return JSON.parse(jsonMatch[1]);
+      } catch (e2) {
+        console.error('Failed to parse extracted JSON from markdown:', e2);
       }
     }
-  }
-
-  // Attempt 3: Extract JSON object or array from mixed text
-  // Looks for {...} or [...] patterns
-  const jsonPatterns = [
-    // Match JSON object
-    /\{[\s\S]*\}/,
-    // Match JSON array
-    /\[[\s\S]*\]/
-  ];
-
-  for (const pattern of jsonPatterns) {
-    const match = content.match(pattern);
-    if (match && match[0]) {
-      try {
-        const parsed = JSON.parse(match[0]);
-        // Validate it has expected structure (clubs array)
-        if (parsed.clubs || Array.isArray(parsed)) {
-          return parsed;
-        }
-      } catch (e) {
-        // Continue to next pattern
-      }
-    }
-  }
-
-  // Attempt 4: Handle responses with explanatory text
-  // Look for common patterns like "Here is the analysis:" followed by JSON
-  const textPatterns = [
-    /(?:here is|this is|the analysis|the equipment|detected equipment)[::\s]*(\{[\s\S]*\})/i,
-    /(?:json|result|response|output)[::\s]*(\{[\s\S]*\})/i
-  ];
-
-  for (const pattern of textPatterns) {
-    const match = content.match(pattern);
-    if (match && match[1]) {
-      try {
-        return JSON.parse(match[1].trim());
-      } catch (e) {
-        // Continue to next pattern
-      }
-    }
-  }
-
-  // Attempt 5: Try to extract the largest valid JSON structure
-  // This handles cases where JSON might be truncated or have extra characters
-  const jsonStart = content.indexOf('{');
-  const jsonArrayStart = content.indexOf('[');
-  
-  if (jsonStart !== -1 || jsonArrayStart !== -1) {
-    const startIndex = jsonStart !== -1 && (jsonArrayStart === -1 || jsonStart < jsonArrayStart) 
-      ? jsonStart 
-      : jsonArrayStart;
     
-    let depth = 0;
-    let inString = false;
-    let escapeNext = false;
-    
-    for (let i = startIndex; i < content.length; i++) {
-      const char = content[i];
-      
-      if (!escapeNext) {
-        if (char === '"' && !inString) {
-          inString = true;
-        } else if (char === '"' && inString) {
-          inString = false;
-        } else if (!inString) {
-          if (char === '{' || char === '[') {
-            depth++;
-          } else if (char === '}' || char === ']') {
-            depth--;
-            if (depth === 0) {
-              // Found complete JSON structure
-              try {
-                const jsonStr = content.substring(startIndex, i + 1);
-                return JSON.parse(jsonStr);
-              } catch (e) {
-                // Invalid JSON, continue searching
-              }
-            }
-          }
-        }
-        
-        if (char === '\\') {
-          escapeNext = true;
-        }
-      } else {
-        escapeNext = false;
+    // Try to find JSON object in mixed text
+    const jsonObjectMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonObjectMatch) {
+      try {
+        return JSON.parse(jsonObjectMatch[0]);
+      } catch (e3) {
+        console.error('Failed to parse found JSON object:', e3);
       }
     }
+    
+    // Last resort: try to clean and parse
+    const cleaned = text
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .replace(/^[\s\w]*?(?=\{)/g, '') // Remove text before first {
+      .replace(/\}[\s\S]*$/g, '}') // Remove text after last }
+      .trim();
+    
+    try {
+      return JSON.parse(cleaned);
+    } catch (e4) {
+      console.error('All JSON parsing attempts failed:', e4);
+      throw new Error(`Unable to parse AI response as JSON. Raw response: ${text.substring(0, 200)}...`);
+    }
   }
-
-  // If all extraction attempts fail, throw descriptive error
-  const preview = content.substring(0, 100);
-  throw new Error(`Failed to extract valid JSON from response. Content preview: "${preview}..."`);
 }
 
 /**
@@ -185,21 +127,67 @@ export async function analyzeGolfBagImage(
       messages: [
         {
           role: "system",
-          content: `You are an expert golf equipment identifier. Analyze golf bag images and identify all visible clubs and equipment.
-          
-          For each club, provide:
-          - Type (driver, fairway wood, hybrid, iron, wedge, putter)
-          - Brand (if visible)
-          - Model (if visible)
-          - Confidence score (0-1)
-          - Any visible details (shaft brand, grip type, loft markings)
-          - Approximate position in the image
-          
-          Also identify:
-          - The golf bag brand/model
-          - Any visible accessories (balls, tees, towels, rangefinders, etc.)
-          
-          Return your analysis in JSON format.`
+          content: `You are an expert golf equipment identifier with access to online golf equipment databases. Analyze golf bag images using this 3-step process:
+
+STEP 1 - VISUAL IDENTIFICATION:
+- Identify each visible club/equipment piece
+- Note brand markings, model text, visual characteristics
+- Assign initial confidence scores (0.0-1.0)
+- Include position coordinates in the image
+
+STEP 2 - ONLINE VERIFICATION:
+- For each identified item, consider what you know about:
+  * Current golf equipment models and years
+  * Brand-specific design characteristics
+  * Common equipment configurations
+- Adjust confidence based on likelihood of identification
+
+STEP 3 - DATABASE MATCHING PREPARATION:
+- Format results for database lookup
+- Provide alternative spellings/models for fuzzy matching
+- Include search keywords for equipment not found
+
+REQUIRED JSON OUTPUT FORMAT:
+{
+  "identifiedEquipment": [
+    {
+      "visualId": "unique_id_1",
+      "type": "driver|fairway|hybrid|iron|wedge|putter|ball|bag|accessory",
+      "primaryIdentification": {
+        "brand": "exact_brand_name",
+        "model": "exact_model_name",
+        "confidence": 0.85,
+        "year": "2024"
+      },
+      "alternativeMatches": [
+        {"brand": "alt_brand", "model": "alt_model", "confidence": 0.65}
+      ],
+      "visualDetails": {
+        "position": {"x": 100, "y": 200, "width": 50, "height": 150},
+        "shaft": "visible_shaft_brand",
+        "grip": "visible_grip_type",
+        "loft": "visible_loft_marking",
+        "condition": "new|used|worn"
+      },
+      "searchKeywords": ["keyword1", "keyword2", "keyword3"],
+      "requiresManualReview": false
+    }
+  ],
+  "bagAnalysis": {
+    "brand": "bag_brand",
+    "model": "bag_model", 
+    "confidence": 0.75
+  },
+  "analysisMetadata": {
+    "totalItemsFound": 14,
+    "overallConfidence": 0.78,
+    "imageQuality": "good|fair|poor",
+    "lightingConditions": "good|fair|poor",
+    "recommendManualReview": false
+  }
+}
+
+CRITICAL: Return ONLY valid JSON. No markdown, no explanations, no extra text.`
         },
         {
           role: "user",
@@ -225,42 +213,48 @@ export async function analyzeGolfBagImage(
     const content = response.choices[0]?.message?.content || '{}';
     
     try {
-      // Use robust JSON extraction
-      console.log('OpenAI response received, attempting to extract JSON...');
       const analysis = extractJSON(content);
-      console.log('Successfully extracted JSON from OpenAI response');
       
-      // Normalize and validate the response
-      return {
-        clubs: (analysis.clubs || []).map((club: any) => ({
-          type: normalizeClubType(club.type),
-          brand: club.brand || 'Unknown',
-          model: club.model,
-          confidence: club.confidence || 0.5,
-          details: club.details,
-          position: club.position
-        })),
-        bagInfo: analysis.bagInfo || {},
-        accessories: analysis.accessories || [],
-        overallConfidence: calculateOverallConfidence(analysis.clubs || []),
-        rawResponse: content
-      };
-    } catch (parseError) {
-      console.error('Failed to extract/parse OpenAI response:', parseError);
-      console.error('Raw response:', content);
-      console.error('Response length:', content.length);
-      
-      // Log specific extraction failure details
-      if (parseError instanceof Error) {
-        console.error('Extraction error details:', parseError.message);
+      // Validate required structure
+      if (!analysis.identifiedEquipment || !Array.isArray(analysis.identifiedEquipment)) {
+        throw new Error('Invalid response structure: missing identifiedEquipment array');
       }
       
-      // Return a structured error response with more context
+      // Transform to existing format for backward compatibility
+      return {
+        clubs: analysis.identifiedEquipment.map((item: any) => ({
+          type: normalizeClubType(item.type),
+          brand: item.primaryIdentification?.brand || 'Unknown',
+          model: item.primaryIdentification?.model,
+          confidence: item.primaryIdentification?.confidence || 0.5,
+          details: {
+            shaft: item.visualDetails?.shaft,
+            grip: item.visualDetails?.grip,
+            loft: item.visualDetails?.loft,
+            condition: item.visualDetails?.condition
+          },
+          position: item.visualDetails?.position,
+          searchKeywords: item.searchKeywords,
+          alternativeMatches: item.alternativeMatches,
+          requiresManualReview: item.requiresManualReview
+        })),
+        bagInfo: analysis.bagAnalysis || {},
+        accessories: [], // Can be extracted from identifiedEquipment if needed
+        overallConfidence: analysis.analysisMetadata?.overallConfidence || 0.5,
+        rawResponse: content,
+        metadata: analysis.analysisMetadata
+      };
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response:', parseError);
+      console.error('Raw response:', content);
+      
+      // Return structured error response instead of empty
       return {
         clubs: [],
         overallConfidence: 0,
         rawResponse: content,
-        error: parseError instanceof Error ? parseError.message : 'Unknown parsing error'
+        error: parseError instanceof Error ? parseError.message : 'Unknown parsing error',
+        requiresManualReview: true
       };
     }
   } catch (error) {
@@ -298,6 +292,9 @@ function normalizeClubType(type: string): string {
     'irons': 'iron',
     'wedge': 'wedge',
     'putter': 'putter',
+    'ball': 'other',
+    'bag': 'other',
+    'accessory': 'other'
   };
 
   return typeMap[normalized] || 'other';
@@ -323,34 +320,78 @@ export async function validateEquipmentData(
   analysis: EquipmentAnalysisResult,
   supabase: any
 ): Promise<EquipmentAnalysisResult> {
-  // For each identified club, try to match with our equipment database
   const enhancedClubs = await Promise.all(
     analysis.clubs.map(async (club) => {
+      let matches = [];
+      
+      // Primary brand/model search
       if (club.brand && club.brand !== 'Unknown') {
-        // Search for matching equipment in database
-        const { data: matches } = await supabase
+        const { data: primaryMatches } = await supabase
           .from('equipment')
-          .select('id, brand, model, category, specs')
+          .select('id, brand, model, category, specs, image_url, msrp')
           .ilike('brand', `%${club.brand}%`)
           .eq('category', club.type)
-          .limit(5);
+          .limit(10);
         
-        if (matches && matches.length > 0) {
-          // Find best match based on model similarity
-          const bestMatch = matches.find(m => 
-            club.model && m.model.toLowerCase().includes(club.model.toLowerCase())
-          ) || matches[0];
+        if (primaryMatches) matches.push(...primaryMatches);
+      }
+      
+      // Search using keywords if available
+      if (club.searchKeywords && club.searchKeywords.length > 0) {
+        for (const keyword of club.searchKeywords.slice(0, 3)) { // Limit to 3 keywords
+          const { data: keywordMatches } = await supabase
+            .from('equipment')
+            .select('id, brand, model, category, specs, image_url, msrp')
+            .or(`brand.ilike.%${keyword}%,model.ilike.%${keyword}%`)
+            .eq('category', club.type)
+            .limit(5);
           
-          return {
-            ...club,
-            matchedEquipmentId: bestMatch.id,
-            verifiedBrand: bestMatch.brand,
-            verifiedModel: bestMatch.model,
-            specs: bestMatch.specs
-          };
+          if (keywordMatches) matches.push(...keywordMatches);
         }
       }
-      return club;
+      
+      // Remove duplicates
+      const uniqueMatches = matches.filter((match, index, self) => 
+        index === self.findIndex(m => m.id === match.id)
+      );
+      
+      if (uniqueMatches.length > 0) {
+        // Score matches based on similarity
+        const scoredMatches = uniqueMatches.map(match => {
+          let score = 0;
+          
+          // Brand similarity
+          if (club.brand && match.brand.toLowerCase().includes(club.brand.toLowerCase())) {
+            score += 0.4;
+          }
+          
+          // Model similarity
+          if (club.model && match.model.toLowerCase().includes(club.model.toLowerCase())) {
+            score += 0.6;
+          }
+          
+          return { ...match, matchScore: score };
+        }).sort((a, b) => b.matchScore - a.matchScore);
+        
+        const bestMatch = scoredMatches[0];
+        
+        return {
+          ...club,
+          matchedEquipmentId: bestMatch.id,
+          verifiedBrand: bestMatch.brand,
+          verifiedModel: bestMatch.model,
+          specs: bestMatch.specs,
+          databaseMatches: scoredMatches.slice(0, 5), // Top 5 matches for user selection
+          matchConfidence: bestMatch.matchScore,
+          requiresUserConfirmation: bestMatch.matchScore < 0.7 || club.confidence < 0.8
+        };
+      }
+      
+      return {
+        ...club,
+        requiresManualAddition: true,
+        databaseMatches: []
+      };
     })
   );
 
