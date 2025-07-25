@@ -26,11 +26,11 @@ export default function AddEquipmentMethodDialog({
         <div className="grid gap-4 py-4">
           {/* AI Scanner Option */}
           <button
-            onClick={() => onSelectMethod('ai')}
-            className="group relative overflow-hidden rounded-lg bg-[#2a2a2a] p-6 transition-all hover:bg-[#3a3a3a] hover:scale-[1.02] active:scale-[0.98]"
+            disabled
+            className="group relative overflow-hidden rounded-lg bg-[#2a2a2a] p-6 opacity-50 cursor-not-allowed"
           >
             <div className="flex flex-col items-center gap-3">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 text-green-500 transition-colors group-hover:bg-green-500/20">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 text-green-500">
                 <Camera className="h-8 w-8" />
               </div>
               <div className="text-center">
@@ -39,8 +39,8 @@ export default function AddEquipmentMethodDialog({
                   Take a photo and let AI identify your equipment
                 </p>
               </div>
-              <div className="absolute -right-1 -top-1 rounded-bl-lg bg-green-500 px-2 py-1 text-xs font-medium text-black">
-                NEW
+              <div className="absolute -right-1 -top-1 rounded-bl-lg bg-gray-500 px-2 py-1 text-xs font-medium text-white">
+                COMING SOON
               </div>
             </div>
           </button>
