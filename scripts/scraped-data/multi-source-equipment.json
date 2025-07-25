@@ -1,0 +1,347 @@
+[
+  {
+    "brand": "TaylorMade",
+    "model": "Stealth 2 HD Driver",
+    "category": "driver",
+    "msrp": 579.99,
+    "specs": {
+      "loft_options": [
+        "10.5°",
+        "12°"
+      ],
+      "shaft_flex": [
+        "Senior",
+        "Regular",
+        "Stiff"
+      ],
+      "head_size": "460cc",
+      "material": "60X Carbon Twist Face",
+      "adjustability": "Yes - Loft Sleeve (±2°)",
+      "stock_shaft": "Fujikura Speeder NX Red",
+      "swing_weight": "D3",
+      "year": 2023
+    },
+    "description": "High draw bias driver with maximum forgiveness for slower swing speeds.",
+    "image_url": "https://www.taylormadegolf.com/dw/image/v2/stealth2-hd-driver.jpg",
+    "id": "taylormade-taylormade-stealth-2-hd-driver-1753416585259-6a501xm66",
+    "scraped_at": "2025-07-25T04:09:45.259Z",
+    "source": "multi-source-taylormade",
+    "popularity_score": 65,
+    "in_stock": true,
+    "retailer": "TaylorMade Direct"
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Stealth 2 Fairway",
+    "category": "fairway",
+    "msrp": 349.99,
+    "specs": {
+      "loft_options": [
+        "16.5°",
+        "19°",
+        "22°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff"
+      ],
+      "material": "3D Carbon Crown",
+      "adjustability": "Yes - Loft Sleeve",
+      "stock_shaft": "Fujikura Ventus Red",
+      "year": 2023
+    },
+    "description": "Advanced 3D carbon crown construction for lower CG and higher launch.",
+    "image_url": "https://www.taylormadegolf.com/dw/image/v2/stealth2-fairway.jpg",
+    "id": "taylormade-taylormade-stealth-2-fairway-1753416585259-epj33xn8h",
+    "scraped_at": "2025-07-25T04:09:45.259Z",
+    "source": "multi-source-taylormade",
+    "popularity_score": 87,
+    "in_stock": true,
+    "retailer": "TaylorMade Direct"
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "P790 Black",
+    "category": "iron",
+    "msrp": 1749.99,
+    "specs": {
+      "set_composition": "3-PW",
+      "shaft_options": [
+        "KBS Tour Black",
+        "UST Recoil Black"
+      ],
+      "material": "Forged Hollow Body with SpeedFoam Air",
+      "finish": "Black PVD",
+      "year": 2023
+    },
+    "description": "Limited edition black finish with enhanced feel and distance.",
+    "image_url": "https://www.taylormadegolf.com/dw/image/v2/p790-black-irons.jpg",
+    "id": "taylormade-taylormade-p790-black-1753416585259-mc0mwte35",
+    "scraped_at": "2025-07-25T04:09:45.259Z",
+    "source": "multi-source-taylormade",
+    "popularity_score": 60,
+    "in_stock": true,
+    "retailer": "TaylorMade Direct"
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Ai Smoke Max Driver",
+    "category": "driver",
+    "msrp": 599.99,
+    "specs": {
+      "loft_options": [
+        "9°",
+        "10.5°",
+        "12°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "head_size": "460cc",
+      "material": "AI Smart Face",
+      "adjustability": "Yes - OptiFit 3 Hosel",
+      "stock_shaft": "Project X Denali Black",
+      "year": 2024
+    },
+    "description": "AI-designed face for optimal launch and spin across the face.",
+    "image_url": "https://www.callawaygolf.com/dw/image/v2/paradym-ai-smoke-max.jpg",
+    "id": "callaway-callaway-paradym-ai-smoke-max-driver-1753416585259-52beublje",
+    "scraped_at": "2025-07-25T04:09:45.259Z",
+    "source": "multi-source-callaway",
+    "popularity_score": 64,
+    "in_stock": true,
+    "retailer": "Callaway Direct"
+  },
+  {
+    "brand": "Callaway",
+    "model": "Apex TCB Irons",
+    "category": "iron",
+    "msrp": 2100,
+    "specs": {
+      "set_composition": "3-PW",
+      "shaft_options": [
+        "Project X LS",
+        "Dynamic Gold Tour Issue"
+      ],
+      "material": "Tour Cavity Back Forging",
+      "year": 2023
+    },
+    "description": "Tour-inspired cavity back with pure forged feel.",
+    "image_url": "https://www.callawaygolf.com/dw/image/v2/apex-tcb-irons.jpg",
+    "id": "callaway-callaway-apex-tcb-irons-1753416585259-mylvlfsex",
+    "scraped_at": "2025-07-25T04:09:45.259Z",
+    "source": "multi-source-callaway",
+    "popularity_score": 96,
+    "in_stock": true,
+    "retailer": "Callaway Direct"
+  },
+  {
+    "brand": "Callaway",
+    "model": "Opus Wedge",
+    "category": "wedge",
+    "msrp": 199.99,
+    "specs": {
+      "loft_options": [
+        "50°",
+        "52°",
+        "54°",
+        "56°",
+        "58°",
+        "60°"
+      ],
+      "bounce_options": [
+        "S",
+        "C",
+        "W"
+      ],
+      "material": "8620 Mild Carbon Steel",
+      "grooves": "Spin Gen Face Technology",
+      "year": 2024
+    },
+    "description": "Premium wedge co-designed with Phil Mickelson.",
+    "image_url": "https://www.callawaygolf.com/dw/image/v2/opus-wedge.jpg",
+    "id": "callaway-callaway-opus-wedge-1753416585259-w7gmcrum6",
+    "scraped_at": "2025-07-25T04:09:45.259Z",
+    "source": "multi-source-callaway",
+    "popularity_score": 96,
+    "in_stock": true,
+    "retailer": "Callaway Direct"
+  },
+  {
+    "brand": "Cobra",
+    "model": "Darkspeed Driver",
+    "category": "driver",
+    "msrp": 549,
+    "specs": {
+      "loft_options": [
+        "9°",
+        "10.5°",
+        "12°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff"
+      ],
+      "material": "PWR-COR Technology",
+      "adjustability": "Yes - MyFly8",
+      "stock_shaft": "UST Mamiya LIN-Q",
+      "year": 2024
+    },
+    "description": "Aerodynamic design with lowest CG ever in a Cobra driver.",
+    "image_url": "https://www.cobragolf.com/dw/image/v2/darkspeed-driver.jpg",
+    "id": "golfgalaxy-cobra-darkspeed-driver-1753416585259-wklf74l4u",
+    "scraped_at": "2025-07-25T04:09:45.259Z",
+    "source": "multi-source-golfgalaxy",
+    "popularity_score": 61,
+    "in_stock": true,
+    "retailer": "Golf Galaxy Inventory"
+  },
+  {
+    "brand": "Mizuno",
+    "model": "JPX 923 Hot Metal Pro",
+    "category": "iron",
+    "msrp": 1199.99,
+    "specs": {
+      "set_composition": "4-PW",
+      "shaft_options": [
+        "UST Recoil Dart",
+        "Dynamic Gold 105"
+      ],
+      "material": "Chromoly 4140M",
+      "year": 2023
+    },
+    "description": "Compact players distance iron with seamless cup face.",
+    "image_url": "https://mizunousa.com/dw/image/v2/jpx923-hot-metal-pro.jpg",
+    "id": "golfgalaxy-mizuno-jpx-923-hot-metal-pro-1753416585259-gds3m5z9c",
+    "scraped_at": "2025-07-25T04:09:45.259Z",
+    "source": "multi-source-golfgalaxy",
+    "popularity_score": 94,
+    "in_stock": true,
+    "retailer": "Golf Galaxy Inventory"
+  },
+  {
+    "brand": "Wilson",
+    "model": "Staff Model Ball",
+    "category": "balls",
+    "msrp": 49.99,
+    "specs": {
+      "construction": "4-piece",
+      "compression": "Mid (90)",
+      "cover": "Cast Urethane",
+      "year": 2023
+    },
+    "description": "Tour ball with V-COR technology for exceptional feel.",
+    "image_url": "https://www.wilson.com/dw/image/v2/staff-model-ball.jpg",
+    "id": "golfgalaxy-wilson-staff-model-ball-1753416585259-lmyi2hbir",
+    "scraped_at": "2025-07-25T04:09:45.259Z",
+    "source": "multi-source-golfgalaxy",
+    "popularity_score": 67,
+    "in_stock": true,
+    "retailer": "Golf Galaxy Inventory"
+  },
+  {
+    "brand": "OGIO",
+    "model": "WOODE 8",
+    "category": "bags",
+    "msrp": 229.99,
+    "specs": {
+      "type": "Hybrid Stand/Cart",
+      "weight": "5.9 lbs",
+      "dividers": "8-way WOODĒ top",
+      "features": [
+        "Ball Silo",
+        "SHOXX Absorption",
+        "Walking Accessible"
+      ],
+      "year": 2023
+    },
+    "description": "Innovative hybrid bag with patented club management system.",
+    "image_url": "https://ogio.com/dw/image/v2/woode-8-hybrid.jpg",
+    "id": "golfgalaxy-ogio-woode-8-1753416585259-rtcosluzi",
+    "scraped_at": "2025-07-25T04:09:45.259Z",
+    "source": "multi-source-golfgalaxy",
+    "popularity_score": 75,
+    "in_stock": true,
+    "retailer": "Golf Galaxy Inventory"
+  },
+  {
+    "brand": "PXG",
+    "model": "0311 GEN6 Driver",
+    "category": "driver",
+    "msrp": 399.99,
+    "specs": {
+      "loft_options": [
+        "7.5°",
+        "9°",
+        "10.5°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "material": "High-Speed Titanium Alloy",
+      "adjustability": "Yes - Adjustable Weighting",
+      "year": 2023
+    },
+    "description": "Precision engineered driver with robotic polishing.",
+    "image_url": "https://www.pxg.com/dw/image/v2/0311-gen6-driver.jpg",
+    "id": "specialty-pxg-0311-gen6-driver-1753416585260-ltj7vwjmd",
+    "scraped_at": "2025-07-25T04:09:45.260Z",
+    "source": "multi-source-specialty",
+    "popularity_score": 68,
+    "in_stock": true,
+    "retailer": "Specialty & Boutique"
+  },
+  {
+    "brand": "LAB Golf",
+    "model": "DF3",
+    "category": "putter",
+    "msrp": 579,
+    "specs": {
+      "head_style": "Lie Angle Balanced",
+      "length_options": [
+        "33\"",
+        "34\"",
+        "35\"",
+        "36\""
+      ],
+      "material": "6061 Aluminum",
+      "grip": "Press Grip 3 Degrees",
+      "year": 2023
+    },
+    "description": "Lie Angle Balanced putter for consistent stroke.",
+    "image_url": "https://www.labgolf.com/dw/image/v2/df3-putter.jpg",
+    "id": "specialty-lab-golf-df3-1753416585260-3lsk2btui",
+    "scraped_at": "2025-07-25T04:09:45.260Z",
+    "source": "multi-source-specialty",
+    "popularity_score": 96,
+    "in_stock": true,
+    "retailer": "Specialty & Boutique"
+  },
+  {
+    "brand": "Miura",
+    "model": "TC-201",
+    "category": "iron",
+    "msrp": 2800,
+    "specs": {
+      "set_composition": "4-PW",
+      "shaft_options": [
+        "Custom Only"
+      ],
+      "material": "S20C Soft Carbon Steel",
+      "forging": "Hand-forged in Japan",
+      "year": 2023
+    },
+    "description": "Premium forged cavity back with legendary Miura feel.",
+    "image_url": "https://miuragolf.com/dw/image/v2/tc-201-irons.jpg",
+    "id": "specialty-miura-tc-201-1753416585260-2seeqrkmo",
+    "scraped_at": "2025-07-25T04:09:45.260Z",
+    "source": "multi-source-specialty",
+    "popularity_score": 82,
+    "in_stock": true,
+    "retailer": "Specialty & Boutique"
+  }
+]

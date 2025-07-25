@@ -93,6 +93,7 @@ const ForumIndex = lazyImport(() => import("@/pages/ForumIndex"), "Forum Index")
 const ForumCategory = lazyImport(() => import("@/pages/ForumCategory"), "Forum Category");
 const ForumThread = lazyImport(() => import("@/pages/ForumThread"), "Forum Thread");
 const NotFound = lazyImport(() => import("@/pages/NotFound"), "Not Found");
+const AIBagAnalyzer = lazyImport(() => import("@/pages/AIBagAnalyzer"), "AI Bag Analyzer");
 
 // Admin routes (rarely accessed)
 const SeedEquipment = lazyImport(() => import("@/pages/admin/SeedEquipment"), "Seed Equipment");
@@ -168,6 +169,7 @@ const App = () => {
                         <Route path="/wishlist" element={<Wishlist />} />
                         <Route path="/badges" element={<Badges />} />
                         <Route path="/badge-preview" element={<BadgePreview />} />
+                        <Route path="/ai-analyzer" element={<AIBagAnalyzer />} />
                         <Route path="/forum/*" element={<ForumIndex />} />
                         <Route path="/admin/seed-equipment" element={<SeedEquipment />} />
                         <Route path="/admin/equipment-migration" element={<EquipmentMigration />} />

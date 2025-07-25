@@ -1,0 +1,1170 @@
+[
+  {
+    "brand": "TaylorMade",
+    "model": "Stealth 2 Plus",
+    "category": "driver",
+    "msrp": 599.99,
+    "specs": {
+      "loft_options": [
+        "8°",
+        "9°",
+        "10.5°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "head_size": "460cc",
+      "material": "Carbon Composite",
+      "adjustability": "Yes - Loft Sleeve",
+      "stock_shaft": "Fujikura Ventus TR",
+      "year": 2023
+    },
+    "description": "The Stealth 2 Plus Driver features advanced carbon face technology and adjustable weights for maximum distance and forgiveness.",
+    "image_url": "https://www.taylormadegolf.com/on/demandware.static/-/Sites-TMaG-Library/default/v1677777744914/2023-stealth2plus-driver-hero.jpg",
+    "id": "taylormade-stealth-2-plus-1753416471736-wxw5f8790",
+    "scraped_at": "2025-07-25T04:07:51.736Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 94,
+    "in_stock": true
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Triple Diamond",
+    "category": "driver",
+    "msrp": 699.99,
+    "specs": {
+      "loft_options": [
+        "8°",
+        "9°",
+        "10.5°"
+      ],
+      "shaft_flex": [
+        "Stiff",
+        "X-Stiff"
+      ],
+      "head_size": "450cc",
+      "material": "Triaxial Carbon",
+      "adjustability": "Yes - OptiFit Hosel",
+      "stock_shaft": "Mitsubishi Tensei AV Blue",
+      "year": 2023
+    },
+    "description": "Tour-level driver with a compact shape and neutral ball flight for better players.",
+    "image_url": "https://www.callawaygolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-master-catalog/default/dw3c4f8a09/images/large/drivers_23_paradym_triple_diamond.jpg",
+    "id": "callaway-paradym-triple-diamond-1753416471737-5xwpke2po",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 89,
+    "in_stock": true
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSR3",
+    "category": "driver",
+    "msrp": 599,
+    "specs": {
+      "loft_options": [
+        "8°",
+        "9°",
+        "10°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "head_size": "460cc",
+      "material": "Titanium",
+      "adjustability": "Yes - SureFit CG Track",
+      "stock_shaft": "Mitsubishi Tensei 1K Black",
+      "year": 2023
+    },
+    "description": "Precision-tuned performance with advanced adjustability and tour-inspired shaping.",
+    "image_url": "https://www.titleist.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-titleist-catalog/default/dw5d5e5c5e/images/large/TSR3_Driver.jpg",
+    "id": "titleist-tsr3-1753416471737-xur2t804i",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 83,
+    "in_stock": true
+  },
+  {
+    "brand": "Ping",
+    "model": "G430 Max",
+    "category": "driver",
+    "msrp": 549.99,
+    "specs": {
+      "loft_options": [
+        "9°",
+        "10.5°",
+        "12°"
+      ],
+      "shaft_flex": [
+        "Soft Regular",
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "head_size": "460cc",
+      "material": "Ti 8-1-1 Titanium",
+      "adjustability": "Yes - Trajectory Tuning",
+      "stock_shaft": "PING Alta CB Black",
+      "year": 2023
+    },
+    "description": "Maximum forgiveness and distance with a high MOI design.",
+    "image_url": "https://ping.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-ping-catalog/default/dw8e8e8e8e/images/large/G430_Max_Driver.jpg",
+    "id": "ping-g430-max-1753416471737-4xqu08a6d",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 99,
+    "in_stock": true
+  },
+  {
+    "brand": "Cobra",
+    "model": "Aerojet LS",
+    "category": "driver",
+    "msrp": 549,
+    "specs": {
+      "loft_options": [
+        "8.5°",
+        "9.5°",
+        "10.5°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "head_size": "460cc",
+      "material": "PWR-COR Technology",
+      "adjustability": "Yes - MyFly Loft",
+      "stock_shaft": "UST Helium Nanocore",
+      "year": 2023
+    },
+    "description": "Low spin driver designed for faster swing speeds with aerodynamic shaping.",
+    "image_url": "https://www.cobragolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-cobra-catalog/default/dw7d7d7d7d/images/large/Aerojet_LS_Driver.jpg",
+    "id": "cobra-aerojet-ls-1753416471737-8p82mpmkg",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 93,
+    "in_stock": true
+  },
+  {
+    "brand": "Mizuno",
+    "model": "JPX 923 Forged",
+    "category": "iron",
+    "msrp": 1400,
+    "specs": {
+      "set_composition": "4-PW",
+      "shaft_options": [
+        "Steel",
+        "Graphite"
+      ],
+      "flex_options": [
+        "Regular",
+        "Stiff"
+      ],
+      "material": "Forged 1025E Carbon Steel",
+      "offset": "Moderate",
+      "sole_width": "Medium",
+      "year": 2023
+    },
+    "description": "Players distance iron combining forgiveness with soft forged feel.",
+    "image_url": "https://mizunousa.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-mizuno-catalog/default/dw1a1a1a1a/images/large/JPX923_Forged_Iron.jpg",
+    "id": "mizuno-jpx-923-forged-1753416471737-scr5c80q1",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 87,
+    "in_stock": true
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "P790",
+    "category": "iron",
+    "msrp": 1499.99,
+    "specs": {
+      "set_composition": "4-PW",
+      "shaft_options": [
+        "KBS Tour Steel",
+        "UST Recoil Graphite"
+      ],
+      "flex_options": [
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "material": "Forged Hollow Body",
+      "offset": "Minimal",
+      "sole_width": "Thin to Medium",
+      "year": 2023
+    },
+    "description": "Forged hollow body construction with SpeedFoam for exceptional feel and distance.",
+    "image_url": "https://www.taylormadegolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-TMaG-Library/default/dw2b2b2b2b/images/large/P790_2023_Iron.jpg",
+    "id": "taylormade-p790-1753416471737-8zwerojjg",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 89,
+    "in_stock": true
+  },
+  {
+    "brand": "Titleist",
+    "model": "T200",
+    "category": "iron",
+    "msrp": 1399,
+    "specs": {
+      "set_composition": "4-PW",
+      "shaft_options": [
+        "True Temper AMT Black",
+        "Mitsubishi Tensei Blue"
+      ],
+      "flex_options": [
+        "Regular",
+        "Stiff"
+      ],
+      "material": "Forged Face Insert",
+      "offset": "Moderate",
+      "sole_width": "Medium",
+      "year": 2023
+    },
+    "description": "Tour-inspired shape with Max Impact technology for consistent distance.",
+    "image_url": "https://www.titleist.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-titleist-catalog/default/dw3c3c3c3c/images/large/T200_Iron.jpg",
+    "id": "titleist-t200-1753416471737-qgug782bk",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 92,
+    "in_stock": true
+  },
+  {
+    "brand": "Callaway",
+    "model": "Apex Pro 23",
+    "category": "iron",
+    "msrp": 1400,
+    "specs": {
+      "set_composition": "3-PW",
+      "shaft_options": [
+        "Project X",
+        "Dynamic Gold"
+      ],
+      "flex_options": [
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "material": "Forged 1025 Carbon Steel",
+      "offset": "Minimal",
+      "sole_width": "Thin",
+      "year": 2023
+    },
+    "description": "Tour-level forged iron with precision control and workability.",
+    "image_url": "https://www.callawaygolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-master-catalog/default/dw4d4d4d4d/images/large/irons_23_apex_pro.jpg",
+    "id": "callaway-apex-pro-23-1753416471737-l2zsjycxu",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 92,
+    "in_stock": true
+  },
+  {
+    "brand": "Ping",
+    "model": "i230",
+    "category": "iron",
+    "msrp": 1350,
+    "specs": {
+      "set_composition": "3-PW",
+      "shaft_options": [
+        "Dynamic Gold",
+        "PING AWT 2.0"
+      ],
+      "flex_options": [
+        "Regular",
+        "Stiff"
+      ],
+      "material": "Forged 8620 Carbon Steel",
+      "offset": "Slight",
+      "sole_width": "Narrow to Medium",
+      "year": 2023
+    },
+    "description": "Compact players iron with activated elastomer for pure feel.",
+    "image_url": "https://ping.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-ping-catalog/default/dw5e5e5e5e/images/large/i230_Iron.jpg",
+    "id": "ping-i230-1753416471737-3ak6bw308",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 91,
+    "in_stock": true
+  },
+  {
+    "brand": "Titleist",
+    "model": "Vokey SM9",
+    "category": "wedge",
+    "msrp": 179.99,
+    "specs": {
+      "loft_options": [
+        "46°",
+        "48°",
+        "50°",
+        "52°",
+        "54°",
+        "56°",
+        "58°",
+        "60°"
+      ],
+      "bounce_options": [
+        "Low",
+        "Mid",
+        "High"
+      ],
+      "grind_options": [
+        "F",
+        "S",
+        "M",
+        "K",
+        "L",
+        "D"
+      ],
+      "material": "8620 Carbon Steel",
+      "grooves": "TX9 Grooves",
+      "finish_options": [
+        "Tour Chrome",
+        "Brushed Steel",
+        "Jet Black"
+      ],
+      "year": 2022
+    },
+    "description": "The most played wedge on tour with precise distance and trajectory control.",
+    "image_url": "https://www.titleist.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-titleist-catalog/default/dw6f6f6f6f/images/large/SM9_Wedge.jpg",
+    "id": "titleist-vokey-sm9-1753416471737-lid4j931p",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 93,
+    "in_stock": true
+  },
+  {
+    "brand": "Cleveland",
+    "model": "RTX 6 ZipCore",
+    "category": "wedge",
+    "msrp": 169.99,
+    "specs": {
+      "loft_options": [
+        "46°",
+        "48°",
+        "50°",
+        "52°",
+        "54°",
+        "56°",
+        "58°",
+        "60°"
+      ],
+      "bounce_options": [
+        "Low",
+        "Mid",
+        "High",
+        "XLow"
+      ],
+      "grind_options": [
+        "Low",
+        "Mid",
+        "Full"
+      ],
+      "material": "8620 Soft Carbon Steel",
+      "grooves": "UltiZip Grooves",
+      "finish_options": [
+        "Tour Satin",
+        "Black Satin"
+      ],
+      "year": 2023
+    },
+    "description": "Revolutionary ZipCore technology shifts CG for added spin and control.",
+    "image_url": "https://www.clevelandgolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-cleveland-catalog/default/dw7g7g7g7g/images/large/RTX6_ZipCore_Wedge.jpg",
+    "id": "cleveland-rtx-6-zipcore-1753416471737-1cfw21bqa",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 83,
+    "in_stock": true
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "MG3",
+    "category": "wedge",
+    "msrp": 179.99,
+    "specs": {
+      "loft_options": [
+        "50°",
+        "52°",
+        "54°",
+        "56°",
+        "58°",
+        "60°"
+      ],
+      "bounce_options": [
+        "8°",
+        "10°",
+        "12°",
+        "14°"
+      ],
+      "grind_options": [
+        "Standard",
+        "Low",
+        "High"
+      ],
+      "material": "8620 Carbon Steel",
+      "grooves": "Raw Face Technology",
+      "finish_options": [
+        "Chrome",
+        "Black"
+      ],
+      "year": 2022
+    },
+    "description": "Raw face technology for increased spin and precision around the greens.",
+    "image_url": "https://www.taylormadegolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-TMaG-Library/default/dw8h8h8h8h/images/large/MG3_Wedge.jpg",
+    "id": "taylormade-mg3-1753416471737-66b1yqo19",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 99,
+    "in_stock": true
+  },
+  {
+    "brand": "Callaway",
+    "model": "Jaws Raw",
+    "category": "wedge",
+    "msrp": 169.99,
+    "specs": {
+      "loft_options": [
+        "48°",
+        "50°",
+        "52°",
+        "54°",
+        "56°",
+        "58°",
+        "60°"
+      ],
+      "bounce_options": [
+        "8°",
+        "10°",
+        "12°"
+      ],
+      "grind_options": [
+        "S",
+        "W",
+        "X"
+      ],
+      "material": "8620 Mild Steel",
+      "grooves": "Aggressive Groove Design",
+      "finish_options": [
+        "Raw",
+        "Chrome"
+      ],
+      "year": 2023
+    },
+    "description": "Raw face will rust over time for enhanced spin and feel.",
+    "image_url": "https://www.callawaygolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-master-catalog/default/dw9i9i9i9i/images/large/wedges_jaws_raw.jpg",
+    "id": "callaway-jaws-raw-1753416471737-li7tjtscz",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 97,
+    "in_stock": true
+  },
+  {
+    "brand": "Ping",
+    "model": "Glide 4.0",
+    "category": "wedge",
+    "msrp": 179.99,
+    "specs": {
+      "loft_options": [
+        "46°",
+        "50°",
+        "52°",
+        "54°",
+        "56°",
+        "58°",
+        "60°"
+      ],
+      "bounce_options": [
+        "8°",
+        "10°",
+        "12°",
+        "14°"
+      ],
+      "grind_options": [
+        "SS",
+        "WS",
+        "TS",
+        "ES"
+      ],
+      "material": "8620 Carbon Steel",
+      "grooves": "Precision-Milled Grooves",
+      "finish_options": [
+        "Hydropearl 2.0 Chrome",
+        "Black"
+      ],
+      "year": 2022
+    },
+    "description": "Precision-milled grooves and Hydropearl 2.0 finish for consistent spin.",
+    "image_url": "https://ping.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-ping-catalog/default/dwajajajaj/images/large/Glide_4_Wedge.jpg",
+    "id": "ping-glide-4.0-1753416471737-hdtf0tsqv",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 96,
+    "in_stock": true
+  },
+  {
+    "brand": "Scotty Cameron",
+    "model": "Special Select Newport 2",
+    "category": "putter",
+    "msrp": 449.99,
+    "specs": {
+      "head_style": "Blade",
+      "length_options": [
+        "33\"",
+        "34\"",
+        "35\""
+      ],
+      "material": "303 Stainless Steel",
+      "face_insert": "Milled",
+      "neck_style": "Plumber's Neck",
+      "grip": "Pistolini Plus",
+      "year": 2023
+    },
+    "description": "Tour-proven design with enhanced alignment and premium craftsmanship.",
+    "image_url": "https://www.scottycameron.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-scotty-catalog/default/dwbkbkbkbk/images/large/Special_Select_Newport_2.jpg",
+    "id": "scotty-cameron-special-select-newport-2-1753416471737-p4zauuiye",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 85,
+    "in_stock": true
+  },
+  {
+    "brand": "Odyssey",
+    "model": "White Hot OG #7",
+    "category": "putter",
+    "msrp": 249.99,
+    "specs": {
+      "head_style": "Mallet",
+      "length_options": [
+        "33\"",
+        "34\"",
+        "35\""
+      ],
+      "material": "Stainless Steel",
+      "face_insert": "White Hot Insert",
+      "neck_style": "Double Bend",
+      "grip": "Odyssey Pistol",
+      "year": 2023
+    },
+    "description": "Legendary White Hot insert with tour-proven shapes.",
+    "image_url": "https://www.odysseygolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-odyssey-catalog/default/dwclclclcl/images/large/White_Hot_OG_7.jpg",
+    "id": "odyssey-white-hot-og-#7-1753416471737-hbbvuiwz1",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 96,
+    "in_stock": true
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Spider GT",
+    "category": "putter",
+    "msrp": 349.99,
+    "specs": {
+      "head_style": "High MOI Mallet",
+      "length_options": [
+        "33\"",
+        "34\"",
+        "35\""
+      ],
+      "material": "Lightweight Aluminum",
+      "face_insert": "Pure Roll Insert",
+      "neck_style": "Single Bend",
+      "grip": "SuperStroke Pistol GTR",
+      "year": 2023
+    },
+    "description": "High MOI design with True Path alignment for improved accuracy.",
+    "image_url": "https://www.taylormadegolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-TMaG-Library/default/dwdmdmdmdm/images/large/Spider_GT_Putter.jpg",
+    "id": "taylormade-spider-gt-1753416471737-jsur1kpm2",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 86,
+    "in_stock": true
+  },
+  {
+    "brand": "Ping",
+    "model": "PLD Milled Anser",
+    "category": "putter",
+    "msrp": 395,
+    "specs": {
+      "head_style": "Blade",
+      "length_options": [
+        "33\"",
+        "34\"",
+        "35\""
+      ],
+      "material": "303 Stainless Steel",
+      "face_insert": "Precision Milled",
+      "neck_style": "Plumber's Neck",
+      "grip": "PP58 Tour",
+      "year": 2023
+    },
+    "description": "Precision-milled from 303 stainless steel for tour-level feel.",
+    "image_url": "https://ping.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-ping-catalog/default/dwenenenenen/images/large/PLD_Milled_Anser.jpg",
+    "id": "ping-pld-milled-anser-1753416471737-5dd0n0ohv",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 89,
+    "in_stock": true
+  },
+  {
+    "brand": "Bettinardi",
+    "model": "Queen B 6",
+    "category": "putter",
+    "msrp": 450,
+    "specs": {
+      "head_style": "Blade",
+      "length_options": [
+        "33\"",
+        "34\"",
+        "35\""
+      ],
+      "material": "303 Stainless Steel",
+      "face_insert": "Precision Milled",
+      "neck_style": "Plumber's Neck",
+      "grip": "Lamkin Sink Fit",
+      "year": 2023
+    },
+    "description": "Precision-milled in the USA with honeycomb face pattern.",
+    "image_url": "https://www.bettinardi.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-bettinardi-catalog/default/dwfnfnfnfn/images/large/Queen_B_6.jpg",
+    "id": "bettinardi-queen-b-6-1753416471737-bjv7w2z5k",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 98,
+    "in_stock": true
+  },
+  {
+    "brand": "Titleist",
+    "model": "Pro V1",
+    "category": "balls",
+    "msrp": 54.99,
+    "specs": {
+      "construction": "3-piece",
+      "compression": "Mid (87)",
+      "cover": "Cast Urethane Elastomer",
+      "dimples": 388,
+      "spin": "Mid",
+      "feel": "Soft",
+      "year": 2023
+    },
+    "description": "The #1 ball in golf with exceptional distance and consistent flight.",
+    "image_url": "https://www.titleist.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-titleist-catalog/default/dwgogogogo/images/large/Pro_V1_Ball.jpg",
+    "id": "titleist-pro-v1-1753416471737-u67n14vfm",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 98,
+    "in_stock": true
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "TP5x",
+    "category": "balls",
+    "msrp": 49.99,
+    "specs": {
+      "construction": "5-piece",
+      "compression": "High (97)",
+      "cover": "Cast Urethane",
+      "dimples": 322,
+      "spin": "High",
+      "feel": "Firm",
+      "year": 2023
+    },
+    "description": "Five-layer tour ball with highest launch and lowest spin off the driver.",
+    "image_url": "https://www.taylormadegolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-TMaG-Library/default/dwhphphphp/images/large/TP5x_Ball.jpg",
+    "id": "taylormade-tp5x-1753416471737-n75x3ti05",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 96,
+    "in_stock": true
+  },
+  {
+    "brand": "Callaway",
+    "model": "Chrome Soft X",
+    "category": "balls",
+    "msrp": 49.99,
+    "specs": {
+      "construction": "4-piece",
+      "compression": "High (100)",
+      "cover": "Urethane",
+      "dimples": 332,
+      "spin": "Mid to High",
+      "feel": "Firm",
+      "year": 2023
+    },
+    "description": "Tour-level performance with Precision Technology for tight dispersion.",
+    "image_url": "https://www.callawaygolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-master-catalog/default/dwiqiqiqiq/images/large/balls_chrome_soft_x.jpg",
+    "id": "callaway-chrome-soft-x-1753416471737-j8gpyytrc",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 93,
+    "in_stock": true
+  },
+  {
+    "brand": "Bridgestone",
+    "model": "Tour B XS",
+    "category": "balls",
+    "msrp": 49.99,
+    "specs": {
+      "construction": "3-piece",
+      "compression": "Mid (78)",
+      "cover": "Urethane",
+      "dimples": 330,
+      "spin": "High",
+      "feel": "Soft",
+      "year": 2023
+    },
+    "description": "Tiger Woods' ball of choice with REACTIV cover technology.",
+    "image_url": "https://www.bridgestonegolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-bridgestone-catalog/default/dwjrjrjrjr/images/large/Tour_B_XS_Ball.jpg",
+    "id": "bridgestone-tour-b-xs-1753416471737-mdicdh331",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 89,
+    "in_stock": true
+  },
+  {
+    "brand": "Srixon",
+    "model": "Z-Star XV",
+    "category": "balls",
+    "msrp": 44.99,
+    "specs": {
+      "construction": "4-piece",
+      "compression": "High (102)",
+      "cover": "Urethane",
+      "dimples": 338,
+      "spin": "Mid",
+      "feel": "Firm",
+      "year": 2023
+    },
+    "description": "Maximum distance with excellent iron spin and control.",
+    "image_url": "https://www.srixon.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-srixon-catalog/default/dwksksksks/images/large/Z_Star_XV_Ball.jpg",
+    "id": "srixon-z-star-xv-1753416471737-1md7pa2zt",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 85,
+    "in_stock": true
+  },
+  {
+    "brand": "Titleist",
+    "model": "Players 4 Plus StaDry",
+    "category": "bags",
+    "msrp": 299.99,
+    "specs": {
+      "type": "Stand Bag",
+      "weight": "5.5 lbs",
+      "dividers": "4-way",
+      "pockets": 9,
+      "straps": "Dual Strap",
+      "features": [
+        "Waterproof",
+        "Cart Strap Pass-Through",
+        "Umbrella Holder"
+      ],
+      "year": 2023
+    },
+    "description": "Lightweight waterproof stand bag with premium organization.",
+    "image_url": "https://www.titleist.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-titleist-catalog/default/dwltltltlt/images/large/Players_4_Plus_StaDry_Bag.jpg",
+    "id": "titleist-players-4-plus-stadry-1753416471737-qfupjjgq6",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 91,
+    "in_stock": true
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "FlexTech Crossover",
+    "category": "bags",
+    "msrp": 279.99,
+    "specs": {
+      "type": "Stand Bag",
+      "weight": "5.0 lbs",
+      "dividers": "14-way",
+      "pockets": 11,
+      "straps": "Dual Strap",
+      "features": [
+        "Cart Strap Channel",
+        "Cooler Pocket",
+        "Micro Suede Valuables Pocket"
+      ],
+      "year": 2023
+    },
+    "description": "Versatile stand bag that performs equally well on a cart or carried.",
+    "image_url": "https://www.taylormadegolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-TMaG-Library/default/dwmumumumum/images/large/FlexTech_Crossover_Bag.jpg",
+    "id": "taylormade-flextech-crossover-1753416471737-wu8mv3ya8",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 99,
+    "in_stock": true
+  },
+  {
+    "brand": "Ping",
+    "model": "Hoofer 14",
+    "category": "bags",
+    "msrp": 259.99,
+    "specs": {
+      "type": "Stand Bag",
+      "weight": "5.5 lbs",
+      "dividers": "14-way",
+      "pockets": 12,
+      "straps": "Adjustable SensorCool Straps",
+      "features": [
+        "Magnetic Pocket",
+        "Deployable Shoe Pouch",
+        "Velour-Lined Valuables"
+      ],
+      "year": 2023
+    },
+    "description": "The most popular stand bag with exceptional organization and comfort.",
+    "image_url": "https://ping.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-ping-catalog/default/dwnvnvnvnv/images/large/Hoofer_14_Bag.jpg",
+    "id": "ping-hoofer-14-1753416471737-b4y1qtwd2",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 94,
+    "in_stock": true
+  },
+  {
+    "brand": "Sun Mountain",
+    "model": "C-130",
+    "category": "bags",
+    "msrp": 299.99,
+    "specs": {
+      "type": "Cart Bag",
+      "weight": "7.2 lbs",
+      "dividers": "14-way",
+      "pockets": 10,
+      "straps": "Cart Strap Pass-Through",
+      "features": [
+        "Reverse Orientation Top",
+        "Integrated Putter Well",
+        "Drink Holders"
+      ],
+      "year": 2023
+    },
+    "description": "Premium cart bag with reverse club layout for easy access.",
+    "image_url": "https://www.sunmountain.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-sunmountain-catalog/default/dwowowowow/images/large/C130_Cart_Bag.jpg",
+    "id": "sun-mountain-c-130-1753416471737-o71oi9z88",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 83,
+    "in_stock": true
+  },
+  {
+    "brand": "Vessel",
+    "model": "Player IV Pro",
+    "category": "bags",
+    "msrp": 395,
+    "specs": {
+      "type": "Stand Bag",
+      "weight": "6.0 lbs",
+      "dividers": "6-way",
+      "pockets": 7,
+      "straps": "Equilibrium Double Strap",
+      "features": [
+        "Tour-Grade Synthetic Leather",
+        "Magnetic Closures",
+        "Rotator Stand System"
+      ],
+      "year": 2023
+    },
+    "description": "Premium tour-inspired stand bag with luxury materials.",
+    "image_url": "https://www.vesselbags.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-vessel-catalog/default/dwpwpwpwpw/images/large/Player_IV_Pro_Bag.jpg",
+    "id": "vessel-player-iv-pro-1753416471737-igvko4x9q",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 86,
+    "in_stock": true
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Stealth 2 Rescue",
+    "category": "hybrid",
+    "msrp": 299.99,
+    "specs": {
+      "loft_options": [
+        "19°",
+        "22°",
+        "25°",
+        "28°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff"
+      ],
+      "shaft_model": "Fujikura Ventus Red",
+      "adjustability": "Yes - Loft Sleeve",
+      "material": "Steel Body with Carbon Crown",
+      "year": 2023
+    },
+    "description": "High-launching rescue club with V Steel sole design.",
+    "image_url": "https://www.taylormadegolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-TMaG-Library/default/dwqxqxqxqx/images/large/Stealth_2_Rescue.jpg",
+    "id": "taylormade-stealth-2-rescue-1753416471737-wf9yvqcs4",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 85,
+    "in_stock": true
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Hybrid",
+    "category": "hybrid",
+    "msrp": 279.99,
+    "specs": {
+      "loft_options": [
+        "18°",
+        "21°",
+        "24°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff"
+      ],
+      "shaft_model": "UST Mamiya Recoil",
+      "adjustability": "Yes - OptiFit Hosel",
+      "material": "Forged 455 Face",
+      "year": 2023
+    },
+    "description": "Forged face hybrid with Jailbreak technology for increased ball speed.",
+    "image_url": "https://www.callawaygolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-master-catalog/default/dwryryryry/images/large/hybrids_paradym.jpg",
+    "id": "callaway-paradym-hybrid-1753416471737-74f6xxmya",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 95,
+    "in_stock": true
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSR2 Hybrid",
+    "category": "hybrid",
+    "msrp": 299,
+    "specs": {
+      "loft_options": [
+        "18°",
+        "21°",
+        "24°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff"
+      ],
+      "shaft_model": "Mitsubishi Tensei Blue",
+      "adjustability": "Yes - SureFit Hosel",
+      "material": "High-Strength Steel",
+      "year": 2023
+    },
+    "description": "Player-preferred shape with enhanced forgiveness and launch.",
+    "image_url": "https://www.titleist.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-titleist-catalog/default/dwszszszsz/images/large/TSR2_Hybrid.jpg",
+    "id": "titleist-tsr2-hybrid-1753416471737-n76k4iyom",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 94,
+    "in_stock": true
+  },
+  {
+    "brand": "Ping",
+    "model": "G430 Hybrid",
+    "category": "hybrid",
+    "msrp": 279.99,
+    "specs": {
+      "loft_options": [
+        "17°",
+        "19°",
+        "22°",
+        "26°",
+        "30°"
+      ],
+      "shaft_flex": [
+        "Soft Regular",
+        "Regular",
+        "Stiff"
+      ],
+      "shaft_model": "PING Alta Quick",
+      "adjustability": "Yes - Trajectory Tuning",
+      "material": "Maraging Steel Face",
+      "year": 2023
+    },
+    "description": "Carbonfly Wrap crown saves weight for higher MOI and forgiveness.",
+    "image_url": "https://ping.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-ping-catalog/default/dwtztztztzt/images/large/G430_Hybrid.jpg",
+    "id": "ping-g430-hybrid-1753416471737-e6louxmac",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 87,
+    "in_stock": true
+  },
+  {
+    "brand": "Cobra",
+    "model": "Aerojet Hybrid",
+    "category": "hybrid",
+    "msrp": 279,
+    "specs": {
+      "loft_options": [
+        "17°",
+        "19°",
+        "22°",
+        "25°",
+        "28°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff"
+      ],
+      "shaft_model": "UST Helium Nanocore",
+      "adjustability": "Yes - MyFly Loft",
+      "material": "PWR-Bridge Weight",
+      "year": 2023
+    },
+    "description": "Aerodynamic design with adjustable weights for customization.",
+    "image_url": "https://www.cobragolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-cobra-catalog/default/dwuauauaua/images/large/Aerojet_Hybrid.jpg",
+    "id": "cobra-aerojet-hybrid-1753416471737-fxnv8b7qp",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 93,
+    "in_stock": true
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Stealth 2 Plus Fairway",
+    "category": "fairway",
+    "msrp": 399.99,
+    "specs": {
+      "loft_options": [
+        "15°",
+        "18°"
+      ],
+      "shaft_flex": [
+        "Stiff",
+        "X-Stiff"
+      ],
+      "shaft_model": "Fujikura Ventus TR Black",
+      "adjustability": "Yes - Loft Sleeve & Weight Track",
+      "material": "3D Carbon Crown",
+      "head_size": "175cc",
+      "year": 2023
+    },
+    "description": "Tour-inspired fairway wood with sliding weight track for shot shape control.",
+    "image_url": "https://www.taylormadegolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-TMaG-Library/default/dwvbvbvbvb/images/large/Stealth_2_Plus_Fairway.jpg",
+    "id": "taylormade-stealth-2-plus-fairway-1753416471737-aeeqlnntt",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 85,
+    "in_stock": true
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Triple Diamond Fairway",
+    "category": "fairway",
+    "msrp": 449.99,
+    "specs": {
+      "loft_options": [
+        "13.5°",
+        "15°",
+        "18°"
+      ],
+      "shaft_flex": [
+        "Stiff",
+        "X-Stiff"
+      ],
+      "shaft_model": "Mitsubishi Tensei AV Blue",
+      "adjustability": "Yes - OptiFit Hosel",
+      "material": "Forged Carbon Sole",
+      "head_size": "165cc",
+      "year": 2023
+    },
+    "description": "Compact tour shape with neutral ball flight for better players.",
+    "image_url": "https://www.callawaygolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-master-catalog/default/dwwcwcwcwc/images/large/fairways_paradym_triple_diamond.jpg",
+    "id": "callaway-paradym-triple-diamond-fairway-1753416471737-u5yuypb9b",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 96,
+    "in_stock": true
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSR3 Fairway",
+    "category": "fairway",
+    "msrp": 399,
+    "specs": {
+      "loft_options": [
+        "13.5°",
+        "15°",
+        "16.5°",
+        "18°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "shaft_model": "Mitsubishi Tensei 1K Black",
+      "adjustability": "Yes - SureFit CG Track",
+      "material": "High-Strength Steel",
+      "head_size": "175cc",
+      "year": 2023
+    },
+    "description": "Precision-tuned performance with adjustable CG track system.",
+    "image_url": "https://www.titleist.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-titleist-catalog/default/dwxdxdxdxd/images/large/TSR3_Fairway.jpg",
+    "id": "titleist-tsr3-fairway-1753416471737-oljfcrh1g",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 88,
+    "in_stock": true
+  },
+  {
+    "brand": "Ping",
+    "model": "G430 Max Fairway",
+    "category": "fairway",
+    "msrp": 349.99,
+    "specs": {
+      "loft_options": [
+        "15°",
+        "18°",
+        "21°",
+        "24°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff"
+      ],
+      "shaft_model": "PING Alta CB Black",
+      "adjustability": "Yes - Trajectory Tuning",
+      "material": "Maraging Steel Face",
+      "head_size": "195cc",
+      "year": 2023
+    },
+    "description": "Maximum forgiveness with Carbonfly Wrap and Spinsistency technology.",
+    "image_url": "https://ping.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-ping-catalog/default/dwyeieieiei/images/large/G430_Max_Fairway.jpg",
+    "id": "ping-g430-max-fairway-1753416471737-3pmb2h88t",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 84,
+    "in_stock": true
+  },
+  {
+    "brand": "Cobra",
+    "model": "Aerojet LS Fairway",
+    "category": "fairway",
+    "msrp": 349,
+    "specs": {
+      "loft_options": [
+        "14.5°",
+        "17.5°"
+      ],
+      "shaft_flex": [
+        "Stiff",
+        "X-Stiff"
+      ],
+      "shaft_model": "UST Helium Nanocore Black",
+      "adjustability": "Yes - MyFly Loft & Weight",
+      "material": "PWR-COR Technology",
+      "head_size": "170cc",
+      "year": 2023
+    },
+    "description": "Low spin fairway wood designed for faster swing speeds.",
+    "image_url": "https://www.cobragolf.com/dw/image/v2/BFKK_PRD/on/demandware.static/-/Sites-cobra-catalog/default/dwzfzfzfzf/images/large/Aerojet_LS_Fairway.jpg",
+    "id": "cobra-aerojet-ls-fairway-1753416471737-4b3n5l4iv",
+    "scraped_at": "2025-07-25T04:07:51.737Z",
+    "source": "golf-equipment-scraper",
+    "popularity_score": 92,
+    "in_stock": true
+  }
+]

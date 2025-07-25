@@ -1,4 +1,4 @@
-import { User, Grid, Heart, Users, LogOut, MessageSquare } from "lucide-react";
+import { User, Grid, Heart, Users, LogOut, MessageSquare, Camera } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -188,6 +188,12 @@ const Navigation = () => {
                       <DropdownMenuItem onClick={() => setShowProfile(true)}>
                         <User className="mr-2 h-4 w-4" />
                         Edit Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/ai-analyzer">
+                          <Camera className="mr-2 h-4 w-4" />
+                          AI Bag Analyzer
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleSignOut}>

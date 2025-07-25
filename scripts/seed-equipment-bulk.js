@@ -234,34 +234,56 @@ async function seedEquipment() {
   const equipment = generateEquipment();
   console.log(`Generated ${equipment.length} equipment items`);
   
+  // Check existing equipment first
+  console.log('Checking for existing equipment...');
+  const { data: existingData } = await supabase
+    .from('equipment')
+    .select('brand, model, category');
+  
+  const existingSet = new Set(
+    (existingData || []).map(e => `${e.brand}-${e.model}-${e.category}`)
+  );
+  
+  // Filter out duplicates
+  const newEquipment = equipment.filter(item => 
+    !existingSet.has(`${item.brand}-${item.model}-${item.category}`)
+  );
+  
+  console.log(`Found ${existingData?.length || 0} existing items`);
+  console.log(`Will insert ${newEquipment.length} new items`);
+  
+  if (newEquipment.length === 0) {
+    console.log('\n✅ All equipment already exists in database!');
+    return;
+  }
+  
   // Insert in batches
   const batchSize = 50;
   let totalInserted = 0;
   
-  for (let i = 0; i < equipment.length; i += batchSize) {
-    const batch = equipment.slice(i, i + batchSize);
+  for (let i = 0; i < newEquipment.length; i += batchSize) {
+    const batch = newEquipment.slice(i, i + batchSize);
     
     try {
       const { data, error } = await supabase
         .from('equipment')
-        .upsert(
+        .insert(
           batch.map(item => ({
             ...item,
             image_url: `https://placehold.co/400x400/1a1a1a/white?text=${encodeURIComponent(item.brand + ' ' + item.model)}`,
             created_at: new Date().toISOString()
-          })),
-          { 
-            onConflict: 'brand,model,category',
-            ignoreDuplicates: false 
-          }
-        );
+          }))
+        )
+        .select();
       
       if (error) {
         console.error('Error inserting batch:', error);
+        console.error('Error details:', error.details, error.message, error.hint);
+      } else if (data && data.length > 0) {
+        totalInserted += data.length;
+        console.log(`✅ Inserted batch ${Math.floor(i/batchSize) + 1} (${data.length} items)`);
       } else {
-        console.log('Insert response:', { data, error });
-        totalInserted += data?.length || 0;
-        console.log(`Inserted batch ${Math.floor(i/batchSize) + 1} (${data?.length || 0} items)`);
+        console.log(`⚠️ Batch ${Math.floor(i/batchSize) + 1} returned no data`);
       }
     } catch (error) {
       console.error('Batch insert error:', error);
