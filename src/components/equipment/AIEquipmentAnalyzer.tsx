@@ -104,7 +104,22 @@ export default function AIEquipmentAnalyzer({
         })
       });
 
-      const data = await response.json();
+      // Check Content-Type before parsing JSON
+      const contentType = response.headers.get('content-type');
+      let data;
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // Try to get text content for debugging
+        const text = await response.text();
+        console.error('[AI-Analyzer] Non-JSON response:', { 
+          contentType,
+          statusCode: response.status,
+          responseText: text.substring(0, 500) // First 500 chars for debugging
+        });
+        throw new Error(`Received non-JSON response from server (${response.status})`);
+      }
       
       console.log('[AI-Analyzer] API response:', { 
         statusCode: response.status,
@@ -117,8 +132,14 @@ export default function AIEquipmentAnalyzer({
         if (response.status === 429) {
           const retryAfter = data.retryAfter || 60;
           throw new Error(`Rate limit reached. Please try again in ${retryAfter} seconds.`);
+        } else if (response.status === 401) {
+          throw new Error('Authentication failed. Please log in again.');
+        } else if (response.status === 503) {
+          throw new Error('AI service is temporarily unavailable. Please try again later.');
+        } else if (response.status === 500) {
+          throw new Error('Server error occurred. Please try again or contact support.');
         }
-        throw new Error(data.message || 'Failed to analyze image');
+        throw new Error(data.message || `Failed to analyze image (${response.status})`);
       }
 
       setAnalysisStep('processing');

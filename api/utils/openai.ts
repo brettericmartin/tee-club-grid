@@ -115,6 +115,7 @@ export async function analyzeGolfBagImage(
       };
     } catch (parseError) {
       console.error('Failed to parse OpenAI response:', parseError);
+      console.error('Raw response:', content);
       // Return a structured error response
       return {
         clubs: [],
@@ -124,7 +125,17 @@ export async function analyzeGolfBagImage(
     }
   } catch (error) {
     console.error('OpenAI API error:', error);
-    throw new Error('Failed to analyze image');
+    if (error instanceof Error) {
+      // Check for specific OpenAI errors
+      if (error.message.includes('401')) {
+        throw new Error('OpenAI API authentication failed. Please check API key configuration.');
+      } else if (error.message.includes('429')) {
+        throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+      } else if (error.message.includes('insufficient_quota')) {
+        throw new Error('OpenAI API quota exceeded. Please contact support.');
+      }
+    }
+    throw new Error('Failed to analyze image. Please try again.');
   }
 }
 

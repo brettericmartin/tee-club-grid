@@ -5,7 +5,7 @@ import { strictRateLimit } from '../middleware/rate-limit';
 import { analyzeGolfBagImage, validateEquipmentData } from '../utils/openai';
 
 // Initialize Supabase client
-const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -68,6 +68,15 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     }
 
     console.log(`Analyzing image for user ${req.userId}`);
+
+    // Check if configuration is properly set
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('Missing OpenAI API key in environment');
+      return res.status(503).json({
+        error: 'Service Unavailable',
+        message: 'AI service is not properly configured. Please contact support.'
+      });
+    }
 
     // Analyze the image with OpenAI
     const analysis = await analyzeGolfBagImage(image, mimeType);
