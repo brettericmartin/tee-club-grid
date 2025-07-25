@@ -18,22 +18,24 @@ interface SubmitEquipmentModalProps {
   onClose: () => void;
   onSubmit: (equipment: SubmitEquipmentForm) => void;
   initialCategory?: string;
+  prefilledData?: Partial<SubmitEquipmentForm> & { details?: any };
+  remainingCount?: number;
 }
 
-const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: SubmitEquipmentModalProps) => {
+const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory, prefilledData, remainingCount }: SubmitEquipmentModalProps) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState<SubmitEquipmentForm>({
-    brand: "",
-    model: "",
-    year: new Date().getFullYear(),
-    category: "",
-    description: "",
-    imageUrl: "",
-    isCustom: false,
-    flex: "",
-    weight: undefined,
-    size: "",
-    color: ""
+    brand: prefilledData?.brand || "",
+    model: prefilledData?.model || "",
+    year: prefilledData?.year || new Date().getFullYear(),
+    category: prefilledData?.category || "",
+    description: prefilledData?.description || "",
+    imageUrl: prefilledData?.imageUrl || "",
+    isCustom: prefilledData?.isCustom || false,
+    flex: prefilledData?.flex || "",
+    weight: prefilledData?.weight || undefined,
+    size: prefilledData?.size || "",
+    color: prefilledData?.color || ""
   });
   
   const [brands, setBrands] = useState<string[]>([]);
@@ -59,8 +61,20 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
       if (initialCategory) {
         setFormData(prev => ({ ...prev, category: initialCategory }));
       }
+      // Update form with prefilled data when modal opens
+      if (prefilledData) {
+        setFormData(prev => ({
+          ...prev,
+          ...prefilledData,
+          // Include details in description if available
+          description: prefilledData.description || 
+            (prefilledData.details ? `Shaft: ${prefilledData.details.shaft || 'Unknown'}\nGrip: ${prefilledData.details.grip || 'Unknown'}${prefilledData.details.loft ? `\nLoft: ${prefilledData.details.loft}` : ''}` : '')
+        }));
+        setBrandSearch(prefilledData.brand || '');
+        setModelSearch(prefilledData.model || '');
+      }
     }
-  }, [isOpen, initialCategory]);
+  }, [isOpen, initialCategory, prefilledData]);
   
   // Load models when brand is selected
   useEffect(() => {
@@ -162,7 +176,19 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory }: Su
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <DialogTitle>Submit Equipment</DialogTitle>
+            <div className="flex items-center gap-3">
+              <DialogTitle>Submit Equipment</DialogTitle>
+              {remainingCount !== undefined && remainingCount > 0 && (
+                <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 border-yellow-500/30">
+                  {remainingCount} more to review
+                </Badge>
+              )}
+              {prefilledData?.details?.detectedByAI && (
+                <Badge variant="secondary" className="bg-green-500/20 text-green-500 border-green-500/30">
+                  AI Detected
+                </Badge>
+              )}
+            </div>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>

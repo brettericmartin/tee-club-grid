@@ -34,11 +34,15 @@ import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import { sortBadgesByPriority } from "@/utils/badgeSorting";
 import { UserFeedView } from "@/components/feed/UserFeedView";
+import { aiFlowMetrics } from "@/utils/performanceMonitor";
 
 // Lazy load heavy components with @dnd-kit
 const BagGalleryDndKit = lazy(() => import("@/components/bag/BagGalleryDndKit"));
 const EquipmentSelectorImproved = lazy(() => import("@/components/equipment/EquipmentSelectorImproved"));
 const EquipmentEditor = lazy(() => import("@/components/bag/EquipmentEditor"));
+const AddEquipmentMethodDialog = lazy(() => import("@/components/equipment/AddEquipmentMethodDialog"));
+const AIEquipmentAnalyzer = lazy(() => import("@/components/equipment/AIEquipmentAnalyzer"));
+const AIAnalysisResultsDialog = lazy(() => import("@/components/equipment/AIAnalysisResultsDialog"));
 
 // Loading component for heavy components
 const ComponentLoadingFallback = () => {
@@ -109,6 +113,12 @@ const MyBagSupabase = () => {
   const [manageBadgesOpen, setManageBadgesOpen] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
+  
+  // AI Equipment flow states
+  const [showMethodDialog, setShowMethodDialog] = useState(false);
+  const [showAIAnalyzer, setShowAIAnalyzer] = useState(false);
+  const [showAIResults, setShowAIResults] = useState(false);
+  const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
   
   // Badge check hook
   const { checkBadgeProgress, newBadges, clearNewBadges } = useBadgeCheck();
@@ -654,6 +664,34 @@ const MyBagSupabase = () => {
     }
   };
 
+  // AI Equipment flow handlers
+  const handleMethodSelect = (method: 'ai' | 'manual') => {
+    aiFlowMetrics.trackMethodSelected(method);
+    setShowMethodDialog(false);
+    if (method === 'ai') {
+      aiFlowMetrics.trackAIAnalyzerOpen();
+      setShowAIAnalyzer(true);
+    } else {
+      setEquipmentSelectorOpen(true);
+    }
+  };
+
+  const handleAIAnalysisComplete = (result: any) => {
+    console.log('[MyBag] AI Analysis complete:', { 
+      clubsDetected: result.clubs.length,
+      confidence: result.overallConfidence 
+    });
+    aiFlowMetrics.trackAnalysisComplete(result.clubs.length, result.overallConfidence);
+    
+    const matchedCount = result.clubs.filter((c: any) => c.matchedEquipmentId).length;
+    const unmatchedCount = result.clubs.length - matchedCount;
+    aiFlowMetrics.trackResultsDialogOpen(matchedCount, unmatchedCount);
+    
+    setAiAnalysisResult(result);
+    setShowAIAnalyzer(false);
+    setShowAIResults(true);
+  };
+
   const removeItem = async (bagEquipmentId: string) => {
     try {
       const { error } = await supabase
@@ -805,7 +843,10 @@ const MyBagSupabase = () => {
         <p className="text-gray-300">Add equipment to showcase your setup</p>
       </div>
       <div className="flex flex-wrap gap-3 justify-center">
-        <Button onClick={() => setEquipmentSelectorOpen(true)} variant="default">
+        <Button onClick={() => {
+          aiFlowMetrics.trackMethodDialogOpen();
+          setShowMethodDialog(true);
+        }} variant="default">
           <Plus className="w-4 h-4 mr-2" />
           Add Equipment
         </Button>
@@ -846,7 +887,10 @@ const MyBagSupabase = () => {
               <>
                 {/* Add Equipment Button - Always visible */}
                 <Button
-                  onClick={() => setEquipmentSelectorOpen(true)}
+                  onClick={() => {
+                    aiFlowMetrics.trackMethodDialogOpen();
+                    setShowMethodDialog(true);
+                  }}
                   variant="outline"
                   size="sm"
                   className="text-white hover:text-white hover:bg-white/20 whitespace-nowrap"
@@ -1321,7 +1365,10 @@ const MyBagSupabase = () => {
         {/* Add Equipment Buttons */}
         {isEditing && (
           <div className="mt-8 flex flex-wrap gap-4 justify-center">
-            <Button onClick={() => setEquipmentSelectorOpen(true)} size="lg">
+            <Button onClick={() => {
+              aiFlowMetrics.trackMethodDialogOpen();
+              setShowMethodDialog(true);
+            }} size="lg">
               <Plus className="w-5 h-5 mr-2" />
               Add Equipment
             </Button>
@@ -1374,6 +1421,40 @@ const MyBagSupabase = () => {
         hasExistingBags={bags.length > 0}
       />
 
+      {/* Equipment Addition Method Dialog */}
+      <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
+        <AddEquipmentMethodDialog
+          isOpen={showMethodDialog}
+          onClose={() => setShowMethodDialog(false)}
+          onSelectMethod={handleMethodSelect}
+        />
+      </Suspense>
+
+      {/* AI Equipment Analyzer */}
+      <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
+        <AIEquipmentAnalyzer
+          isOpen={showAIAnalyzer}
+          onClose={() => setShowAIAnalyzer(false)}
+          onAnalysisComplete={handleAIAnalysisComplete}
+        />
+      </Suspense>
+
+      {/* AI Analysis Results */}
+      {aiAnalysisResult && (
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
+          <AIAnalysisResultsDialog
+            isOpen={showAIResults}
+            onClose={() => {
+              setShowAIResults(false);
+              setAiAnalysisResult(null);
+            }}
+            analysisResult={aiAnalysisResult}
+            onAddEquipment={addEquipment}
+          />
+        </Suspense>
+      )}
+
+      {/* Manual Equipment Selector */}
       <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
         <EquipmentSelectorImproved
           isOpen={equipmentSelectorOpen}
