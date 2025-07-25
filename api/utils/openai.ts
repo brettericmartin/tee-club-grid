@@ -40,6 +40,136 @@ export interface EquipmentAnalysisResult {
   }>;
   overallConfidence: number;
   rawResponse?: string;
+  error?: string;
+}
+
+/**
+ * Extract JSON from various OpenAI response formats
+ * Handles markdown code blocks, mixed text responses, and partial JSON
+ */
+function extractJSON(content: string): any {
+  if (!content || typeof content !== 'string') {
+    throw new Error('Invalid content: expected non-empty string');
+  }
+
+  // Attempt 1: Try direct JSON parse (fastest path)
+  try {
+    return JSON.parse(content.trim());
+  } catch (e) {
+    // Continue to other extraction methods
+  }
+
+  // Attempt 2: Remove markdown code blocks
+  // Handles ```json ... ``` and ``` ... ```
+  const markdownPatterns = [
+    /```json\s*\n?([\s\S]*?)\n?```/i,
+    /```\s*\n?([\s\S]*?)\n?```/
+  ];
+
+  for (const pattern of markdownPatterns) {
+    const match = content.match(pattern);
+    if (match && match[1]) {
+      try {
+        return JSON.parse(match[1].trim());
+      } catch (e) {
+        // Continue to next pattern
+      }
+    }
+  }
+
+  // Attempt 3: Extract JSON object or array from mixed text
+  // Looks for {...} or [...] patterns
+  const jsonPatterns = [
+    // Match JSON object
+    /\{[\s\S]*\}/,
+    // Match JSON array
+    /\[[\s\S]*\]/
+  ];
+
+  for (const pattern of jsonPatterns) {
+    const match = content.match(pattern);
+    if (match && match[0]) {
+      try {
+        const parsed = JSON.parse(match[0]);
+        // Validate it has expected structure (clubs array)
+        if (parsed.clubs || Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch (e) {
+        // Continue to next pattern
+      }
+    }
+  }
+
+  // Attempt 4: Handle responses with explanatory text
+  // Look for common patterns like "Here is the analysis:" followed by JSON
+  const textPatterns = [
+    /(?:here is|this is|the analysis|the equipment|detected equipment)[::\s]*(\{[\s\S]*\})/i,
+    /(?:json|result|response|output)[::\s]*(\{[\s\S]*\})/i
+  ];
+
+  for (const pattern of textPatterns) {
+    const match = content.match(pattern);
+    if (match && match[1]) {
+      try {
+        return JSON.parse(match[1].trim());
+      } catch (e) {
+        // Continue to next pattern
+      }
+    }
+  }
+
+  // Attempt 5: Try to extract the largest valid JSON structure
+  // This handles cases where JSON might be truncated or have extra characters
+  const jsonStart = content.indexOf('{');
+  const jsonArrayStart = content.indexOf('[');
+  
+  if (jsonStart !== -1 || jsonArrayStart !== -1) {
+    const startIndex = jsonStart !== -1 && (jsonArrayStart === -1 || jsonStart < jsonArrayStart) 
+      ? jsonStart 
+      : jsonArrayStart;
+    
+    let depth = 0;
+    let inString = false;
+    let escapeNext = false;
+    
+    for (let i = startIndex; i < content.length; i++) {
+      const char = content[i];
+      
+      if (!escapeNext) {
+        if (char === '"' && !inString) {
+          inString = true;
+        } else if (char === '"' && inString) {
+          inString = false;
+        } else if (!inString) {
+          if (char === '{' || char === '[') {
+            depth++;
+          } else if (char === '}' || char === ']') {
+            depth--;
+            if (depth === 0) {
+              // Found complete JSON structure
+              try {
+                const jsonStr = content.substring(startIndex, i + 1);
+                return JSON.parse(jsonStr);
+              } catch (e) {
+                // Invalid JSON, continue searching
+              }
+            }
+          }
+        }
+        
+        if (char === '\\') {
+          escapeNext = true;
+        }
+      } else {
+        escapeNext = false;
+      }
+    }
+  }
+
+  // If all extraction attempts fail, throw descriptive error
+  const preview = content.substring(0, 100);
+  throw new Error(`Failed to extract valid JSON from response. Content preview: "${preview}..."`);
 }
 
 /**
@@ -95,8 +225,10 @@ export async function analyzeGolfBagImage(
     const content = response.choices[0]?.message?.content || '{}';
     
     try {
-      // Parse the JSON response
-      const analysis = JSON.parse(content);
+      // Use robust JSON extraction
+      console.log('OpenAI response received, attempting to extract JSON...');
+      const analysis = extractJSON(content);
+      console.log('Successfully extracted JSON from OpenAI response');
       
       // Normalize and validate the response
       return {
@@ -114,13 +246,21 @@ export async function analyzeGolfBagImage(
         rawResponse: content
       };
     } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', parseError);
+      console.error('Failed to extract/parse OpenAI response:', parseError);
       console.error('Raw response:', content);
-      // Return a structured error response
+      console.error('Response length:', content.length);
+      
+      // Log specific extraction failure details
+      if (parseError instanceof Error) {
+        console.error('Extraction error details:', parseError.message);
+      }
+      
+      // Return a structured error response with more context
       return {
         clubs: [],
         overallConfidence: 0,
-        rawResponse: content
+        rawResponse: content,
+        error: parseError instanceof Error ? parseError.message : 'Unknown parsing error'
       };
     }
   } catch (error) {
