@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Heart, Star, Users, ExternalLink, Bookmark, BookmarkCheck } from 'lucide-react';
 import {
   Dialog,
@@ -16,13 +17,14 @@ import { getTopBagsWithEquipment } from '@/services/equipmentBags';
 import { savePhoto, unsavePhoto, arePhotosSaved } from '@/services/savedPhotos';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { getForumThreadsByEquipment } from '@/services/forum';
+import ForumThreadPreview from '@/components/forum/ForumThreadPreview';
 import type { Database } from '@/lib/supabase';
 
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
   equipment: Database['public']['Tables']['equipment']['Row'];
   shaft?: Database['public']['Tables']['equipment']['Row'];
   grip?: Database['public']['Tables']['equipment']['Row'];
-  loft_option?: Database['public']['Tables']['loft_options']['Row'];
 };
 
 interface EquipmentShowcaseModalProps {
@@ -43,6 +45,9 @@ export function EquipmentShowcaseModal({
   const [loading, setLoading] = useState(false);
   const [savedPhotos, setSavedPhotos] = useState<Record<string, boolean>>({});
   const [savingPhoto, setSavingPhoto] = useState<string | null>(null);
+  const [forumThreads, setForumThreads] = useState<any[]>([]);
+  const [loadingForums, setLoadingForums] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen && bagEquipment) {
@@ -79,6 +84,12 @@ export function EquipmentShowcaseModal({
         const savedStatus = await arePhotosSaved(user.id, allPhotoUrls);
         setSavedPhotos(savedStatus);
       }
+
+      // Load forum threads mentioning this equipment
+      setLoadingForums(true);
+      const { threads } = await getForumThreadsByEquipment(bagEquipment.equipment_id);
+      setForumThreads(threads);
+      setLoadingForums(false);
     } catch (error) {
       console.error('Error loading additional data:', error);
     } finally {
@@ -107,7 +118,7 @@ export function EquipmentShowcaseModal({
           source_type: photoData ? 'equipment_photo' : 'bag_equipment',
           source_id: photoData?.id || bagEquipment.id,
           equipment_id: bagEquipment.equipment_id,
-          saved_from_user_id: photoData?.user_id || bagEquipment.user_id,
+          saved_from_user_id: photoData?.user_id || user.id,
         });
         setSavedPhotos(prev => ({ ...prev, [photoUrl]: true }));
         toast.success('Photo saved! View in your Saved tab');
@@ -308,12 +319,6 @@ export function EquipmentShowcaseModal({
                     </div>
                   )}
                   
-                  {bagEquipment.loft_option && (
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-xs text-muted-foreground mb-1">Loft</p>
-                      <p className="font-medium">{bagEquipment.loft_option.display_name}</p>
-                    </div>
-                  )}
                 </div>
               </div>
               )}
@@ -391,35 +396,40 @@ export function EquipmentShowcaseModal({
             </div>
           </div>
 
-          {/* Tabs for Specs and Top Bags */}
-          <Tabs defaultValue="specs" className="mt-8">
+          {/* Tabs for Forums and Top Bags */}
+          <Tabs defaultValue="forums" className="mt-8">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="specs">Specifications</TabsTrigger>
+              <TabsTrigger value="forums">Forums</TabsTrigger>
               <TabsTrigger value="bags">
                 <Users className="w-4 h-4 mr-2" />
                 Popular Bags ({topBags.length})
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="specs" className="mt-4">
-              <div className="p-4 bg-muted rounded-lg">
-                {bagEquipment.equipment.specs && Object.keys(bagEquipment.equipment.specs).length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    {Object.entries(bagEquipment.equipment.specs).map(([key, value]) => (
-                      <div key={key} className="flex justify-between">
-                        <span className="text-muted-foreground capitalize">
-                          {key.replace(/_/g, ' ')}
-                        </span>
-                        <span className="font-medium">{String(value)}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-center py-4">
-                    No specifications available
-                  </p>
-                )}
-              </div>
+            <TabsContent value="forums" className="mt-4">
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {loadingForums ? (
+                    <div className="text-center py-8 text-gray-400">
+                      Loading forum discussions...
+                    </div>
+                  ) : forumThreads.length > 0 ? (
+                    forumThreads.map((thread) => (
+                      <ForumThreadPreview
+                        key={thread.id}
+                        thread={thread}
+                        onClick={() => navigate(`/forum/${thread.category.slug}/${thread.id}`)}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-400">
+                      No forum discussions found for this equipment yet.
+                      <br />
+                      <span className="text-sm">Be the first to start a conversation!</span>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
             </TabsContent>
             
             <TabsContent value="bags" className="mt-4">

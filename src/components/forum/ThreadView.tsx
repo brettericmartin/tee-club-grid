@@ -7,12 +7,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import PostThread from './PostThread';
 import PostEditor from './PostEditor';
+import EquipmentTagger from './EquipmentTagger';
 import { Eye, Lock, Pin, MessageSquare, ArrowLeft } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   getThreadDetails, 
   getThreadPosts, 
-  createForumPost, 
+  createForumPost,
+  tagEquipmentInPost,
   type ForumPostWithUser, 
   type ForumThreadWithDetails 
 } from '@/services/forum';
@@ -32,6 +34,7 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
   const [error, setError] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
   const [isReplying, setIsReplying] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState<any[]>([]);
 
   const fetchThreadData = async () => {
     try {
@@ -64,11 +67,11 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
 
     setIsReplying(true);
     try {
-      const { error } = await createForumPost({
+      const { post, error } = await createForumPost({
         threadId,
         userId: user.id,
         content: replyContent.trim(),
-        parentPostId: null // Top-level reply
+        parentPostId: null
       });
 
       if (error) {
@@ -76,10 +79,14 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
         return;
       }
 
+      if (selectedEquipment.length > 0) {
+        await tagEquipmentInPost(post.id, selectedEquipment.map(eq => eq.id));
+      }
+
       toast.success('Reply posted successfully');
       setReplyContent('');
+      setSelectedEquipment([]);
       
-      // Refresh posts to show the new reply
       await fetchThreadData();
     } catch (error) {
       console.error('Error posting reply:', error);
@@ -212,8 +219,14 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
             value={replyContent}
             onChange={setReplyContent}
             placeholder="Share your thoughts..."
-            isSubmitting={isReplying}
+            disabled={isReplying}
           />
+          <div className="mt-4">
+            <EquipmentTagger
+              selectedEquipment={selectedEquipment}
+              onEquipmentChange={setSelectedEquipment}
+            />
+          </div>
           <div className="flex justify-end mt-4">
             <Button
               className="bg-[#10B981] hover:bg-[#0ea674]"
