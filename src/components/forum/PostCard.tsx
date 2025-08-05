@@ -39,6 +39,8 @@ interface PostCardProps {
     };
     depth?: number;
   };
+  equipment?: any[];
+  onEquipmentClick?: (equipment: any) => void;
   threadLocked?: boolean;
   showActions?: boolean;
   onEdit?: () => void;
@@ -47,9 +49,11 @@ interface PostCardProps {
 
 export default function PostCard({ 
   post, 
+  equipment,
+  onEquipmentClick,
   threadLocked = false, 
-  showActions = true,
-  onEdit,
+  showActions = true, 
+  onEdit, 
   onDelete 
 }: PostCardProps) {
   const { user } = useAuth();
@@ -193,6 +197,22 @@ export default function PostCard({
           <div className="text-gray-100 mb-4">
             {renderContent(post.content)}
           </div>
+
+          {/* Equipment Tags */}
+          {equipment && equipment.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {equipment.map((eq) => (
+                <Badge
+                  key={eq.id}
+                  variant="outline"
+                  className="cursor-pointer hover:bg-white/10"
+                  onClick={() => onEquipmentClick?.(eq)}
+                >
+                  {eq.brand} {eq.model}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           {/* Reactions - Split Layout */}
           <div className="flex items-center justify-between">
