@@ -174,7 +174,7 @@ const Following = () => {
             <p className="text-muted-foreground mb-6">
               Start following other golfers to see their bags and updates here.
             </p>
-            <Link to="/bags">
+            <Link to="/bags-browser">
               <Button>
                 Discover Bags
               </Button>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Heart, Star, Users, ExternalLink, Bookmark, BookmarkCheck } from 'lucide-react';
+import { X, Heart, Star, Users, ExternalLink, Bookmark, BookmarkCheck, MessageSquare } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -14,8 +14,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/lib/supabase';
 import { getTopBagsWithEquipment } from '@/services/equipmentBags';
 import { savePhoto, unsavePhoto, arePhotosSaved } from '@/services/savedPhotos';
+import { getForumThreadsByEquipment } from '@/services/forum';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import ForumThreadPreview from '@/components/forum/ForumThreadPreview';
+import ReviewList from '@/components/equipment/ReviewList';
 import type { Database } from '@/lib/supabase';
 
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
@@ -37,9 +41,11 @@ export function EquipmentShowcaseModal({
   bagEquipment,
 }: EquipmentShowcaseModalProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [equipmentPhotos, setEquipmentPhotos] = useState<any[]>([]);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [topBags, setTopBags] = useState<any[]>([]);
+  const [forumThreads, setForumThreads] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [savedPhotos, setSavedPhotos] = useState<Record<string, boolean>>({});
   const [savingPhoto, setSavingPhoto] = useState<string | null>(null);
@@ -67,6 +73,10 @@ export function EquipmentShowcaseModal({
       // Load top bags with this equipment
       const bags = await getTopBagsWithEquipment(bagEquipment.equipment_id);
       setTopBags(bags);
+      
+      // Load forum threads mentioning this equipment
+      const { threads } = await getForumThreadsByEquipment(bagEquipment.equipment_id);
+      setForumThreads(threads);
 
       // Check saved status for all photos if user is logged in
       if (user && photos) {
@@ -391,35 +401,104 @@ export function EquipmentShowcaseModal({
             </div>
           </div>
 
-          {/* Tabs for Specs and Top Bags */}
-          <Tabs defaultValue="specs" className="mt-8">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="specs">Specifications</TabsTrigger>
+          {/* Tabs for Forums and Top Bags */}
+          <Tabs defaultValue="forums" className="mt-8">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="photos">Photos</TabsTrigger>
+              <TabsTrigger value="reviews">Reviews</TabsTrigger>
+              <TabsTrigger value="forums">Forums</TabsTrigger>
               <TabsTrigger value="bags">
                 <Users className="w-4 h-4 mr-2" />
                 Popular Bags ({topBags.length})
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="specs" className="mt-4">
-              <div className="p-4 bg-muted rounded-lg">
-                {bagEquipment.equipment.specs && Object.keys(bagEquipment.equipment.specs).length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    {Object.entries(bagEquipment.equipment.specs).map(([key, value]) => (
-                      <div key={key} className="flex justify-between">
-                        <span className="text-muted-foreground capitalize">
-                          {key.replace(/_/g, ' ')}
-                        </span>
-                        <span className="font-medium">{String(value)}</span>
-                      </div>
+            <TabsContent value="photos" className="mt-4">
+              <ScrollArea className="h-[300px]">
+                <div className="grid grid-cols-2 gap-2">
+                  {allPhotos.map((photo, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={photo}
+                        alt={`Photo ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-md cursor-pointer"
+                        onClick={() => setSelectedPhotoIndex(index)}
+                      />
+                      {user && (
+                        <Button
+                          size="sm"
+                          variant={savedPhotos[photo] ? "default" : "secondary"}
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 px-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSavePhoto(photo, index);
+                          }}
+                          disabled={savingPhoto === photo}
+                        >
+                          {savingPhoto === photo ? (
+                            <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : savedPhotos[photo] ? (
+                            <BookmarkCheck className="w-3 h-3" />
+                          ) : (
+                            <Bookmark className="w-3 h-3" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  {allPhotos.length === 0 && (
+                    <p className="text-muted-foreground text-center py-8 col-span-2">
+                      No photos available
+                    </p>
+                  )}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="reviews" className="mt-4">
+              <ReviewList equipmentId={bagEquipment.equipment.id} isModal={true} />
+            </TabsContent>
+            
+            <TabsContent value="forums" className="mt-4">
+              <ScrollArea className="h-[300px]">
+                {forumThreads.length > 0 ? (
+                  <div className="space-y-2">
+                    {forumThreads.map((thread) => (
+                      <ForumThreadPreview
+                        key={thread.id}
+                        thread={{
+                          ...thread,
+                          tee_count: thread.tee_count || 0,
+                          reply_count: thread.reply_count || 0
+                        }}
+                        onClick={() => {
+                          onClose();
+                          navigate(`/forum/${thread.category.slug}/${thread.id}`);
+                        }}
+                      />
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-center py-4">
-                    No specifications available
-                  </p>
+                  <div className="text-center py-8">
+                    <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground">No discussions yet</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Be the first to start a conversation about this equipment
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-4"
+                      onClick={() => {
+                        onClose();
+                        navigate({ to: '/forum' });
+                      }}
+                    >
+                      Start Discussion
+                    </Button>
+                  </div>
                 )}
-              </div>
+              </ScrollArea>
             </TabsContent>
             
             <TabsContent value="bags" className="mt-4">

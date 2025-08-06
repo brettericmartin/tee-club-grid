@@ -10,6 +10,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getEquipmentDetails, toggleEquipmentSave, isEquipmentSaved } from '@/services/equipment';
 import { EquipmentPhotoRepository } from '@/components/equipment/EquipmentPhotoRepository';
 import { toast } from 'sonner';
+import { getForumThreadsByEquipment } from '@/services/forum';
+import ForumThreadPreview from '@/components/forum/ForumThreadPreview';
+import { MessageSquare } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import ReviewList from '@/components/equipment/ReviewList';
 
 export default function EquipmentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -18,10 +23,18 @@ export default function EquipmentDetail() {
   const [equipment, setEquipment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
+  const [forumThreads, setForumThreads] = useState<any[]>([]);
+  const [loadingForums, setLoadingForums] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadEquipment();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      loadForumThreads();
     }
   }, [id]);
 
@@ -43,6 +56,20 @@ export default function EquipmentDetail() {
       toast.error('Failed to load equipment details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadForumThreads = async () => {
+    if (!id) return;
+    
+    setLoadingForums(true);
+    try {
+      const { threads } = await getForumThreadsByEquipment(id);
+      setForumThreads(threads);
+    } catch (error) {
+      console.error('Error loading forum threads:', error);
+    } finally {
+      setLoadingForums(false);
     }
   };
 
@@ -215,24 +242,6 @@ export default function EquipmentDetail() {
               </Button>
             </div>
 
-            {/* Specs Preview */}
-            {equipment.specs && (
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-3">Key Specifications</h3>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    {Object.entries(equipment.specs).slice(0, 6).map(([key, value]) => (
-                      <div key={key} className="flex justify-between">
-                        <span className="text-muted-foreground capitalize">
-                          {key.replace(/_/g, ' ')}:
-                        </span>
-                        <span className="font-medium">{String(value)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
 
@@ -240,7 +249,7 @@ export default function EquipmentDetail() {
         <Tabs defaultValue="photos" className="w-full">
           <TabsList className="grid w-full grid-cols-4 lg:w-auto">
             <TabsTrigger value="photos">Photos</TabsTrigger>
-            <TabsTrigger value="specs">Specifications</TabsTrigger>
+            <TabsTrigger value="forums">Forums</TabsTrigger>
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
             <TabsTrigger value="prices">Prices</TabsTrigger>
           </TabsList>
@@ -254,70 +263,55 @@ export default function EquipmentDetail() {
             />
           </TabsContent>
 
-          <TabsContent value="specs" className="mt-6">
+          <TabsContent value="forums" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Full Specifications</h3>
-                {equipment.specs ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(equipment.specs).map(([key, value]) => (
-                      <div key={key} className="flex justify-between py-2 border-b">
-                        <span className="text-muted-foreground capitalize">
-                          {key.replace(/_/g, ' ')}:
-                        </span>
-                        <span className="font-medium">{String(value)}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">No specifications available</p>
-                )}
+                <h3 className="text-xl font-semibold mb-4">Community Discussions</h3>
+                <ScrollArea className="h-[500px]">
+                  {loadingForums ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">Loading discussions...</p>
+                    </div>
+                  ) : forumThreads.length > 0 ? (
+                    <div className="space-y-2">
+                      {forumThreads.map((thread) => (
+                        <ForumThreadPreview
+                          key={thread.id}
+                          thread={{
+                            ...thread,
+                            tee_count: thread.tee_count || 0,
+                            reply_count: thread.reply_count || 0
+                          }}
+                          onClick={() => {
+                            navigate(`/forum/${thread.category.slug}/${thread.id}`);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground">No discussions yet</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Be the first to start a conversation about this equipment
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-4"
+                        onClick={() => navigate('/forum')}
+                      >
+                        Start Discussion
+                      </Button>
+                    </div>
+                  )}
+                </ScrollArea>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-6">
-            <div className="space-y-4">
-              {equipment.equipment_reviews?.map((review: any) => (
-                <Card key={review.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="font-semibold">{review.profile?.display_name || review.profile?.username}</p>
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <svg
-                              key={star}
-                              className={`w-4 h-4 ${
-                                star <= review.rating
-                                  ? 'text-yellow-400 fill-current'
-                                  : 'text-gray-300'
-                              }`}
-                              viewBox="0 0 20 20"
-                            >
-                              <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                            </svg>
-                          ))}
-                        </div>
-                      </div>
-                      <span className="text-sm text-muted-foreground">
-                        {new Date(review.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    {review.title && (
-                      <h4 className="font-semibold mb-2">{review.title}</h4>
-                    )}
-                    <p className="text-sm">{review.content}</p>
-                  </CardContent>
-                </Card>
-              )) || (
-                <Card>
-                  <CardContent className="p-12 text-center">
-                    <p className="text-muted-foreground">No reviews yet</p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+            <ReviewList equipmentId={id} />
           </TabsContent>
 
           <TabsContent value="prices" className="mt-6">

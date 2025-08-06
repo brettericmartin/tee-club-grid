@@ -186,7 +186,7 @@ const BagDisplayStyled = () => {
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white text-center">
           <h2 className="text-2xl font-bold mb-4">Bag not found</h2>
-          <Button onClick={() => navigate('/bags')} variant="outline">
+          <Button onClick={() => navigate('/bags-browser')} variant="outline">
             Browse Bags
           </Button>
         </div>
@@ -217,7 +217,7 @@ const BagDisplayStyled = () => {
       {/* Content */}
       <div className="relative z-10">
         {/* Header */}
-        <div className="bg-white/5 backdrop-blur-[10px] border-b border-white/10 sticky top-0 z-40">
+        <div className="bg-[#1a1a1a] border-b border-white/10 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -239,7 +239,7 @@ const BagDisplayStyled = () => {
             
             <div className="flex items-center gap-2">
               {/* View Mode Toggle */}
-              <div className="bg-white/10 rounded-lg p-1 flex">
+              <div className="bg-[#2a2a2a] rounded-lg p-1 flex">
                 <Button
                   variant={viewMode === 'card' ? 'default' : 'ghost'}
                   size="sm"
@@ -266,7 +266,7 @@ const BagDisplayStyled = () => {
                 </Button>
               </div>
 
-              <div className="bg-white/10 border border-white/20 rounded-md hover:bg-white/20 transition-colors">
+              <div className="bg-[#2a2a2a] border border-white/20 rounded-md hover:bg-[#3a3a3a] transition-colors">
                 <TeedBallLike
                   isLiked={isLiked}
                   likeCount={bagData?.likes_count || 0}
@@ -310,7 +310,7 @@ const BagDisplayStyled = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Owner Info - hide in card view since it's in the BagCard */}
         {viewMode !== 'card' && (
-          <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-6 mb-8 shadow-[0_4px_6px_rgba(0,0,0,0.3)]">
+          <div className="bg-[#1a1a1a] border border-white/20 rounded-xl p-6 mb-8 shadow-[0_4px_6px_rgba(0,0,0,0.3)]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Avatar className="w-16 h-16">
@@ -465,7 +465,7 @@ const BagDisplayStyled = () => {
                     {items.map((item: any) => (
                       <div
                         key={item.id}
-                        className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:bg-white/[0.15] transition-colors cursor-pointer"
+                        className="bg-[#1a1a1a] border border-white/20 rounded-xl p-4 shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:bg-[#2a2a2a] transition-colors cursor-pointer"
                         onClick={() => navigate(`/equipment/${item.equipment.id}`)}
                       >
                         <div className="flex items-start gap-4">
@@ -509,25 +509,25 @@ const BagDisplayStyled = () => {
         {/* Stats - only show for non-card views */}
         {viewMode !== 'card' && (
           <div className="mt-12 grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
+            <div className="bg-[#1a1a1a] border border-white/20 rounded-xl p-4 text-center">
               <p className="text-2xl font-bold text-primary">{bagData.bag_equipment?.length || 0}</p>
               <p className="text-white/70 text-sm">Total Items</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
+            <div className="bg-[#1a1a1a] border border-white/20 rounded-xl p-4 text-center">
               <p className="text-2xl font-bold text-primary">{bagData.likes_count || 0}</p>
               <p className="text-white/70 text-sm">Bag Tees</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
+            <div className="bg-[#1a1a1a] border border-white/20 rounded-xl p-4 text-center">
               <p className="text-2xl font-bold text-primary">{bagData.views_count || 0}</p>
               <p className="text-white/70 text-sm">Views</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
+            <div className="bg-[#1a1a1a] border border-white/20 rounded-xl p-4 text-center">
               <p className="text-2xl font-bold text-primary">
                 {bagData.bag_equipment?.filter((i: any) => i.is_featured).length || 0}
               </p>
               <p className="text-white/70 text-sm">Featured</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl p-4 text-center">
+            <div className="bg-[#1a1a1a] border border-white/20 rounded-xl p-4 text-center">
               <p className="text-xl font-medium text-white/80">
                 {formatCompactCurrency(totalValue)}
               </p>

@@ -280,7 +280,7 @@ const Index = () => {
   };
 
   const handleExploreBagsClick = () => {
-    navigate('/bags');
+    navigate('/bags-browser');
   };
 
   // Stats data - Real data from database

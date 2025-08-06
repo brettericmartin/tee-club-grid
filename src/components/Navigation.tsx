@@ -97,7 +97,7 @@ const Navigation = () => {
               </Link>
               
               <div className="hidden md:flex items-center gap-6">
-                <NavLink to="/bags">Bags</NavLink>
+                <NavLink to="/bags-browser">Bags</NavLink>
                 <NavLink to="/equipment">Equipment</NavLink>
               </div>
             </div>

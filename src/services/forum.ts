@@ -293,3 +293,111 @@ export async function deleteForumPost(postId: string) {
   
   return { success: true, error: null };
 }
+
+// Get forum threads that mention a specific piece of equipment
+export async function getForumThreadsByEquipment(equipmentId: string, limit = 10) {
+  // First get all thread IDs that have posts with this equipment tagged
+  const { data: taggedPosts, error: tagsError } = await supabase
+    .from('forum_equipment_tags')
+    .select('post_id')
+    .eq('equipment_id', equipmentId);
+  
+  if (tagsError) {
+    console.error('Error fetching equipment tags:', tagsError);
+    return { threads: [], error: tagsError };
+  }
+  
+  if (!taggedPosts || taggedPosts.length === 0) {
+    return { threads: [], error: null };
+  }
+  
+  // Get thread IDs from the posts
+  const { data: posts, error: postsError } = await supabase
+    .from('forum_posts')
+    .select('thread_id')
+    .in('id', taggedPosts.map(t => t.post_id));
+  
+  if (postsError) {
+    console.error('Error fetching posts:', postsError);
+    return { threads: [], error: postsError };
+  }
+  
+  const threadIds = [...new Set(posts.map(p => p.thread_id))];
+  
+  // Now get the threads with all details
+  const { data: threads, error: threadsError } = await supabase
+    .from('forum_threads')
+    .select(`
+      *,
+      category:forum_categories!forum_threads_category_id_fkey (
+        id,
+        name,
+        slug,
+        icon
+      ),
+      user:profiles!forum_threads_user_id_fkey (
+        id,
+        username,
+        display_name,
+        avatar_url
+      )
+    `)
+    .in('id', threadIds)
+    .order('tee_count', { ascending: false })
+    .order('updated_at', { ascending: false })
+    .limit(limit);
+  
+  if (threadsError) {
+    console.error('Error fetching threads:', threadsError);
+    return { threads: [], error: threadsError };
+  }
+  
+  return { threads: threads as ForumThreadWithDetails[], error: null };
+}
+
+// Tag equipment in a forum post
+export async function tagEquipmentInPost(postId: string, equipmentIds: string[]) {
+  if (!equipmentIds || equipmentIds.length === 0) {
+    return { success: true, error: null };
+  }
+  
+  const tags = equipmentIds.map(equipmentId => ({
+    post_id: postId,
+    equipment_id: equipmentId
+  }));
+  
+  const { error } = await supabase
+    .from('forum_equipment_tags')
+    .insert(tags);
+  
+  if (error) {
+    console.error('Error tagging equipment:', error);
+    return { success: false, error };
+  }
+  
+  return { success: true, error: null };
+}
+
+// Get equipment tags for a post
+export async function getEquipmentTagsForPost(postId: string) {
+  const { data: tags, error } = await supabase
+    .from('forum_equipment_tags')
+    .select(`
+      equipment_id,
+      equipment:equipment!forum_equipment_tags_equipment_id_fkey (
+        id,
+        brand,
+        model,
+        category,
+        image_url
+      )
+    `)
+    .eq('post_id', postId);
+  
+  if (error) {
+    console.error('Error fetching equipment tags:', error);
+    return { tags: [], error };
+  }
+  
+  return { tags: tags || [], error: null };
+}

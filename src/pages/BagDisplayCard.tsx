@@ -194,7 +194,7 @@ const BagDisplayCard = () => {
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white text-center">
           <h2 className="text-2xl font-bold mb-4">Bag not found</h2>
-          <Button onClick={() => navigate('/bags')} variant="outline">
+          <Button onClick={() => navigate('/bags-browser')} variant="outline">
             Browse Bags
           </Button>
         </div>

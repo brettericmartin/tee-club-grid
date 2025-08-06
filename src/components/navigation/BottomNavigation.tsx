@@ -13,7 +13,7 @@ const BottomNavigation = () => {
       label: "Feed",
     },
     {
-      to: "/bags",
+      to: "/bags-browser",
       icon: Grid,
       label: "Bags",
     },

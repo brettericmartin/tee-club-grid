@@ -27,6 +27,11 @@ import {
 import PostEditor from './PostEditor';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
+import EquipmentTagger from './EquipmentTagger';
+import { tagEquipmentInPost } from '@/services/forum';
+import type { Database } from '@/lib/supabase';
+
+type Equipment = Database['public']['Tables']['equipment']['Row'];
 
 interface CreateThreadProps {
   open: boolean;
@@ -50,6 +55,8 @@ interface ThreadFormProps {
   categoryId: string;
   setCategoryId: (value: string) => void;
   categories: Category[];
+  selectedEquipment: Equipment[];
+  setSelectedEquipment: (equipment: Equipment[]) => void;
   errors: { title?: string; content?: string; category?: string };
   isSubmitting: boolean;
   loadingCategories?: boolean;
@@ -66,6 +73,8 @@ const ThreadForm = ({
   categoryId,
   setCategoryId,
   categories,
+  selectedEquipment,
+  setSelectedEquipment,
   errors,
   isSubmitting,
   loadingCategories = false,
@@ -143,6 +152,16 @@ const ThreadForm = ({
         )}
       </div>
 
+      <div className="space-y-2">
+        <Label>Tag Related Equipment (optional)</Label>
+        <p className="text-sm text-gray-400">Tag equipment mentioned in your discussion</p>
+        <EquipmentTagger
+          selectedEquipment={selectedEquipment}
+          onEquipmentChange={setSelectedEquipment}
+          maxSelections={5}
+        />
+      </div>
+
       <div className="flex justify-end gap-3 pt-4">
         <Button
           variant="outline"
@@ -170,6 +189,7 @@ export default function CreateThread({ open, onOpenChange, defaultCategory, cate
   const [content, setContent] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [categories, setCategories] = useState<Category[]>(propCategories || []);
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; content?: string; category?: string }>({});
   const [loadingCategories, setLoadingCategories] = useState(false);
@@ -263,15 +283,23 @@ export default function CreateThread({ open, onOpenChange, defaultCategory, cate
       if (threadError) throw threadError;
 
       // Create first post
-      const { error: postError } = await supabase
+      const { data: post, error: postError } = await supabase
         .from('forum_posts')
         .insert({
           thread_id: thread.id,
           user_id: user.id,
           content: content.trim()
-        });
+        })
+        .select()
+        .single();
 
       if (postError) throw postError;
+
+      // Tag equipment if any selected
+      if (selectedEquipment.length > 0 && post) {
+        const equipmentIds = selectedEquipment.map(e => e.id);
+        await tagEquipmentInPost(post.id, equipmentIds);
+      }
 
       // Get category slug for navigation
       const category = categories.find(c => c.id === categoryId);
@@ -282,6 +310,7 @@ export default function CreateThread({ open, onOpenChange, defaultCategory, cate
         setTitle('');
         setContent('');
         setCategoryId('');
+        setSelectedEquipment([]);
         setErrors({});
       }
     } catch (error) {
@@ -314,6 +343,8 @@ export default function CreateThread({ open, onOpenChange, defaultCategory, cate
               categoryId={categoryId}
               setCategoryId={setCategoryId}
               categories={categories}
+              selectedEquipment={selectedEquipment}
+              setSelectedEquipment={setSelectedEquipment}
               errors={errors}
               isSubmitting={isSubmitting}
               loadingCategories={loadingCategories}
@@ -347,6 +378,8 @@ export default function CreateThread({ open, onOpenChange, defaultCategory, cate
           categoryId={categoryId}
           setCategoryId={setCategoryId}
           categories={categories}
+          selectedEquipment={selectedEquipment}
+          setSelectedEquipment={setSelectedEquipment}
           errors={errors}
           isSubmitting={isSubmitting}
           loadingCategories={loadingCategories}

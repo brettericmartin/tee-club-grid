@@ -21,7 +21,7 @@ export async function getTopBagsWithEquipment(equipmentId: string, limit: number
         )
       `)
       .eq('equipment_id', equipmentId)
-      .order('user_bags.likes_count', { ascending: false })
+      .order('likes_count', { ascending: false, referencedTable: 'user_bags' })
       .limit(limit);
 
     if (error) throw error;

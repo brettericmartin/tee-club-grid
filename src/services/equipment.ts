@@ -171,24 +171,151 @@ export async function searchEquipment(query: string) {
   return data;
 }
 
-// Add review
-export async function addEquipmentReview(review: {
+// Create review (updated with new fields)
+export async function createReview(review: {
   user_id: string;
   equipment_id: string;
   rating: number;
-  title?: string;
-  content?: string;
-  pros?: string[];
-  cons?: string[];
+  title?: string | null;
+  review: string;
 }) {
+  console.log('[equipment.service] Creating review:', review);
+  
   const { data, error } = await supabase
     .from('equipment_reviews')
-    .insert(review)
-    .select()
+    .insert({
+      ...review,
+      tee_count: 0 // Initialize tee count
+    })
+    .select(`
+      *,
+      profiles (
+        username,
+        display_name,
+        avatar_url
+      )
+    `)
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('[equipment.service] Error creating review:', error);
+    throw error;
+  }
+  
+  console.log('[equipment.service] Review created:', data);
   return data;
+}
+
+// Get reviews with sorting
+export async function getReviews(equipmentId: string, sortBy: 'newest' | 'most_teed' = 'newest') {
+  console.log('[equipment.service] Getting reviews:', { equipmentId, sortBy });
+  
+  let query = supabase
+    .from('equipment_reviews')
+    .select(`
+      *,
+      profiles (
+        username,
+        display_name,
+        avatar_url
+      )
+    `)
+    .eq('equipment_id', equipmentId);
+
+  // Apply sorting
+  if (sortBy === 'most_teed') {
+    query = query.order('tee_count', { ascending: false });
+  } else {
+    query = query.order('created_at', { ascending: false });
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('[equipment.service] Error getting reviews:', error);
+    throw error;
+  }
+
+  console.log('[equipment.service] Reviews fetched:', data?.length);
+  return data || [];
+}
+
+// Tee/untee a review
+export async function teeReview(reviewId: string, userId: string, tee: boolean) {
+  console.log('[equipment.service] Tee review:', { reviewId, userId, tee });
+  
+  if (tee) {
+    // Add tee
+    const { error } = await supabase
+      .from('review_tees')
+      .insert({
+        review_id: reviewId,
+        user_id: userId
+      });
+
+    if (error && !error.message?.includes('duplicate')) {
+      console.error('[equipment.service] Error adding tee:', error);
+      throw error;
+    }
+  } else {
+    // Remove tee
+    const { error } = await supabase
+      .from('review_tees')
+      .delete()
+      .eq('review_id', reviewId)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('[equipment.service] Error removing tee:', error);
+      throw error;
+    }
+  }
+
+  console.log('[equipment.service] Tee action completed');
+}
+
+// Check if user has teed a review
+export async function checkUserTeedReview(reviewId: string, userId: string): Promise<boolean> {
+  console.log('[equipment.service] Checking user teed review:', { reviewId, userId });
+  
+  const { data, error } = await supabase
+    .from('review_tees')
+    .select('id')
+    .eq('review_id', reviewId)
+    .eq('user_id', userId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('[equipment.service] Error checking tee:', error);
+    return false;
+  }
+
+  console.log('[equipment.service] User has teed:', !!data);
+  return !!data;
+}
+
+// Get user's teed reviews for equipment
+export async function getUserReviewTees(userId: string, equipmentId: string) {
+  console.log('[equipment.service] Getting user review tees:', { userId, equipmentId });
+  
+  const { data, error } = await supabase
+    .from('review_tees')
+    .select(`
+      review_id,
+      equipment_reviews!inner (
+        id,
+        equipment_id
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('equipment_reviews.equipment_id', equipmentId);
+
+  if (error) {
+    console.error('[equipment.service] Error getting user tees:', error);
+    return [];
+  }
+
+  return data?.map(item => item.review_id) || [];
 }
 
 // Check if equipment is saved by user
