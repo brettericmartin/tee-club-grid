@@ -1,16 +1,18 @@
-import { Plus, Briefcase, Trophy, Calendar, Settings } from 'lucide-react';
+import { Plus, Briefcase, Trophy, Calendar, Settings, Trash2, AlertCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { formatDistanceToNow } from 'date-fns';
-import { setPrimaryBag } from '@/services/bags';
+import { setPrimaryBag, deleteBag } from '@/services/bags';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -43,6 +45,9 @@ export function BagSelectorDialog({
 }: BagSelectorDialogProps) {
   const [updatingPrimary, setUpdatingPrimary] = useState<string | null>(null);
   const [bags, setBags] = useState<Bag[]>(propBags);
+  const [deletingBag, setDeletingBag] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [bagToDelete, setBagToDelete] = useState<Bag | null>(null);
   
   // Update local state when props change
   useEffect(() => {
@@ -117,6 +122,33 @@ export function BagSelectorDialog({
     }
   };
 
+  const handleDeleteBag = async () => {
+    if (!bagToDelete || !bagToDelete.user_id) return;
+    
+    setDeletingBag(bagToDelete.id);
+    
+    try {
+      await deleteBag(bagToDelete.id, bagToDelete.user_id);
+      
+      // Remove from local state
+      setBags(bags.filter(b => b.id !== bagToDelete.id));
+      
+      toast.success(`${bagToDelete.name} has been deleted`);
+      setShowDeleteConfirm(false);
+      setBagToDelete(null);
+      
+      // Call parent update if provided
+      if (onBagsUpdate) {
+        onBagsUpdate();
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete bag');
+      console.error('Error deleting bag:', error);
+    } finally {
+      setDeletingBag(null);
+    }
+  };
+
   const getBagIcon = (bagType: string) => {
     switch (bagType) {
       case 'tournament':
@@ -129,6 +161,7 @@ export function BagSelectorDialog({
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="glass-card border-white/20 text-white max-w-2xl">
         <DialogHeader>
@@ -167,11 +200,27 @@ export function BagSelectorDialog({
                       className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors group relative"
                       onClick={() => handleSelectBag(bag.id)}
                     >
-                      {/* Primary Bag Toggle Switch */}
+                      {/* Primary Bag Toggle Switch and Delete Button */}
                       <div 
                         className="absolute top-3 right-3 z-10 flex items-center gap-2"
                         onClick={(e) => e.stopPropagation()}
                       >
+                        {/* Delete button - only show if user has more than 1 bag */}
+                        {bags.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-white/50 hover:text-red-500 hover:bg-red-500/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setBagToDelete(bag);
+                              setShowDeleteConfirm(true);
+                            }}
+                            disabled={deletingBag === bag.id}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                         <span className="text-xs text-white/50">Primary</span>
                         <Switch
                           checked={bag.is_primary || false}
@@ -210,5 +259,43 @@ export function BagSelectorDialog({
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Delete Confirmation Dialog */}
+    <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <DialogContent className="glass-card border-white/20 text-white max-w-md">
+        <DialogHeader>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+              <AlertCircle className="w-6 h-6 text-red-500" />
+            </div>
+            <DialogTitle className="text-xl">Delete Bag</DialogTitle>
+          </div>
+          <DialogDescription className="text-white/70">
+            Are you sure you want to delete <span className="font-semibold text-white">"{bagToDelete?.name}"</span>? 
+            This will permanently remove the bag and all its equipment configurations. This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setShowDeleteConfirm(false);
+              setBagToDelete(null);
+            }}
+            disabled={!!deletingBag}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDeleteBag}
+            disabled={!!deletingBag}
+          >
+            {deletingBag ? 'Deleting...' : 'Delete Bag'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

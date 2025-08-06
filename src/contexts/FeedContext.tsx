@@ -18,6 +18,7 @@ interface FeedContextType {
   updatePost: (postId: string, updates: Partial<FeedPost>) => void;
   deletePost: (postId: string) => void;
   addPost: (post: FeedPost) => void;
+  updatePostLike: (postId: string, isLiked: boolean, newCount: number) => void;
   
   // Utilities
   refreshFeeds: () => Promise<void>;
@@ -80,10 +81,26 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       
       const feedPosts = await getFeedPosts(user?.id, filter);
       
+      console.log('[FeedContext] Raw feed posts:', feedPosts.length, 'posts');
+      console.log('[FeedContext] Sample post:', feedPosts[0]);
+      
       // Transform posts to UI format
       const transformedPosts = feedPosts.map(post => {
         const isFollowed = followedUsers.has(post.user_id);
-        return transformFeedPost({ ...post, isFollowed });
+        const transformed = transformFeedPost({ ...post, isFollowed });
+        
+        // Log the first post transformation for debugging
+        if (feedPosts[0] === post) {
+          console.log('[FeedContext] Post transformation:', {
+            raw_likes_count: post.likes_count,
+            raw_feed_likes: post.feed_likes,
+            transformed_likes: transformed.likes,
+            user_liked: post.user_liked,
+            isLiked: transformed.isLiked
+          });
+        }
+        
+        return transformed;
       });
       
       setAllPosts(transformedPosts);
@@ -203,6 +220,42 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
     });
   }, [followedUsers]);
 
+  // Update a post's like status and count
+  const updatePostLike = useCallback((postId: string, isLiked: boolean, newCount: number) => {
+    console.log(`Updating post ${postId} like status:`, { isLiked, newCount });
+    
+    // Update in all posts
+    setAllPosts(prev => prev.map(post => {
+      if (post.postId === postId) {
+        return {
+          ...post,
+          isLiked,
+          likes: newCount
+        };
+      }
+      return post;
+    }));
+
+    // Update in user posts cache
+    setUserPosts(prev => {
+      const newMap = new Map(prev);
+      for (const [userId, posts] of newMap) {
+        const updatedPosts = posts.map(post => {
+          if (post.postId === postId) {
+            return {
+              ...post,
+              isLiked,
+              likes: newCount
+            };
+          }
+          return post;
+        });
+        newMap.set(userId, updatedPosts);
+      }
+      return newMap;
+    });
+  }, []);
+
   // Refresh all feeds
   const refreshFeeds = useCallback(async () => {
     console.log('Refreshing all feeds...');
@@ -318,6 +371,7 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
     updatePost,
     deletePost,
     addPost,
+    updatePostLike,
     refreshFeeds,
     clearCache
   };

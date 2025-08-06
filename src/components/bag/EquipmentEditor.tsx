@@ -369,15 +369,25 @@ export function EquipmentEditor({
               </div>
             </div>
             
-            {/* Community Photos Button */}
-            <Button
-              variant="outline"
-              onClick={() => setShowPhotoGallery(true)}
-              className="w-full"
-            >
-              <Images className="w-4 h-4 mr-2" />
-              Browse Community Photos {equipmentPhotos.length > 0 && `(${equipmentPhotos.length})`}
-            </Button>
+            {/* Community Photos and Equipment Page Buttons */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowPhotoGallery(true)}
+                className="flex-1"
+              >
+                <Images className="w-4 h-4 mr-2" />
+                Browse Community Photos {equipmentPhotos.length > 0 && `(${equipmentPhotos.length})`}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => window.open(`/equipment/${equipment.equipment_id}`, '_blank')}
+                className="flex-1"
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                View Equipment Page
+              </Button>
+            </div>
           </div>
 
           {/* Feature Toggle */}

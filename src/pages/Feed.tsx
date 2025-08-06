@@ -15,10 +15,13 @@ import {
 import { FeedItemCard } from '@/components/FeedItemCard';
 import { FeedErrorBoundary } from '@/components/FeedErrorBoundary';
 import { supabase } from '@/lib/supabase';
+// Animation imports temporarily disabled to fix dynamic import errors
+// import { AnimatedPageWrapper, AnimatedGrid, ScrollReveal } from '@/components/animation/AnimatedPageWrapper';
+// import { AnimatedLoader } from '@/components/loading/AnimatedLoader';
 
 const FeedContent = () => {
   const { user } = useAuth();
-  const { allPosts, loading, error, loadMainFeed } = useFeed();
+  const { allPosts, loading, error, loadMainFeed, updatePostLike } = useFeed();
   const [filter, setFilter] = useState<'all' | 'following'>('all');
   const [displayCount, setDisplayCount] = useState(12);
 
@@ -27,37 +30,80 @@ const FeedContent = () => {
   }, [filter, loadMainFeed]);
 
   const handleLike = async (postId: string) => {
-    if (!user) return;
+    if (!user) {
+      console.error('No user found for like action');
+      return;
+    }
+    
+    console.log('Attempting to toggle like for post:', postId, 'by user:', user.id);
     
     try {
       // Toggle like in database using the correct table
-      const { data: existingLike } = await supabase
+      const { data: existingLike, error: fetchError } = await supabase
         .from('feed_likes')
         .select('id')
         .eq('user_id', user.id)
         .eq('post_id', postId)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to avoid error when no record exists
+      
+      if (fetchError) {
+        console.error('Error checking existing like:', fetchError);
+        throw fetchError;
+      }
       
       if (existingLike) {
         // Unlike
-        await supabase
+        console.log('Unliking post:', postId);
+        const { error: deleteError } = await supabase
           .from('feed_likes')
           .delete()
           .eq('id', existingLike.id);
+          
+        if (deleteError) {
+          console.error('Error deleting like:', deleteError);
+          throw deleteError;
+        }
+        console.log('Successfully unliked post');
+        
+        // Get updated count
+        const { count } = await supabase
+          .from('feed_likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('post_id', postId);
+        
+        // Update the post in the feed context
+        updatePostLike(postId, false, count || 0);
       } else {
         // Like
-        await supabase
+        console.log('Liking post:', postId);
+        const { error: insertError } = await supabase
           .from('feed_likes')
           .insert({
             user_id: user.id,
             post_id: postId
           });
+          
+        if (insertError) {
+          console.error('Error inserting like:', insertError);
+          throw insertError;
+        }
+        console.log('Successfully liked post');
+        
+        // Get updated count
+        const { count } = await supabase
+          .from('feed_likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('post_id', postId);
+        
+        // Update the post in the feed context
+        updatePostLike(postId, true, count || 1);
       }
       
-      // Don't reload the entire feed - let optimistic updates handle it
-      // The TeedBallLike component already handles optimistic updates
+      // Don't reload the entire feed - updatePostLike handles the state update
     } catch (error) {
       console.error('Error toggling like:', error);
+      // You might want to show a toast here
+      // toast.error('Failed to update like');
     }
   };
 

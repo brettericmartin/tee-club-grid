@@ -376,3 +376,55 @@ export async function getUserBags(userId: string) {
   if (error) throw error;
   return data || [];
 }
+
+// Delete a bag and all its equipment
+export async function deleteBag(bagId: string, userId: string) {
+  // First check if this is the user's only bag
+  const { data: userBags, error: countError } = await supabase
+    .from('user_bags')
+    .select('id, is_primary')
+    .eq('user_id', userId);
+    
+  if (countError) throw countError;
+  
+  if (!userBags || userBags.length === 0) {
+    throw new Error('No bags found');
+  }
+  
+  if (userBags.length === 1) {
+    throw new Error('Cannot delete your only bag. Create another bag first.');
+  }
+  
+  // Find the bag to delete
+  const bagToDelete = userBags.find(b => b.id === bagId);
+  if (!bagToDelete) {
+    throw new Error('Bag not found');
+  }
+  
+  // If we're deleting the primary bag, we need to set another as primary
+  if (bagToDelete.is_primary) {
+    const otherBag = userBags.find(b => b.id !== bagId);
+    if (otherBag) {
+      await setPrimaryBag(userId, otherBag.id);
+    }
+  }
+  
+  // Delete all equipment associations first (due to foreign key constraints)
+  const { error: equipmentError } = await supabase
+    .from('bag_equipment')
+    .delete()
+    .eq('bag_id', bagId);
+    
+  if (equipmentError) throw equipmentError;
+  
+  // Now delete the bag
+  const { error: deleteError } = await supabase
+    .from('user_bags')
+    .delete()
+    .eq('id', bagId)
+    .eq('user_id', userId); // Extra safety check
+    
+  if (deleteError) throw deleteError;
+  
+  return true;
+}

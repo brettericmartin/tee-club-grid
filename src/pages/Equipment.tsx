@@ -227,76 +227,76 @@ const Equipment = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#111111]">
+    <div className="min-h-screen bg-[#111111] pt-20">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Show info if no equipment loaded - removed since we have data */}
         
-        {/* Filters and View Bar */}
-        {/* Filters and Submit Button */}
-        <div className="space-y-4 mb-6">
-          {/* Mobile: Stack filters vertically */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:flex-wrap">
-            {/* Category Filter */}
-            <select 
-              value={category} 
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
-            >
-              <option value="all">All Equipment</option>
-              {categoryOptions.map(cat => (
-                <option key={cat.value} value={cat.value}>{cat.label}</option>
-              ))}
-            </select>
+        {/* Filters and Submit Button - All in one row on desktop */}
+        <div className="mb-6">
+          {/* Desktop: All in one row with filters on left, button on right */}
+          <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+            {/* Filters Group */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap lg:flex-nowrap">
+              {/* Category Filter */}
+              <select 
+                value={category} 
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
+              >
+                <option value="all">All Equipment</option>
+                {categoryOptions.map(cat => (
+                  <option key={cat.value} value={cat.value}>{cat.label}</option>
+                ))}
+              </select>
 
-            {/* Sort */}
-            <select 
-              value={sortBy} 
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
-            >
-              <option value="popular">Most Liked</option>
-              <option value="newest">Newest</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
+              {/* Sort */}
+              <select 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
+              >
+                <option value="popular">Most Liked</option>
+                <option value="newest">Newest</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
 
-            {/* Brand Filter */}
-            <select 
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
-            >
-              <option value="all">All Brands</option>
-              {brands.map(b => (
-                <option key={b} value={b}>{b}</option>
-              ))}
-            </select>
+              {/* Brand Filter */}
+              <select 
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
+              >
+                <option value="all">All Brands</option>
+                {brands.map(b => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
 
-            {/* Saved Only Checkbox */}
-            {user && (
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="saved-only"
-                  checked={showSavedOnly}
-                  onCheckedChange={(checked) => setShowSavedOnly(checked as boolean)}
-                />
-                <label 
-                  htmlFor="saved-only" 
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap"
-                >
-                  Saved items only
-                </label>
-              </div>
-            )}
-          </div>
-          
-          {/* Submit Button - Full width on mobile */}
-          <div className="flex justify-end">
+              {/* Saved Only Checkbox */}
+              {user && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="saved-only"
+                    checked={showSavedOnly}
+                    onCheckedChange={(checked) => setShowSavedOnly(checked as boolean)}
+                  />
+                  <label 
+                    htmlFor="saved-only" 
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap"
+                  >
+                    Saved items only
+                  </label>
+                </div>
+              )}
+            </div>
+            
+            {/* Submit Button */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowSubmitModal(true)}
-              className="w-full sm:w-auto bg-[#10B981] text-white border-[#10B981] hover:bg-[#0ea674] hover:border-[#0ea674]"
+              className="w-full sm:w-auto bg-[#10B981] text-white border-[#10B981] hover:bg-[#0ea674] hover:border-[#0ea674] lg:ml-4 lg:flex-shrink-0"
             >
               <Plus className="w-4 h-4 mr-2" />
               Submit Equipment

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, ShoppingCart, Share2 } from 'lucide-react';
+import { ArrowLeft, Heart, ShoppingCart, Share2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,6 +15,9 @@ import ForumThreadPreview from '@/components/forum/ForumThreadPreview';
 import { MessageSquare } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReviewList from '@/components/equipment/ReviewList';
+import { getTopBagsWithEquipment } from '@/services/equipmentBags';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { TeedBallIcon } from '@/components/shared/TeedBallLike';
 
 export default function EquipmentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +28,8 @@ export default function EquipmentDetail() {
   const [isSaved, setIsSaved] = useState(false);
   const [forumThreads, setForumThreads] = useState<any[]>([]);
   const [loadingForums, setLoadingForums] = useState(false);
+  const [topBags, setTopBags] = useState<any[]>([]);
+  const [loadingBags, setLoadingBags] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -35,6 +40,7 @@ export default function EquipmentDetail() {
   useEffect(() => {
     if (id) {
       loadForumThreads();
+      loadTopBags();
     }
   }, [id]);
 
@@ -70,6 +76,20 @@ export default function EquipmentDetail() {
       console.error('Error loading forum threads:', error);
     } finally {
       setLoadingForums(false);
+    }
+  };
+
+  const loadTopBags = async () => {
+    if (!id) return;
+    
+    setLoadingBags(true);
+    try {
+      const bags = await getTopBagsWithEquipment(id);
+      setTopBags(bags);
+    } catch (error) {
+      console.error('Error loading top bags:', error);
+    } finally {
+      setLoadingBags(false);
     }
   };
 
@@ -247,8 +267,12 @@ export default function EquipmentDetail() {
 
         {/* Tabs Section */}
         <Tabs defaultValue="photos" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto">
             <TabsTrigger value="photos">Photos</TabsTrigger>
+            <TabsTrigger value="bags">
+              <Users className="w-4 h-4 mr-2" />
+              Bags
+            </TabsTrigger>
             <TabsTrigger value="forums">Forums</TabsTrigger>
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
             <TabsTrigger value="prices">Prices</TabsTrigger>
@@ -261,6 +285,66 @@ export default function EquipmentDetail() {
               brand={equipment.brand}
               model={equipment.model}
             />
+          </TabsContent>
+
+          <TabsContent value="bags" className="mt-6">
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold mb-4">Bags Using This Equipment</h3>
+                <ScrollArea className="h-[500px]">
+                  {loadingBags ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">Loading bags...</p>
+                    </div>
+                  ) : topBags.length > 0 ? (
+                    <div className="space-y-3">
+                      {topBags.map((bag) => (
+                        <div
+                          key={bag.bagId}
+                          className="flex items-center justify-between p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors cursor-pointer"
+                          onClick={() => navigate(`/bag/${bag.bagId}`)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={bag.user.avatar} />
+                              <AvatarFallback>
+                                {bag.user.displayName?.charAt(0) || bag.user.username?.charAt(0)?.toUpperCase() || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium text-foreground">{bag.bagName}</p>
+                              <p className="text-sm text-muted-foreground">
+                                @{bag.user.username} • Handicap {bag.user.handicap ?? 'N/A'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <TeedBallIcon className="w-4 h-4" filled={false} />
+                            <span className="text-sm">{bag.likesCount}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground">No bags found with this equipment</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Be the first to add this to your bag
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-4"
+                        onClick={() => navigate('/my-bag')}
+                      >
+                        Go to My Bag
+                      </Button>
+                    </div>
+                  )}
+                </ScrollArea>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="forums" className="mt-6">

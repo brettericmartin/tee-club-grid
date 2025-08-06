@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star, Circle } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { teeReview, checkUserTeedReview } from '@/services/equipment';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { TeedBallIcon } from '@/components/shared/TeedBallLike';
 
 interface ReviewCardProps {
   review: {
@@ -148,15 +149,17 @@ export default function ReviewCard({ review, onTeeUpdate }: ReviewCardProps) {
             )}
           >
             <div className="relative">
-              <Circle 
+              <TeedBallIcon 
                 className={cn(
                   "w-5 h-5 transition-all",
-                  isTeed ? "fill-current" : ""
+                  isTeed ? "text-[#10B981]" : "text-white/60"
                 )}
+                filled={isTeed}
               />
               {showTeeAnimation && (
-                <Circle 
-                  className="w-5 h-5 absolute inset-0 animate-ping fill-current"
+                <TeedBallIcon 
+                  className="w-5 h-5 absolute inset-0 animate-ping text-[#10B981]"
+                  filled
                 />
               )}
             </div>

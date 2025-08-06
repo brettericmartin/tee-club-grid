@@ -39,6 +39,7 @@ export function transformFeedPost(post: FeedPost & {
   profile?: any; 
   bag?: any;
   isFollowed?: boolean;
+  feed_likes?: Array<{ count: number }>;
 }): FeedItemData {
   const content = post.content || {};
   
@@ -83,6 +84,9 @@ export function transformFeedPost(post: FeedPost & {
     };
   }
   
+  // Get likes count from either feed_likes array or likes_count field
+  const likesCount = post.feed_likes?.[0]?.count ?? post.likes_count ?? 0;
+  
   return {
     postId: post.id,
     userId: post.user_id,
@@ -93,11 +97,11 @@ export function transformFeedPost(post: FeedPost & {
     postType: post.type,
     imageUrl,
     caption,
-    likes: post.likes_count || 0,
+    likes: likesCount,
     commentCount: 0, // Comments not implemented yet
     timestamp: new Date(post.created_at),
     isFromFollowed: post.isFollowed || false,
-    isLiked: post.user_liked && post.user_liked.length > 0,
+    isLiked: typeof post.user_liked === 'boolean' ? post.user_liked : (post.user_liked && post.user_liked.length > 0),
     bagId: post.bag_id || content.bag_id,
     equipmentId: post.equipment_id || content.equipment_id,
     bagData,
