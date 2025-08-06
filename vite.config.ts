@@ -102,12 +102,7 @@ export default defineConfig(({ mode }) => {
                 return 'components-shared';
               }
 
-              // Important pages that should be in their own chunks
-              if (id.includes('src/pages/BagsBrowser')) {
-                return 'page-bags-browser';
-              }
-              
-              // Other pages are handled by dynamic imports
+              // Pages are handled by dynamic imports, don't chunk them
               if (id.includes('src/pages/')) {
                 return undefined;
               }
