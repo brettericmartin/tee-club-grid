@@ -25,80 +25,96 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      // Temporarily disable manual chunks to fix import issues
-      // rollupOptions: {
-      //   output: {
-      //     manualChunks: {
-      //       // Vendor libraries
-      //       'vendor-ui': [
-      //         '@radix-ui/react-dialog',
-      //         '@radix-ui/react-dropdown-menu',
-      //         '@radix-ui/react-tabs',
-      //         '@radix-ui/react-toast',
-      //         '@radix-ui/react-tooltip',
-      //         '@radix-ui/react-avatar',
-      //         '@radix-ui/react-accordion',
-      //         '@radix-ui/react-progress',
-      //         '@radix-ui/react-select',
-      //         '@radix-ui/react-checkbox',
-      //         '@radix-ui/react-radio-group',
-      //         '@radix-ui/react-label',
-      //       ],
-      //       'vendor-forms': [
-      //         'react-hook-form',
-      //         '@hookform/resolvers',
-      //         'zod',
-      //       ],
-      //       'vendor-db': [
-      //         '@supabase/supabase-js',
-      //       ],
-      //       'vendor-routing': [
-      //         'react-router-dom',
-      //       ],
-      //       'vendor-query': [
-      //         '@tanstack/react-query',
-      //       ],
-      //       'vendor-utils': [
-      //         'clsx',
-      //         'tailwind-merge',
-      //         'date-fns',
-      //         'uuid',
-      //         'sonner',
-      //       ],
-      //       'vendor-animation': [
-      //         'framer-motion',
-      //         '@dnd-kit/core',
-      //         '@dnd-kit/sortable',
-      //         '@dnd-kit/utilities',
-      //       ],
-      //       // Feature chunks - simplified to avoid circular dependencies
-      //       'feature-equipment': [
-      //         './src/pages/Equipment',
-      //         './src/pages/EquipmentDetail',
-      //       ],
-      //       'feature-bags': [
-      //         './src/pages/BagsBrowser',
-      //         './src/pages/MyBagSupabase',
-      //         './src/pages/BagDisplayStyled',
-      //       ],
-      //       'feature-feed': [
-      //         './src/pages/Feed',
-      //       ],
-      //       'feature-admin': [
-      //         './src/pages/admin/SeedEquipment',
-      //         './src/pages/admin/EquipmentMigration',
-      //         './src/pages/Debug',
-      //         './src/pages/DebugFeed',
-      //       ],
-      //       'feature-forum': [
-      //         './src/pages/Forum',
-      //         './src/pages/ForumIndex',
-      //         './src/pages/ForumCategory',
-      //         './src/pages/ForumThread',
-      //       ],
-      //     },
-      //   },
-      // },
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            // Vendor chunks - group by functionality
+            if (id.includes('node_modules')) {
+              // UI Components
+              if (id.includes('@radix-ui')) {
+                return 'vendor-ui';
+              }
+              // Forms and validation
+              if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) {
+                return 'vendor-forms';
+              }
+              // Database and API
+              if (id.includes('@supabase')) {
+                return 'vendor-db';
+              }
+              // Routing
+              if (id.includes('react-router')) {
+                return 'vendor-routing';
+              }
+              // State management
+              if (id.includes('@tanstack/react-query')) {
+                return 'vendor-query';
+              }
+              // Animation libraries
+              if (id.includes('framer-motion') || id.includes('@dnd-kit')) {
+                return 'vendor-animation';
+              }
+              // Date and time utilities
+              if (id.includes('date-fns')) {
+                return 'vendor-date';
+              }
+              // Other utilities
+              if (id.includes('clsx') || id.includes('tailwind-merge') || 
+                  id.includes('uuid') || id.includes('sonner') || id.includes('lucide-react')) {
+                return 'vendor-utils';
+              }
+              // All other vendor code
+              return 'vendor-misc';
+            }
+
+            // Application chunks - avoid circular dependencies
+            if (id.includes('src/')) {
+              // Shared components and utilities (loaded first)
+              if (id.includes('src/components/ui/') || 
+                  id.includes('src/lib/') || 
+                  id.includes('src/utils/')) {
+                return 'app-core';
+              }
+              
+              // Services and hooks
+              if (id.includes('src/services/') || 
+                  id.includes('src/hooks/') || 
+                  id.includes('src/contexts/')) {
+                return 'app-services';
+              }
+
+              // Feature-specific components
+              if (id.includes('src/components/equipment/')) {
+                return 'components-equipment';
+              }
+              if (id.includes('src/components/bag/')) {
+                return 'components-bag';
+              }
+              if (id.includes('src/components/forum/')) {
+                return 'components-forum';
+              }
+              if (id.includes('src/components/badges/')) {
+                return 'components-badges';
+              }
+              
+              // Shared components
+              if (id.includes('src/components/')) {
+                return 'components-shared';
+              }
+
+              // Important pages that should be in their own chunks
+              if (id.includes('src/pages/BagsBrowser')) {
+                return 'page-bags-browser';
+              }
+              
+              // Other pages are handled by dynamic imports
+              if (id.includes('src/pages/')) {
+                return undefined;
+              }
+            }
+          },
+        },
+      },
       // Increase chunk size warning limit since we're splitting intentionally
       chunkSizeWarningLimit: 600,
     },
@@ -109,7 +125,12 @@ export default defineConfig(({ mode }) => {
         'react-router-dom',
         '@supabase/supabase-js',
         '@tanstack/react-query',
+        'lucide-react',
+        'date-fns',
+        'sonner',
       ],
+      // Force pre-bundling of dynamic imports in development
+      force: mode === 'development',
     },
   };
 });

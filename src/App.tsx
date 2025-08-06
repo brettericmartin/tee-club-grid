@@ -12,6 +12,28 @@ import BottomNavigation from "./components/navigation/BottomNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Analytics } from "@vercel/analytics/react";
 
+// Direct imports for development to avoid dynamic import issues
+import IndexPage from "@/pages/Index";
+import BagsBrowserPage from "@/pages/BagsBrowser";
+import BagDisplayPage from "@/pages/BagDisplayStyled";
+import MyBagPage from "@/pages/MyBagSupabase";
+import EquipmentPage from "@/pages/Equipment";
+import EquipmentDetailPage from "@/pages/EquipmentDetail";
+import FeedPage from "@/pages/Feed";
+import WishlistPage from "@/pages/Wishlist";
+import BadgesPage from "@/pages/Badges";
+import BadgePreviewPage from "@/pages/BadgePreview";
+import ForumPage from "@/pages/Forum";
+import ForumIndexPage from "@/pages/ForumIndex";
+import ForumCategoryPage from "@/pages/ForumCategory";
+import ForumThreadPage from "@/pages/ForumThread";
+import NotFoundPage from "@/pages/NotFound";
+import AIBagAnalyzerPage from "@/pages/AIBagAnalyzer";
+import SeedEquipmentPage from "@/pages/admin/SeedEquipment";
+import EquipmentMigrationPage from "@/pages/admin/EquipmentMigration";
+import DebugPage from "@/pages/Debug";
+import DebugFeedPage from "@/pages/DebugFeed";
+
 // Lazy load pages for code splitting with enhanced error handling and debugging
 const lazyImport = (importFn: () => Promise<any>, componentName?: string) => {
   console.log(`[DEBUG] Attempting to lazy load: ${componentName || 'unknown module'}`);
@@ -78,30 +100,33 @@ const lazyImport = (importFn: () => Promise<any>, componentName?: string) => {
   );
 };
 
-const Index = lazyImport(() => import("@/pages/Index"), "Home");
-const BagsBrowser = lazyImport(() => import("@/pages/BagsBrowser"), "Bags Browser");
-const BagDisplay = lazyImport(() => import("@/pages/BagDisplayStyled"), "Bag Display");
-const MyBag = lazyImport(() => import("@/pages/MyBag"), "My Bag");
-const Equipment = lazyImport(() => import("@/pages/Equipment"), "Equipment");
-const EquipmentDetail = lazyImport(() => import("@/pages/EquipmentDetail"), "Equipment Detail");
-const Feed = lazyImport(() => import("@/pages/Feed"), "Feed");
-const Wishlist = lazyImport(() => import("@/pages/Wishlist"), "Wishlist");
-const Badges = lazyImport(() => import("@/pages/Badges"), "Badges");
-const BadgePreview = lazyImport(() => import("@/pages/BadgePreview"), "Badge Preview");
-const Forum = lazyImport(() => import("@/pages/Forum"), "Forum");
-const ForumIndex = lazyImport(() => import("@/pages/ForumIndex"), "Forum Index");
-const ForumCategory = lazyImport(() => import("@/pages/ForumCategory"), "Forum Category");
-const ForumThread = lazyImport(() => import("@/pages/ForumThread"), "Forum Thread");
-const NotFound = lazyImport(() => import("@/pages/NotFound"), "Not Found");
-const AIBagAnalyzer = lazyImport(() => import("@/pages/AIBagAnalyzer"), "AI Bag Analyzer");
+// Use direct imports in development, lazy loading in production
+const isDev = import.meta.env.DEV;
+
+const Index = isDev ? IndexPage : lazyImport(() => import("@/pages/Index"), "Home");
+const BagsBrowser = isDev ? BagsBrowserPage : lazyImport(() => import("@/pages/BagsBrowser"), "Bags Browser");
+const BagDisplay = isDev ? BagDisplayPage : lazyImport(() => import("@/pages/BagDisplayStyled"), "Bag Display");
+const MyBag = isDev ? MyBagPage : lazyImport(() => import("@/pages/MyBagSupabase"), "My Bag");
+const Equipment = isDev ? EquipmentPage : lazyImport(() => import("@/pages/Equipment"), "Equipment");
+const EquipmentDetail = isDev ? EquipmentDetailPage : lazyImport(() => import("@/pages/EquipmentDetail"), "Equipment Detail");
+const Feed = isDev ? FeedPage : lazyImport(() => import("@/pages/Feed"), "Feed");
+const Wishlist = isDev ? WishlistPage : lazyImport(() => import("@/pages/Wishlist"), "Wishlist");
+const Badges = isDev ? BadgesPage : lazyImport(() => import("@/pages/Badges"), "Badges");
+const BadgePreview = isDev ? BadgePreviewPage : lazyImport(() => import("@/pages/BadgePreview"), "Badge Preview");
+const Forum = isDev ? ForumPage : lazyImport(() => import("@/pages/Forum"), "Forum");
+const ForumIndex = isDev ? ForumIndexPage : lazyImport(() => import("@/pages/ForumIndex"), "Forum Index");
+const ForumCategory = isDev ? ForumCategoryPage : lazyImport(() => import("@/pages/ForumCategory"), "Forum Category");
+const ForumThread = isDev ? ForumThreadPage : lazyImport(() => import("@/pages/ForumThread"), "Forum Thread");
+const NotFound = isDev ? NotFoundPage : lazyImport(() => import("@/pages/NotFound"), "Not Found");
+const AIBagAnalyzer = isDev ? AIBagAnalyzerPage : lazyImport(() => import("@/pages/AIBagAnalyzer"), "AI Bag Analyzer");
 
 // Admin routes (rarely accessed)
-const SeedEquipment = lazyImport(() => import("@/pages/admin/SeedEquipment"), "Seed Equipment");
-const EquipmentMigration = lazyImport(() => import("@/pages/admin/EquipmentMigration"), "Equipment Migration");
+const SeedEquipment = isDev ? SeedEquipmentPage : lazyImport(() => import("@/pages/admin/SeedEquipment"), "Seed Equipment");
+const EquipmentMigration = isDev ? EquipmentMigrationPage : lazyImport(() => import("@/pages/admin/EquipmentMigration"), "Equipment Migration");
 
 // Debug routes (developer-only)
-const Debug = lazyImport(() => import("@/pages/Debug"), "Debug");
-const DebugFeed = lazyImport(() => import("@/pages/DebugFeed"), "Debug Feed");
+const Debug = isDev ? DebugPage : lazyImport(() => import("@/pages/Debug"), "Debug");
+const DebugFeed = isDev ? DebugFeedPage : lazyImport(() => import("@/pages/DebugFeed"), "Debug Feed");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -127,39 +152,43 @@ const PageLoadingFallback = () => (
   </div>
 );
 
-const App = () => {
-  // App component rendering
-  console.log('[DEBUG] App component initializing...');
-  console.log('[DEBUG] Environment:', {
+function App() {
+  console.log("[DEBUG] App component initializing...");
+  console.log("[DEBUG] Environment:", {
     mode: import.meta.env.MODE,
     dev: import.meta.env.DEV,
     prod: import.meta.env.PROD,
-    supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'Set' : 'Not set',
-    supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Not set',
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? "Set" : "Not set",
+    supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY ? "Set" : "Not set",
   });
-  
+
+  if (isDev) {
+    console.log("[DEBUG] Running in development mode - using direct imports to avoid dynamic import issues");
+  }
+
   return (
-  <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <FeedProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <Analytics />
-              <BrowserRouter>
-              <div className="min-h-screen bg-background font-sans antialiased overflow-x-hidden">
-                {/* Fixed background gradient */}
-                <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-primary/10 -z-10" />
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <FeedProvider>
+              <ErrorBoundary>
+                <Toaster />
+                <Sonner />
+                <Analytics />
                 
-                <Navigation />
-                
-                {/* Main content with padding for fixed nav */}
-                <main className="pt-16 pb-16 md:pb-0 overflow-x-hidden">
-                  <ErrorBoundary>
+                <div className="flex flex-col min-h-screen bg-black">
+                  {/* Header navigation - hidden on mobile */}
+                  <div className="hidden md:block">
+                    <Navigation />
+                  </div>
+                  
+                  {/* Main content area */}
+                  <main className="flex-1 pb-16 md:pb-0">
                     <Suspense fallback={<PageLoadingFallback />}>
                       <Routes>
                         <Route path="/" element={<Index />} />
+                        <Route path="/bags-browser" element={<BagsBrowser />} />
                         <Route path="/bags" element={<BagsBrowser />} />
                         <Route path="/bag/:bagId" element={<BagDisplay />} />
                         <Route path="/my-bag" element={<MyBag />} />
@@ -168,30 +197,40 @@ const App = () => {
                         <Route path="/feed" element={<Feed />} />
                         <Route path="/wishlist" element={<Wishlist />} />
                         <Route path="/badges" element={<Badges />} />
-                        <Route path="/badge-preview" element={<BadgePreview />} />
-                        <Route path="/ai-analyzer" element={<AIBagAnalyzer />} />
+                        <Route path="/badge/:badgeType" element={<BadgePreview />} />
                         <Route path="/forum/*" element={<ForumIndex />} />
+                        <Route path="/ai-bag-analyzer" element={<AIBagAnalyzer />} />
+                        
+                        {/* Admin routes */}
                         <Route path="/admin/seed-equipment" element={<SeedEquipment />} />
                         <Route path="/admin/equipment-migration" element={<EquipmentMigration />} />
-                        <Route path="/debug" element={<Debug />} />
-                        <Route path="/debug-feed" element={<DebugFeed />} />
-                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                        
+                        {/* Debug routes - only in development */}
+                        {import.meta.env.DEV && (
+                          <>
+                            <Route path="/debug" element={<Debug />} />
+                            <Route path="/debug/feed" element={<DebugFeed />} />
+                          </>
+                        )}
+                        
+                        {/* 404 catch-all - must be last */}
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </Suspense>
-                  </ErrorBoundary>
-                </main>
-                
-                {/* Bottom navigation for mobile */}
-                <BottomNavigation />
-              </div>
-            </BrowserRouter>
-          </TooltipProvider>
-          </FeedProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-  </ErrorBoundary>
+                  </main>
+                  
+                  {/* Bottom navigation - visible on mobile only */}
+                  <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+                    <BottomNavigation />
+                  </div>
+                </div>
+              </ErrorBoundary>
+            </FeedProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
-};
+}
 
 export default App;

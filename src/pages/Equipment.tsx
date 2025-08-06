@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Grid, List, Heart, Camera, Loader2, Filter, Plus } from "lucide-react";
+import { Heart, Camera, Loader2, Filter, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +14,6 @@ import EquipmentCard from "@/components/shared/EquipmentCard";
 import SubmitEquipmentModal from "@/components/SubmitEquipmentModal";
 
 const Equipment = () => {
-  const [view, setView] = useState<'grid' | 'list'>('grid');
   const [category, setCategory] = useState('all');
   const [sortBy, setSortBy] = useState<'popular' | 'newest' | 'price-low' | 'price-high'>('popular');
   const [brand, setBrand] = useState('all');
@@ -226,107 +225,6 @@ const Equipment = () => {
     }
   };
 
-  const EquipmentGrid = () => {
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
-      );
-    }
-
-    if (equipment.length === 0) {
-      return (
-        <div className="text-center py-20">
-          <Camera className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-lg font-medium text-foreground mb-2">
-            {showSavedOnly ? "No saved equipment yet" : "No equipment found"}
-          </p>
-          <p className="text-muted-foreground mb-4">
-            {showSavedOnly 
-              ? "Equipment you save will appear here" 
-              : brand !== 'all' 
-                ? `No ${brand} equipment found in this category`
-                : "Try adjusting your filters"}
-          </p>
-          {showSavedOnly && (
-            <Button 
-              variant="outline" 
-              onClick={() => setShowSavedOnly(false)}
-            >
-              Browse All Equipment
-            </Button>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {equipment.map(item => (
-          <EquipmentCard
-            key={item.id}
-            equipment={item}
-            variant="grid"
-            isSaved={savedItems.has(item.id)}
-            onSaveToggle={(e) => handleSaveToggle(e, item.id)}
-            onViewDetails={() => navigate(`/equipment/${item.id}`)}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const EquipmentList = () => {
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
-      );
-    }
-
-    if (equipment.length === 0) {
-      return (
-        <div className="text-center py-20">
-          <Camera className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-lg font-medium text-foreground mb-2">
-            {showSavedOnly ? "No saved equipment yet" : "No equipment found"}
-          </p>
-          <p className="text-muted-foreground mb-4">
-            {showSavedOnly 
-              ? "Equipment you save will appear here" 
-              : brand !== 'all' 
-                ? `No ${brand} equipment found in this category`
-                : "Try adjusting your filters"}
-          </p>
-          {showSavedOnly && (
-            <Button 
-              variant="outline" 
-              onClick={() => setShowSavedOnly(false)}
-            >
-              Browse All Equipment
-            </Button>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4">
-        {equipment.map(item => (
-          <EquipmentCard
-            key={item.id}
-            equipment={item}
-            variant="list"
-            isSaved={savedItems.has(item.id)}
-            onSaveToggle={(e) => handleSaveToggle(e, item.id)}
-            onViewDetails={() => navigate(`/equipment/${item.id}`)}
-          />
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-[#111111]">
@@ -334,14 +232,15 @@ const Equipment = () => {
         {/* Show info if no equipment loaded - removed since we have data */}
         
         {/* Filters and View Bar */}
-        <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-          {/* Filters */}
-          <div className="flex gap-4 flex-wrap">
+        {/* Filters and Submit Button */}
+        <div className="space-y-4 mb-6">
+          {/* Mobile: Stack filters vertically */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:flex-wrap">
             {/* Category Filter */}
             <select 
               value={category} 
               onChange={(e) => setCategory(e.target.value)}
-              className="px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
+              className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
             >
               <option value="all">All Equipment</option>
               {categoryOptions.map(cat => (
@@ -353,7 +252,7 @@ const Equipment = () => {
             <select 
               value={sortBy} 
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
+              className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
             >
               <option value="popular">Most Liked</option>
               <option value="newest">Newest</option>
@@ -365,7 +264,7 @@ const Equipment = () => {
             <select 
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
-              className="px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
+              className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
             >
               <option value="all">All Brands</option>
               {brands.map(b => (
@@ -383,7 +282,7 @@ const Equipment = () => {
                 />
                 <label 
                   htmlFor="saved-only" 
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap"
                 >
                   Saved items only
                 </label>
@@ -391,31 +290,16 @@ const Equipment = () => {
             )}
           </div>
           
-          {/* View Toggle and Submit Button */}
-          <div className="flex gap-2">
-            <Button
-              variant={view === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setView('grid')}
-            >
-              <Grid className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={view === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setView('list')}
-            >
-              <List className="w-4 h-4" />
-            </Button>
+          {/* Submit Button - Full width on mobile */}
+          <div className="flex justify-end">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowSubmitModal(true)}
-              className="ml-2 bg-[#10B981] text-white border-[#10B981] hover:bg-[#0ea674] hover:border-[#0ea674]"
+              className="w-full sm:w-auto bg-[#10B981] text-white border-[#10B981] hover:bg-[#0ea674] hover:border-[#0ea674]"
             >
               <Plus className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Submit Equipment</span>
-              <span className="sm:hidden">Add</span>
+              Submit Equipment
             </Button>
           </div>
         </div>
@@ -432,20 +316,21 @@ const Equipment = () => {
             </div>
           ) : (
             <>
-              <div className="flex justify-between items-center mb-4">
-                <p className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+                <p className="text-sm text-muted-foreground text-center sm:text-left">
                   Showing {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, equipment.length)} of {equipment.length} items
                 </p>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                   >
-                    Previous
+                    <span className="hidden sm:inline">Previous</span>
+                    <span className="sm:hidden">Prev</span>
                   </Button>
-                  <span className="flex items-center px-3 text-sm">
+                  <span className="flex items-center px-2 sm:px-3 text-sm">
                     Page {currentPage} of {Math.ceil(equipment.length / itemsPerPage)}
                   </span>
                   <Button
