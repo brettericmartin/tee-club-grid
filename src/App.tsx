@@ -178,13 +178,11 @@ function App() {
                 <Analytics />
                 
                 <div className="flex flex-col min-h-screen bg-black">
-                  {/* Header navigation - hidden on mobile */}
-                  <div className="hidden md:block">
-                    <Navigation />
-                  </div>
+                  {/* Header navigation */}
+                  <Navigation />
                   
                   {/* Main content area */}
-                  <main className="flex-1 pb-16 md:pb-0">
+                  <main className="flex-1 pt-16 pb-16 md:pb-0">
                     <Suspense fallback={<PageLoadingFallback />}>
                       <Routes>
                         <Route path="/" element={<Index />} />
