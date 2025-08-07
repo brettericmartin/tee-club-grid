@@ -93,7 +93,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const enhancedAnalysis = await validateEquipmentData(analysis, supabase);
 
     // Log the analysis for tracking
-    await supabase
+    supabase
       .from('ai_analysis_logs')
       .insert({
         user_id: req.userId,
@@ -102,7 +102,8 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
         confidence_score: enhancedAnalysis.overallConfidence,
         created_at: new Date().toISOString()
       })
-      .catch(err => console.error('Failed to log analysis:', err));
+      .then(() => console.log('Analysis logged successfully'))
+      .catch((err: any) => console.error('Failed to log analysis:', err));
 
     // Get rate limit info from headers
     const rateLimitInfo = {
@@ -138,8 +139,9 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       if (error.message.includes('parse') || error.message.includes('JSON')) {
         return res.status(502).json({
           error: 'Bad Gateway',
-          message: 'AI service returned invalid response format',
-          details: error.message
+          message: 'AI service returned invalid response format. This may be due to the AI model change.',
+          details: error.message,
+          suggestion: 'Please try again or contact support if the issue persists.'
         });
       }
     }
