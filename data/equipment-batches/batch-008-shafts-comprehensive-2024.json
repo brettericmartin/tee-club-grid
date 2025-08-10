@@ -1,0 +1,822 @@
+[
+  {
+    "brand": "Fujikura",
+    "model": "Ventus Blue 2024",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [50, 60, 70, 80, 90],
+      "flex_options": ["R2", "R", "S", "X", "TX"],
+      "launch_profile": "Mid",
+      "spin_profile": "Low",
+      "torque": "3.2-4.5",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium/Stock upcharge"
+    },
+    "description": "Mid launch, low spin shaft featuring VeloCore+ technology for tighter dispersion and smoother feel",
+    "tour_usage": ["Multiple Tour Pros"],
+    "key_features": ["VeloCore+ Technology", "Improved Dispersion", "Enhanced Feel"]
+  },
+  {
+    "brand": "Fujikura",
+    "model": "Ventus Black 2024",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [60, 70, 80, 90],
+      "flex_options": ["S", "X", "TX"],
+      "launch_profile": "Low",
+      "spin_profile": "Low",
+      "torque": "3.0-4.0",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium/Stock upcharge"
+    },
+    "description": "Low launch, low spin shaft designed for aggressive swingers with fastest swing speeds",
+    "tour_usage": ["Tour Professionals"],
+    "key_features": ["VeloCore+ Technology", "Stiffest Profile", "Aggressive Tempo Friendly"]
+  },
+  {
+    "brand": "Fujikura",
+    "model": "Ventus Red 2024",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [50, 60, 70, 80, 90],
+      "flex_options": ["R2", "R", "S", "X", "TX"],
+      "launch_profile": "Mid-High",
+      "spin_profile": "Mid",
+      "torque": "3.5-5.0",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium/Stock upcharge"
+    },
+    "description": "Mid-high launch shaft optimized for players with slower swing speeds up to 90 MPH",
+    "tour_usage": ["Tour Professionals"],
+    "key_features": ["VeloCore+ Technology", "High Launch Profile", "Optimal for Moderate Swing Speeds"]
+  },
+  {
+    "brand": "Fujikura",
+    "model": "Ventus TR Blue",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [50, 60, 70, 80, 90],
+      "flex_options": ["R", "S", "X", "TX"],
+      "launch_profile": "Mid",
+      "spin_profile": "Low",
+      "torque": "3.0-4.2",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Aftermarket Premium"
+    },
+    "description": "Tour Ready version with additional Spread Tow carbon fiber for aggressive tempo players",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["VeloCore Technology", "Spread Tow Carbon", "Aggressive Tempo Design"]
+  },
+  {
+    "brand": "Fujikura",
+    "model": "Speeder NX",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [50, 60, 70, 80],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid",
+      "spin_profile": "Mid",
+      "torque": "4.0-5.5",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Stock/No upcharge"
+    },
+    "description": "Versatile shaft providing consistent performance across wide range of swing types",
+    "tour_usage": ["Multiple Tour Pros"],
+    "key_features": ["Consistent Performance", "Wide Swing Speed Range", "Reliable Feel"]
+  },
+  {
+    "brand": "Fujikura",
+    "model": "Air Speeder",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [40, 50, 60],
+      "flex_options": ["L", "A", "R", "S"],
+      "launch_profile": "High",
+      "spin_profile": "High",
+      "torque": "5.0-6.5",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Stock/No upcharge"
+    },
+    "description": "Ultra-lightweight shaft designed for maximum distance and higher launch",
+    "tour_usage": ["Senior Tour Players"],
+    "key_features": ["Lightweight Design", "High Launch", "Maximum Distance"]
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Tensei AV Blue",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [55, 65, 75],
+      "flex_options": ["R", "S", "X", "TX"],
+      "launch_profile": "Mid",
+      "spin_profile": "Low",
+      "torque": "3.0-4.0",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium/Stock upcharge"
+    },
+    "description": "Mid-launch, low-spin shaft with aluminum vapor coating for enhanced performance",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["Aluminum Vapor Coating", "Multi-Material Construction", "Tour Proven"]
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Tensei AV Orange",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [55, 65, 75, 85],
+      "flex_options": ["R", "S", "X", "TX"],
+      "launch_profile": "Low",
+      "spin_profile": "Low",
+      "torque": "3.0-3.8",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium/Stock upcharge"
+    },
+    "description": "Low launch, low spin design for strong swingers seeking penetrating ball flight",
+    "tour_usage": ["Tour Professionals"],
+    "key_features": ["Aluminum Vapor Coating", "Low Launch/Spin", "Strong Player Design"]
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Tensei 1K Pro Blue",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [52, 62, 72, 82],
+      "flex_options": ["R", "S", "X", "TX"],
+      "launch_profile": "Mid",
+      "spin_profile": "Low",
+      "torque": "2.8-3.5",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Aftermarket Premium"
+    },
+    "description": "Premium shaft featuring 1K carbon fiber weave for ultimate consistency",
+    "tour_usage": ["Tour Professionals"],
+    "key_features": ["1K Carbon Fiber", "Boron Fiber", "Xlink Tech", "Tighter Weave"]
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Diamana WB",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [43, 53, 63, 73, 83],
+      "flex_options": ["R2", "R", "SR", "S", "X", "TX"],
+      "launch_profile": "Low",
+      "spin_profile": "Low",
+      "torque": "3.0-4.5",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium/Stock upcharge"
+    },
+    "description": "White Board design for lower launch and spin, reinforced tip section for control",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["80-ton DIALEAD Pitch Fiber", "46-ton Fiber", "Reinforced Tip"]
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "Kai'li Blue",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [50, 60, 70, 80],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid",
+      "spin_profile": "Mid",
+      "torque": "4.0-5.0",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Stock/No upcharge"
+    },
+    "description": "Entry-level Mitsubishi shaft offering reliable performance at accessible price",
+    "tour_usage": ["Amateur Players"],
+    "key_features": ["Accessible Pricing", "Reliable Performance", "Wide Appeal"]
+  },
+  {
+    "brand": "Project X",
+    "model": "HZRDUS Smoke Blue",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [60, 70, 80],
+      "flex_options": ["R", "S", "X", "TX"],
+      "launch_profile": "Mid",
+      "spin_profile": "Low",
+      "torque": "3.2-4.0",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium/Stock upcharge"
+    },
+    "description": "High-performance shaft designed for strong swingers seeking distance and control",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["Low Resin Content", "High Strength Carbon", "Strong Player Design"]
+  },
+  {
+    "brand": "Project X",
+    "model": "HZRDUS Smoke Black",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [60, 70, 80, 90],
+      "flex_options": ["S", "X", "TX"],
+      "launch_profile": "Low",
+      "spin_profile": "Low",
+      "torque": "3.0-3.8",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium/Stock upcharge"
+    },
+    "description": "Low launch, low spin profile for aggressive swingers with exceptional ball speed",
+    "tour_usage": ["Tour Professionals"],
+    "key_features": ["Low Launch/Spin", "Aggressive Design", "Maximum Ball Speed"]
+  },
+  {
+    "brand": "Project X",
+    "model": "Cypher",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [40, 50, 60],
+      "flex_options": ["L", "A", "R", "S", "X"],
+      "launch_profile": "Mid-High",
+      "spin_profile": "Mid",
+      "torque": "4.5-6.0",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Stock/No upcharge"
+    },
+    "description": "Lightweight option designed for increased swing speed and distance",
+    "tour_usage": ["Amateur Players"],
+    "key_features": ["Lightweight Design", "Swing Speed Enhancement", "Wide Flex Range"]
+  },
+  {
+    "brand": "UST Mamiya",
+    "model": "Helium Nanocore",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [40, 50, 60],
+      "flex_options": ["L", "A", "R", "S"],
+      "launch_profile": "High",
+      "spin_profile": "High",
+      "torque": "5.0-6.5",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Stock/No upcharge"
+    },
+    "description": "Ultra-lightweight shaft with premium carbon fiber for maximum distance",
+    "tour_usage": ["Senior Tour", "Amateur Players"],
+    "key_features": ["Ultra-lightweight", "High Launch", "Low Resin Content", "Counterbalanced Design"]
+  },
+  {
+    "brand": "Aldila",
+    "model": "Rogue Black 130 MSI",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [60, 70, 80],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Low",
+      "spin_profile": "Low",
+      "torque": "3.0-4.0",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium/Stock upcharge"
+    },
+    "description": "Low launch, low spin shaft with MSI technology for strong swingers",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["MSI Technology", "Low Launch/Spin", "Tour Proven"]
+  },
+  {
+    "brand": "Graphite Design",
+    "model": "Tour AD DI",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [50, 60, 70, 80],
+      "flex_options": ["R", "S", "X", "TX"],
+      "launch_profile": "Mid",
+      "spin_profile": "Mid",
+      "torque": "3.2-4.2",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Aftermarket Premium"
+    },
+    "description": "Tour AD Design Innovation with balanced performance characteristics",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["Tour AD Technology", "Balanced Performance", "Premium Materials"]
+  },
+  {
+    "brand": "Graphite Design",
+    "model": "Tour AD IZ",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [50, 60, 70, 80],
+      "flex_options": ["R", "S", "X", "TX"],
+      "launch_profile": "Mid",
+      "spin_profile": "Low",
+      "torque": "3.0-4.0",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Aftermarket Premium"
+    },
+    "description": "Tour AD Innovation Zone design for enhanced control and distance",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["Innovation Zone Design", "Enhanced Control", "Low Spin"]
+  },
+  {
+    "brand": "True Temper",
+    "model": "Dynamic Gold",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [130],
+      "flex_options": ["R300", "S300", "S400", "X100"],
+      "launch_profile": "Low",
+      "spin_profile": "Low",
+      "torque": "2.5",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Stock/No upcharge"
+    },
+    "description": "Most successful shaft in golf history, tour-weighted for penetrating ball flight",
+    "tour_usage": ["Majority of PGA Tour Players"],
+    "key_features": ["Tour Proven", "Low Penetrating Flight", "Variable Wall Technology"]
+  },
+  {
+    "brand": "True Temper",
+    "model": "Dynamic Gold 105",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [105],
+      "flex_options": ["R300", "S300", "X100"],
+      "launch_profile": "Mid",
+      "spin_profile": "Mid",
+      "torque": "3.0",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Stock/No upcharge"
+    },
+    "description": "Lighter weight Dynamic Gold option with mid-launch characteristics",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["Lighter Weight", "Mid Launch", "Dynamic Gold DNA"]
+  },
+  {
+    "brand": "True Temper",
+    "model": "Dynamic Gold 120",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [120],
+      "flex_options": ["S300", "X100"],
+      "launch_profile": "Low-Mid",
+      "spin_profile": "Low-Mid",
+      "torque": "2.8",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Stock upcharge"
+    },
+    "description": "Tour-weight steel shaft balancing Dynamic Gold performance with lighter weight",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["Tour Weight", "Dynamic Gold Feel", "Optimized Balance"]
+  },
+  {
+    "brand": "True Temper",
+    "model": "Project X",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [115, 120, 125, 130],
+      "flex_options": ["5.0", "5.5", "6.0", "6.5", "7.0"],
+      "launch_profile": "Low",
+      "spin_profile": "Low",
+      "torque": "2.0",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Stout profile throughout for stronger swingers seeking flat, penetrating flight",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["Stout Profile", "Flat Ball Flight", "Unmatched Stability"]
+  },
+  {
+    "brand": "True Temper",
+    "model": "Project X LZ",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [105, 115, 125],
+      "flex_options": ["5.0", "5.5", "6.0", "6.5"],
+      "launch_profile": "Mid",
+      "spin_profile": "Mid",
+      "torque": "2.3",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Loading Zone technology for optimized energy transfer and performance",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["Loading Zone Technology", "Optimized Energy Transfer", "Mid Launch"]
+  },
+  {
+    "brand": "KBS",
+    "model": "Tour",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [90, 105, 115, 125],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid",
+      "spin_profile": "Mid",
+      "torque": "2.5",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Stock/No upcharge"
+    },
+    "description": "Mid-launch, mid-spin profile with superior feel and shot control",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["Mid Launch/Spin", "Superior Feel", "Shot Control"]
+  },
+  {
+    "brand": "KBS",
+    "model": "C-Taper",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [110, 115, 120, 125, 130],
+      "flex_options": ["R", "R+", "S", "S+", "X"],
+      "launch_profile": "Low",
+      "spin_profile": "Low",
+      "torque": "2.0",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Constant taper design for low piercing trajectory and superior shot control",
+    "tour_usage": ["Gary Woodland", "Justin Rose", "Rickie Fowler"],
+    "key_features": ["Constant Taper", "No Steps", "5% Lower Flight than DG", "Strong Feel"]
+  },
+  {
+    "brand": "KBS",
+    "model": "$-Taper",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [105, 115, 125],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Low-Mid",
+      "spin_profile": "Low",
+      "torque": "2.2",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Subtle taper design positioned between C-Taper and Tour for versatility",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["Subtle Taper", "Versatile Performance", "Balanced Characteristics"]
+  },
+  {
+    "brand": "Nippon",
+    "model": "Modus3 Tour 105",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [103, 106.5],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid",
+      "spin_profile": "Mid",
+      "torque": "2.5",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Unique structure with stiff tip and soft mid-section for optimal trajectory",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["Stiff Tip Section", "Soft Mid-Section", "Optimal Trajectory"]
+  },
+  {
+    "brand": "Nippon",
+    "model": "Modus3 Tour 120",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [120],
+      "flex_options": ["S", "X"],
+      "launch_profile": "Mid",
+      "spin_profile": "Low",
+      "torque": "2.3",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Tour-tested design for stronger players seeking controlled ball flight",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["Tour Tested", "Strong Player Design", "Controlled Flight"]
+  },
+  {
+    "brand": "Nippon",
+    "model": "NS Pro 950GH",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [95],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid",
+      "spin_profile": "Mid",
+      "torque": "3.0",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Stock/No upcharge"
+    },
+    "description": "Lightweight steel option with excellent feel and performance",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["Lightweight Steel", "Excellent Feel", "Versatile Performance"]
+  },
+  {
+    "brand": "UST Mamiya",
+    "model": "Recoil 65",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [65],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid",
+      "spin_profile": "Mid",
+      "torque": "4.5",
+      "tip_diameter": ".370",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Lightweight graphite iron shaft designed to improve club head speed",
+    "tour_usage": ["Amateur Players"],
+    "key_features": ["Lightweight Design", "Improved Club Head Speed", "Enhanced Accuracy"]
+  },
+  {
+    "brand": "UST Mamiya",
+    "model": "Recoil 95",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [95],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid-High",
+      "spin_profile": "Mid",
+      "torque": "3.5",
+      "tip_diameter": ".370",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Mid-weight graphite option for players seeking control and mid-high flight",
+    "tour_usage": ["Amateur Players"],
+    "key_features": ["Mid-Weight Design", "Control Focus", "Mid-High Ball Flight"]
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "MMT 60",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [60],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid-High",
+      "spin_profile": "Mid",
+      "torque": "5.0",
+      "tip_diameter": ".370",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Multi-Material Technology combining graphite with metal mesh for stability",
+    "tour_usage": ["Amateur Players"],
+    "key_features": ["Multi-Material Technology", "Metal Mesh", "Enhanced Stability"]
+  },
+  {
+    "brand": "Mitsubishi",
+    "model": "MMT 80",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [80],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid",
+      "spin_profile": "Mid",
+      "torque": "4.2",
+      "tip_diameter": ".370",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Balanced weight MMT option for versatile performance",
+    "tour_usage": ["Amateur/Club Players"],
+    "key_features": ["Balanced Weight", "Multi-Material Tech", "Versatile Performance"]
+  },
+  {
+    "brand": "Aerotech",
+    "model": "SteelFiber i95",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [95],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid",
+      "spin_profile": "Low",
+      "torque": "3.2",
+      "tip_diameter": ".370",
+      "butt_diameter": ".600",
+      "material": "Graphite/Steel Hybrid",
+      "price_tier": "Aftermarket Premium"
+    },
+    "description": "Tour weight SteelFiber with trajectory control for stronger players",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["Tour Weight", "Trajectory Control", "Low Torque"]
+  },
+  {
+    "brand": "Aerotech",
+    "model": "SteelFiber i110",
+    "category": "shaft",
+    "specs": {
+      "club_type": "iron",
+      "weight_grams": [110],
+      "flex_options": ["S", "X"],
+      "launch_profile": "Low-Mid",
+      "spin_profile": "Low",
+      "torque": "3.0",
+      "tip_diameter": ".370",
+      "butt_diameter": ".600",
+      "material": "Graphite/Steel Hybrid",
+      "price_tier": "Aftermarket Premium"
+    },
+    "description": "Heaviest SteelFiber option for maximum control and penetrating flight",
+    "tour_usage": ["Strong Tour Players"],
+    "key_features": ["Maximum Control", "Penetrating Flight", "Heavy Weight"]
+  },
+  {
+    "brand": "True Temper",
+    "model": "Dynamic Gold Tour Issue S400",
+    "category": "shaft",
+    "specs": {
+      "club_type": "wedge",
+      "weight_grams": [130],
+      "flex_options": ["S400"],
+      "launch_profile": "Low",
+      "spin_profile": "Low",
+      "torque": "2.5",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Tour Issue quality wedge shaft for ultimate precision and control",
+    "tour_usage": ["PGA Tour Players"],
+    "key_features": ["Tour Issue Quality", "Ultimate Precision", "Professional Grade"]
+  },
+  {
+    "brand": "KBS",
+    "model": "Hi-Rev 2.0",
+    "category": "shaft",
+    "specs": {
+      "club_type": "wedge",
+      "weight_grams": [115],
+      "flex_options": ["Wedge"],
+      "launch_profile": "Mid",
+      "spin_profile": "High",
+      "torque": "2.8",
+      "tip_diameter": ".355",
+      "butt_diameter": ".600",
+      "material": "Steel",
+      "price_tier": "Premium upcharge"
+    },
+    "description": "Specialized wedge shaft designed to optimize spin and control around greens",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["Spin Optimization", "Wedge Specific", "Enhanced Feel"]
+  },
+  {
+    "brand": "Accra",
+    "model": "TZ5",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [55, 65, 75, 85],
+      "flex_options": ["R", "S", "X", "TX"],
+      "launch_profile": "Mid",
+      "spin_profile": "Low",
+      "torque": "3.0-4.0",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Aftermarket Premium"
+    },
+    "description": "Premium aftermarket shaft with Tour Zone 5 technology for optimal energy transfer",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["Tour Zone 5 Technology", "Optimal Energy Transfer", "Premium Materials"]
+  },
+  {
+    "brand": "OBAN",
+    "model": "Kiyoshi White",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [55, 65, 75],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "High",
+      "spin_profile": "Mid",
+      "torque": "4.3",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Aftermarket Premium"
+    },
+    "description": "High launch shaft with smooth feel and stability throughout the swing",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["High Launch", "Smooth Feel", "Stable Profile"]
+  },
+  {
+    "brand": "Autoflex",
+    "model": "SF505",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [48],
+      "flex_options": ["Universal"],
+      "launch_profile": "Variable",
+      "spin_profile": "Variable",
+      "torque": "Variable",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Ultra Premium"
+    },
+    "description": "Revolutionary self-adjusting shaft technology that adapts to swing tempo",
+    "tour_usage": ["Select Players"],
+    "key_features": ["Self-Adjusting", "Tempo Responsive", "Universal Flex"]
+  },
+  {
+    "brand": "LA Golf",
+    "model": "Trono",
+    "category": "shaft",
+    "specs": {
+      "club_type": "driver",
+      "weight_grams": [60, 70, 80],
+      "flex_options": ["R", "S", "X"],
+      "launch_profile": "Mid",
+      "spin_profile": "Low",
+      "torque": "3.0-4.0",
+      "tip_diameter": ".335",
+      "butt_diameter": ".600",
+      "material": "Graphite",
+      "price_tier": "Aftermarket Premium"
+    },
+    "description": "Premium aftermarket shaft with innovative materials and construction",
+    "tour_usage": ["Tour Players"],
+    "key_features": ["Innovative Materials", "Premium Construction", "Tour Performance"]
+  }
+]

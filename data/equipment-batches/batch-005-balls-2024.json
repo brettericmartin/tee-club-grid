@@ -1,0 +1,272 @@
+[
+  {
+    "brand": "Titleist",
+    "model": "Pro V1",
+    "category": "ball",
+    "release_year": 2023,
+    "msrp": 54.99,
+    "specs": {
+      "construction": "3-piece",
+      "compression": "87",
+      "cover_material": "Urethane",
+      "dimple_count": "388",
+      "feel": "Soft",
+      "spin": "Mid"
+    },
+    "description": "The #1 ball in golf delivers exceptional distance, consistent flight, very soft feel, and Drop-and-Stop greenside control.",
+    "tour_usage": ["Jordan Spieth", "Justin Thomas", "Max Homa"],
+    "key_features": ["Penetrating trajectory", "Very soft feel", "Excellent greenside control", "Long distance"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "Pro V1x",
+    "category": "ball",
+    "release_year": 2023,
+    "msrp": 54.99,
+    "specs": {
+      "construction": "4-piece",
+      "compression": "97",
+      "cover_material": "Urethane",
+      "dimple_count": "348",
+      "feel": "Firm",
+      "spin": "High"
+    },
+    "description": "Pro V1x delivers low long game spin and high trajectory for increased distance with consistent flight.",
+    "tour_usage": ["Scottie Scheffler", "Xander Schauffele", "Cameron Smith"],
+    "key_features": ["High trajectory", "Low long game spin", "Firmer feel", "Increased iron spin"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "AVX",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 49.99,
+    "specs": {
+      "construction": "3-piece",
+      "compression": "77",
+      "cover_material": "Urethane",
+      "dimple_count": "352",
+      "feel": "Very Soft",
+      "spin": "Low"
+    },
+    "description": "Premium performance ball engineered for lower flight and spin with exceptionally soft feel.",
+    "tour_usage": [],
+    "key_features": ["Low flight window", "Low spin", "Very soft feel", "Premium distance"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Chrome Soft",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 54.99,
+    "specs": {
+      "construction": "3-piece",
+      "compression": "75",
+      "cover_material": "Urethane",
+      "dimple_count": "332",
+      "feel": "Soft",
+      "spin": "Mid"
+    },
+    "description": "Tour-proven ball with exceptional feel, Hyper Elastic SoftFast Core for tour-level speed and spin.",
+    "tour_usage": ["Jon Rahm", "Phil Mickelson"],
+    "key_features": ["Hyper Elastic SoftFast Core", "Tour Aero design", "Exceptional feel", "Consistent performance"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Chrome Soft X",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 54.99,
+    "specs": {
+      "construction": "4-piece",
+      "compression": "90",
+      "cover_material": "Urethane",
+      "dimple_count": "332",
+      "feel": "Firm",
+      "spin": "High"
+    },
+    "description": "Tour performance ball with firmer feel, designed for better players seeking workability and spin control.",
+    "tour_usage": ["Sam Burns", "Marc Leishman"],
+    "key_features": ["Triple Track alignment", "Firmer feel", "High spin", "Tour workability"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "TP5",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 54.99,
+    "specs": {
+      "construction": "5-piece",
+      "compression": "85",
+      "cover_material": "Urethane",
+      "dimple_count": "322",
+      "feel": "Soft",
+      "spin": "High"
+    },
+    "description": "Complete tour ball with 5-layer construction for maximum distance and complete spin control.",
+    "tour_usage": ["Rory McIlroy", "Collin Morikawa"],
+    "key_features": ["5-layer construction", "Speed-Layer System", "High launch", "Maximum carry distance"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "TP5x",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 54.99,
+    "specs": {
+      "construction": "5-piece",
+      "compression": "97",
+      "cover_material": "Urethane",
+      "dimple_count": "322",
+      "feel": "Firm",
+      "spin": "Mid-High"
+    },
+    "description": "Fastest tour ball with firmer feel, lower launch, and higher wedge spin for complete performance.",
+    "tour_usage": ["Dustin Johnson", "Rickie Fowler"],
+    "key_features": ["Fastest ball speed", "Firmer feel", "Lower launch", "Higher wedge spin"]
+  },
+  {
+    "brand": "Bridgestone",
+    "model": "Tour B X",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 49.99,
+    "specs": {
+      "construction": "3-piece",
+      "compression": "90",
+      "cover_material": "Urethane",
+      "dimple_count": "330",
+      "feel": "Firm",
+      "spin": "Low-Mid"
+    },
+    "description": "Tour ball for players with swing speeds over 105 mph, designed for maximum distance with REACTIV iQ cover.",
+    "tour_usage": ["Bryson DeChambeau", "Matt Kuchar"],
+    "key_features": ["REACTIV iQ cover", "For faster swing speeds", "Increased ball speed", "Smart cover technology"]
+  },
+  {
+    "brand": "Bridgestone",
+    "model": "Tour B XS",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 49.99,
+    "specs": {
+      "construction": "3-piece",
+      "compression": "78",
+      "cover_material": "Urethane",
+      "dimple_count": "330",
+      "feel": "Soft",
+      "spin": "High"
+    },
+    "description": "Tour ball with softer feel and increased spin for players seeking maximum greenside control.",
+    "tour_usage": ["Tiger Woods", "Fred Couples"],
+    "key_features": ["Tiger Woods ball", "REACTIV iQ cover", "Softer feel", "Maximum spin control"]
+  },
+  {
+    "brand": "Srixon",
+    "model": "Z-STAR",
+    "category": "ball",
+    "release_year": 2023,
+    "msrp": 44.99,
+    "specs": {
+      "construction": "3-piece",
+      "compression": "90",
+      "cover_material": "Urethane",
+      "dimple_count": "338",
+      "feel": "Soft",
+      "spin": "High"
+    },
+    "description": "Premium tour ball with FastLayer DG Core for exceptional feel and maximum greenside spin.",
+    "tour_usage": ["Hideki Matsuyama", "Shane Lowry"],
+    "key_features": ["FastLayer DG Core", "Spin Skin coating", "338 Speed Dimples", "Exceptional feel"]
+  },
+  {
+    "brand": "Srixon",
+    "model": "Z-STAR XV",
+    "category": "ball",
+    "release_year": 2023,
+    "msrp": 44.99,
+    "specs": {
+      "construction": "4-piece",
+      "compression": "102",
+      "cover_material": "Urethane",
+      "dimple_count": "338",
+      "feel": "Firm",
+      "spin": "Mid"
+    },
+    "description": "Tour ball for faster swing speeds with dual-core construction for maximum distance and iron spin.",
+    "tour_usage": ["Brooks Koepka", "Cameron Smith"],
+    "key_features": ["Dual Energetic Core", "For faster swings", "Maximum distance", "Mid-launch trajectory"]
+  },
+  {
+    "brand": "Vice",
+    "model": "Pro Plus",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "construction": "4-piece",
+      "compression": "95",
+      "cover_material": "Urethane",
+      "dimple_count": "318",
+      "feel": "Medium",
+      "spin": "High"
+    },
+    "description": "Direct-to-consumer tour ball with 4-piece construction for maximum distance and control.",
+    "tour_usage": [],
+    "key_features": ["DTC value", "4-piece construction", "S2TG technology", "Tour-level performance"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "RB Tour",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 44.99,
+    "specs": {
+      "construction": "4-piece",
+      "compression": "90",
+      "cover_material": "Urethane",
+      "dimple_count": "360",
+      "feel": "Soft",
+      "spin": "High"
+    },
+    "description": "Tour ball with C-Dimple technology for reduced drag and increased distance in all conditions.",
+    "tour_usage": ["Keith Mitchell"],
+    "key_features": ["C-Dimple technology", "4-piece construction", "Wind-resistant", "Tour feel"]
+  },
+  {
+    "brand": "Wilson",
+    "model": "Staff Model",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 49.99,
+    "specs": {
+      "construction": "4-piece",
+      "compression": "90",
+      "cover_material": "Urethane",
+      "dimple_count": "362",
+      "feel": "Firm",
+      "spin": "High"
+    },
+    "description": "Tour ball developed with input from Wilson Advisory Staff for maximum control and workability.",
+    "tour_usage": ["Gary Woodland", "Padraig Harrington"],
+    "key_features": ["V-COR technology", "362 PhD aerodynamics", "Tour feedback design", "Premium control"]
+  },
+  {
+    "brand": "Maxfli",
+    "model": "Tour",
+    "category": "ball",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "construction": "3-piece",
+      "compression": "90",
+      "cover_material": "Urethane",
+      "dimple_count": "318",
+      "feel": "Soft",
+      "spin": "Mid-High"
+    },
+    "description": "Tour-quality ball at an exceptional value with premium urethane cover for complete performance.",
+    "tour_usage": [],
+    "key_features": ["Value pricing", "Tour performance", "Urethane cover", "Consistent flight"]
+  }
+]

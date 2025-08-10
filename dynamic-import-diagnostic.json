@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-08-07T00:19:42.081Z",
+  "issues": 0,
+  "warnings": 3,
+  "suggestions": 0,
+  "details": {
+    "issues": [],
+    "warnings": [
+      "⚠️  useEffect without cleanup in src/components/equipment/EquipmentSelectorImproved.tsx might cause HMR issues",
+      "⚠️  useEffect without cleanup in src/components/bag/BagGalleryDndKit.tsx might cause HMR issues",
+      "⚠️  useEffect without cleanup in src/components/bag/EquipmentEditor.tsx might cause HMR issues"
+    ],
+    "suggestions": []
+  }
+}

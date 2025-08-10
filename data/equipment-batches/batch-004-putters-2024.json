@@ -1,0 +1,272 @@
+[
+  {
+    "brand": "Scotty Cameron",
+    "model": "Phantom 11.5",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 599.00,
+    "specs": {
+      "head_style": "Mid-Mallet",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "303 Stainless Steel",
+      "face_insert": "Aluminum",
+      "toe_hang": "Face Balanced",
+      "grip": "Pistolero Plus"
+    },
+    "description": "Mid-mallet design with enhanced alignment and stability. Precision milled from 303 stainless steel with adjustable sole weights.",
+    "tour_usage": ["Justin Thomas", "Adam Scott"],
+    "key_features": ["Multi-material construction", "Adjustable sole weights", "Enhanced alignment system", "Tour-proven design"]
+  },
+  {
+    "brand": "Scotty Cameron",
+    "model": "Special Select Newport 2",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 449.99,
+    "specs": {
+      "head_style": "Blade",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "303 Stainless Steel",
+      "face_insert": "Deep Milled",
+      "toe_hang": "35 degrees",
+      "grip": "Pistolini Plus"
+    },
+    "description": "Classic blade putter with modern weighting technology and deep milled face for enhanced feel and roll.",
+    "tour_usage": ["Jordan Spieth", "Justin Thomas"],
+    "key_features": ["Precision milled", "Tungsten sole weights", "Classic shape", "Tour-proven performance"]
+  },
+  {
+    "brand": "Scotty Cameron",
+    "model": "Special Select Squareback 2",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 449.99,
+    "specs": {
+      "head_style": "Mallet",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "303 Stainless Steel",
+      "face_insert": "Deep Milled",
+      "toe_hang": "Face Balanced",
+      "grip": "Matador Medium"
+    },
+    "description": "Square-back mallet with face-balanced design for straight stroke paths and maximum forgiveness.",
+    "tour_usage": ["Scottie Scheffler"],
+    "key_features": ["Face-balanced design", "Multi-material construction", "Square-back shape", "Enhanced MOI"]
+  },
+  {
+    "brand": "Odyssey",
+    "model": "White Hot OG #7",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 279.99,
+    "specs": {
+      "head_style": "Modified Mallet",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "Stainless Steel",
+      "face_insert": "White Hot Insert",
+      "toe_hang": "Face Balanced",
+      "grip": "Odyssey Pistol"
+    },
+    "description": "Legendary White Hot insert technology in a modified mallet design for exceptional feel and consistent roll.",
+    "tour_usage": ["Xander Schauffele"],
+    "key_features": ["White Hot insert", "Tour-proven shape", "Consistent sound and feel", "High MOI design"]
+  },
+  {
+    "brand": "Odyssey",
+    "model": "Tri-Hot 5K One",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 349.99,
+    "specs": {
+      "head_style": "Blade",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "303 Stainless Steel",
+      "face_insert": "White Hot",
+      "toe_hang": "35 degrees",
+      "grip": "Odyssey Pistol"
+    },
+    "description": "Multi-material blade putter with tungsten weighting for increased MOI and improved performance on off-center hits.",
+    "tour_usage": ["Collin Morikawa"],
+    "key_features": ["Tungsten weighting", "5K MOI", "Forward CG", "Premium construction"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Spider Tour X",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 349.99,
+    "specs": {
+      "head_style": "High MOI Mallet",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "Aluminum/Steel Composite",
+      "face_insert": "Pure Roll Insert",
+      "toe_hang": "Face Balanced",
+      "grip": "SuperStroke Pistol GT 1.0"
+    },
+    "description": "Tour-proven Spider design with True Path alignment and Pure Roll insert for optimal forward roll.",
+    "tour_usage": ["Rory McIlroy", "Jason Day"],
+    "key_features": ["Pure Roll insert", "True Path alignment", "High MOI", "Adjustable sole weights"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "TP Hydro Blast Soto",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 249.99,
+    "specs": {
+      "head_style": "Blade",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "303 Stainless Steel",
+      "face_insert": "Pure Roll",
+      "toe_hang": "35 degrees",
+      "grip": "Lamkin Sink Fit Skinny"
+    },
+    "description": "Classic blade shape with hydro blast finish for premium feel and reduced glare.",
+    "tour_usage": ["Dustin Johnson"],
+    "key_features": ["Hydro blast finish", "Pure Roll technology", "Classic shape", "Premium feel"]
+  },
+  {
+    "brand": "Ping",
+    "model": "PLD Milled Anser 2",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 395.00,
+    "specs": {
+      "head_style": "Blade",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "303 Stainless Steel",
+      "face_insert": "Deep AMP grooves",
+      "toe_hang": "Slight Arc",
+      "grip": "PP58 Tour"
+    },
+    "description": "Precision-milled blade putter with deep AMP grooves for consistent ball speed and improved accuracy.",
+    "tour_usage": ["Viktor Hovland", "Tony Finau"],
+    "key_features": ["Precision milled", "Deep AMP grooves", "Tour-weighted design", "Premium finish options"]
+  },
+  {
+    "brand": "Ping",
+    "model": "Heppler Tomcat 14",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 299.00,
+    "specs": {
+      "head_style": "Mallet",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "Aluminum/Steel",
+      "face_insert": "Aluminum",
+      "toe_hang": "Face Balanced",
+      "grip": "PP58 Mid"
+    },
+    "description": "Multi-material mallet with machined aluminum face and steel body for optimized sound and feel.",
+    "tour_usage": [],
+    "key_features": ["Multi-material construction", "Machined aluminum face", "Adjustable shaft", "High MOI"]
+  },
+  {
+    "brand": "Cleveland",
+    "model": "Huntington Beach SOFT Premier 11",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 199.99,
+    "specs": {
+      "head_style": "Mallet",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "304 Stainless Steel",
+      "face_insert": "SOFT Face",
+      "toe_hang": "Face Balanced",
+      "grip": "Cleveland Lamkin"
+    },
+    "description": "Premium mallet putter with SOFT face technology for enhanced feel at an accessible price point.",
+    "tour_usage": [],
+    "key_features": ["SOFT face technology", "Speed Optimized Face", "Diamond CNC milling", "Tour-inspired shape"]
+  },
+  {
+    "brand": "Bettinardi",
+    "model": "Queen B 14",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 450.00,
+    "specs": {
+      "head_style": "Mallet",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "303 Stainless Steel",
+      "face_insert": "F.I.T. Face",
+      "toe_hang": "Face Balanced",
+      "grip": "Lamkin Sink Fit"
+    },
+    "description": "Premium milled mallet with F.I.T. face technology and honeycomb pattern for superior feel.",
+    "tour_usage": ["Matt Fitzpatrick"],
+    "key_features": ["F.I.T. Face", "Honeycomb milling", "Premium finish", "Tour-quality construction"]
+  },
+  {
+    "brand": "LAB Golf",
+    "model": "DF3",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 499.00,
+    "specs": {
+      "head_style": "Mallet",
+      "length_options": ["33\"", "34\"", "35\"", "Broomstick"],
+      "material": "6061 Aluminum",
+      "face_insert": "Aluminum",
+      "toe_hang": "Lie Angle Balanced",
+      "grip": "Press Grip"
+    },
+    "description": "Revolutionary Lie Angle Balanced putter that stays square to the arc throughout the stroke.",
+    "tour_usage": ["Adam Scott", "Denny McCarthy"],
+    "key_features": ["Lie Angle Balance", "Zero torque", "Stays square naturally", "Custom weighting"]
+  },
+  {
+    "brand": "Evnroll",
+    "model": "ER2 MidBlade",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 399.00,
+    "specs": {
+      "head_style": "Mid-Blade",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "303 Stainless Steel",
+      "face_insert": "Sweet Face Technology",
+      "toe_hang": "Moderate",
+      "grip": "Evnroll Gravity"
+    },
+    "description": "Precision-milled putter with patented Sweet Face Technology for consistent distance control.",
+    "tour_usage": [],
+    "key_features": ["Sweet Face grooves", "Consistent ball speed", "Precision milled", "Tour-inspired design"]
+  },
+  {
+    "brand": "PXG",
+    "model": "0211 Hellcat",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 249.99,
+    "specs": {
+      "head_style": "Blade",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "303 Stainless Steel",
+      "face_insert": "Milled Pattern",
+      "toe_hang": "35 degrees",
+      "grip": "PXG Comfort"
+    },
+    "description": "Performance blade putter with pyramid face pattern for optimal roll and feel at an exceptional value.",
+    "tour_usage": [],
+    "key_features": ["Pyramid face pattern", "Precision milled", "Tungsten heel-toe weights", "Premium components"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "M.Craft OMOI 05",
+    "category": "putter",
+    "release_year": 2024,
+    "msrp": 449.99,
+    "specs": {
+      "head_style": "Mallet",
+      "length_options": ["33\"", "34\"", "35\""],
+      "material": "1025 Carbon Steel",
+      "face_insert": "Deep Face Milling",
+      "toe_hang": "Face Balanced",
+      "grip": "Lamkin Sink Fit"
+    },
+    "description": "Premium forged putter with heavyweight design for stability and blue ion finish for reduced glare.",
+    "tour_usage": [],
+    "key_features": ["Heavyweight design", "Blue ion finish", "Deep face milling", "Premium forged feel"]
+  }
+]

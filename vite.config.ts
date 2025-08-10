@@ -37,9 +37,18 @@ export default defineConfig(({ mode }) => {
         'lucide-react',
         'date-fns',
         'sonner',
+        '@dnd-kit/sortable',
+        '@dnd-kit/core',
+        '@dnd-kit/utilities',
       ],
+      exclude: [],
       // Force pre-bundling of dynamic imports in development
       force: mode === 'development',
+      // Entries to optimize even if not directly imported
+      entries: [
+        'src/components/equipment/*.tsx',
+        'src/components/bag/*.tsx',
+      ],
     },
   };
 });

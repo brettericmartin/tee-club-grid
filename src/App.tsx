@@ -14,6 +14,7 @@ import { Analytics } from "@vercel/analytics/react";
 
 // Direct imports for development to avoid dynamic import issues
 import IndexPage from "@/pages/Index";
+import LandingPage from "@/pages/Landing";
 import BagsBrowserPage from "@/pages/BagsBrowser";
 import BagDisplayPage from "@/pages/BagDisplayStyled";
 import MyBagPage from "@/pages/MyBagSupabase";
@@ -104,6 +105,7 @@ const lazyImport = (importFn: () => Promise<any>, componentName?: string) => {
 const isDev = import.meta.env.DEV;
 
 const Index = isDev ? IndexPage : lazyImport(() => import("@/pages/Index"), "Home");
+const Landing = isDev ? LandingPage : lazyImport(() => import("@/pages/Landing"), "Landing");
 const BagsBrowser = isDev ? BagsBrowserPage : lazyImport(() => import("@/pages/BagsBrowser"), "Bags Browser");
 const BagDisplay = isDev ? BagDisplayPage : lazyImport(() => import("@/pages/BagDisplayStyled"), "Bag Display");
 const MyBag = isDev ? MyBagPage : lazyImport(() => import("@/pages/MyBagSupabase"), "My Bag");
@@ -185,7 +187,8 @@ function App() {
                   <main className="flex-1 pt-16 pb-16 md:pb-0">
                     <Suspense fallback={<PageLoadingFallback />}>
                       <Routes>
-                        <Route path="/" element={<Index />} />
+                        <Route path="/" element={<Landing />} />
+                        <Route path="/old-index" element={<Index />} />
                         <Route path="/bags-browser" element={<BagsBrowser />} />
                         <Route path="/bags" element={<BagsBrowser />} />
                         <Route path="/bag/:bagId" element={<BagDisplay />} />

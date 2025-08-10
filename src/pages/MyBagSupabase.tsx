@@ -1,5 +1,5 @@
 /* @refresh skip */
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
 import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer, { bagBackgrounds } from "@/components/BackgroundLayer";
@@ -35,14 +35,15 @@ import { cn } from "@/lib/utils";
 import { sortBadgesByPriority } from "@/utils/badgeSorting";
 import { UserFeedView } from "@/components/feed/UserFeedView";
 import { aiFlowMetrics } from "@/utils/performanceMonitor";
+import { lazyWithRetry } from "@/utils/dynamicImport";
 
-// Lazy load heavy components with @dnd-kit
-const BagGalleryDndKit = lazy(() => import("@/components/bag/BagGalleryDndKit"));
-const EquipmentSelectorImproved = lazy(() => import("@/components/equipment/EquipmentSelectorImproved"));
-const EquipmentEditor = lazy(() => import("@/components/bag/EquipmentEditor"));
-const AddEquipmentMethodDialog = lazy(() => import("@/components/equipment/AddEquipmentMethodDialog"));
-const AIEquipmentAnalyzer = lazy(() => import("@/components/equipment/AIEquipmentAnalyzer"));
-const AIAnalysisResultsDialog = lazy(() => import("@/components/equipment/AIAnalysisResultsDialog"));
+// Lazy load heavy components with retry logic for Vite HMR stability
+const BagGalleryDndKit = lazyWithRetry(() => import("@/components/bag/BagGalleryDndKit"));
+const EquipmentSelectorImproved = lazyWithRetry(() => import("@/components/equipment/EquipmentSelectorImproved"));
+const EquipmentEditor = lazyWithRetry(() => import("@/components/bag/EquipmentEditor"));
+const AddEquipmentMethodDialog = lazyWithRetry(() => import("@/components/equipment/AddEquipmentMethodDialog"));
+const AIEquipmentAnalyzer = lazyWithRetry(() => import("@/components/equipment/AIEquipmentAnalyzer"));
+const AIAnalysisResultsDialog = lazyWithRetry(() => import("@/components/equipment/AIAnalysisResultsDialog"));
 
 // Loading component for heavy components
 const ComponentLoadingFallback = () => {

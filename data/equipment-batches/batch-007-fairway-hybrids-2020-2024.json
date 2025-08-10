@@ -1,0 +1,563 @@
+[
+  {
+    "brand": "TaylorMade",
+    "model": "SIM2 Fairway",
+    "category": "fairway_wood",
+    "release_year": 2021,
+    "msrp": 349.99,
+    "specs": {
+      "loft_options": ["15°", "16.5°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "V-Steel Sole",
+      "adjustability": "Yes - Loft Sleeve",
+      "stock_shaft": "Fujikura Ventus"
+    },
+    "description": "V-steel panel with titanium face material, tour-style smaller profile head with low spinning design",
+    "tour_usage": ["Rory McIlroy", "Dustin Johnson", "Collin Morikawa"],
+    "key_features": ["V-Steel Technology", "Titanium Face", "Adjustable Hosel"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Stealth Fairway",
+    "category": "fairway_wood",
+    "release_year": 2022,
+    "msrp": 349.99,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Carbon Crown",
+      "adjustability": "Plus Model Only",
+      "stock_shaft": "Fujikura Ventus"
+    },
+    "description": "V-steel sole panel with carbon fiber crown and C300 steel face for enhanced performance",
+    "tour_usage": ["Multiple Tour Players"],
+    "key_features": ["Carbon Crown", "Twist Face", "V-Steel Sole"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Stealth 2 Fairway",
+    "category": "fairway_wood",
+    "release_year": 2023,
+    "msrp": 349.99,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "3D Carbon Crown",
+      "adjustability": "Yes - Loft Sleeve",
+      "stock_shaft": "Fujikura Ventus"
+    },
+    "description": "Advanced 60X Carbon Twist Face with carbon reinforced composite ring technology",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["3D Carbon Crown", "Inverted Cone Technology", "Carbon Ring"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Qi10 Fairway",
+    "category": "fairway_wood",
+    "release_year": 2024,
+    "msrp": 349.99,
+    "specs": {
+      "loft_options": ["15°", "16.5°", "18°", "21°", "24°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Infinity Carbon Crown",
+      "adjustability": "Yes - Loft Sleeve",
+      "stock_shaft": "Fujikura Ventus"
+    },
+    "description": "Infinity carbon crown covering almost entire top surface for maximum weight redistribution",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Infinity Carbon Crown", "Advanced Weight Distribution", "Qi10 Technology"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Epic Speed Fairway",
+    "category": "fairway_wood",
+    "release_year": 2021,
+    "msrp": 329.99,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Titanium Face",
+      "adjustability": "Yes - OptiFit Hosel",
+      "stock_shaft": "Project X EvenFlow Riptide"
+    },
+    "description": "Advanced A.I. designed Flash Face SS21 with Jailbreak A.I. Speed Frame",
+    "tour_usage": ["Jon Rahm", "Xander Schauffele"],
+    "key_features": ["A.I. Flash Face", "Jailbreak Technology", "Titanium Construction"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Rogue ST Max Fairway",
+    "category": "fairway_wood",
+    "release_year": 2022,
+    "msrp": 299.99,
+    "specs": {
+      "loft_options": ["15°", "16.5°", "18°", "20°", "21°", "24°", "27°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "C300 Steel Face",
+      "adjustability": "Yes - OptiFit Hosel",
+      "stock_shaft": "Project X Cypher"
+    },
+    "description": "High launching, low spinning fairway with semi-draw bias and maximum forgiveness",
+    "tour_usage": ["Multiple Tour Players"],
+    "key_features": ["Jailbreak A.I.", "C300 Face", "OptiFit Adjustability"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Fairway",
+    "category": "fairway_wood",
+    "release_year": 2023,
+    "msrp": 379.99,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Carbon Chassis",
+      "adjustability": "Yes - OptiFit Hosel",
+      "stock_shaft": "Project X Cypher 2"
+    },
+    "description": "Revolutionary carbon chassis construction with 24g weight repositioning throughout the head",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Carbon Chassis", "A.I. Designed Face", "OptiFit Technology"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Ai Smoke Max Fairway",
+    "category": "fairway_wood",
+    "release_year": 2024,
+    "msrp": 379.99,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°", "24°", "27°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Carbon Chassis",
+      "adjustability": "Yes - OptiFit Hosel",
+      "stock_shaft": "Project X Cypher 2"
+    },
+    "description": "High launching, low spinning fairway with neutral ball flight and maximum MOI",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["A.I. Smoke Technology", "Carbon Chassis", "Enhanced MOI"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSi2 Fairway",
+    "category": "fairway_wood",
+    "release_year": 2020,
+    "msrp": 299.99,
+    "specs": {
+      "loft_options": ["13.5°", "15°", "16.5°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Steel Face",
+      "adjustability": "Yes - SureFit CG",
+      "stock_shaft": "Titleist TSP1"
+    },
+    "description": "Improved Active Recoil Channel 4.0 with lower CG for high launch and optimized spin",
+    "tour_usage": ["Multiple Tour Players"],
+    "key_features": ["ARC 4.0", "SureFit Technology", "High MOI Design"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSi3 Fairway",
+    "category": "fairway_wood",
+    "release_year": 2020,
+    "msrp": 299.99,
+    "specs": {
+      "loft_options": ["13.5°", "15°", "16.5°", "18°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Steel Face",
+      "adjustability": "Yes - SureFit CG Track",
+      "stock_shaft": "Titleist TSP1"
+    },
+    "description": "Player-focused design with three-setting SureFit CG track for precise ball flight control",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["SureFit CG Track", "Player-Focused Design", "ARC 4.0"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSR2 Fairway",
+    "category": "fairway_wood",
+    "release_year": 2022,
+    "msrp": 399.99,
+    "specs": {
+      "loft_options": ["15°", "16.5°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Steel Face",
+      "adjustability": "Yes - SureFit Hosel",
+      "stock_shaft": "Titleist TSR"
+    },
+    "description": "Lowest CG fairway wood ever from Titleist for maximum launch and forgiveness",
+    "tour_usage": ["60+ Tour Players"],
+    "key_features": ["Lowest CG Design", "Enhanced Forgiveness", "SureFit Technology"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSR3 Fairway",
+    "category": "fairway_wood",
+    "release_year": 2022,
+    "msrp": 399.99,
+    "specs": {
+      "loft_options": ["13.5°", "15°", "16.5°", "18°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Steel Face",
+      "adjustability": "Yes - 5-Position Weight Track",
+      "stock_shaft": "Titleist TSR"
+    },
+    "description": "Five-position weight track provides finer CG adjustment and greater overall movement",
+    "tour_usage": ["Tour Staff Players", "Tom Kim"],
+    "key_features": ["5-Position Weight Track", "Precise CG Control", "Tour-Proven Design"]
+  },
+  {
+    "brand": "Ping",
+    "model": "G425 Max Fairway",
+    "category": "fairway_wood",
+    "release_year": 2021,
+    "msrp": 350.00,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°", "24°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Maraging Steel Face",
+      "adjustability": "Yes - Trajectory Tuning 2.0",
+      "stock_shaft": "PING Tour 2.0"
+    },
+    "description": "Face Wrap technology with maraging steel extending beyond topline and leading edge",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Face Wrap Technology", "Trajectory Tuning 2.0", "High MOI"]
+  },
+  {
+    "brand": "Ping",
+    "model": "G430 Max Fairway",
+    "category": "fairway_wood",
+    "release_year": 2023,
+    "msrp": 385.00,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°", "24°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Maraging Steel Face",
+      "adjustability": "Yes - Trajectory Tuning 2.0",
+      "stock_shaft": "PING Tour 2.0"
+    },
+    "description": "Ultra-thin carbon composite crown saves 10 grams for improved weight distribution",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Carbon Crown", "Trajectory Tuning 2.0", "Enhanced Forgiveness"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "RADSPEED Fairway",
+    "category": "fairway_wood",
+    "release_year": 2021,
+    "msrp": 279.99,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "CNC Milled Face",
+      "adjustability": "Yes - MyFly8",
+      "stock_shaft": "Cobra Helium"
+    },
+    "description": "Radial weighting technology with thin-ply carbon crown and hollow split rails",
+    "tour_usage": ["Rickie Fowler", "Bryson DeChambeau"],
+    "key_features": ["Radial Weighting", "CNC Milled Face", "Hollow Split Rails"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "LTDx Fairway",
+    "category": "fairway_wood",
+    "release_year": 2022,
+    "msrp": 300.00,
+    "specs": {
+      "loft_options": ["13.5°", "15°", "18°", "21°", "24°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Carpenter 475 Steel Face",
+      "adjustability": "Yes - MyFly8",
+      "stock_shaft": "Helium Nanocore"
+    },
+    "description": "Carbon composite crown saves 13 grams with PWR-COR technology and tungsten weighting",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["PWR-COR Technology", "Carbon Crown", "Tungsten Weighting"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "Aerojet Fairway",
+    "category": "fairway_wood",
+    "release_year": 2023,
+    "msrp": 349.99,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "PWRSHELL H.O.T. Face",
+      "adjustability": "Yes - MyFly8",
+      "stock_shaft": "Helium Nanocore"
+    },
+    "description": "PWR-Bridge technology with PWRSHELL H.O.T. Face for increased distance and forgiveness",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["PWR-Bridge", "PWRSHELL H.O.T. Face", "Carbon Crown"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "Darkspeed Max Fairway",
+    "category": "fairway_wood",
+    "release_year": 2024,
+    "msrp": 330.00,
+    "specs": {
+      "loft_options": ["15.5°", "18.5°", "21.5°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "AI-Designed Face",
+      "adjustability": "Yes - MyFly8",
+      "stock_shaft": "Helium Nanocore"
+    },
+    "description": "AI-designed variable thickness pattern with oversized head for maximum forgiveness",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["AI-Designed Face", "Oversized Head", "Variable Thickness"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "ST-Z Fairway",
+    "category": "fairway_wood",
+    "release_year": 2021,
+    "msrp": 299.99,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "MAS1C Steel Face",
+      "adjustability": "Yes - Quick Switch",
+      "stock_shaft": "Mizuno MFusion"
+    },
+    "description": "Low spinning, high launching design with CORTECH Chamber and carbon crown",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["CORTECH Chamber", "MAS1C Face", "Carbon Crown"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "ST-Max 230 Fairway",
+    "category": "fairway_wood",
+    "release_year": 2024,
+    "msrp": 300.00,
+    "specs": {
+      "loft_options": ["15°", "18°", "21°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "MAS1C Steel Face",
+      "adjustability": "Yes - Quick Switch",
+      "stock_shaft": "Mizuno MFusion"
+    },
+    "description": "Larger footprint design for maximum MOI with expanded CORTECH Chamber",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Maximum MOI", "Speed Bevel", "CORTECH Chamber"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "SIM2 Rescue",
+    "category": "hybrid",
+    "release_year": 2021,
+    "msrp": 279.99,
+    "specs": {
+      "loft_options": ["17°", "19°", "22°", "25°", "28°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Steel Face",
+      "adjustability": "Yes - Standard Model",
+      "stock_shaft": "Fujikura Ventus"
+    },
+    "description": "Updated V-Steel sole design with Twist Face and asymmetric Thru-Slot Speed Pocket",
+    "tour_usage": ["Rory McIlroy", "Dustin Johnson", "Collin Morikawa"],
+    "key_features": ["V-Steel Sole", "Twist Face", "Speed Pocket"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Stealth Rescue",
+    "category": "hybrid",
+    "release_year": 2022,
+    "msrp": 299.99,
+    "specs": {
+      "loft_options": ["17°", "19°", "22°", "25°", "28°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Carbon Face",
+      "adjustability": "Plus Model Only",
+      "stock_shaft": "Fujikura Ventus"
+    },
+    "description": "Lightest rescue club head from TaylorMade with carbon layered face and crown",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Carbon Face", "Carbon Crown", "V-Steel Sole"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Stealth 2 Rescue",
+    "category": "hybrid",
+    "release_year": 2023,
+    "msrp": 299.99,
+    "specs": {
+      "loft_options": ["17°", "19°", "22°", "25°", "28°", "31°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Carbon Face",
+      "adjustability": "Yes - Standard Model",
+      "stock_shaft": "Fujikura Ventus"
+    },
+    "description": "Expanded three-model family with larger carbon fiber crown for enhanced forgiveness",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Enhanced Carbon Crown", "Inverted Cone Technology", "Multiple Lofts"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Qi10 Rescue",
+    "category": "hybrid",
+    "release_year": 2024,
+    "msrp": 299.99,
+    "specs": {
+      "loft_options": ["17°", "19°", "22°", "25°", "28°", "31°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Steel Face",
+      "adjustability": "Yes - Standard Model",
+      "stock_shaft": "Fujikura Ventus"
+    },
+    "description": "Focus on playability over speed with improved forgiveness and MOI performance",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Enhanced MOI", "V-Steel Technology", "Improved Forgiveness"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Apex Pro Hybrid",
+    "category": "hybrid",
+    "release_year": 2021,
+    "msrp": 249.99,
+    "specs": {
+      "loft_options": ["18°", "21°", "24°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "C300 Steel Face",
+      "adjustability": "No",
+      "stock_shaft": "UST Recoil"
+    },
+    "description": "Compact design for elite players with enhanced turf interaction and shot versatility",
+    "tour_usage": ["Jon Rahm", "Xander Schauffele"],
+    "key_features": ["Compact Head", "C300 Face", "Player-Focused Design"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Super Hybrid",
+    "category": "hybrid",
+    "release_year": 2023,
+    "msrp": 400.00,
+    "specs": {
+      "loft_options": ["16°", "18°", "21°", "24°", "27°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "A.I. Designed Face",
+      "adjustability": "Yes - OptiFit 3",
+      "stock_shaft": "Project X HZRDUS Smoke"
+    },
+    "description": "Up to 91 grams of tungsten weighting with Triple MIM technology for maximum distance",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Triple MIM Weighting", "91g Tungsten", "A.I. Face Design"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSi2 Hybrid",
+    "category": "hybrid",
+    "release_year": 2020,
+    "msrp": 279.99,
+    "specs": {
+      "loft_options": ["18°", "21°", "24°", "27°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Steel Face",
+      "adjustability": "Yes - SureFit Hosel",
+      "stock_shaft": "Titleist TSP322"
+    },
+    "description": "High MOI design with improved Active Recoil Channel for consistent performance",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["High MOI", "ARC 4.0", "SureFit Technology"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSR2 Hybrid",
+    "category": "hybrid",
+    "release_year": 2022,
+    "msrp": 329.99,
+    "specs": {
+      "loft_options": ["18°", "21°", "24°", "27°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Steel Face",
+      "adjustability": "Yes - SureFit Hosel",
+      "stock_shaft": "Titleist TSR"
+    },
+    "description": "Lower CG design for higher launch with optimized spin and improved trajectory",
+    "tour_usage": ["60+ Tour Players"],
+    "key_features": ["Lower CG", "Optimized Spin", "Enhanced Launch"]
+  },
+  {
+    "brand": "Ping",
+    "model": "G425 Hybrid",
+    "category": "hybrid",
+    "release_year": 2021,
+    "msrp": 299.99,
+    "specs": {
+      "loft_options": ["17°", "19°", "22°", "26°", "30°", "34°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Maraging Steel Face",
+      "adjustability": "Yes - Trajectory Tuning 2.0",
+      "stock_shaft": "PING Tour 2.0"
+    },
+    "description": "Face Wrap technology with modified roll radius to retain spin on low-face hits",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Face Wrap Technology", "Modified Roll Radius", "Trajectory Tuning"]
+  },
+  {
+    "brand": "Ping",
+    "model": "G430 Hybrid",
+    "category": "hybrid",
+    "release_year": 2023,
+    "msrp": 325.00,
+    "specs": {
+      "loft_options": ["17°", "19°", "22°", "26°", "30°", "34°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Maraging Steel Face",
+      "adjustability": "Yes - Trajectory Tuning 2.0",
+      "stock_shaft": "PING Tour 2.0"
+    },
+    "description": "Carbon crown saves eight grams with improved ball speed and reduced spin",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["Carbon Crown", "Improved Ball Speed", "Weight Savings"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "RADSPEED Hybrid",
+    "category": "hybrid",
+    "release_year": 2021,
+    "msrp": 229.99,
+    "specs": {
+      "loft_options": ["17°", "20°", "23°", "26°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "Steel Face",
+      "adjustability": "Yes - MyFly8",
+      "stock_shaft": "Cobra Helium"
+    },
+    "description": "Radial weighting technology with thin-ply carbon crown and improved forgiveness",
+    "tour_usage": ["Rickie Fowler", "Bryson DeChambeau"],
+    "key_features": ["Radial Weighting", "Carbon Crown", "Improved MOI"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "Darkspeed Hybrid",
+    "category": "hybrid",
+    "release_year": 2024,
+    "msrp": 280.00,
+    "specs": {
+      "loft_options": ["17°", "20°", "23°", "26°", "29°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "material": "AI-Designed Face",
+      "adjustability": "Yes - MyFly8",
+      "stock_shaft": "Helium Nanocore"
+    },
+    "description": "AI-designed variable thickness pattern for optimized ball speed across the face",
+    "tour_usage": ["Tour Staff Players"],
+    "key_features": ["AI-Designed Face", "Variable Thickness", "Enhanced Forgiveness"]
+  },
+  {
+    "brand": "Cleveland",
+    "model": "Launcher Halo XL Hybrid",
+    "category": "hybrid",
+    "release_year": 2022,
+    "msrp": 229.99,
+    "specs": {
+      "loft_options": ["18°", "21°", "24°", "27°"],
+      "shaft_flex": ["Regular", "Stiff", "Senior"],
+      "material": "Steel Face",
+      "adjustability": "No",
+      "stock_shaft": "UST Helium"
+    },
+    "description": "Highest MOI hybrid ever from Cleveland with extreme forgiveness and low CG design",
+    "tour_usage": ["Limited Tour Usage"],
+    "key_features": ["Highest MOI", "XL Head Design", "Gliderail Technology"]
+  }
+]

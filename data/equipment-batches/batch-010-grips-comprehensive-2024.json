@@ -1,0 +1,1466 @@
+[
+  {
+    "brand": "Golf Pride",
+    "model": "Tour Velvet",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 8.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Rubber",
+      "texture": "Non-Cord",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "The most popular grip in golf, combining comfort and moderate surface texture",
+    "tour_usage": ["Used by majority of tour players"],
+    "key_features": ["State-of-the-art rubber blend", "Moderate surface texture", "Scientifically designed tread pattern"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "Tour Velvet Plus4",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 10.99,
+    "specs": {
+      "size": "Midsize Lower Hand",
+      "weight_grams": 52,
+      "material": "Rubber",
+      "texture": "Non-Cord",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Features a larger lower hand for reduced grip pressure and increased power",
+    "tour_usage": ["Popular on PGA Tour"],
+    "key_features": ["Plus4 technology", "Reduced taper", "Lighter grip pressure"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "MCC",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 12.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 48,
+      "material": "Rubber/Cord Hybrid",
+      "texture": "Brushed Cotton Cord",
+      "core_size": ".600 Round",
+      "firmness": "Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Hybrid grip with cord in upper hand and rubber in lower for ultimate control",
+    "tour_usage": ["#1 Hybrid grip on Tour"],
+    "key_features": ["Brushed cotton cord", "Rubber lower hand", "Maximum control"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "MCC Plus4",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 14.99,
+    "specs": {
+      "size": "Midsize Lower Hand",
+      "weight_grams": 50,
+      "material": "Rubber/Cord Hybrid",
+      "texture": "Brushed Cotton Cord",
+      "core_size": ".600 Round",
+      "firmness": "Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Combines MCC technology with Plus4 larger lower hand design",
+    "tour_usage": ["Tour preferred"],
+    "key_features": ["Hybrid technology", "Plus4 lower hand", "Tour performance"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "Tour Velvet Cord",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 11.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 52,
+      "material": "Cord",
+      "texture": "Full Cord",
+      "core_size": ".600 Round",
+      "firmness": "Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Combines Tour Velvet design with cord for enhanced moisture management",
+    "tour_usage": ["Tour players in humid conditions"],
+    "key_features": ["Full cord construction", "Moisture management", "Tour Velvet pattern"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "Z-Grip",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 11.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 48,
+      "material": "Rubber/Cord Hybrid",
+      "texture": "Z-Texture Pattern",
+      "core_size": ".600 Round",
+      "firmness": "Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Features ZK Cord in upper hand with firm rubber lower for control",
+    "tour_usage": ["Tour validated"],
+    "key_features": ["ZK Cord technology", "Firm rubber lower", "Enhanced feedback"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "CP2 Pro",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 10.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 48,
+      "material": "Rubber",
+      "texture": "Soft",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Softest performance grip combining comfort with control",
+    "tour_usage": ["Select tour players"],
+    "key_features": ["2.5% softer", "Control Core technology", "Reduced vibration"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "CP2 Wrap",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 10.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 64,
+      "material": "Rubber",
+      "texture": "Wrap Style",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Softest grip with simulated wrap texture for ultimate comfort",
+    "tour_usage": [],
+    "key_features": ["Wrap texture", "Soft feel", "Enhanced comfort"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "Tour Wrap 2G",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 7.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 51,
+      "material": "Rubber",
+      "texture": "Wrap Style",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "One-piece simulated wrap grip with tackier feel",
+    "tour_usage": [],
+    "key_features": ["Simulated wrap", "Tacky feel", "Excellent value"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "Align",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 12.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 52,
+      "material": "Rubber",
+      "texture": "Micro-Diamond",
+      "core_size": ".600 Reminder",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Features raised ridge to aid consistent hand placement",
+    "tour_usage": ["Tour validated"],
+    "key_features": ["Align technology ridge", "Consistent hand placement", "Micro-diamond texture"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "Crossline",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 6.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 48,
+      "material": "Rubber",
+      "texture": "Crossline Pattern",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Classic grip with distinctive crossline pattern for traction",
+    "tour_usage": ["Tour proven"],
+    "key_features": ["Crossline pattern", "Proven performance", "Great value"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "Crossline Plus",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 8.99,
+    "specs": {
+      "size": "Midsize",
+      "weight_grams": 60,
+      "material": "Rubber",
+      "texture": "Crossline Pattern",
+      "core_size": ".580 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Midsize version of classic Crossline for reduced grip pressure",
+    "tour_usage": [],
+    "key_features": ["Midsize diameter", "Reduced grip pressure", "Classic pattern"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "Sonar",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 10.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Lamkin Genesis Material",
+      "texture": "Fingerprint Technology",
+      "core_size": ".600 Round",
+      "firmness": "Medium-Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Features Fingerprint Technology for enhanced grip and reduced slip",
+    "tour_usage": ["Justin Rose"],
+    "key_features": ["Fingerprint Technology", "Genesis Material", "Micro-textures"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "Sonar Plus",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 12.99,
+    "specs": {
+      "size": "Midsize Lower Hand",
+      "weight_grams": 53,
+      "material": "Lamkin Genesis Material",
+      "texture": "Fingerprint Technology",
+      "core_size": ".600 Round",
+      "firmness": "Medium-Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Sonar with larger lower hand for lighter grip pressure",
+    "tour_usage": ["Tour validated"],
+    "key_features": ["Plus taper design", "Fingerprint Technology", "Reduced tension"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "UTx",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 14.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 48,
+      "material": "Tri-Layer Cord",
+      "texture": "Full Cord",
+      "core_size": ".600 Round",
+      "firmness": "Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Three-layer cord construction for ultimate performance",
+    "tour_usage": ["Brooks Koepka"],
+    "key_features": ["Tri-Layer technology", "Full cord", "Tour performance"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "ST Hybrid",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 11.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 52,
+      "material": "Rubber/Cord Hybrid",
+      "texture": "Hybrid",
+      "core_size": ".600 Round",
+      "firmness": "Medium-Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Hybrid design with cord upper and rubber lower hand",
+    "tour_usage": [],
+    "key_features": ["Hybrid construction", "Surface texture", "All-weather performance"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "Comfort Plus",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 7.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 45,
+      "material": "Rubber",
+      "texture": "Soft",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Softest grip in Lamkin line for maximum comfort",
+    "tour_usage": [],
+    "key_features": ["Ultra-soft feel", "Comfort focused", "Reduced vibration"]
+  },
+  {
+    "brand": "Winn",
+    "model": "Dri-Tac",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 9.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 48,
+      "material": "WinnDry Polymer",
+      "texture": "Tacky",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Tackiest all-weather grip with WinnDry polymer material",
+    "tour_usage": [],
+    "key_features": ["WinnDry polymer", "Superior tackiness", "Shock absorption"]
+  },
+  {
+    "brand": "Winn",
+    "model": "Dri-Tac 2.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 10.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "WinnDry Polymer",
+      "texture": "Enhanced Tacky",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Enhanced version with improved durability and tackiness",
+    "tour_usage": [],
+    "key_features": ["Enhanced polymer", "Improved durability", "Maximum comfort"]
+  },
+  {
+    "brand": "Winn",
+    "model": "Excel",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 6.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 43,
+      "material": "Polymer",
+      "texture": "Wrap Style",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "Fair Weather"
+    },
+    "description": "Comfortable wrap-style grip at an affordable price",
+    "tour_usage": [],
+    "key_features": ["Wrap style", "Lightweight", "Value pricing"]
+  },
+  {
+    "brand": "Winn",
+    "model": "V17",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 8.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 47,
+      "material": "Polymer",
+      "texture": "Vertical Pistol",
+      "core_size": ".600 Round",
+      "firmness": "Medium-Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Vertical pistol profile for enhanced control",
+    "tour_usage": [],
+    "key_features": ["Vertical pistol profile", "Enhanced control", "Comfortable feel"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "S-Tech",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 24.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Polyurethane",
+      "texture": "Soft Tacky",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Premium soft feel with Cross-Traction technology",
+    "tour_usage": ["Jordan Spieth"],
+    "key_features": ["Cross-Traction surface", "Soft polyurethane", "No taper technology"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Tour 2.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Oversized",
+      "weight_grams": 85,
+      "material": "Polyurethane",
+      "texture": "Cross-Traction",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Oversized grip with parallel technology for consistent pressure",
+    "tour_usage": ["Multiple tour players"],
+    "key_features": ["Oversized profile", "No taper", "Cross-Traction"]
+  },
+  {
+    "brand": "Iomic",
+    "model": "Sticky 2.3",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 19.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 48,
+      "material": "Elastomer",
+      "texture": "Sticky",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Japanese elastomer grip with exceptional tackiness",
+    "tour_usage": [],
+    "key_features": ["Elastomer material", "Water resistant", "Consistent feel"]
+  },
+  {
+    "brand": "Iomic",
+    "model": "Sticky Evolution 2.3",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 22.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Elastomer",
+      "texture": "X-Evolution Pattern",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Enhanced pattern design for improved grip and control",
+    "tour_usage": [],
+    "key_features": ["X-Evolution pattern", "Superior grip", "Durability"]
+  },
+  {
+    "brand": "Karma",
+    "model": "Velour",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 5.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 51,
+      "material": "Rubber",
+      "texture": "Velvet",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Tour velvet style grip at value pricing",
+    "tour_usage": [],
+    "key_features": ["Classic design", "Value pricing", "Proven performance"]
+  },
+  {
+    "brand": "Karma",
+    "model": "Dual Touch",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 6.99,
+    "specs": {
+      "size": "Midsize",
+      "weight_grams": 65,
+      "material": "Rubber",
+      "texture": "Multi-Texture",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Midsize grip with dual texture zones",
+    "tour_usage": [],
+    "key_features": ["Dual texture", "Midsize profile", "Comfort grip"]
+  },
+  {
+    "brand": "JumboMax",
+    "model": "JMX UltraLite",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 24.99,
+    "specs": {
+      "size": "Jumbo",
+      "weight_grams": 50,
+      "material": "Rubber",
+      "texture": "Shock Absorbing",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Jumbo grip that weighs same as standard grip",
+    "tour_usage": ["Bryson DeChambeau"],
+    "key_features": ["Jumbo size", "Ultra lightweight", "Twist resistant"]
+  },
+  {
+    "brand": "JumboMax",
+    "model": "Tour Series Medium",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 22.99,
+    "specs": {
+      "size": "Jumbo",
+      "weight_grams": 65,
+      "material": "Rubber",
+      "texture": "Tour Texture",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Tour-validated jumbo grip for reduced grip pressure",
+    "tour_usage": ["Tour validated"],
+    "key_features": ["Reduced grip pressure", "Tour texture", "Shock absorption"]
+  },
+  {
+    "brand": "JumboMax",
+    "model": "STR8 Tech",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 26.99,
+    "specs": {
+      "size": "Jumbo",
+      "weight_grams": 125,
+      "material": "Rubber",
+      "texture": "Non-Tapered",
+      "core_size": ".600 Round",
+      "firmness": "Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Non-tapered jumbo grip for consistent hand pressure",
+    "tour_usage": [],
+    "key_features": ["Non-tapered design", "Straight profile", "Maximum stability"]
+  },
+  {
+    "brand": "Pure Grips",
+    "model": "Pro",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 7.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 51,
+      "material": "100% Rubber",
+      "texture": "Tacky",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "100% rubber grip with tapeless installation technology",
+    "tour_usage": [],
+    "key_features": ["Tapeless installation", "100% rubber", "Excellent tackiness"]
+  },
+  {
+    "brand": "Pure Grips",
+    "model": "DTX",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 9.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 48,
+      "material": "100% Rubber",
+      "texture": "Diamond Texture",
+      "core_size": ".600 Round",
+      "firmness": "Medium-Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Diamond texture pattern for enhanced grip and control",
+    "tour_usage": [],
+    "key_features": ["Diamond texture", "Moisture wicking", "Consistent feel"]
+  },
+  {
+    "brand": "Tacki-Mac",
+    "model": "Command RF",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 8.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 51,
+      "material": "Polyurethane",
+      "texture": "Tacky",
+      "core_size": ".600 Ribbed",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Polyurethane grip with rib for consistent hand placement",
+    "tour_usage": [],
+    "key_features": ["Polyurethane material", "Ribbed reminder", "All-weather tackiness"]
+  },
+  {
+    "brand": "NO1 Grip",
+    "model": "50 Series",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 14.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Proprietary Compound",
+      "texture": "Multi-Texture",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Premium grip with proprietary compound for optimal performance",
+    "tour_usage": ["European Tour players"],
+    "key_features": ["Proprietary material", "Multi-texture zones", "Premium performance"]
+  },
+  {
+    "brand": "Avon",
+    "model": "Chamois II",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 11.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 45,
+      "material": "Rubber",
+      "texture": "Smooth",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Smooth feel grip preferred by traditional players",
+    "tour_usage": [],
+    "key_features": ["Smooth texture", "Traditional feel", "Lightweight"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "Tour SNSR Contour 104cc",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Putter - Standard",
+      "weight_grams": 104,
+      "material": "SNSR Rubber",
+      "texture": "Soft",
+      "core_size": ".580 Pistol",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Tour-validated putter grip with SNSR compound for enhanced feel",
+    "tour_usage": ["PGA Tour players"],
+    "key_features": ["SNSR compound", "Tour feedback", "Pistol shape"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "Tour SNSR Straight 104cc",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Putter - Standard",
+      "weight_grams": 104,
+      "material": "SNSR Rubber",
+      "texture": "Soft",
+      "core_size": ".580 Non-Tapered",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Non-tapered putter grip for consistent hand pressure",
+    "tour_usage": ["Tour players"],
+    "key_features": ["Non-tapered design", "SNSR material", "Consistent pressure"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Traxion Tour 1.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Putter - Standard",
+      "weight_grams": 50,
+      "material": "Polyurethane",
+      "texture": "Traxion",
+      "core_size": "1.0\" diameter",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Advanced surface texture for enhanced feedback and tackiness",
+    "tour_usage": ["Jordan Spieth"],
+    "key_features": ["Traxion texture", "No taper technology", "Tour feedback"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Traxion Tour 2.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Putter - Midsize",
+      "weight_grams": 60,
+      "material": "Polyurethane",
+      "texture": "Traxion",
+      "core_size": "1.2\" diameter",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Midsize putter grip with Traxion technology",
+    "tour_usage": ["Multiple tour winners"],
+    "key_features": ["Midsize diameter", "Enhanced feel", "No taper"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Traxion Tour 3.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Putter - Oversized",
+      "weight_grams": 85,
+      "material": "Polyurethane",
+      "texture": "Traxion",
+      "core_size": "1.3\" diameter",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Oversized putter grip for maximum stability",
+    "tour_usage": ["Tour validated"],
+    "key_features": ["Oversized profile", "Maximum stability", "Reduced wrist action"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Zenergy Tour 5.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "size": "Putter - XL",
+      "weight_grams": 120,
+      "material": "Polyurethane",
+      "texture": "Zenergy",
+      "core_size": "1.52\" diameter",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Extra large putter grip with new Zenergy material",
+    "tour_usage": [],
+    "key_features": ["XL size", "Zenergy material", "Ultimate stability"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Fatso 5.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "size": "Putter - Jumbo",
+      "weight_grams": 135,
+      "material": "Polyurethane",
+      "texture": "Cross-Traction",
+      "core_size": "1.4\" diameter",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Largest diameter putter grip in SuperStroke line",
+    "tour_usage": [],
+    "key_features": ["Jumbo size", "Minimal wrist action", "Cross-Traction surface"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "Sink Fit Skinny Pistol",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 24.99,
+    "specs": {
+      "size": "Putter - Pistol",
+      "weight_grams": 75,
+      "material": "Polyurethane",
+      "texture": "Fingerprint Technology",
+      "core_size": ".580 Pistol",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Traditional pistol shape with Fingerprint Technology",
+    "tour_usage": ["Justin Rose"],
+    "key_features": ["Fingerprint Technology", "Pistol shape", "Traditional size"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "Sink Fit Straight",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 24.99,
+    "specs": {
+      "size": "Putter - Standard",
+      "weight_grams": 76,
+      "material": "Polyurethane",
+      "texture": "Fingerprint Technology",
+      "core_size": ".580 Non-Tapered",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Non-tapered design with proprietary Fingerprint Technology",
+    "tour_usage": [],
+    "key_features": ["Straight profile", "Fingerprint surface", "Consistent diameter"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "Deep Etched Paddle",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 19.99,
+    "specs": {
+      "size": "Putter - Paddle",
+      "weight_grams": 80,
+      "material": "Rubber",
+      "texture": "Deep Etched",
+      "core_size": ".580 Paddle",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Classic paddle putter grip with traditional etched pattern",
+    "tour_usage": [],
+    "key_features": ["Paddle shape", "Deep etched pattern", "Classic design"]
+  },
+  {
+    "brand": "Winn",
+    "model": "X Pro 1.18",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 19.99,
+    "specs": {
+      "size": "Putter - Midsize",
+      "weight_grams": 65,
+      "material": "WinnLite Polymer",
+      "texture": "Tacky",
+      "core_size": "1.18\" diameter",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Midsize putter grip with WinnLite Technology",
+    "tour_usage": [],
+    "key_features": ["WinnLite Technology", "1.18\" diameter", "Tacky feel"]
+  },
+  {
+    "brand": "Winn",
+    "model": "Excel Medallist Pistol",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 14.99,
+    "specs": {
+      "size": "Putter - Pistol",
+      "weight_grams": 58,
+      "material": "Polymer",
+      "texture": "Pistol",
+      "core_size": ".580 Pistol",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Traditional pistol shape with Winn polymer comfort",
+    "tour_usage": [],
+    "key_features": ["Pistol shape", "Lightweight", "Comfortable polymer"]
+  },
+  {
+    "brand": "Odyssey",
+    "model": "Jumbo Pistol",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 16.99,
+    "specs": {
+      "size": "Putter - Oversized Pistol",
+      "weight_grams": 85,
+      "material": "Rubber",
+      "texture": "Textured",
+      "core_size": ".580 Jumbo Pistol",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Oversized pistol design for enhanced stability",
+    "tour_usage": [],
+    "key_features": ["Jumbo pistol shape", "Enhanced stability", "Traditional feel"]
+  },
+  {
+    "brand": "Scotty Cameron",
+    "model": "Matador Medium",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 35.00,
+    "specs": {
+      "size": "Putter - Medium",
+      "weight_grams": 75,
+      "material": "Rubber",
+      "texture": "Cord",
+      "core_size": ".580 Round",
+      "firmness": "Firm",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Premium putter grip with cord texture for all-weather performance",
+    "tour_usage": ["Scotty Cameron tour players"],
+    "key_features": ["Cord texture", "Premium quality", "Tour feedback"]
+  },
+  {
+    "brand": "Scotty Cameron",
+    "model": "Pistolero Plus",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 35.00,
+    "specs": {
+      "size": "Putter - Pistol Plus",
+      "weight_grams": 83,
+      "material": "Rubber",
+      "texture": "Smooth Wrap",
+      "core_size": ".580 Pistol",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Larger pistol shape preferred by tour professionals",
+    "tour_usage": ["Multiple major winners"],
+    "key_features": ["Pistol plus shape", "Tour preferred", "Premium feel"]
+  },
+  {
+    "brand": "Scotty Cameron",
+    "model": "Pistolini Plus",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 35.00,
+    "specs": {
+      "size": "Putter - Small Pistol",
+      "weight_grams": 65,
+      "material": "Rubber",
+      "texture": "Smooth",
+      "core_size": ".580 Small Pistol",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Smaller pistol profile for traditional feel",
+    "tour_usage": ["Tour validated"],
+    "key_features": ["Small pistol shape", "Traditional size", "Tour quality"]
+  },
+  {
+    "brand": "Ping",
+    "model": "PP58",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 20.00,
+    "specs": {
+      "size": "Putter - Standard",
+      "weight_grams": 58,
+      "material": "Rubber",
+      "texture": "Classic",
+      "core_size": ".580 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Classic Ping putter grip design with traditional feel",
+    "tour_usage": ["Ping tour staff"],
+    "key_features": ["Classic design", "Traditional weight", "Consistent feel"]
+  },
+  {
+    "brand": "Ping",
+    "model": "PP58 Mid",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 22.00,
+    "specs": {
+      "size": "Putter - Midsize",
+      "weight_grams": 75,
+      "material": "Rubber",
+      "texture": "Classic",
+      "core_size": ".580 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Midsize version of classic PP58 for reduced grip pressure",
+    "tour_usage": [],
+    "key_features": ["Midsize diameter", "Reduced tension", "Classic feel"]
+  },
+  {
+    "brand": "Boccieri Golf",
+    "model": "Secret Grip",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 39.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 100,
+      "material": "Rubber with Weight",
+      "texture": "Tour Velvet Style",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Counterbalanced grip with 50g backweight for stability",
+    "tour_usage": [],
+    "key_features": ["50g backweight", "Counterbalance technology", "Increased MOI"]
+  },
+  {
+    "brand": "Boccieri Golf",
+    "model": "Tour Pro Heavy Putter",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 44.99,
+    "specs": {
+      "size": "Putter - Oversized",
+      "weight_grams": 140,
+      "material": "Rubber with Weight",
+      "texture": "Tour Texture",
+      "core_size": ".580 Non-Tapered",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Heavy putter grip for enhanced stability and tempo",
+    "tour_usage": [],
+    "key_features": ["140g weight", "Enhanced stability", "Improved tempo"]
+  },
+  {
+    "brand": "Garsen Golf",
+    "model": "G-Pro Max",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "size": "Putter - Non-Traditional",
+      "weight_grams": 75,
+      "material": "Rubber",
+      "texture": "Angled",
+      "core_size": ".580 Custom",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Non-tapered angled putter grip for unique putting style",
+    "tour_usage": [],
+    "key_features": ["15-degree angle", "Non-traditional design", "Unique hand position"]
+  },
+  {
+    "brand": "Garsen Golf",
+    "model": "G-Pro Edge",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Putter - Standard",
+      "weight_grams": 65,
+      "material": "Rubber",
+      "texture": "Angled Edge",
+      "core_size": ".580 Custom",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Standard size with Garsen's unique angled design",
+    "tour_usage": [],
+    "key_features": ["Angled design", "Standard size", "Alternative putting method"]
+  },
+  {
+    "brand": "Flat Cat",
+    "model": "Original",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 24.99,
+    "specs": {
+      "size": "Putter - Square",
+      "weight_grams": 85,
+      "material": "FLAT1 Polymer",
+      "texture": "Tacky",
+      "core_size": ".580 Square",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Square putter grip design for consistent hand position",
+    "tour_usage": [],
+    "key_features": ["Square profile", "FLAT1 material", "Consistent positioning"]
+  },
+  {
+    "brand": "Flat Cat",
+    "model": "K.I.S.S.",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Putter - Oversized Square",
+      "weight_grams": 125,
+      "material": "FLAT1 Polymer",
+      "texture": "Tacky",
+      "core_size": ".580 Square",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Keep It Square and Stable oversized putter grip",
+    "tour_usage": [],
+    "key_features": ["Oversized square", "Maximum stability", "Reduced wrist action"]
+  },
+  {
+    "brand": "P2",
+    "model": "React Tour",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Putter - Pentagonal",
+      "weight_grams": 60,
+      "material": "Multi-Compound",
+      "texture": "Tour Texture",
+      "core_size": ".580 Pentagonal",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Pentagonal profile putter grip for consistent hand placement",
+    "tour_usage": ["European Tour players"],
+    "key_features": ["Pentagonal shape", "No taper", "Tour feedback"]
+  },
+  {
+    "brand": "P2",
+    "model": "Aware",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "size": "Putter - Midsize Pentagonal",
+      "weight_grams": 80,
+      "material": "Multi-Compound",
+      "texture": "Soft Touch",
+      "core_size": ".580 Pentagonal",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Midsize pentagonal grip with enhanced feel technology",
+    "tour_usage": [],
+    "key_features": ["Enhanced feel", "Pentagonal profile", "Midsize comfort"]
+  },
+  {
+    "brand": "Rosemark",
+    "model": "1.25",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 19.99,
+    "specs": {
+      "size": "Putter - Midsize",
+      "weight_grams": 55,
+      "material": "Thermo-Plastic",
+      "texture": "Smooth",
+      "core_size": "1.25\" diameter",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Lightweight midsize putter grip with thermo-plastic technology",
+    "tour_usage": [],
+    "key_features": ["Lightweight design", "1.25\" diameter", "Thermo-plastic material"]
+  },
+  {
+    "brand": "Rosemark",
+    "model": "1.52",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 21.99,
+    "specs": {
+      "size": "Putter - Jumbo",
+      "weight_grams": 65,
+      "material": "Thermo-Plastic",
+      "texture": "Smooth",
+      "core_size": "1.52\" diameter",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Jumbo putter grip that weighs less than standard grips",
+    "tour_usage": [],
+    "key_features": ["Ultra-light jumbo", "1.52\" diameter", "Minimal counterbalance"]
+  },
+  {
+    "brand": "Iomic",
+    "model": "Putter Grip Standard",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 24.99,
+    "specs": {
+      "size": "Putter - Standard",
+      "weight_grams": 65,
+      "material": "Elastomer",
+      "texture": "Sticky",
+      "core_size": ".580 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Japanese elastomer putter grip with exceptional tackiness",
+    "tour_usage": [],
+    "key_features": ["Elastomer material", "Water resistant", "Consistent feel"]
+  },
+  {
+    "brand": "Iomic",
+    "model": "Putter Grip Large",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Putter - Large",
+      "weight_grams": 85,
+      "material": "Elastomer",
+      "texture": "Sticky",
+      "core_size": ".580 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Large putter grip with Iomic's signature elastomer feel",
+    "tour_usage": [],
+    "key_features": ["Large size", "Premium elastomer", "All-weather performance"]
+  },
+  {
+    "brand": "PURE Grips",
+    "model": "Big Dog Putter",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 24.99,
+    "specs": {
+      "size": "Putter - Oversized",
+      "weight_grams": 115,
+      "material": "100% Rubber",
+      "texture": "Tacky",
+      "core_size": ".580 Non-Tapered",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Oversized putter grip with tapeless installation",
+    "tour_usage": [],
+    "key_features": ["Tapeless install", "Oversized profile", "100% rubber"]
+  },
+  {
+    "brand": "Karma",
+    "model": "Black Velvet Putter",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 9.99,
+    "specs": {
+      "size": "Putter - Standard",
+      "weight_grams": 75,
+      "material": "Rubber",
+      "texture": "Velvet",
+      "core_size": ".580 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Classic velvet putter grip at value pricing",
+    "tour_usage": [],
+    "key_features": ["Classic design", "Value pricing", "Velvet texture"]
+  },
+  {
+    "brand": "Tacki-Mac",
+    "model": "Tour Pro Plus Putter",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 14.99,
+    "specs": {
+      "size": "Putter - Standard",
+      "weight_grams": 66,
+      "material": "Polyurethane",
+      "texture": "Tacky",
+      "core_size": ".580 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Polyurethane putter grip with exceptional tackiness",
+    "tour_usage": [],
+    "key_features": ["Polyurethane material", "All-weather tacky", "Tour feedback"]
+  },
+  {
+    "brand": "Avon",
+    "model": "Chamois Jumbo Putter",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 16.99,
+    "specs": {
+      "size": "Putter - Jumbo",
+      "weight_grams": 90,
+      "material": "Rubber",
+      "texture": "Smooth",
+      "core_size": ".580 Non-Tapered",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Jumbo putter grip with traditional smooth feel",
+    "tour_usage": [],
+    "key_features": ["Jumbo size", "Smooth texture", "Traditional feel"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "Reverse Taper Flat",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 32.99,
+    "specs": {
+      "size": "Putter - Flat Front",
+      "weight_grams": 90,
+      "material": "SNSR Rubber",
+      "texture": "Flat Front",
+      "core_size": ".580 Custom",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Flat front putter grip with reverse taper technology",
+    "tour_usage": [],
+    "key_features": ["Flat front design", "Reverse taper", "SNSR material"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Zenergy Flatso 1.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "size": "Putter - Pentagon",
+      "weight_grams": 50,
+      "material": "Polyurethane",
+      "texture": "Zenergy",
+      "core_size": "Pentagon Shape",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Pentagon shape with Zenergy material for enhanced feedback",
+    "tour_usage": [],
+    "key_features": ["Pentagon profile", "Zenergy compound", "Enhanced feedback"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Zenergy Flatso 2.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "size": "Putter - Pentagon Midsize",
+      "weight_grams": 65,
+      "material": "Polyurethane",
+      "texture": "Zenergy",
+      "core_size": "Pentagon Shape",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Midsize pentagon putter grip with Zenergy technology",
+    "tour_usage": [],
+    "key_features": ["Midsize pentagon", "No taper", "Zenergy material"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Zenergy Flatso 3.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "size": "Putter - Pentagon Oversized",
+      "weight_grams": 85,
+      "material": "Polyurethane",
+      "texture": "Zenergy",
+      "core_size": "Pentagon Shape",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Oversized pentagon design for maximum stability",
+    "tour_usage": [],
+    "key_features": ["Oversized pentagon", "Maximum stability", "Reduced wrist action"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Zenergy Claw 1.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "size": "Putter - Claw",
+      "weight_grams": 55,
+      "material": "Polyurethane",
+      "texture": "Zenergy",
+      "core_size": "Claw Design",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Designed specifically for claw grip putting style",
+    "tour_usage": [],
+    "key_features": ["Claw specific", "Zenergy material", "Unique profile"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Zenergy Claw 2.0",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 34.99,
+    "specs": {
+      "size": "Putter - Claw Midsize",
+      "weight_grams": 70,
+      "material": "Polyurethane",
+      "texture": "Zenergy",
+      "core_size": "Claw Design",
+      "firmness": "Soft",
+      "weather": "All-Weather",
+      "grip_type": "Putter"
+    },
+    "description": "Midsize claw grip for enhanced stability",
+    "tour_usage": [],
+    "key_features": ["Midsize claw", "Enhanced stability", "Claw optimization"]
+  }
+]

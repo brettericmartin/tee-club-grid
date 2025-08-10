@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Server Test</title>
+</head>
+<body>
+    <h1>Testing Server Connection</h1>
+    <div id="status">Checking...</div>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        
+        fetch('http://localhost:3333')
+            .then(response => {
+                if (response.ok) {
+                    statusDiv.innerHTML = '<p style="color: green;">✓ Server is running on http://localhost:3333</p>';
+                    statusDiv.innerHTML += '<p>You can now navigate to the equipment detail page to test the Forums tab.</p>';
+                    statusDiv.innerHTML += '<p>Example: http://localhost:3333/equipment/[equipment-id]</p>';
+                } else {
+                    statusDiv.innerHTML = '<p style="color: red;">✗ Server responded but with error: ' + response.status + '</p>';
+                }
+            })
+            .catch(error => {
+                statusDiv.innerHTML = '<p style="color: red;">✗ Server is not responding: ' + error.message + '</p>';
+                statusDiv.innerHTML += '<p>Please ensure npm run dev is running.</p>';
+            });
+    </script>
+</body>
+</html>

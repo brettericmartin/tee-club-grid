@@ -1,0 +1,290 @@
+[
+  {
+    "brand": "TaylorMade",
+    "model": "Qi10",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 629.99,
+    "specs": {
+      "loft_options": ["9°", "10.5°", "12°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "60X Carbon Twist Face",
+      "adjustability": "4° loft sleeve",
+      "stock_shaft": "Fujikura Ventus TR Blue"
+    },
+    "description": "Re-engineered 60X Carbon Twist Face delivers energy transfer from clubface to ball more efficiently, with Infinity Carbon Crown covering 97% of crown area for enhanced forgiveness.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Infinity Carbon Crown", "Thru-Slot Speed Pocket", "Lower CG projection", "Higher MOI than Stealth 2"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Qi10 LS",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 629.99,
+    "specs": {
+      "loft_options": ["8°", "9°", "10.5°"],
+      "shaft_flex": ["Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "60X Carbon Twist Face",
+      "adjustability": "4° loft sleeve",
+      "stock_shaft": "Fujikura Ventus TR Blue"
+    },
+    "description": "Low-spin driver with traditional pear shape for better players seeking workability and penetrating ball flight.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Low spin design", "Traditional pear shape", "Compact look at address", "Player-focused"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Ai Smoke MAX D",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 599.00,
+    "specs": {
+      "loft_options": ["9°", "10.5°", "12°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "Ai Smart Face",
+      "adjustability": "Draw-biased weighting",
+      "stock_shaft": "MCA Tensei AV Blue 60"
+    },
+    "description": "Built with high MOI and generously stretched profile, specifically designed for players looking to hit a draw.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Draw-biased design", "High MOI construction", "Ai Smart Face", "Stretched profile at address"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Ai Smoke Triple Diamond",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 599.00,
+    "specs": {
+      "loft_options": ["8°", "9°", "10.5°"],
+      "shaft_flex": ["Stiff", "X-Stiff"],
+      "head_size": "450cc",
+      "material": "Ai Smart Face",
+      "adjustability": "Adjustable weighting",
+      "stock_shaft": "Project X HZRDUS Black Gen 4"
+    },
+    "description": "Tour-level driver with compact profile and low spin characteristics for better players seeking maximum workability.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Compact 450cc head", "Low spin design", "Tour-level workability", "Ai Smart Face"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSR2",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 599.00,
+    "specs": {
+      "loft_options": ["8°", "9°", "10°", "11°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "ATI-425 Titanium",
+      "adjustability": "SureFit hosel",
+      "stock_shaft": "Titleist Tour AD IZ"
+    },
+    "description": "High launch, low spin, max performance driver that combines distance and forgiveness with Multi-Plateau VFT face technology.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Multi-Plateau VFT", "Speed Chassis construction", "Improved aerodynamics", "30-day satisfaction guarantee"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSR4",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 699.00,
+    "specs": {
+      "loft_options": ["8°", "9°", "10°"],
+      "shaft_flex": ["Stiff", "X-Stiff"],
+      "head_size": "430cc",
+      "material": "ATI-425 Titanium",
+      "adjustability": "Front/back weight positions",
+      "stock_shaft": "Titleist Tour AD IZ"
+    },
+    "description": "Ultra-low spin driver for players generating spin rates higher than 3,000 RPM, with smaller head profile for workability.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Ultra-low spin", "Compact 430cc head", "Front/back weighting", "Maximum spin reduction"]
+  },
+  {
+    "brand": "Ping",
+    "model": "G430 MAX",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 549.00,
+    "specs": {
+      "loft_options": ["9°", "10.5°", "12°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "T9S Titanium",
+      "adjustability": "Trajectory Tuning 2.0",
+      "stock_shaft": "PING Tour 2.0 Chrome"
+    },
+    "description": "Most forgiving driver with over 10K MOI and 25-gram moveable tungsten weight for shot shape adjustment.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["10K+ MOI", "25g moveable weight", "VFT forged face", "Spinsistency technology"]
+  },
+  {
+    "brand": "Ping",
+    "model": "G430 LST",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 579.00,
+    "specs": {
+      "loft_options": ["9°", "10.5°"],
+      "shaft_flex": ["Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "T9S Titanium with Carbon Crown",
+      "adjustability": "Trajectory Tuning 2.0",
+      "stock_shaft": "PING Tour 2.0 Chrome"
+    },
+    "description": "Low Spin Technology driver with carbon fiber crown and 22-gram moveable tungsten weight for faster swing speeds.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Carbon fiber crown", "22g moveable weight", "Low spin design", "Fast swing speed optimization"]
+  },
+  {
+    "brand": "Ping",
+    "model": "G430 SFT",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 549.00,
+    "specs": {
+      "loft_options": ["10.5°"],
+      "shaft_flex": ["Regular", "Stiff"],
+      "head_size": "460cc",
+      "material": "T9S Titanium",
+      "adjustability": "Trajectory Tuning 2.0",
+      "stock_shaft": "PING Tour 2.0 Chrome"
+    },
+    "description": "Straight Flight Technology with 22g moveable weight and built-in draw bias to help eliminate slice.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Built-in draw bias", "22g moveable weight", "Slice correction", "Draw/Draw+ settings"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "DARKSPEED MAX",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 549.00,
+    "specs": {
+      "loft_options": ["9°", "10.5°", "12°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "PWRSHELL H.O.T. Face",
+      "adjustability": "MyFly +/- 1.5°",
+      "stock_shaft": "Project X HZRDUS CB Red"
+    },
+    "description": "Ultimate fairway finder with extreme forgiveness and accuracy, featuring highest MOI in Darkspeed lineup.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Highest MOI", "PWRSHELL H.O.T. Face", "13% larger face insert", "A.I. optimized"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "DARKSPEED X",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 549.00,
+    "specs": {
+      "loft_options": ["9°", "10.5°", "12°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "PWRSHELL H.O.T. Face",
+      "adjustability": "MyFly +/- 1.5°, 3g/12g weights",
+      "stock_shaft": "Mitsubishi Kai'li Blue"
+    },
+    "description": "Blends extraordinary speed and forgiveness with adjustable front-to-back center of gravity for maximum distance.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Front-to-back CG adjustment", "3g/12g interchangeable weights", "Mid-launch/mid-spin", "Speed and forgiveness blend"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "DARKSPEED LS",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 549.00,
+    "specs": {
+      "loft_options": ["8°", "9°", "10.5°"],
+      "shaft_flex": ["Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "PWRSHELL H.O.T. Face",
+      "adjustability": "MyFly +/- 1.5°",
+      "stock_shaft": "Project X HZRDUS Matte Black"
+    },
+    "description": "Low spin driver for faster swing speeds, featuring most compact profile and aerodynamic head shape.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Low launch/low spin", "Compact profile", "Aerodynamic design", "8° option available"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "ST-Max 230",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 500.00,
+    "specs": {
+      "loft_options": ["9.5°", "10.5°", "12°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "Multi-thickness face geometry",
+      "adjustability": "Quick Switch Adaptor 4°",
+      "stock_shaft": "Project X HZRDUS Smoke Green RDX"
+    },
+    "description": "Maximum forgiveness and stability driver with CORTECH Chamber technology and 54 grams of back weighting.",
+    "tour_usage": ["Keith Mitchell"],
+    "key_features": ["CORTECH Chamber", "54g back weighting", "9% higher tensile strength face", "Tour-ready design"]
+  },
+  {
+    "brand": "Srixon",
+    "model": "ZX5 Mk II",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 499.99,
+    "specs": {
+      "loft_options": ["9.5°", "10.5°", "12°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "Rebound Frame technology",
+      "adjustability": "12-position hosel, 8g weight",
+      "stock_shaft": "Project X HZRDUS Smoke Red RDX"
+    },
+    "description": "Forgiving mid-spin, mid-launch driver with amazing forgiveness and high flight characteristics.",
+    "tour_usage": ["Shane Lowry", "Hideki Matsuyama", "Brooks Koepka"],
+    "key_features": ["Rebound Frame", "10% larger high COR area", "12-position adjustability", "2-14g weight options"]
+  },
+  {
+    "brand": "Srixon",
+    "model": "ZX7 Mk II",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 499.99,
+    "specs": {
+      "loft_options": ["9.5°", "10.5°", "12°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "Rebound Frame technology",
+      "adjustability": "12-position hosel, 8g weight",
+      "stock_shaft": "Project X HZRDUS Black Gen 4"
+    },
+    "description": "Player's driver designed for total control and workability, featuring low-spin, mid-launch characteristics.",
+    "tour_usage": ["Shane Lowry", "Ryan Fox"],
+    "key_features": ["Total control design", "Workability focused", "Low-spin profile", "Fade-biased"]
+  },
+  {
+    "brand": "PXG",
+    "model": "0311 Black Ops",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 699.99,
+    "specs": {
+      "loft_options": ["9°", "10.5°", "12°"],
+      "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+      "head_size": "460cc",
+      "material": "Advanced Material Face (AMF)",
+      "adjustability": "Three adjustable weights",
+      "stock_shaft": "PXG Premium shaft"
+    },
+    "description": "Premium driver featuring Advanced Material Face technology with stronger, more flexible titanium for increased ball speed.",
+    "tour_usage": ["Select PGA Tour professionals"],
+    "key_features": ["AMF titanium face", "Robotic face polishing", "Non-uniform bulge and roll", "Carbon composite panels"]
+  }
+]

@@ -1,0 +1,342 @@
+[
+  {
+    "brand": "TaylorMade",
+    "model": "Qi HL",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1099.99,
+    "specs": {
+      "set_composition": "5-PW, GW (7 clubs)",
+      "shaft_options": ["KBS Tour Steel", "UST Recoil Graphite"],
+      "material": "Cap Back Design with Steel Face",
+      "technology": "FLTD CG, Speed Pocket",
+      "offset": "Progressive"
+    },
+    "description": "High-launching game improvement iron designed for moderate swing speeds with ultralight components and increased lofts for maximum distance and height.",
+    "tour_usage": [],
+    "key_features": ["Cap Back Design", "FLTD CG Technology", "HYBRAR Echo Dampers", "Straight Distance Technology"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Qi",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1099.99,
+    "specs": {
+      "set_composition": "5-PW, GW (7 clubs)",
+      "shaft_options": ["KBS Tour Steel", "Mitsubishi Graphite"],
+      "material": "Multi-material Cap Back",
+      "technology": "Individual Head Optimization",
+      "offset": "Progressive"
+    },
+    "description": "Game improvement iron engineered to control face flexibility and eliminate unwanted cut spin for straighter shots.",
+    "tour_usage": [],
+    "key_features": ["Individual Head Optimization", "Cap Back Design", "Speed Pocket", "Organic Face Geometries"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Ai Smoke",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1199.99,
+    "specs": {
+      "set_composition": "4-PW, AW (8 clubs)",
+      "shaft_options": ["Steel Dynamic Gold", "Graphite Aldila Ascent"],
+      "material": "Forged Face with Steel Body",
+      "technology": "Ai Smart Face",
+      "offset": "Progressive"
+    },
+    "description": "Distance iron with AI-optimized face design using swing data from thousands of golfers to maximize distance with tight dispersion.",
+    "tour_usage": [],
+    "key_features": ["Ai Smart Face", "Swing Code Analysis", "Extended Length Technology", "Tight Dispersion Design"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "T350",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1399.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["True Temper AMT Red", "Mitsubishi MMT Graphite"],
+      "material": "Forged L-Face with Tungsten",
+      "technology": "Max Impact Technology",
+      "offset": "Progressive"
+    },
+    "description": "Maximum forgiveness iron with forged L-Face design and hollow-body construction for higher launch and longer distance.",
+    "tour_usage": [],
+    "key_features": ["Forged L-Face Design", "Max Impact Technology", "D18 Tungsten Weighting", "Variable Bounce Sole"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "T200",
+    "category": "iron",
+    "release_year": 2023,
+    "msrp": 1299.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["True Temper AMT White", "Mitsubishi MMT"],
+      "material": "Forged Face with Tungsten",
+      "technology": "Max Impact Technology",
+      "offset": "Minimal"
+    },
+    "description": "Players' distance iron combining tour-inspired shaping with distance-enhancing technology and tungsten weighting.",
+    "tour_usage": ["Multiple PGA Tour professionals"],
+    "key_features": ["Tour-Inspired Shape", "Tungsten Weighting", "Forged Construction", "Max Impact Technology"]
+  },
+  {
+    "brand": "Ping",
+    "model": "G430",
+    "category": "iron",
+    "release_year": 2023,
+    "msrp": 1199.99,
+    "specs": {
+      "set_composition": "4-PW, UW (8 clubs)",
+      "shaft_options": ["PING AWT 2.0 Steel", "PING ALTA CB Graphite"],
+      "material": "Hyper 17-4 Stainless Steel",
+      "technology": "PurFlex Cavity Badge",
+      "offset": "Progressive"
+    },
+    "description": "Game improvement iron with faster ball speeds from thinner face and extreme perimeter weighting for maximum forgiveness.",
+    "tour_usage": ["Cameron Champ", "Tony Finau", "Viktor Hovland"],
+    "key_features": ["Hyper 17-4 Steel Face", "PurFlex Cavity Badge", "Tungsten Toe/Heel Weights", "Lower CG Design"]
+  },
+  {
+    "brand": "Ping",
+    "model": "G Le3",
+    "category": "iron",
+    "release_year": 2023,
+    "msrp": 999.99,
+    "specs": {
+      "set_composition": "6-PW, SW (5 clubs)",
+      "shaft_options": ["PING ULT250 Lite Graphite", "PING Ultra Lite Graphite"],
+      "material": "17-4 Stainless Steel",
+      "technology": "Multi-material PurFlex",
+      "offset": "Progressive"
+    },
+    "description": "Women's-specific iron designed for lightweight performance with optimized lofts and lower CG for increased distance and forgiveness.",
+    "tour_usage": [],
+    "key_features": ["Lightweight Design", "Women's-Specific Engineering", "EYE2 Sand Wedge", "Custom Lofts"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "P790",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1399.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["KBS Tour Steel", "Mitsubishi MMT Graphite"],
+      "material": "Forged Hollow Body",
+      "technology": "SpeedFoam Air",
+      "offset": "Minimal"
+    },
+    "description": "Players' distance iron with forged L-Face and SpeedFoam Air technology for explosive ball speeds in a premium forged construction.",
+    "tour_usage": ["Tiger Woods", "Rory McIlroy", "Dustin Johnson"],
+    "key_features": ["Forged L-Face", "SpeedFoam Air", "FLTD CG Technology", "Tungsten Weighting"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "P770",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1299.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["True Temper Dynamic Gold", "KBS Tour Steel"],
+      "material": "Forged 4140 Face with 8620 Body",
+      "technology": "Hollow Body Construction",
+      "offset": "Minimal"
+    },
+    "description": "Compact players' iron with hollow body construction and tungsten weighting for enhanced forgiveness without sacrificing workability.",
+    "tour_usage": ["Collin Morikawa", "Matthew Wolff"],
+    "key_features": ["Forged Construction", "Flighted CG", "Tungsten Weighting", "Compact Profile"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "JPX 923 Hot Metal",
+    "category": "iron",
+    "release_year": 2023,
+    "msrp": 999.99,
+    "specs": {
+      "set_composition": "5-PW, GW (7 clubs)",
+      "shaft_options": ["Nippon NS Pro Modus Steel", "UST Recoil Graphite"],
+      "material": "Nickel Chromoly 4335",
+      "technology": "CORTECH Design",
+      "offset": "Progressive"
+    },
+    "description": "Game improvement iron forged from high-strength Nickel Chromoly with thin face for maximum ball speed and distance.",
+    "tour_usage": [],
+    "key_features": ["Nickel Chromoly 4335", "V-Chassis Design", "Harmonic Impact Technology", "CORTECH Design"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "Pro 243",
+    "category": "iron",
+    "release_year": 2023,
+    "msrp": 1499.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["True Temper Dynamic Gold", "Nippon Modus"],
+      "material": "Grain Flow Forged 1025E",
+      "technology": "Microslot Technology",
+      "offset": "Minimal"
+    },
+    "description": "Tour-level cavity back iron with Microslot technology in longer irons for increased ball speed while maintaining classic looks.",
+    "tour_usage": ["Keith Mitchell", "Greyson Sigg"],
+    "key_features": ["Microslot Technology", "Grain Flow Forging", "Wrap Around Sole", "Tour-Level Performance"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "Pro 245",
+    "category": "iron",
+    "release_year": 2023,
+    "msrp": 1499.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["True Temper Dynamic Gold", "KBS Tour"],
+      "material": "Grain Flow Forged Steel",
+      "technology": "Hollow Body Construction",
+      "offset": "Minimal"
+    },
+    "description": "Players' distance iron combining hollow body construction with classic Mizuno forging for distance and feel.",
+    "tour_usage": ["Luke Donald"],
+    "key_features": ["Hollow Body Design", "Grain Flow Forging", "Classic Looks", "Enhanced Distance"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Apex Pro",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1399.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["True Temper Dynamic Gold", "KBS Tour"],
+      "material": "Forged 1025 Carbon Steel",
+      "technology": "Multi-Material Construction",
+      "offset": "Minimal"
+    },
+    "description": "Premium forged iron with hollow body construction and urethane microspheres for exceptional feel and distance.",
+    "tour_usage": ["Xander Schauffele", "Sam Burns"],
+    "key_features": ["Multi-Material Forged Construction", "Urethane Microspheres", "Progressive Face Design", "Dynamic Sole Design"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Apex CB",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1299.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["True Temper Dynamic Gold", "Project X"],
+      "material": "Forged 1025 Steel",
+      "technology": "Tour Cavity Back",
+      "offset": "Minimal"
+    },
+    "description": "Tour-level cavity back iron designed for elite ball-strikers with one-piece forged construction for maximum workability.",
+    "tour_usage": ["Phil Mickelson", "Danny Willett"],
+    "key_features": ["One-Piece Forged Construction", "Tour Cavity Design", "Maximum Workability", "Elite Performance"]
+  },
+  {
+    "brand": "Ping",
+    "model": "i530",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1435.00,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["True Temper Dynamic Gold", "KBS Tour"],
+      "material": "Maraging Steel C300 Face",
+      "technology": "Hollow Body with Thin Back Wall",
+      "offset": "Minimal"
+    },
+    "description": "Blade-style iron with hollow body design featuring maraging steel face for distance with stopping power and workability.",
+    "tour_usage": ["Viktor Hovland", "Tony Finau"],
+    "key_features": ["Maraging Steel C300 Face", "Blade-Style Profile", "Hollow Body Design", "MicroMax Grooves"]
+  },
+  {
+    "brand": "Ping",
+    "model": "Blueprint",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1299.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["True Temper Dynamic Gold", "KBS Tour"],
+      "material": "8620 Carbon Steel",
+      "technology": "Single-Piece Forging",
+      "offset": "None"
+    },
+    "description": "Traditional blade iron with single-piece 8620 carbon steel forging for ultimate shot-making precision and trajectory control.",
+    "tour_usage": ["Louis Oosthuizen", "Tyrrell Hatton"],
+    "key_features": ["Single-Piece Forging", "8620 Carbon Steel", "Blade Design", "Maximum Workability"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "Darkspeed",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 1099.99,
+    "specs": {
+      "set_composition": "5-PW, GW (7 clubs)",
+      "shaft_options": ["KBS Tour Steel", "Cobra Graphite"],
+      "material": "Forged Steel Face",
+      "technology": "PWR-COR Technology",
+      "offset": "Progressive"
+    },
+    "description": "Distance iron with PWR-COR technology for increased ball speed and launch, designed for maximum forgiveness and distance.",
+    "tour_usage": ["Bryson DeChambeau", "Rickie Fowler"],
+    "key_features": ["PWR-COR Technology", "Forged Face", "Progressive Design", "Enhanced Forgiveness"]
+  },
+  {
+    "brand": "Cleveland",
+    "model": "Launcher XL Halo",
+    "category": "iron",
+    "release_year": 2024,
+    "msrp": 899.99,
+    "specs": {
+      "set_composition": "5-PW, AW, SW (7 clubs)",
+      "shaft_options": ["Cleveland Action Graphite", "Steel Option"],
+      "material": "17-4 Stainless Steel",
+      "technology": "HiBore Crown",
+      "offset": "Progressive"
+    },
+    "description": "Super game improvement iron designed for maximum forgiveness and easy launch with lightweight construction.",
+    "tour_usage": [],
+    "key_features": ["HiBore Crown Technology", "Lightweight Design", "Maximum Forgiveness", "Easy Launch"]
+  },
+  {
+    "brand": "Srixon",
+    "model": "ZX5 Mk II",
+    "category": "iron",
+    "release_year": 2023,
+    "msrp": 1199.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["Nippon Modus Steel", "UST Recoil Graphite"],
+      "material": "Forged Steel with Tungsten",
+      "technology": "MainFrame Face",
+      "offset": "Moderate"
+    },
+    "description": "Players' distance iron with MainFrame face technology and tungsten weighting for enhanced distance and forgiveness.",
+    "tour_usage": ["Hideki Matsuyama", "Cameron Smith"],
+    "key_features": ["MainFrame Face Technology", "Tungsten Weighting", "Forged Construction", "Tour Performance"]
+  },
+  {
+    "brand": "Srixon",
+    "model": "ZX7 Mk II",
+    "category": "iron",
+    "release_year": 2023,
+    "msrp": 1199.99,
+    "specs": {
+      "set_composition": "4-PW (7 clubs)",
+      "shaft_options": ["True Temper Dynamic Gold", "Nippon Modus"],
+      "material": "Forged 1020 Carbon Steel",
+      "technology": "Progressive Grooves",
+      "offset": "Minimal"
+    },
+    "description": "Tour-level forged iron with compact profile and progressive groove design for maximum workability and control.",
+    "tour_usage": ["Hideki Matsuyama", "Shane Lowry"],
+    "key_features": ["1020 Carbon Steel", "Compact Profile", "Progressive Grooves", "Tour-Level Feel"]
+  }
+]

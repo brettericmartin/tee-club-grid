@@ -1,0 +1,610 @@
+[
+  {
+    "brand": "Golf Pride",
+    "model": "VDR",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 7.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Rubber",
+      "texture": "Variable Depth",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Variable depth pattern for enhanced grip in all conditions",
+    "tour_usage": [],
+    "key_features": ["Variable depth ridges", "All-weather performance", "Classic design"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "New Decade MultiCompound Platinum",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 15.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Rubber/Cord Hybrid",
+      "texture": "Brushed Cotton Cord",
+      "core_size": ".600 Round",
+      "firmness": "Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Premium MCC grip with platinum finish for tour performance",
+    "tour_usage": ["PGA Tour players"],
+    "key_features": ["Platinum finish", "Premium cord", "Tour choice"]
+  },
+  {
+    "brand": "Golf Pride",
+    "model": "Tour Velvet BCT Cord",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 13.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 52,
+      "material": "Brushed Cotton Cord",
+      "texture": "Full Cord",
+      "core_size": ".600 Round",
+      "firmness": "Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Brushed cotton technology cord for superior moisture management",
+    "tour_usage": ["Tour players"],
+    "key_features": ["BCT cord", "Moisture control", "Tour performance"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "Arthritic",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 10.99,
+    "specs": {
+      "size": "Jumbo",
+      "weight_grams": 58,
+      "material": "Rubber",
+      "texture": "Soft",
+      "core_size": ".580 Round",
+      "firmness": "Extra Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Designed for golfers with arthritis or hand conditions",
+    "tour_usage": [],
+    "key_features": ["Extra soft", "Jumbo size", "Reduces hand strain"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "REL Ace 3GEN",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 8.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "3GEN Material",
+      "texture": "Tacky",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Third generation material for enhanced feel and durability",
+    "tour_usage": [],
+    "key_features": ["3GEN material", "Enhanced durability", "Consistent feel"]
+  },
+  {
+    "brand": "Lamkin",
+    "model": "Calibrate",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 13.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 52,
+      "material": "Genesis Material",
+      "texture": "Reminder Technology",
+      "core_size": ".600 Reminder",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Features reminder rib for consistent hand placement",
+    "tour_usage": [],
+    "key_features": ["Reminder rib", "Genesis material", "Consistent alignment"]
+  },
+  {
+    "brand": "Winn",
+    "model": "Dri-Tac Lite",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 11.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 25,
+      "material": "WinnLite Technology",
+      "texture": "Tacky",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Ultra-lightweight version of popular Dri-Tac grip",
+    "tour_usage": [],
+    "key_features": ["25g weight", "WinnLite Technology", "Maximum tackiness"]
+  },
+  {
+    "brand": "Winn",
+    "model": "Dri-Tac Wrap",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 10.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 54,
+      "material": "WinnDry Polymer",
+      "texture": "Wrap Style",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Wrap-style version of the popular Dri-Tac grip",
+    "tour_usage": [],
+    "key_features": ["Wrap texture", "WinnDry polymer", "Comfortable feel"]
+  },
+  {
+    "brand": "SuperStroke",
+    "model": "Cross Comfort",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 12.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Polyurethane",
+      "texture": "Cross Pattern",
+      "core_size": ".600 Round",
+      "firmness": "Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Soft polyurethane grip with cross pattern for comfort",
+    "tour_usage": [],
+    "key_features": ["Cross pattern", "Soft feel", "Enhanced comfort"]
+  },
+  {
+    "brand": "Iomic",
+    "model": "Sticky 1.8",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 22.99,
+    "specs": {
+      "size": "Undersize",
+      "weight_grams": 45,
+      "material": "Elastomer",
+      "texture": "Sticky",
+      "core_size": ".580 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Undersize grip for junior or ladies clubs",
+    "tour_usage": [],
+    "key_features": ["Undersize diameter", "Elastomer material", "All-weather sticky"]
+  },
+  {
+    "brand": "Iomic",
+    "model": "Sticky Opus 3",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 24.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Elastomer",
+      "texture": "Multi-Pattern",
+      "core_size": ".600 Round",
+      "firmness": "Medium-Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Premium elastomer grip with three-zone texture pattern",
+    "tour_usage": [],
+    "key_features": ["Three-zone texture", "Premium elastomer", "Optimal feedback"]
+  },
+  {
+    "brand": "Karma",
+    "model": "Neion II",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 7.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 52,
+      "material": "Rubber",
+      "texture": "Performance Pattern",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Performance grip with unique Neion material compound",
+    "tour_usage": [],
+    "key_features": ["Neion compound", "Performance pattern", "Durability"]
+  },
+  {
+    "brand": "Karma",
+    "model": "Smoothie",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 8.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 76,
+      "material": "Rubber",
+      "texture": "Paddle Style",
+      "core_size": ".580 Paddle",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Classic paddle-style grip with smooth feel",
+    "tour_usage": [],
+    "key_features": ["Paddle design", "Classic feel", "76g weight"]
+  },
+  {
+    "brand": "JumboMax",
+    "model": "Ultralite Small",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 22.99,
+    "specs": {
+      "size": "Small Jumbo",
+      "weight_grams": 45,
+      "material": "Rubber",
+      "texture": "Shock Absorbing",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Smallest JumboMax grip that's still larger than standard",
+    "tour_usage": [],
+    "key_features": ["Small jumbo size", "45g weight", "Reduced tension"]
+  },
+  {
+    "brand": "JumboMax",
+    "model": "Tour Series Large",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 24.99,
+    "specs": {
+      "size": "Large Jumbo",
+      "weight_grams": 85,
+      "material": "Rubber",
+      "texture": "Tour Texture",
+      "core_size": ".600 Round",
+      "firmness": "Medium-Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Large jumbo grip for maximum grip pressure reduction",
+    "tour_usage": [],
+    "key_features": ["Large jumbo", "Tour texture", "Maximum comfort"]
+  },
+  {
+    "brand": "Pure Grips",
+    "model": "Midsize",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 8.99,
+    "specs": {
+      "size": "Midsize",
+      "weight_grams": 60,
+      "material": "100% Rubber",
+      "texture": "Tacky",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Midsize version with tapeless installation",
+    "tour_usage": [],
+    "key_features": ["Midsize diameter", "Tapeless install", "100% rubber"]
+  },
+  {
+    "brand": "Tacki-Mac",
+    "model": "Itomic",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 9.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 52,
+      "material": "Polyurethane",
+      "texture": "Wrap Style",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Italian-designed wrap grip with polyurethane technology",
+    "tour_usage": [],
+    "key_features": ["Italian design", "Wrap style", "Polyurethane material"]
+  },
+  {
+    "brand": "Grip Master",
+    "model": "Montana Wrap",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 12.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 52,
+      "material": "Leather",
+      "texture": "Wrap",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "Fair Weather"
+    },
+    "description": "Premium leather wrap grip for classic feel",
+    "tour_usage": [],
+    "key_features": ["Genuine leather", "Classic wrap", "Premium feel"]
+  },
+  {
+    "brand": "Grip Master",
+    "model": "Custom Leather",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 29.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 55,
+      "material": "Premium Leather",
+      "texture": "Perforated",
+      "core_size": ".600 Round",
+      "firmness": "Medium-Firm",
+      "weather": "Fair Weather"
+    },
+    "description": "Handcrafted leather grip with perforated pattern",
+    "tour_usage": [],
+    "key_features": ["Handcrafted", "Perforated leather", "Luxury feel"]
+  },
+  {
+    "brand": "Star Grip",
+    "model": "Classic Wrap",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 5.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 52,
+      "material": "Rubber",
+      "texture": "Wrap Style",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Budget-friendly wrap-style grip",
+    "tour_usage": [],
+    "key_features": ["Value pricing", "Wrap texture", "Reliable performance"]
+  },
+  {
+    "brand": "Star Grip",
+    "model": "Tour Star",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 6.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Rubber",
+      "texture": "Tour Velvet Style",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Tour-style grip at budget price point",
+    "tour_usage": [],
+    "key_features": ["Tour style", "Budget friendly", "Good quality"]
+  },
+  {
+    "brand": "Champ",
+    "model": "C1",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 4.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 48,
+      "material": "Rubber",
+      "texture": "Standard",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Entry-level grip for beginners",
+    "tour_usage": [],
+    "key_features": ["Entry level", "Basic performance", "Low cost"]
+  },
+  {
+    "brand": "Champkey",
+    "model": "Victor",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 5.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Rubber",
+      "texture": "Multi-Texture",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Multi-texture grip at value pricing",
+    "tour_usage": [],
+    "key_features": ["Multi-texture", "Value pricing", "Good grip"]
+  },
+  {
+    "brand": "SAPLIZE",
+    "model": "CC01",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 7.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Rubber",
+      "texture": "Cross Pattern",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Cross pattern grip with good all-weather performance",
+    "tour_usage": [],
+    "key_features": ["Cross pattern", "All-weather", "Good value"]
+  },
+  {
+    "brand": "Geoleap",
+    "model": "ACE-C",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 8.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 48,
+      "material": "Rubber/Cord Hybrid",
+      "texture": "Half Cord",
+      "core_size": ".600 Round",
+      "firmness": "Medium-Firm",
+      "weather": "All-Weather"
+    },
+    "description": "Hybrid grip with cord upper hand",
+    "tour_usage": [],
+    "key_features": ["Half cord", "Hybrid design", "Good control"]
+  },
+  {
+    "brand": "Majek",
+    "model": "Tour Pro",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 6.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 51,
+      "material": "Rubber",
+      "texture": "Tour Style",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Tour-style grip for all skill levels",
+    "tour_usage": [],
+    "key_features": ["Tour style", "All skill levels", "Consistent feel"]
+  },
+  {
+    "brand": "TourMARK",
+    "model": "Standard",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 4.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 52,
+      "material": "Rubber",
+      "texture": "Standard",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Basic grip for practice and beginners",
+    "tour_usage": [],
+    "key_features": ["Basic design", "Practice grip", "Affordable"]
+  },
+  {
+    "brand": "Sharpro",
+    "model": "Tour Velvet Style",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 5.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Rubber",
+      "texture": "Tour Velvet Style",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Tour velvet style at budget price",
+    "tour_usage": [],
+    "key_features": ["Tour style", "Budget price", "Decent quality"]
+  },
+  {
+    "brand": "Alien Pros",
+    "model": "Luxury",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 9.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Premium Rubber",
+      "texture": "Multi-Zone",
+      "core_size": ".600 Round",
+      "firmness": "Medium-Soft",
+      "weather": "All-Weather"
+    },
+    "description": "Premium feel grip with multi-zone texture",
+    "tour_usage": [],
+    "key_features": ["Multi-zone texture", "Premium rubber", "Luxury feel"]
+  },
+  {
+    "brand": "Wedge Guys",
+    "model": "Professional",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 7.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Rubber",
+      "texture": "Professional Pattern",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Professional-grade grip for serious players",
+    "tour_usage": [],
+    "key_features": ["Professional grade", "Quality rubber", "Good performance"]
+  },
+  {
+    "brand": "Loudmouth",
+    "model": "Magic Bus",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 14.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Rubber",
+      "texture": "Graphic Design",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Bold graphic design grip for personality",
+    "tour_usage": [],
+    "key_features": ["Bold graphics", "Unique designs", "Stand out style"]
+  },
+  {
+    "brand": "Loudmouth",
+    "model": "Shagadelic",
+    "category": "grip",
+    "release_year": 2024,
+    "msrp": 14.99,
+    "specs": {
+      "size": "Standard",
+      "weight_grams": 50,
+      "material": "Rubber",
+      "texture": "Graphic Design",
+      "core_size": ".600 Round",
+      "firmness": "Medium",
+      "weather": "All-Weather"
+    },
+    "description": "Retro-inspired graphic grip design",
+    "tour_usage": [],
+    "key_features": ["Retro graphics", "Fun design", "Quality grip"]
+  }
+]

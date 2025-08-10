@@ -1,0 +1,398 @@
+[
+  {
+    "brand": "Titleist",
+    "model": "Vokey SM8",
+    "category": "wedge",
+    "release_year": 2020,
+    "msrp": 179.99,
+    "specs": {
+      "loft_options": ["46°", "48°", "50°", "52°", "54°", "56°", "58°", "60°", "62°"],
+      "bounce_options": ["4°", "8°", "10°", "12°", "14°"],
+      "grind_options": ["F", "S", "M", "L", "D", "K"],
+      "finish_options": ["Tour Chrome", "Jet Black"],
+      "groove_type": "TX8",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Tour-proven wedge with progressive center of gravity and TX8 grooves for maximum spin performance",
+    "tour_usage": ["Jordan Spieth", "Justin Thomas", "Adam Scott"],
+    "key_features": ["Progressive CG", "TX8 Grooves", "Tour-proven sole grinds"]
+  },
+  {
+    "brand": "Titleist",
+    "model": "Vokey SM10",
+    "category": "wedge",
+    "release_year": 2024,
+    "msrp": 189.99,
+    "specs": {
+      "loft_options": ["46°", "48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["4°", "8°", "10°", "12°", "14°"],
+      "grind_options": ["F", "S", "M", "L", "D", "K"],
+      "finish_options": ["Tour Chrome", "Nickel", "Jet Black", "Raw"],
+      "groove_type": "TX10",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Latest evolution with individually calibrated progressive CG for maximum performance",
+    "tour_usage": ["Jordan Spieth", "Justin Thomas", "Cameron Smith"],
+    "key_features": ["TX10 Grooves", "Individual CG calibration", "25 unique combinations"]
+  },
+  {
+    "brand": "Cleveland",
+    "model": "RTX 6 ZipCore",
+    "category": "wedge",
+    "release_year": 2023,
+    "msrp": 159.99,
+    "specs": {
+      "loft_options": ["48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["Low", "Mid", "Full"],
+      "finish_options": ["Tour Satin", "Tour Rack Raw", "Satin Black"],
+      "groove_type": "UltiZip",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Enhanced ZipCore with 95% more core material and deepest grooves ever",
+    "tour_usage": ["Shane Lowry", "Hideki Matsuyama", "Russell Henley"],
+    "key_features": ["Enhanced ZipCore", "HydraZip Technology", "Tour-developed grinds"]
+  },
+  {
+    "brand": "Cleveland",
+    "model": "CBX 4 ZipCore",
+    "category": "wedge",
+    "release_year": 2024,
+    "msrp": 149.99,
+    "specs": {
+      "loft_options": ["44°", "46°", "48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°"],
+      "grind_options": ["Pre-selected by loft"],
+      "finish_options": ["Graphite", "Black Satin"],
+      "groove_type": "UltiZip",
+      "material": "431 Stainless Steel"
+    },
+    "description": "Premium cavity back wedge with tour-caliber technologies and ultimate forgiveness",
+    "tour_usage": ["Game improvement focused"],
+    "key_features": ["Cavity Back Design", "Variable blast patterns", "Pre-selected grinds"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "JAWS MD5",
+    "category": "wedge",
+    "release_year": 2020,
+    "msrp": 159.99,
+    "specs": {
+      "loft_options": ["46°", "48°", "50°", "52°", "54°", "56°", "58°", "60°", "64°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["C", "S", "W", "X", "Z"],
+      "finish_options": ["Platinum Chrome", "Tour Grey"],
+      "groove_type": "JAWS",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Precisely shaped wedge with JAWS grooves and progressive CG design",
+    "tour_usage": ["Phil Mickelson", "Xander Schauffele"],
+    "key_features": ["JAWS Grooves", "Micro-ridges", "Progressive CG"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "JAWS Raw",
+    "category": "wedge",
+    "release_year": 2022,
+    "msrp": 169.99,
+    "specs": {
+      "loft_options": ["50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["C", "S", "W"],
+      "finish_options": ["Raw Face Chrome"],
+      "groove_type": "JAWS",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Raw face design for maximum spin performance with tungsten technology",
+    "tour_usage": ["Xander Schauffele", "Danny Willett"],
+    "key_features": ["Raw Face", "Tungsten Technology", "Maximum spin"]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Opus",
+    "category": "wedge",
+    "release_year": 2024,
+    "msrp": 199.99,
+    "specs": {
+      "loft_options": ["52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["10°", "12°", "14°"],
+      "grind_options": ["Standard"],
+      "finish_options": ["Platinum Chrome", "PVD Blue"],
+      "groove_type": "Precision Milled",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Premium wedge featuring CNC milled back and spectacular visual appeal",
+    "tour_usage": ["Tour validation pending"],
+    "key_features": ["CNC Milled Back", "Premium aesthetics", "Precision grooves"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Milled Grind 2",
+    "category": "wedge",
+    "release_year": 2020,
+    "msrp": 169.99,
+    "specs": {
+      "loft_options": ["48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["Low Bounce", "Standard", "High Bounce", "Tiger Woods"],
+      "finish_options": ["Chrome", "Black", "Nickel"],
+      "groove_type": "ZTP RAW",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Precision milled sole with ZTP RAW grooves and TPU insert for enhanced feel",
+    "tour_usage": ["Tiger Woods", "Dustin Johnson", "Rory McIlroy"],
+    "key_features": ["Milled sole geometry", "ZTP RAW Grooves", "TPU Insert"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Milled Grind 3",
+    "category": "wedge",
+    "release_year": 2021,
+    "msrp": 179.99,
+    "specs": {
+      "loft_options": ["46°", "48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["Low Bounce", "Standard", "High Bounce", "Tiger Woods"],
+      "finish_options": ["Chrome", "Black"],
+      "groove_type": "ZTP-17",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Enhanced groove design with raised micro-ribs for maximum spin performance",
+    "tour_usage": ["Tiger Woods", "Dustin Johnson", "Collin Morikawa"],
+    "key_features": ["Raised Micro-Rib", "ZTP-17 Grooves", "15 loft options"]
+  },
+  {
+    "brand": "TaylorMade",
+    "model": "Milled Grind 4",
+    "category": "wedge",
+    "release_year": 2024,
+    "msrp": 189.99,
+    "specs": {
+      "loft_options": ["48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["Standard", "Low", "High"],
+      "finish_options": ["Chrome", "Black", "Raw"],
+      "groove_type": "Spin Tread",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Laser etched Spin Tread technology with raw face for superior wet condition performance",
+    "tour_usage": ["Tiger Woods", "Collin Morikawa", "Tommy Fleetwood"],
+    "key_features": ["Spin Tread Technology", "Raw Face Design", "Larger footprint"]
+  },
+  {
+    "brand": "Ping",
+    "model": "Glide 3.0",
+    "category": "wedge",
+    "release_year": 2020,
+    "msrp": 159.99,
+    "specs": {
+      "loft_options": ["46°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["10°", "12°", "14°"],
+      "grind_options": ["SS", "WS", "TS", "Eye2"],
+      "finish_options": ["HydroPearl Chrome 2.0"],
+      "groove_type": "Variable Depth",
+      "material": "431 Stainless Steel"
+    },
+    "description": "Precision-machined grooves with HydroPearl finish and elastomer insert",
+    "tour_usage": ["Tony Finau", "Tyrrell Hatton"],
+    "key_features": ["HydroPearl Finish", "Elastomer Insert", "Variable groove depth"]
+  },
+  {
+    "brand": "Ping",
+    "model": "Glide 4.0",
+    "category": "wedge",
+    "release_year": 2022,
+    "msrp": 217.50,
+    "specs": {
+      "loft_options": ["46°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["T", "S", "W", "E"],
+      "finish_options": ["HydroPearl Chrome 2.0"],
+      "groove_type": "Variable Depth",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Softer carbon steel construction with enlarged custom tuning port",
+    "tour_usage": ["Tony Finau", "Tyrrell Hatton", "Cameron Champ"],
+    "key_features": ["8620 Carbon Steel", "36% Larger Tuning Port", "Four distinct grinds"]
+  },
+  {
+    "brand": "Ping",
+    "model": "Glide Forged Pro",
+    "category": "wedge",
+    "release_year": 2022,
+    "msrp": 199.99,
+    "specs": {
+      "loft_options": ["50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["10°", "12°", "14°"],
+      "grind_options": ["S", "T"],
+      "finish_options": ["Chrome", "Raw"],
+      "groove_type": "Machined",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Tour-preferred compact shape with precision-machined grooves",
+    "tour_usage": ["Viktor Hovland", "Tony Finau"],
+    "key_features": ["Forged Construction", "Tour-preferred shape", "Emery face blast"]
+  },
+  {
+    "brand": "Ping",
+    "model": "s159",
+    "category": "wedge",
+    "release_year": 2024,
+    "msrp": 197.00,
+    "specs": {
+      "loft_options": ["46°", "48°", "50°", "52°", "54°", "56°", "58°", "60°", "62°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["C", "D", "G", "S", "T", "W"],
+      "finish_options": ["HydroPearl 2.0", "Midnight"],
+      "groove_type": "MicroMax",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Tour-inspired design with six sole grinds and MicroMax groove technology",
+    "tour_usage": ["Viktor Hovland", "Harris English"],
+    "key_features": ["Six grind options", "MicroMax grooves", "Midnight finish option"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "T20",
+    "category": "wedge",
+    "release_year": 2020,
+    "msrp": 149.99,
+    "specs": {
+      "loft_options": ["48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["Standard", "Wide"],
+      "finish_options": ["Chrome", "Blue Ion", "Raw"],
+      "groove_type": "HydroFlow Micro",
+      "material": "Grain Flow Forged 1025E"
+    },
+    "description": "Grain Flow forged with HydroFlow Micro Grooves for enhanced spin",
+    "tour_usage": ["Keith Mitchell", "Greyson Sigg"],
+    "key_features": ["Grain Flow Forged", "HydroFlow Micro Grooves", "Multiple finishes"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "T22",
+    "category": "wedge",
+    "release_year": 2022,
+    "msrp": 169.99,
+    "specs": {
+      "loft_options": ["48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["Standard", "Wide"],
+      "finish_options": ["Satin Chrome", "Denim Copper", "Raw"],
+      "groove_type": "Quad Cut",
+      "material": "Grain Flow Forged 1025E"
+    },
+    "description": "Enhanced forging process with soft copper underlay for improved feel",
+    "tour_usage": ["Keith Mitchell", "Lucas Glover"],
+    "key_features": ["Soft copper underlay", "Quad Cut grooves", "Enhanced feel"]
+  },
+  {
+    "brand": "Mizuno",
+    "model": "T24",
+    "category": "wedge",
+    "release_year": 2024,
+    "msrp": 229.99,
+    "specs": {
+      "loft_options": ["48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["Standard", "Wide"],
+      "finish_options": ["Soft White Satin", "Denim Copper", "Tour Raw"],
+      "groove_type": "Variable Quad Cut",
+      "material": "Grain Flow Forged 1025E"
+    },
+    "description": "Modern CG positioning with varying groove amounts optimized by loft",
+    "tour_usage": ["Keith Mitchell", "Lucas Glover", "Greyson Sigg"],
+    "key_features": ["Variable groove patterns", "Modern CG", "HydroFlow micro grooves"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "King MIM",
+    "category": "wedge",
+    "release_year": 2021,
+    "msrp": 139.99,
+    "specs": {
+      "loft_options": ["48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°"],
+      "grind_options": ["Versatile", "Wide/Low"],
+      "finish_options": ["Chrome", "Black"],
+      "groove_type": "CNC Milled",
+      "material": "Metal Injection Molded"
+    },
+    "description": "First fully metal injection molded wedge head for precision shaping",
+    "tour_usage": ["Rickie Fowler", "Bryson DeChambeau"],
+    "key_features": ["Metal Injection Molding", "Precision shaping", "Exceptional feel"]
+  },
+  {
+    "brand": "Cobra",
+    "model": "Snakebite",
+    "category": "wedge",
+    "release_year": 2023,
+    "msrp": 149.99,
+    "specs": {
+      "loft_options": ["50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["Versatile", "Classic", "Wide/Low"],
+      "finish_options": ["Chrome", "Black"],
+      "groove_type": "Snakebite CNC",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Most aggressive grooves with 11% deeper cuts and 40% sharper edges",
+    "tour_usage": ["Rickie Fowler", "Bryson DeChambeau"],
+    "key_features": ["Deepest grooves", "Sharpest edges", "Full face grooves"]
+  },
+  {
+    "brand": "Wilson",
+    "model": "Staff Model",
+    "category": "wedge",
+    "release_year": 2022,
+    "msrp": 179.99,
+    "specs": {
+      "loft_options": ["50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["Tour", "Classic"],
+      "finish_options": ["Tour Satin", "Black PVD"],
+      "groove_type": "Precision Milled",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Tour-caliber wedge developed with feedback from Wilson Advisory Staff",
+    "tour_usage": ["Gary Woodland", "Padraig Harrington"],
+    "key_features": ["Tour feedback design", "Progressive hosel lengths", "Premium materials"]
+  },
+  {
+    "brand": "Srixon",
+    "model": "ZX Mk II",
+    "category": "wedge",
+    "release_year": 2023,
+    "msrp": 159.99,
+    "specs": {
+      "loft_options": ["48°", "50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["8°", "10°", "12°", "14°"],
+      "grind_options": ["Standard", "Wide"],
+      "finish_options": ["Chrome", "Black"],
+      "groove_type": "Laser Milled",
+      "material": "1020 Carbon Steel"
+    },
+    "description": "Soft carbon steel construction with laser milled grooves for consistent spin",
+    "tour_usage": ["Hideki Matsuyama", "Shane Lowry"],
+    "key_features": ["1020 Carbon Steel", "Laser milled grooves", "Progressive design"]
+  },
+  {
+    "brand": "PXG",
+    "model": "0311",
+    "category": "wedge",
+    "release_year": 2023,
+    "msrp": 229.99,
+    "specs": {
+      "loft_options": ["50°", "52°", "54°", "56°", "58°", "60°"],
+      "bounce_options": ["9°", "11°", "13°"],
+      "grind_options": ["Standard"],
+      "finish_options": ["Chrome", "Xtreme Dark"],
+      "groove_type": "Precision Milled",
+      "material": "8620 Carbon Steel"
+    },
+    "description": "Premium forged wedge with robotic precision milling for consistent performance",
+    "tour_usage": ["Select PGA Tour professionals"],
+    "key_features": ["Robotic milling", "Premium forging", "Weight optimization"]
+  }
+]

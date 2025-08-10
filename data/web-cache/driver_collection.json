@@ -1,0 +1,112 @@
+[
+  {
+    "brand": "TaylorMade",
+    "model": "Qi10 Max",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 629.99,
+    "specs": {
+      "loft_options": [
+        "9°",
+        "10.5°",
+        "12°"
+      ],
+      "shaft_flex": [
+        "Senior",
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "head_size": "460cc",
+      "material": "Carbon Twist Face",
+      "adjustability": "Yes - 4° Loft Sleeve",
+      "face_technology": "60X Carbon Twist Face",
+      "crown_material": "Carbon Composite",
+      "stock_shaft": "Fujikura Ventus TR Blue"
+    },
+    "description": "The Qi10 Max driver features a massive 10,000 MOI for ultimate forgiveness and straighter drives. The 60X Carbon Twist Face provides faster ball speeds across the entire face.",
+    "image_url": "https://www.taylormadegolf.com/on/demandware.static/-/Sites-TMaG-Library/en_US/qi10-max-driver.jpg",
+    "tour_usage": [
+      "Rory McIlroy",
+      "Tommy Fleetwood"
+    ],
+    "key_features": [
+      "10,000 MOI for maximum forgiveness",
+      "60X Carbon Twist Face technology",
+      "Adjustable loft sleeve (±2°)",
+      "High launch, mid-spin profile"
+    ]
+  },
+  {
+    "brand": "Callaway",
+    "model": "Paradym Ai Smoke Max",
+    "category": "driver",
+    "release_year": 2024,
+    "msrp": 599.99,
+    "specs": {
+      "loft_options": [
+        "9°",
+        "10.5°",
+        "12°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "head_size": "460cc",
+      "material": "Ai Smart Face",
+      "adjustability": "Yes - OptiFit 3 Hosel",
+      "face_technology": "Ai Smart Face",
+      "stock_shaft": "Project X Denali Black"
+    },
+    "description": "The Paradym Ai Smoke Max uses artificial intelligence to optimize launch and spin across the face. Features a lighter, stronger Titanium chassis for maximum forgiveness.",
+    "image_url": "https://www.callawaygolf.com/dw/image/v2/paradym-ai-smoke-max-driver.jpg",
+    "tour_usage": [
+      "Jon Rahm",
+      "Xander Schauffele"
+    ],
+    "key_features": [
+      "Ai-designed Smart Face",
+      "Forged Carbon sole",
+      "Adjustable perimeter weighting",
+      "High MOI design"
+    ]
+  },
+  {
+    "brand": "Titleist",
+    "model": "TSR3",
+    "category": "driver",
+    "release_year": 2023,
+    "msrp": 599,
+    "specs": {
+      "loft_options": [
+        "8°",
+        "9°",
+        "10°"
+      ],
+      "shaft_flex": [
+        "Regular",
+        "Stiff",
+        "X-Stiff"
+      ],
+      "head_size": "460cc",
+      "material": "Titanium",
+      "adjustability": "Yes - SureFit CG Track",
+      "stock_shaft": "Mitsubishi Tensei 1K Black"
+    },
+    "description": "Tour-preferred driver with precision CG track for shot shape control. Features refined aerodynamics and Speed Ring VFT face for faster ball speeds.",
+    "image_url": "https://www.titleist.com/dw/image/v2/tsr3-driver.jpg",
+    "tour_usage": [
+      "Jordan Spieth",
+      "Justin Thomas",
+      "Max Homa"
+    ],
+    "key_features": [
+      "SureFit CG Track System",
+      "Speed Ring VFT Face",
+      "Tour-inspired shape",
+      "Premium shaft options"
+    ]
+  }
+]
