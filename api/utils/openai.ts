@@ -73,17 +73,27 @@ export interface EquipmentAnalysisResult {
  * Handles markdown code blocks, mixed text responses, and partial JSON
  */
 function extractJSON(text: string): any {
+  console.log('[extractJSON] Attempting to parse:', {
+    textLength: text.length,
+    textPreview: text.substring(0, 100),
+    startsWithBrace: text.trim().startsWith('{'),
+    endsWithBrace: text.trim().endsWith('}')
+  });
+  
   try {
     // First try direct parsing
     return JSON.parse(text);
   } catch (e) {
+    console.log('[extractJSON] Direct parsing failed, trying alternatives');
+    
     // Try to extract JSON from markdown code blocks
     const jsonMatch = text.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
     if (jsonMatch) {
       try {
+        console.log('[extractJSON] Found markdown JSON block');
         return JSON.parse(jsonMatch[1]);
       } catch (e2) {
-        console.error('Failed to parse extracted JSON from markdown:', e2);
+        console.error('[extractJSON] Failed to parse extracted JSON from markdown:', e2);
       }
     }
     
@@ -91,26 +101,43 @@ function extractJSON(text: string): any {
     const jsonObjectMatch = text.match(/\{[\s\S]*\}/);
     if (jsonObjectMatch) {
       try {
+        console.log('[extractJSON] Found JSON object in text');
         return JSON.parse(jsonObjectMatch[0]);
       } catch (e3) {
-        console.error('Failed to parse found JSON object:', e3);
+        console.error('[extractJSON] Failed to parse found JSON object:', e3);
       }
     }
     
-    // Last resort: try to clean and parse
-    const cleaned = text
+    // Try to handle gpt-4o specific response patterns
+    const cleanedText = text
       .replace(/```json/g, '')
       .replace(/```/g, '')
       .replace(/^[\s\w]*?(?=\{)/g, '') // Remove text before first {
       .replace(/\}[\s\S]*$/g, '}') // Remove text after last }
       .trim();
     
-    try {
-      return JSON.parse(cleaned);
-    } catch (e4) {
-      console.error('All JSON parsing attempts failed:', e4);
-      throw new Error(`Unable to parse AI response as JSON. Raw response: ${text.substring(0, 200)}...`);
+    if (cleanedText !== text) {
+      try {
+        console.log('[extractJSON] Trying cleaned text approach');
+        return JSON.parse(cleanedText);
+      } catch (e4) {
+        console.error('[extractJSON] Cleaned text parsing failed:', e4);
+      }
     }
+    
+    // Last resort: try to extract just the JSON structure
+    const structureMatch = text.match(/\{\s*"identifiedEquipment"[\s\S]*\}/);
+    if (structureMatch) {
+      try {
+        console.log('[extractJSON] Trying structure-based extraction');
+        return JSON.parse(structureMatch[0]);
+      } catch (e5) {
+        console.error('[extractJSON] Structure-based parsing failed:', e5);
+      }
+    }
+    
+    console.error('[extractJSON] All JSON parsing attempts failed');
+    throw new Error(`Unable to parse AI response as JSON. Raw response: ${text.substring(0, 200)}...`);
   }
 }
 
@@ -123,7 +150,7 @@ export async function analyzeGolfBagImage(
 ): Promise<EquipmentAnalysisResult> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4-vision-preview",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -212,11 +239,20 @@ CRITICAL: Return ONLY valid JSON. No markdown, no explanations, no extra text.`
 
     const content = response.choices[0]?.message?.content || '{}';
     
+    console.log('[OpenAI] Raw response received:', {
+      hasContent: !!content,
+      contentLength: content.length,
+      contentPreview: content.substring(0, 200),
+      model: "gpt-4o",
+      usage: response.usage
+    });
+    
     try {
       const analysis = extractJSON(content);
       
       // Validate required structure
       if (!analysis.identifiedEquipment || !Array.isArray(analysis.identifiedEquipment)) {
+        console.error('[OpenAI] Invalid response structure:', analysis);
         throw new Error('Invalid response structure: missing identifiedEquipment array');
       }
       
@@ -245,8 +281,10 @@ CRITICAL: Return ONLY valid JSON. No markdown, no explanations, no extra text.`
         metadata: analysis.analysisMetadata
       };
     } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', parseError);
-      console.error('Raw response:', content);
+      console.error('[OpenAI] Failed to parse OpenAI response:', parseError);
+      console.error('[OpenAI] Raw response content:', content);
+      console.error('[OpenAI] Response type:', typeof content);
+      console.error('[OpenAI] Response length:', content?.length || 0);
       
       // Return structured error response instead of empty
       return {
