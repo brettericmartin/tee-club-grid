@@ -20,6 +20,7 @@ import { sortBadgesByPriority } from "@/utils/badgeSorting";
 import BackgroundLayer from "@/components/BackgroundLayer";
 import { TeedBallLike } from "@/components/shared/TeedBallLike";
 import { toggleBagLike } from "@/services/bags";
+import ShareModal from "@/components/bag/ShareModal";
 
 const BagDisplayStyled = () => {
   const { bagId } = useParams();
@@ -33,6 +34,7 @@ const BagDisplayStyled = () => {
   const [isEditingLayout, setIsEditingLayout] = useState(false);
   const [totalTees, setTotalTees] = useState(0);
   const [userBadges, setUserBadges] = useState<any[]>([]);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     if (bagId) {
@@ -277,11 +279,12 @@ const BagDisplayStyled = () => {
                 />
               </div>
               <Button
-                variant="ghost"
-                size="icon"
-                className="text-white hover:bg-white/10"
+                variant="outline"
+                onClick={() => setShowShareModal(true)}
+                className="text-white border-white/20 hover:bg-white/10"
               >
-                <Share2 className="w-5 h-5" />
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
               </Button>
               {isOwnBag && viewMode === 'gallery' && (
                 <Button
@@ -535,8 +538,28 @@ const BagDisplayStyled = () => {
             </div>
           </div>
         )}
+        
+        {/* Share Button - Bottom of Page */}
+        <div className="mt-12 mb-8">
+          <Button
+            onClick={() => setShowShareModal(true)}
+            className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-black font-semibold py-6 text-lg rounded-xl shadow-lg"
+          >
+            <Share2 className="w-5 h-5" />
+            Share This Bag
+          </Button>
+        </div>
       </div>
       </div>
+      
+      {/* Share Modal */}
+      {bagData && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          bag={bagData}
+        />
+      )}
     </div>
   );
 };

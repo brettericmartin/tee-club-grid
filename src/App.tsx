@@ -25,6 +25,8 @@ import WishlistPage from "@/pages/Wishlist";
 import BadgesPage from "@/pages/Badges";
 import BadgePreviewPage from "@/pages/BadgePreview";
 import ForumPage from "@/pages/Forum";
+import BagProfilePage from "@/pages/BagProfilePage";
+import UserBagPage from "@/pages/UserBagPage";
 import ForumIndexPage from "@/pages/ForumIndex";
 import ForumCategoryPage from "@/pages/ForumCategory";
 import ForumThreadPage from "@/pages/ForumThread";
@@ -192,6 +194,7 @@ function App() {
                         <Route path="/bags-browser" element={<BagsBrowser />} />
                         <Route path="/bags" element={<BagsBrowser />} />
                         <Route path="/bag/:bagId" element={<BagDisplay />} />
+                        <Route path="/u/:username" element={<UserBagPage />} />
                         <Route path="/my-bag" element={<MyBag />} />
                         <Route path="/equipment" element={<Equipment />} />
                         <Route path="/equipment/:id" element={<EquipmentDetail />} />

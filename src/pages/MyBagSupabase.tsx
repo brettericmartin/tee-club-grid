@@ -1,6 +1,6 @@
 /* @refresh skip */
 import { useState, useEffect, Suspense } from "react";
-import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
+import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle, Share2 } from "lucide-react";
 import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer, { bagBackgrounds } from "@/components/BackgroundLayer";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ import { sortBadgesByPriority } from "@/utils/badgeSorting";
 import { UserFeedView } from "@/components/feed/UserFeedView";
 import { aiFlowMetrics } from "@/utils/performanceMonitor";
 import { lazyWithRetry } from "@/utils/dynamicImport";
+import ShareModal from "@/components/bag/ShareModal";
 
 // Lazy load heavy components with retry logic for Vite HMR stability
 const BagGalleryDndKit = lazyWithRetry(() => import("@/components/bag/BagGalleryDndKit"));
@@ -114,6 +115,7 @@ const MyBagSupabase = () => {
   const [manageBadgesOpen, setManageBadgesOpen] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   
   // AI Equipment flow states
   const [showMethodDialog, setShowMethodDialog] = useState(false);
@@ -951,6 +953,11 @@ const MyBagSupabase = () => {
                     <span className="sm:hidden">{isEditingLayout ? 'Cancel' : 'Layout'}</span>
                   </Button>
                 )}
+                <Button onClick={() => setShowShareModal(true)} variant="outline" size="sm" className="whitespace-nowrap">
+                  <Share2 className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Share</span>
+                  <span className="sm:hidden">Share</span>
+                </Button>
                 <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="whitespace-nowrap">
                   <Edit3 className="w-4 h-4 mr-1 sm:mr-2" />
                   <span className="hidden sm:inline">Edit Bag</span>
@@ -1381,6 +1388,19 @@ const MyBagSupabase = () => {
             )}
           </div>
         )}
+        
+        {/* Share Button - Bottom of Page */}
+        {currentBag && (
+          <div className="mt-12 mb-8">
+            <Button
+              onClick={() => setShowShareModal(true)}
+              className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-black font-semibold py-6 text-lg rounded-xl shadow-lg"
+            >
+              <Share2 className="w-5 h-5" />
+              Share My Bag
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Modals */}
@@ -1519,6 +1539,21 @@ const MyBagSupabase = () => {
           setShowSignIn(true);
         }}
       />
+      
+      {/* Share Modal */}
+      {currentBag && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          bag={{
+            ...currentBag,
+            profiles: {
+              username: user?.user_metadata?.username || user?.email?.split('@')[0],
+              display_name: user?.user_metadata?.display_name || user?.user_metadata?.full_name
+            }
+          }}
+        />
+      )}
 
     </div>
   );
