@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import * as QRCode from "qrcode";
 import { toPng } from "html-to-image";
 import { displayNameToSlug } from "@/utils/slugify";
-import BagShareCard from "./BagShareCard";
+import { BagCard } from "@/components/bags/BagCard";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -111,19 +111,21 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
       const dataUrl = await toPng(shareCardRef.current, { 
         quality: 0.95,
         pixelRatio: 2,
-        backgroundColor: '#000000'
+        backgroundColor: '#111111',
+        width: 400,
+        height: 600
       });
       
       // Download the image
       const link = document.createElement('a');
-      link.download = `${userSlug}-bag-share.png`;
+      link.download = `${userSlug}-bag.png`;
       link.href = dataUrl;
       link.click();
       
-      toast.success("Share card downloaded! Perfect for Instagram, Twitter, and other social media.");
+      toast.success("Bag card downloaded! Perfect for sharing on social media.");
     } catch (error) {
-      console.error('Failed to generate share card:', error);
-      toast.error("Failed to generate share card");
+      console.error('Failed to generate bag card:', error);
+      toast.error("Failed to generate bag card image");
     } finally {
       setGeneratingImage(false);
     }
@@ -336,9 +338,19 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
           {/* Share Card Display */}
           {showShareCard && (
             <div className="space-y-3 pt-3 border-t border-white/10">
-              <div className="bg-[#2a2a2a] rounded-lg p-4 overflow-hidden">
-                <div className="transform scale-[0.25] origin-top-left" style={{ width: '150px', height: '150px' }}>
-                  <BagShareCard ref={shareCardRef} bag={bag} />
+              <div className="bg-black rounded-lg p-4 overflow-hidden">
+                <div className="transform scale-[0.4] origin-top-left" style={{ width: '160px', height: '240px' }}>
+                  <div ref={shareCardRef} style={{ width: '400px' }}>
+                    <BagCard
+                      bag={bag}
+                      onView={() => {}}
+                      onLike={() => {}}
+                      onFollow={async () => {}}
+                      isLiked={false}
+                      isFollowing={false}
+                      currentUserId={null}
+                    />
+                  </div>
                 </div>
               </div>
               <Button
@@ -354,12 +366,12 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
                 ) : (
                   <>
                     <Download className="w-4 h-4 mr-2" />
-                    Download Share Card
+                    Download Bag Card
                   </>
                 )}
               </Button>
               <p className="text-xs text-white/50 text-center">
-                Perfect for Instagram posts, Twitter cards, and stories
+                Download your bag card to share on Instagram, Twitter, and other platforms
               </p>
             </div>
           )}

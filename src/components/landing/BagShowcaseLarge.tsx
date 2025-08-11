@@ -377,9 +377,9 @@ export const BagShowcaseLarge = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex justify-center lg:justify-start items-start"
           >
-            {/* Scale wrapper - 1.75x to match left side height */}
-            <div className="scale-[1.75] origin-top-left lg:ml-16 mt-8">
-              <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] shadow-2xl w-[320px]">
+            {/* Responsive wrapper - no scaling on mobile, scale on desktop */}
+            <div className="w-full max-w-[360px] sm:max-w-[400px] lg:max-w-none lg:transform lg:scale-[1.75] lg:origin-top-left lg:ml-16 lg:mt-8">
+              <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] shadow-2xl w-full lg:w-[320px]">
                 {/* Background with glassmorphic effect */}
                 <div className="absolute inset-0">
                   {golfBagImage && !imageError['golf-bag'] ? (
