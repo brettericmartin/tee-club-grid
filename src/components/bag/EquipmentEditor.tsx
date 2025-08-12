@@ -313,19 +313,20 @@ export function EquipmentEditor({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-2xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="w-full max-w-full sm:max-w-2xl h-[100vh] sm:h-auto max-h-[100vh] sm:max-h-[90vh] p-0 overflow-hidden flex flex-col">
+          <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 sm:pb-4 flex-shrink-0 border-b">
+            <DialogTitle className="text-lg sm:text-xl">
               Edit {equipment.equipment.brand} {equipment.equipment.model}
             </DialogTitle>
           </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 overscroll-contain" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' } as React.CSSProperties}>
+          <div className="space-y-4 sm:space-y-6">
           {/* Photo Section */}
           <div className="space-y-4">
-            <Label>Equipment Photo</Label>
-            <div className="flex items-center gap-4">
-              <div className="w-32 h-32 bg-accent rounded-lg overflow-hidden">
+            <Label className="text-sm sm:text-base">Equipment Photo</Label>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-accent rounded-lg overflow-hidden flex-shrink-0">
                 <img
                   src={formData.custom_photo_url || equipment.equipment.most_liked_photo || equipment.equipment.image_url }
                   alt={`${equipment.equipment.brand} ${equipment.equipment.model}`}
@@ -418,7 +419,7 @@ export function EquipmentEditor({
           </div>
 
           {/* Configuration */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* Shaft Selection - Only show for clubs */}
             {isClub && (
               <div>
@@ -439,7 +440,7 @@ export function EquipmentEditor({
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-0" align="start" sideOffset={4}>
+                  <PopoverContent className="w-full p-0 max-h-[40vh] sm:max-h-[50vh]" align="start" sideOffset={4}>
                     <Command>
                       <CommandInput 
                         placeholder="Search shafts..." 
@@ -462,7 +463,7 @@ export function EquipmentEditor({
                           </Button>
                         </div>
                       </CommandEmpty>
-                      <CommandList>
+                      <CommandList className="max-h-[30vh] sm:max-h-[40vh] overflow-y-auto">
                         <CommandGroup>
                           {shafts && shafts.length > 0 && shafts
                             .filter(shaft => {
@@ -530,7 +531,7 @@ export function EquipmentEditor({
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-0" align="start" sideOffset={4}>
+                  <PopoverContent className="w-full p-0 max-h-[40vh] sm:max-h-[50vh]" align="start" sideOffset={4}>
                     <Command>
                       <CommandInput 
                         placeholder="Search grips..." 
@@ -553,7 +554,7 @@ export function EquipmentEditor({
                           </Button>
                         </div>
                       </CommandEmpty>
-                      <CommandList>
+                      <CommandList className="max-h-[30vh] sm:max-h-[40vh] overflow-y-auto">
                         <CommandGroup>
                           {grips && grips.length > 0 && grips
                             .filter(grip => {
@@ -675,23 +676,29 @@ export function EquipmentEditor({
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-between">
+          </div>
+        </div>
+        
+        {/* Fixed Footer with Actions */}
+        <div className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-t bg-background">
+          <div className="flex justify-between gap-2">
             <Button 
               variant="destructive" 
               onClick={handleRemove} 
               disabled={loading}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+              size="sm"
             >
-              <Trash2 className="w-4 h-4" />
-              Remove from Bag
+              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Remove from Bag</span>
+              <span className="sm:hidden">Remove</span>
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="outline" onClick={onClose} size="sm">
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={loading}>
-                {loading ? 'Saving...' : 'Save Equipment'}
+              <Button onClick={handleSave} disabled={loading} size="sm">
+                {loading ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </div>
