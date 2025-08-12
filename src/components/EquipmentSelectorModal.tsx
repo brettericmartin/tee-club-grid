@@ -143,12 +143,12 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-        <DialogHeader className="px-6 pt-6">
+      <DialogContent className="w-full max-w-full sm:max-w-4xl h-full sm:h-auto max-h-[100vh] sm:max-h-[90vh] p-0 overflow-hidden">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 flex-shrink-0">
           <DialogTitle className="text-2xl">Select Equipment</DialogTitle>
         </DialogHeader>
 
-        <div className="px-6 pb-6 space-y-4">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 sm:space-y-4 overflow-y-auto max-h-[calc(100vh-80px)] sm:max-h-[calc(90vh-80px)]">
           {/* Breadcrumb Navigation */}
           {hasActiveFilters && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -245,14 +245,16 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
 
           {/* Filter Panel */}
           {showFilters && (
-            <div className="border rounded-lg p-4 space-y-4 bg-muted/20">
-              <div className="grid grid-cols-3 gap-4">
+            <div className="border rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4 bg-muted/20">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Brand</label>
                   <select
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     value={selectedBrand}
                     onChange={(e) => setSelectedBrand(e.target.value)}
+                    size={1}
+                    style={{ maxHeight: '150px' }}
                   >
                     <option value="">All Brands</option>
                     {brands.map(brand => (
@@ -266,6 +268,8 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(e.target.value)}
+                    size={1}
+                    style={{ maxHeight: '150px' }}
                   >
                     <option value="">All Years</option>
                     {years.map(year => (
@@ -279,13 +283,15 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
 
           {/* Category Tabs */}
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-            <TabsList className="w-full justify-start">
-              {categories.map(cat => (
-                <TabsTrigger key={cat.id} value={cat.id}>
-                  {cat.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <TabsList className="w-max min-w-full justify-start flex-nowrap">
+                {categories.map(cat => (
+                  <TabsTrigger key={cat.id} value={cat.id} className="whitespace-nowrap">
+                    {cat.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
 
             <TabsContent value={selectedCategory} className="mt-4">
               {loading ? (
@@ -303,14 +309,14 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto pr-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 max-h-[300px] sm:max-h-[400px] overflow-y-auto pr-1 sm:pr-2">
                   {equipment.map((item) => (
                     <Card 
                       key={item.id} 
                       className="cursor-pointer hover:shadow-md transition-shadow"
                       onClick={() => onSelect(item)}
                     >
-                      <CardContent className="p-4">
+                      <CardContent className="p-2 sm:p-4">
                         <div className="aspect-square mb-3 bg-muted rounded-md overflow-hidden">
                           <img 
                             src={item.image_url || '/api/placeholder/200/200'} 

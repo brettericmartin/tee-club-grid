@@ -82,6 +82,7 @@ export function TeedBallLike({
 }: TeedBallLikeProps) {
   const [optimisticLiked, setOptimisticLiked] = useState(isLiked);
   const [optimisticCount, setOptimisticCount] = useState(likeCount);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Sync with props when they change
   useEffect(() => {
@@ -103,6 +104,10 @@ export function TeedBallLike({
 
   const handleClick = () => {
     if (disabled) return;
+
+    // Trigger bounce animation
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 600);
 
     // Optimistic update
     const wasLiked = optimisticLiked;
@@ -139,7 +144,8 @@ export function TeedBallLike({
         className={cn(
           sizeClasses[size],
           'transition-all duration-200',
-          optimisticLiked ? 'scale-110' : 'scale-100 hover:scale-105'
+          optimisticLiked ? 'scale-110' : 'scale-100 hover:scale-105',
+          isAnimating && 'animate-golf-bounce'
         )}
         filled={optimisticLiked}
       />

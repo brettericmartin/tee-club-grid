@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { MessageCircle, Eye, UserPlus, UserCheck, Loader2, Repeat } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MessageCircle, Eye, UserPlus, UserCheck, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { formatCompactCurrency } from '@/lib/formatters';
@@ -12,6 +12,7 @@ import { BagCard } from '@/components/bags/BagCard';
 import CommentModal from '@/components/comments/CommentModal';
 import { toggleBagLike } from '@/services/bags';
 import { toast } from 'sonner';
+import { useScrollAnimation } from '@/utils/animations';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
 type Bag = Database['public']['Tables']['user_bags']['Row'] & {
@@ -29,6 +30,7 @@ interface FeedItemCardProps {
 
 export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItemCardProps) => {
   const navigate = useNavigate();
+  const { ref, isVisible } = useScrollAnimation(0.1);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [isFollowing, setIsFollowing] = useState(post.isFromFollowed);
@@ -238,7 +240,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
 
     // Render the actual BagCard component
     return (
-      <div className="h-full">
+      <div className="h-full overflow-auto">
         <BagCard
           bag={{
             ...userBag,
@@ -274,7 +276,17 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
 
   return (
     <>
-      <div className="relative bg-gray-900 rounded-xl overflow-hidden">
+      <div 
+        ref={ref as React.RefObject<HTMLDivElement>}
+        className={`relative bg-gray-900 rounded-xl overflow-hidden transition-all duration-500 ${
+          isVisible 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-8'
+        }`}
+        style={{
+          transitionDelay: `${Math.random() * 100}ms`
+        }}
+      >
         {/* Card Header */}
         <div className="flex items-center justify-between p-4 bg-black/50">
           <Link to={userBag ? `/bag/${userBag.id}` : '#'} className="flex items-center gap-3">
@@ -308,14 +320,14 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
         </div>
         
         {/* Card Content - Toggleable */}
-        <div className="relative h-[450px]">
-          {/* Toggle Button */}
+        <div className="relative h-[450px] sm:h-[450px] overflow-hidden">
+          {/* Toggle Button - Made larger and more prominent */}
           <button
             onClick={() => setIsFlipped(!isFlipped)}
-            className="absolute top-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-colors"
+            className="absolute top-3 right-3 z-10 bg-primary/90 hover:bg-primary hover:scale-110 text-black p-3 rounded-full transition-all shadow-lg"
             aria-label="Toggle view"
           >
-            <Repeat className="w-4 h-4" />
+            <img src="/MYBAG.png" alt="View Bag" className="w-6 h-6" />
           </button>
           
           {/* Content */}

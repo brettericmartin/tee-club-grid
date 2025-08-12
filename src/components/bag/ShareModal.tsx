@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { 
   Copy, 
   Share2, 
@@ -8,7 +8,7 @@ import {
   Facebook, 
   Download,
   Check,
-  Image
+  ClipboardList
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,9 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import * as QRCode from "qrcode";
-import { toPng } from "html-to-image";
 import { displayNameToSlug } from "@/utils/slugify";
-import { BagCard } from "@/components/bags/BagCard";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -39,12 +37,10 @@ interface ShareModalProps {
 const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
   const [showEmbedCode, setShowEmbedCode] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
-  const [showShareCard, setShowShareCard] = useState(false);
+  const [showEquipmentList, setShowEquipmentList] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [copied, setCopied] = useState(false);
   const [copiedEmbed, setCopiedEmbed] = useState(false);
-  const [generatingImage, setGeneratingImage] = useState(false);
-  const shareCardRef = useRef<HTMLDivElement>(null);
 
   // Generate the shareable URL using username slug
   const userSlug = displayNameToSlug(bag.profiles?.display_name || bag.profiles?.username || '');
@@ -90,44 +86,9 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
       setQrCodeUrl(url);
       setShowQRCode(true);
       setShowEmbedCode(false);
-      setShowShareCard(false);
+      setShowEquipmentList(false);
     } catch (error) {
       toast.error("Failed to generate QR code");
-    }
-  };
-
-  const generateShareCard = async () => {
-    if (!shareCardRef.current) {
-      setShowShareCard(true);
-      setShowQRCode(false);
-      setShowEmbedCode(false);
-      // Wait for the component to render
-      setTimeout(() => generateShareCard(), 100);
-      return;
-    }
-
-    setGeneratingImage(true);
-    try {
-      const dataUrl = await toPng(shareCardRef.current, { 
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: '#111111',
-        width: 400,
-        height: 600
-      });
-      
-      // Download the image
-      const link = document.createElement('a');
-      link.download = `${userSlug}-bag.png`;
-      link.href = dataUrl;
-      link.click();
-      
-      toast.success("Bag card downloaded! Perfect for sharing on social media.");
-    } catch (error) {
-      console.error('Failed to generate bag card:', error);
-      toast.error("Failed to generate bag card image");
-    } finally {
-      setGeneratingImage(false);
     }
   };
 
@@ -192,6 +153,57 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
   };
 
   const embedCode = `<iframe src="${directBagUrl}/embed" width="600" height="800" frameborder="0" title="${bag.name}"></iframe>`;
+
+  // Generate equipment list for copying
+  const generateEquipmentList = () => {
+    if (!bag.bag_equipment || bag.bag_equipment.length === 0) {
+      return `${bag.profiles?.display_name || 'User'}'s ${bag.name}\n\nNo equipment added yet.\n\nView at: ${shareUrl}`;
+    }
+
+    const clubs = bag.bag_equipment.filter(item => 
+      ['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'].includes(item.equipment?.category || '')
+    );
+    const accessories = bag.bag_equipment.filter(item => 
+      !['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'].includes(item.equipment?.category || '')
+    );
+
+    let list = `🏌️ ${bag.profiles?.display_name || 'User'}'s ${bag.name}\n`;
+    list += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+    
+    if (clubs.length > 0) {
+      list += `⛳ CLUBS:\n`;
+      clubs.forEach(item => {
+        list += `• ${item.equipment?.brand} ${item.equipment?.model}\n`;
+      });
+      list += `\n`;
+    }
+    
+    if (accessories.length > 0) {
+      list += `🎒 ACCESSORIES:\n`;
+      accessories.forEach(item => {
+        list += `• ${item.equipment?.brand} ${item.equipment?.model}\n`;
+      });
+      list += `\n`;
+    }
+    
+    list += `━━━━━━━━━━━━━━━━━━━━\n`;
+    list += `📊 ${bag.bag_equipment.length} total items\n`;
+    list += `💚 ${bag.likes_count || 0} tees\n\n`;
+    list += `View full bag: ${shareUrl}\n`;
+    list += `Join me on Teed.club! 🏌️‍♂️`;
+    
+    return list;
+  };
+
+  const copyEquipmentList = async () => {
+    const list = generateEquipmentList();
+    try {
+      await navigator.clipboard.writeText(list);
+      toast.success("Equipment list copied! Perfect for sharing in messages or posts.");
+    } catch (error) {
+      toast.error("Failed to copy list");
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -284,17 +296,23 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
             <label className="text-sm text-white/70">Advanced Options</label>
             <div className="grid grid-cols-3 gap-2">
               <Button
-                onClick={generateShareCard}
+                onClick={() => {
+                  copyEquipmentList();
+                  setShowEquipmentList(true);
+                  setShowQRCode(false);
+                  setShowEmbedCode(false);
+                  setShowShareCard(false);
+                }}
                 variant="outline"
                 className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
-                disabled={generatingImage}
               >
-                <Image className="w-4 h-4 mr-2" />
-                Card
+                <ClipboardList className="w-4 h-4 mr-2" />
+                List
               </Button>
               <Button
                 onClick={() => {
                   generateQRCode();
+                  setShowEquipmentList(false);
                 }}
                 variant="outline"
                 className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
@@ -307,6 +325,7 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
                   setShowEmbedCode(true);
                   setShowQRCode(false);
                   setShowShareCard(false);
+                  setShowEquipmentList(false);
                 }}
                 variant="outline"
                 className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
@@ -316,6 +335,27 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
               </Button>
             </div>
           </div>
+
+          {/* Equipment List Display */}
+          {showEquipmentList && (
+            <div className="space-y-3 pt-3 border-t border-white/10">
+              <div className="bg-[#2a2a2a] rounded-lg p-3 max-h-64 overflow-y-auto">
+                <pre className="text-xs text-white/90 whitespace-pre-wrap font-mono">
+                  {generateEquipmentList()}
+                </pre>
+              </div>
+              <Button
+                onClick={copyEquipmentList}
+                className="w-full bg-primary hover:bg-primary/90"
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Copy List Again
+              </Button>
+              <p className="text-xs text-white/50 text-center">
+                Perfect for sharing in messages, forums, or social media posts
+              </p>
+            </div>
+          )}
 
           {/* QR Code Display */}
           {showQRCode && qrCodeUrl && (
@@ -332,47 +372,6 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
                 <Download className="w-4 h-4 mr-2" />
                 Download QR Code
               </Button>
-            </div>
-          )}
-
-          {/* Share Card Display */}
-          {showShareCard && (
-            <div className="space-y-3 pt-3 border-t border-white/10">
-              <div className="bg-black rounded-lg p-4 overflow-hidden">
-                <div className="transform scale-[0.4] origin-top-left" style={{ width: '160px', height: '240px' }}>
-                  <div ref={shareCardRef} style={{ width: '400px' }}>
-                    <BagCard
-                      bag={bag}
-                      onView={() => {}}
-                      onLike={() => {}}
-                      onFollow={async () => {}}
-                      isLiked={false}
-                      isFollowing={false}
-                      currentUserId={null}
-                    />
-                  </div>
-                </div>
-              </div>
-              <Button
-                onClick={generateShareCard}
-                className="w-full bg-primary hover:bg-primary/90"
-                disabled={generatingImage}
-              >
-                {generatingImage ? (
-                  <>
-                    <Download className="w-4 h-4 mr-2 animate-pulse" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Bag Card
-                  </>
-                )}
-              </Button>
-              <p className="text-xs text-white/50 text-center">
-                Download your bag card to share on Instagram, Twitter, and other platforms
-              </p>
             </div>
           )}
 

@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
 import { GripOption } from "@/types/equipmentDetail";
 
 interface GripSelectionModalProps {
@@ -17,11 +16,8 @@ const GripSelectionModal = ({ isOpen, onClose, grips, currentGrip, onSelect }: G
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader className="flex flex-row items-center justify-between">
+        <DialogHeader>
           <DialogTitle>Select Grip</DialogTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="w-4 h-4" />
-          </Button>
         </DialogHeader>
 
         <div className="space-y-4">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Heart, Star, Users, ExternalLink, Bookmark, BookmarkCheck, MessageSquare } from 'lucide-react';
+import { Heart, Star, Users, ExternalLink, Bookmark, BookmarkCheck, MessageSquare } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -146,14 +146,6 @@ export function EquipmentShowcaseModal({
             <DialogTitle>
               {bagEquipment?.equipment?.brand || 'Unknown'} {bagEquipment?.equipment?.model || 'Equipment'}
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="ml-auto"
-            >
-              <X className="w-4 h-4" />
-            </Button>
           </div>
         </DialogHeader>
 

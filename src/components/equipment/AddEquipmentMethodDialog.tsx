@@ -1,7 +1,8 @@
 import React from 'react';
-import { Camera, Search } from 'lucide-react';
+import { Camera, Search, Clock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface AddEquipmentMethodDialogProps {
   isOpen: boolean;
@@ -29,6 +30,14 @@ export default function AddEquipmentMethodDialog({
             onClick={() => onSelectMethod('ai')}
             className="group relative overflow-hidden rounded-lg bg-[#2a2a2a] p-6 transition-all hover:bg-[#3a3a3a] hover:scale-[1.02] active:scale-[0.98]"
           >
+            {/* Coming Soon Badge */}
+            <div className="absolute top-3 right-3">
+              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 text-xs px-2 py-1">
+                <Clock className="w-3 h-3 mr-1" />
+                Coming Soon
+              </Badge>
+            </div>
+            
             <div className="flex flex-col items-center gap-3">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 text-green-500 transition-colors group-hover:bg-green-500/20">
                 <Camera className="h-8 w-8" />

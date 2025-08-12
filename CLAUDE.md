@@ -215,6 +215,61 @@
 - Implement virtual scrolling for long lists
 - Minimize re-renders with proper React optimization
 - Cache equipment data aggressively
+
+## Animation & Interaction Standards
+
+**Core Animation Principles:**
+- **Performance First:** All animations must maintain 60fps
+- **Golf-Themed:** Subtle references to golf physics (ball bounce, club swing curves)
+- **Mobile Optimized:** Touch gestures and haptic-style feedback
+- **Accessibility:** Respect prefers-reduced-motion settings
+
+**Standard Animations:**
+
+1. **Scroll Animations:**
+   - Fade-in-up for feed cards (500ms, 20px translate)
+   - Staggered delays for list items (50ms between items)
+   - Intersection Observer with 10% threshold
+   - Auto-play only when 50% visible
+
+2. **Interaction Feedback:**
+   - **Golf Ball Bounce:** 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55)
+     - Used for: Tee button clicks, achievements, celebrations
+     - Scale sequence: 1 → 1.2 → 0.9 → 1.1 → 1
+     - Y-axis movement: 0 → -8px → 3px → -2px → 0
+   
+3. **Hover Effects:**
+   - **Primary Buttons:** Green glow (0 0 20px rgba(16,185,129,0.4)) + subtle lift (-2px)
+   - **Cards:** Elevation change (4px lift) + shadow enhancement
+   - **Equipment Tiles:** Scale(1.05) + border highlight
+   - Transition: 300ms ease-out for all hovers
+
+4. **Loading States:**
+   - **Skeleton Screens:** Pulse animation for content placeholders
+   - **Golf Ball Spinner:** Rotating golf ball with dimples
+   - **Progress Bars:** Golf ball rolling along track
+
+5. **Page Transitions:**
+   - **Route Changes:** Fade + slide (300ms)
+   - **Modal Opens:** Scale(0.95 → 1) + fade
+   - **Tab Switches:** Horizontal slide with momentum
+
+**Timing Functions:**
+- **Smooth:** cubic-bezier(0.4, 0, 0.2, 1) - General transitions
+- **Golf Swing:** cubic-bezier(0.87, 0, 0.13, 1) - Natural golf motion
+- **Bounce:** cubic-bezier(0.68, -0.55, 0.265, 1.55) - Playful interactions
+
+**Animation Utilities Location:**
+- Central animations: `/src/utils/animations.ts`
+- Tailwind animations: `tailwind.config.ts` (golf-bounce, fade-in-up, glow-pulse)
+- Component-specific: Inline with clear comments
+
+**Mobile Gesture Support:**
+- Swipe left/right for navigation
+- Pull-to-refresh with golf swing animation
+- Pinch-to-zoom on equipment photos
+- Long-press for context menus
+- Drag-to-reorder for bag equipment
 **Data Security**
 - NEVER EVER DELETE DATA TIED TO USERS THAT THEY HAVE INPUT
 - We MAY come up with a workflow to manually review posts/photos that are reported, but YOU may NEVER delete data that wasnt' created for demo purposes. This will lose users faster than anything else. 

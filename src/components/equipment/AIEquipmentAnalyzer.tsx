@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, Loader2, AlertCircle, Camera, X } from 'lucide-react';
+import { Upload, Loader2, AlertCircle, Camera, X, Clock, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -236,7 +236,62 @@ export default function AIEquipmentAnalyzer({
         </DialogHeader>
 
         <div className="mt-4">
-          {!isAnalyzing && !previewImage && (
+          {/* Coming Soon Message */}
+          <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl p-8 border border-emerald-500/20">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center">
+                  <Sparkles className="w-10 h-10 text-emerald-500" />
+                </div>
+                <div className="absolute -top-1 -right-1">
+                  <Clock className="w-6 h-6 text-yellow-500" />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-white">Coming Soon!</h3>
+                <p className="text-lg text-emerald-400 font-medium">AI Equipment Scanner</p>
+              </div>
+              
+              <div className="max-w-md space-y-3">
+                <p className="text-white/80">
+                  Our AI-powered equipment scanner will automatically identify and catalog all the clubs in your bag from a single photo.
+                </p>
+                <p className="text-white/60 text-sm">
+                  We're fine-tuning the AI to recognize thousands of golf equipment models with high accuracy. Check back soon!
+                </p>
+              </div>
+              
+              <div className="pt-4">
+                <div className="flex items-center gap-2 text-sm text-white/50">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>In Development</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Features Preview */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-[#2a2a2a] rounded-lg p-4 border border-white/10">
+              <Camera className="w-8 h-8 text-emerald-500 mb-2" />
+              <h4 className="font-semibold text-white mb-1">Instant Recognition</h4>
+              <p className="text-xs text-white/60">Snap a photo and let AI identify your equipment</p>
+            </div>
+            <div className="bg-[#2a2a2a] rounded-lg p-4 border border-white/10">
+              <Upload className="w-8 h-8 text-emerald-500 mb-2" />
+              <h4 className="font-semibold text-white mb-1">Bulk Import</h4>
+              <p className="text-xs text-white/60">Add your entire bag in seconds</p>
+            </div>
+            <div className="bg-[#2a2a2a] rounded-lg p-4 border border-white/10">
+              <Sparkles className="w-8 h-8 text-emerald-500 mb-2" />
+              <h4 className="font-semibold text-white mb-1">Smart Matching</h4>
+              <p className="text-xs text-white/60">Automatically matches to our equipment database</p>
+            </div>
+          </div>
+          
+          {/* Original upload interface - hidden for now */}
+          {false && !isAnalyzing && !previewImage && (
             <div
               {...getRootProps()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
@@ -263,129 +318,16 @@ export default function AIEquipmentAnalyzer({
             </div>
           )}
 
-          {/* Preview Image */}
-          {previewImage && !isAnalyzing && (
-            <div className="relative rounded-lg overflow-hidden bg-[#2a2a2a] p-2">
-              <img 
-                src={previewImage} 
-                alt="Golf bag preview" 
-                className="w-full h-auto rounded max-h-[400px] object-contain"
-              />
-              <button
-                onClick={() => {
-                  setPreviewImage(null);
-                  setError(null);
-                }}
-                className="absolute top-4 right-4 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
-              >
-                <X className="w-4 h-4 text-white" />
-              </button>
-            </div>
-          )}
-
-          {/* Analysis Progress */}
-          {isAnalyzing && (
-            <div className="space-y-6">
-              {previewImage && (
-                <div className="relative rounded-lg overflow-hidden bg-[#2a2a2a] p-2 opacity-50">
-                  <img 
-                    src={previewImage} 
-                    alt="Analyzing..." 
-                    className="w-full h-auto rounded max-h-[200px] object-contain blur-sm"
-                  />
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-center">
-                  <div className="relative">
-                    <Loader2 className="w-12 h-12 animate-spin text-green-500" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-6 h-6 bg-green-500 rounded-full animate-ping" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-center space-y-2">
-                  <p className="text-lg font-medium text-white">
-                    {getStepText()}
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    {getStepDescription()}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Progress value={uploadProgress} className="h-2" />
-                  <div className="flex justify-between text-xs text-gray-400">
-                    <span>Step {analysisStep === 'uploading' ? 1 : analysisStep === 'analyzing' ? 2 : 3} of 3</span>
-                    <span>{uploadProgress}%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {error && (
-            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-medium text-red-500">Analysis Failed</p>
-                <p className="text-sm text-gray-300 mt-1">{error}</p>
-                {error.includes('Rate limit') && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="mt-3 text-white"
-                    onClick={() => {
-                      setError(null);
-                      setPreviewImage(null);
-                    }}
-                  >
-                    Try Again
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Tips */}
-          {!isAnalyzing && !error && !previewImage && (
-            <div className="mt-6 p-4 bg-[#2a2a2a] rounded-lg">
-              <p className="text-sm font-medium text-white mb-2">Tips for best results:</p>
-              <ul className="text-xs text-gray-400 space-y-1">
-                <li>• Take photo in good lighting</li>
-                <li>• Show all clubs clearly</li>
-                <li>• Include headcovers for easier identification</li>
-                <li>• Avoid extreme angles</li>
-              </ul>
-            </div>
-          )}
         </div>
 
-        {!isAnalyzing && (
-          <div className="flex justify-end gap-3 mt-6">
-            <Button
-              variant="ghost"
-              onClick={onClose}
-              className="text-gray-400 hover:text-white"
-            >
-              Cancel
-            </Button>
-            {previewImage && !error && (
-              <Button
-                onClick={() => {
-                  const base64Data = previewImage.split(',')[1];
-                  analyzeImage(base64Data, 'image/jpeg');
-                }}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                Analyze Photo
-              </Button>
-            )}
-          </div>
-        )}
+        <div className="flex justify-center mt-6">
+          <Button
+            onClick={onClose}
+            className="bg-emerald-500 hover:bg-emerald-600 text-white px-8"
+          >
+            Got it, I'll Check Back Later
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

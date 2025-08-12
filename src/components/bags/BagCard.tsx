@@ -224,7 +224,7 @@ const BagCardComponent = ({
 
       {/* Container - fully transparent to show background image */}
       <div 
-        className="relative p-4 h-full min-h-[400px] cursor-pointer"
+        className="relative p-4 h-full min-h-[350px] sm:min-h-[400px] cursor-pointer overflow-y-auto"
         onClick={() => onView(bag.id)}
       >
         {/* Header with user info */}
@@ -284,8 +284,8 @@ const BagCardComponent = ({
           </div>
         </div>
 
-        {/* 3x2 Clubs Grid */}
-        <div className="grid grid-cols-3 gap-2 mb-3" onClick={(e) => e.stopPropagation()}>
+        {/* 3x2 Clubs Grid - Adjusted for mobile */}
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-2 sm:mb-3" onClick={(e) => e.stopPropagation()}>
           {Array.from({ length: 6 }).map((_, index) => {
             const item = displayClubs[index];
             const imageUrl = item ? getEquipmentImage(item) : null;
@@ -327,8 +327,8 @@ const BagCardComponent = ({
           })}
         </div>
 
-        {/* Accessories Row - 4 smaller items */}
-        <div className="grid grid-cols-4 gap-2 mb-4" onClick={(e) => e.stopPropagation()}>
+        {/* Accessories Row - 4 smaller items - Adjusted for mobile */}
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-3 sm:mb-4" onClick={(e) => e.stopPropagation()}>
           {Array.from({ length: 4 }).map((_, index) => {
             const item = displayAccessories[index];
             const imageUrl = item ? getEquipmentImage(item) : null;
