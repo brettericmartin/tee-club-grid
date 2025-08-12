@@ -37,6 +37,7 @@ import { UserFeedView } from "@/components/feed/UserFeedView";
 import { aiFlowMetrics } from "@/utils/performanceMonitor";
 import { lazyWithRetry } from "@/utils/dynamicImport";
 import ShareModal from "@/components/bag/ShareModal";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Lazy load heavy components with retry logic for Vite HMR stability
 const BagGalleryDndKit = lazyWithRetry(() => import("@/components/bag/BagGalleryDndKit"));
@@ -648,15 +649,16 @@ const MyBagSupabase = () => {
       setEquipmentSelectorOpen(false);
       toast.success(`Equipment added to your bag!`);
       
-      // Create feed post for equipment addition
-      const equipmentName = `${newItem.equipment.brand} ${newItem.equipment.model}`;
-      await smartCreateEquipmentPost(
-        user.id, 
-        currentBag.id, 
-        currentBag.name,
-        equipmentName,
-        newItem.equipment.id
-      );
+      // DISABLED: Automatic feed post creation when adding equipment
+      // Feed posts are now only created when adding photos to prevent duplicates
+      // const equipmentName = `${newItem.equipment.brand} ${newItem.equipment.model}`;
+      // await smartCreateEquipmentPost(
+      //   user.id, 
+      //   currentBag.id, 
+      //   currentBag.name,
+      //   equipmentName,
+      //   newItem.equipment.id
+      // );
       
       // Check badge progress after adding equipment
       checkBadgeProgress();
@@ -1509,13 +1511,30 @@ const MyBagSupabase = () => {
       )}
 
       {/* Manual Equipment Selector */}
-      <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
-        <EquipmentSelectorImproved
-          isOpen={equipmentSelectorOpen}
-          onClose={() => setEquipmentSelectorOpen(false)}
-          onSelectEquipment={addEquipment}
-        />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense 
+          fallback={
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+              <div className="bg-[#1a1a1a] p-6 rounded-xl border border-white/20 text-center space-y-4">
+                <Skeleton className="h-8 w-64 mx-auto" />
+                <Skeleton className="h-4 w-48 mx-auto" />
+                <div className="flex gap-2 justify-center">
+                  <Skeleton className="h-10 w-24" />
+                  <Skeleton className="h-10 w-24" />
+                </div>
+              </div>
+            </div>
+          }
+        >
+          {equipmentSelectorOpen && (
+            <EquipmentSelectorImproved
+              isOpen={equipmentSelectorOpen}
+              onClose={() => setEquipmentSelectorOpen(false)}
+              onSelectEquipment={addEquipment}
+            />
+          )}
+        </Suspense>
+      </ErrorBoundary>
 
       {selectedBagEquipment && (
         <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>

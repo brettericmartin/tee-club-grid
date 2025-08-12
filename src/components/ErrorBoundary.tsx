@@ -27,6 +27,14 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     console.error('[DEBUG] Error stack:', error.stack);
     console.error('[DEBUG] Component stack:', errorInfo.componentStack);
     console.error('[DEBUG] Error info:', errorInfo);
+    
+    // Check for module loading errors specific to mobile
+    if (error.message?.includes('MIME type') || 
+        error.message?.includes('text/html') ||
+        error.message?.includes('Failed to fetch dynamically imported module')) {
+      console.error('[DEBUG] Module loading error detected - common on mobile devices');
+      console.error('[DEBUG] This usually means the server returned HTML instead of JavaScript');
+    }
   }
 
   handleReset = () => {

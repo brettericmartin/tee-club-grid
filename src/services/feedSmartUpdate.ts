@@ -65,9 +65,8 @@ export async function smartCreateEquipmentPost(
 ) {
   console.log('Smart create equipment post:', { userId, bagId, bagName, equipmentName, equipmentId });
   
-  // First check if there's a recent post for this specific equipment (within 24 hours)
-  // This prevents duplicate posts when adding equipment and then immediately adding a photo
-  const recentEquipmentPost = await findRecentEquipmentPost(userId, equipmentId, 24);
+  // First check if there's a recent post for this specific equipment
+  const recentEquipmentPost = await findRecentEquipmentPost(userId, equipmentId, 1);
   
   if (recentEquipmentPost) {
     console.log('Found recent post for this equipment, skipping duplicate creation');

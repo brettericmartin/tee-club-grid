@@ -178,7 +178,7 @@ export function UnifiedPhotoUploadDialog({
       // Create feed post if user opted in
       if (shareToFeed && context?.type === 'equipment' && context.equipmentId) {
         try {
-          const result = await createEquipmentPhotoFeedPost(
+          await createEquipmentPhotoFeedPost(
             user.id,
             context.equipmentId,
             context.equipmentName || 'equipment',
@@ -187,17 +187,9 @@ export function UnifiedPhotoUploadDialog({
             context.bagId
           );
           
-          // Check if we updated an existing post or skipped creating a duplicate
-          if (result && result.media_urls && result.media_urls.includes(publicUrl)) {
-            toast.success('Photo added to existing feed post!');
-          } else if (result) {
-            // Existing post was returned but not updated (duplicate avoided)
-            toast.success('Photo uploaded successfully!');
-          } else {
-            toast.success('Photo shared to feed!');
-          }
+          toast.success('Photo shared to feed!');
           
-          // Refresh feeds to show the new/updated post
+          // Refresh feeds to show the new post
           await refreshFeeds();
         } catch (error) {
           console.error('Error creating feed post:', error);

@@ -16,9 +16,35 @@ export async function retryDynamicImport<T = any>(
 ): Promise<{ default: T }> {
   try {
     return await fn();
-  } catch (error) {
+  } catch (error: any) {
+    // Check if this is a MIME type error (common on mobile when server returns HTML instead of JS)
+    const isMimeError = error?.message?.includes('MIME type') || 
+                       error?.message?.includes('text/html');
+    
+    // On MIME type errors, try to reload the page once to clear cache
+    if (isMimeError && retriesLeft === 3) {
+      console.warn('[DynamicImport] MIME type error detected, clearing module cache...');
+      
+      // If on mobile, try to force refresh the module
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Clear module cache by adding timestamp to force fresh load
+        const timestamp = Date.now();
+        const moduleUrl = error?.message?.match(/from ['"](.+?)['"]/)?.[1];
+        if (moduleUrl) {
+          console.warn(`[DynamicImport] Attempting fresh load of ${moduleUrl}`);
+        }
+      }
+    }
+    
     if (retriesLeft === 0) {
       console.error('[DynamicImport] Failed after all retries:', error);
+      
+      // Provide a more helpful error message for MIME type issues
+      if (isMimeError) {
+        console.error('[DynamicImport] This usually means the server returned an HTML error page instead of JavaScript.');
+        console.error('[DynamicImport] Try refreshing the page or clearing your browser cache.');
+      }
+      
       throw error;
     }
     

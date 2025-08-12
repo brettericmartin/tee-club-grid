@@ -103,31 +103,9 @@ export async function createEquipmentPhotoFeedPost(
   logger.debug('Creating equipment photo feed post:', { userId, equipmentId, photoUrl, bagId });
   
   try {
-    // Check for recent equipment post to update instead of creating new
-    // Increased time window to 24 hours to catch equipment added earlier
-    const recentPost = await findRecentEquipmentPost(userId, equipmentId, 24);
-    
-    if (recentPost) {
-      logger.debug('Found recent equipment post, updating with photo instead of creating new');
-      
-      // If the post already has photos and was created recently (within 1 hour), 
-      // just update it. Otherwise, skip creating a new post entirely.
-      const postAge = new Date().getTime() - new Date(recentPost.created_at).getTime();
-      const oneHour = 60 * 60 * 1000;
-      
-      if (postAge <= oneHour) {
-        // Recent post - update it with the new photo
-        const updatedPost = await updatePostWithPhoto(recentPost.id, photoUrl, caption);
-        if (updatedPost) {
-          logger.debug('Successfully updated existing post with photo:', updatedPost.id);
-          return updatedPost;
-        }
-      } else {
-        // Post is older than 1 hour - don't create duplicate, just silently succeed
-        logger.debug('Equipment already has a feed post from earlier, skipping duplicate creation');
-        return recentPost; // Return the existing post without creating a new one
-      }
-    }
+    // Simple approach: Always create a new feed post when a photo is uploaded
+    // Since we disabled automatic posts on equipment add, this prevents duplicates
+    logger.debug('Creating feed post for equipment photo');
 
     // No recent post found or update failed, create new post
     const { data, error } = await supabase
