@@ -13,7 +13,7 @@ const Command = React.forwardRef<
   <CommandPrimitive
     ref={ref}
     className={cn(
-      "flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground",
+      "flex h-full w-full flex-col overflow-hidden rounded-md bg-transparent text-white",
       className
     )}
     {...props}
@@ -39,12 +39,12 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-    <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+  <div className="flex items-center border-b border-white/20 px-3" cmdk-input-wrapper="">
+    <Search className="mr-2 h-4 w-4 shrink-0 text-white/50" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-11 w-full rounded-md bg-transparent py-3 text-sm text-white outline-none placeholder:text-white/50 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
@@ -60,7 +60,14 @@ const CommandList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn("max-h-[300px] overflow-y-auto overflow-x-hidden", className)}
+    className={cn(
+      "max-h-[50vh] sm:max-h-[300px] overflow-y-auto overflow-x-hidden",
+      // Add smooth scrolling for mobile
+      "scroll-smooth overscroll-contain",
+      // Better mobile scrolling performance
+      "-webkit-overflow-scrolling-touch",
+      className
+    )}
     {...props}
   />
 ))
@@ -115,7 +122,19 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50",
+      "relative flex cursor-default select-none items-center rounded-sm",
+      // Increase padding for better touch targets (minimum 44px height)
+      "px-3 py-3 sm:px-2 sm:py-1.5",
+      "min-h-[44px] sm:min-h-0",
+      "text-sm outline-none",
+      // Selection states
+      "data-[disabled=true]:pointer-events-none data-[selected='true']:bg-white/20 data-[selected=true]:text-white data-[disabled=true]:opacity-50",
+      // Add hover state for desktop
+      "hover:bg-white/10",
+      // Better tap feedback on mobile
+      "active:bg-white/20 transition-colors",
+      // Text color
+      "text-white",
       className
     )}
     {...props}

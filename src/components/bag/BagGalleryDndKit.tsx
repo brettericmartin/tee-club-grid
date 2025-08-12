@@ -20,7 +20,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Grip, Shuffle, Save, Eye, Wrench, Settings2 } from 'lucide-react';
+import { Grip, Shuffle, Save, Eye, Wrench, Settings2, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { EQUIPMENT_CATEGORIES } from '@/lib/equipment-categories';
@@ -31,6 +31,7 @@ type Equipment = Database['public']['Tables']['equipment']['Row'];
 type BagEquipment = Database['public']['Tables']['bag_equipment']['Row'] & {
   equipment: Equipment;
   custom_photo_url?: string;
+  is_featured?: boolean;
   shaft?: Database['public']['Tables']['shafts']['Row'];
   grip?: Database['public']['Tables']['grips']['Row'];
 };
@@ -50,6 +51,7 @@ interface BagGalleryDndKitProps {
   onLayoutChange?: (layout: Record<string, LayoutItem>) => void;
   onSaveLayout?: () => void;
   onEquipmentClick?: (item: BagEquipment) => void;
+  onToggleFeatured?: (item: BagEquipment) => void;
 }
 
 // Equipment size multipliers based on category
@@ -73,6 +75,7 @@ function SortableItem({
   isEditing, 
   isDragging,
   onEquipmentClick,
+  onToggleFeatured,
   isOwnBag,
   size
 }: {
@@ -80,6 +83,7 @@ function SortableItem({
   isEditing: boolean;
   isDragging: boolean;
   onEquipmentClick?: (item: BagEquipment) => void;
+  onToggleFeatured?: (item: BagEquipment) => void;
   isOwnBag: boolean;
   size: number;
 }) {
@@ -135,6 +139,31 @@ function SortableItem({
           }
         }}
       >
+        {/* Featured Star Button - Only show for own bag */}
+        {isOwnBag && !isEditing && onToggleFeatured && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFeatured(item);
+            }}
+            className={cn(
+              "absolute top-2 left-2 z-20 p-2 rounded-full transition-all",
+              "hover:scale-110 active:scale-95",
+              item.is_featured 
+                ? "bg-primary text-white shadow-lg shadow-primary/50" 
+                : "bg-black/40 text-white/60 hover:bg-black/60 hover:text-white"
+            )}
+            title={item.is_featured ? "Remove from featured" : "Add to featured"}
+          >
+            <Star 
+              className={cn(
+                "h-4 w-4 transition-all",
+                item.is_featured && "fill-current"
+              )} 
+            />
+          </button>
+        )}
+
         {/* Drag Handle */}
         {isEditing && (
           <div
@@ -212,6 +241,7 @@ export function BagGalleryDndKit({
   onLayoutChange,
   onSaveLayout,
   onEquipmentClick,
+  onToggleFeatured,
 }: BagGalleryDndKitProps) {
   const [items, setItems] = useState<BagEquipment[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -400,6 +430,7 @@ export function BagGalleryDndKit({
                 isEditing={isEditing && !showPreview}
                 isDragging={!!activeId}
                 onEquipmentClick={onEquipmentClick}
+                onToggleFeatured={onToggleFeatured}
                 isOwnBag={isOwnBag}
                 size={getItemSize(item)}
               />

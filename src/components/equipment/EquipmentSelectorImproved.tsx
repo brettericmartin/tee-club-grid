@@ -587,7 +587,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
       modal={true}
     >
       <DialogContent 
-        className="w-full max-w-full sm:max-w-3xl h-full sm:h-auto max-h-[100vh] sm:max-h-[90vh] p-0 sm:p-6 flex flex-col bg-[#1a1a1a] sm:glass-card border-white/20 text-white"
+        className="flex flex-col bg-[#1a1a1a] sm:glass-card border-white/20 text-white"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -603,17 +603,9 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           e.preventDefault();
         }}
       >
-        <DialogHeader className="p-4 sm:p-0 pb-2 sm:pb-4">
+        <DialogHeader className="flex-shrink-0 sticky top-0 bg-[#1a1a1a] z-10 border-b border-white/10 p-4 sm:p-6 sm:pb-4 sm:border-0">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl sm:text-2xl">{getStepTitle()}</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleCloseAttempt}
-              className="text-white hover:bg-white/10 -mr-2 sm:mr-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
 
@@ -681,7 +673,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 sm:px-0 pb-4">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-4">
           {/* Category Selection */}
           {step === 'category' && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

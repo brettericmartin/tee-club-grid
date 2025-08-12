@@ -787,6 +787,38 @@ const MyBagSupabase = () => {
     setEquipmentEditorOpen(true);
   };
 
+  const handleToggleFeatured = async (item: BagEquipmentItem) => {
+    try {
+      const newFeaturedStatus = !item.is_featured;
+      
+      // Update in database
+      const { error } = await supabase
+        .from('bag_equipment')
+        .update({ is_featured: newFeaturedStatus })
+        .eq('id', item.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setBagItems(prevItems => 
+        prevItems.map(i => 
+          i.id === item.id 
+            ? { ...i, is_featured: newFeaturedStatus }
+            : i
+        )
+      );
+
+      toast.success(
+        newFeaturedStatus 
+          ? `${item.equipment.brand} ${item.equipment.model} added to featured`
+          : `${item.equipment.brand} ${item.equipment.model} removed from featured`
+      );
+    } catch (error) {
+      console.error('Error toggling featured status:', error);
+      toast.error('Failed to update featured status');
+    }
+  };
+
   const totalValue = bagItems.reduce((sum, item) => 
     sum + (item.purchase_price || item.equipment.msrp || 0), 0
   );
@@ -1193,6 +1225,7 @@ const MyBagSupabase = () => {
                 }
               }}
               onEquipmentClick={handleEditEquipment}
+              onToggleFeatured={handleToggleFeatured}
             />
           </Suspense>
         ) : viewMode === 'list' ? (

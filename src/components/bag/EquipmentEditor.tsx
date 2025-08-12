@@ -313,7 +313,7 @@ export function EquipmentEditor({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="w-full max-w-full sm:max-w-2xl h-full sm:h-auto max-h-[100vh] sm:max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               Edit {equipment.equipment.brand} {equipment.equipment.model}
@@ -418,7 +418,7 @@ export function EquipmentEditor({
           </div>
 
           {/* Configuration */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Shaft Selection - Only show for clubs */}
             {isClub && (
               <div>
@@ -439,7 +439,7 @@ export function EquipmentEditor({
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
+                  <PopoverContent className="w-full p-0" align="start" sideOffset={4}>
                     <Command>
                       <CommandInput 
                         placeholder="Search shafts..." 
@@ -530,7 +530,7 @@ export function EquipmentEditor({
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
+                  <PopoverContent className="w-full p-0" align="start" sideOffset={4}>
                     <Command>
                       <CommandInput 
                         placeholder="Search grips..." 
@@ -644,7 +644,7 @@ export function EquipmentEditor({
           </div>
 
           {/* Purchase Details */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Purchase Price</Label>
               <Input

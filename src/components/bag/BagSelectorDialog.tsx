@@ -163,7 +163,7 @@ export function BagSelectorDialog({
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card border-white/20 text-white max-w-2xl">
+      <DialogContent className="glass-card border-white/20 text-white sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl">Your Bags</DialogTitle>
         </DialogHeader>
@@ -171,19 +171,19 @@ export function BagSelectorDialog({
         <div className="space-y-4">
           {/* Create New Bag Button - Prominent at the top */}
           <Button
-            className="w-full h-20 bg-primary hover:bg-primary/90 text-white group"
+            className="w-full min-h-[80px] sm:h-20 bg-primary hover:bg-primary/90 text-white group p-4"
             onClick={() => {
               onClose();
               onCreateNew();
             }}
           >
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                <Plus className="w-6 h-6" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors flex-shrink-0">
+                <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div className="text-left">
-                <div className="font-semibold text-lg">Create New Bag</div>
-                <div className="text-sm opacity-80">Start building a new setup</div>
+                <div className="font-semibold text-base sm:text-lg">Create New Bag</div>
+                <div className="text-xs sm:text-sm opacity-80">Start building a new setup</div>
               </div>
             </div>
           </Button>
@@ -192,17 +192,17 @@ export function BagSelectorDialog({
           {bags.length > 0 && (
             <>
               <div className="text-sm text-white/60 font-medium">Your Existing Bags</div>
-              <ScrollArea className="h-[400px] pr-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <ScrollArea className="h-[50vh] sm:h-[400px] pr-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {bags.map((bag) => (
                     <Card
                       key={bag.id}
-                      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors group relative"
+                      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors group relative min-h-[100px]"
                       onClick={() => handleSelectBag(bag.id)}
                     >
                       {/* Primary Bag Toggle Switch and Delete Button */}
                       <div 
-                        className="absolute top-3 right-3 z-10 flex items-center gap-2"
+                        className="absolute top-3 right-3 z-10 flex items-center gap-1 sm:gap-2"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {/* Delete button - only show if user has more than 1 bag */}
@@ -221,7 +221,7 @@ export function BagSelectorDialog({
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
-                        <span className="text-xs text-white/50">Primary</span>
+                        <span className="text-xs text-white/50 hidden sm:inline">Primary</span>
                         <Switch
                           checked={bag.is_primary || false}
                           onCheckedChange={async (checked) => {
@@ -234,12 +234,12 @@ export function BagSelectorDialog({
                           className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-white/20"
                         />
                       </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                      <div className="flex items-start gap-3 pr-12 sm:pr-16">
+                        <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors flex-shrink-0">
                           {getBagIcon(bag.bag_type)}
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-white group-hover:text-primary transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-white group-hover:text-primary transition-colors truncate">
                             {bag.name}
                           </h3>
                           <p className="text-sm text-white/60 capitalize">
@@ -262,7 +262,7 @@ export function BagSelectorDialog({
 
     {/* Delete Confirmation Dialog */}
     <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-      <DialogContent className="glass-card border-white/20 text-white max-w-md">
+      <DialogContent className="glass-card border-white/20 text-white sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">

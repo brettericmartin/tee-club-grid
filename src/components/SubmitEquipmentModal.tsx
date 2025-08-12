@@ -173,7 +173,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory, pref
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-2xl overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -189,9 +189,6 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory, pref
                 </Badge>
               )}
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="w-4 h-4" />
-            </Button>
           </div>
         </DialogHeader>
 
@@ -228,11 +225,15 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory, pref
                     onFocus={() => setShowBrandDropdown(true)}
                     placeholder="Search for a brand..."
                     required
+                    className="h-12 sm:h-10 text-base sm:text-sm"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
                   />
                   <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
                   
                   {showBrandDropdown && (
-                    <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-lg max-h-[40vh] sm:max-h-48 overflow-y-auto">
                       <Button
                         type="button"
                         variant="ghost"
@@ -312,11 +313,15 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory, pref
                     placeholder="Search for a model..."
                     required
                     disabled={!formData.brand}
+                    className="h-12 sm:h-10 text-base sm:text-sm"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
                   />
                   <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
                   
                   {showModelDropdown && formData.brand && (
-                    <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-lg max-h-[40vh] sm:max-h-48 overflow-y-auto">
                       <Button
                         type="button"
                         variant="ghost"
@@ -384,7 +389,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory, pref
             </div>
 
             {/* Category and Year */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="category">Category *</Label>
                 <select
@@ -430,7 +435,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory, pref
             {/* Shaft specific fields */}
             {formData.category === 'shaft' && (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="flex">Flex</Label>
                     <Input
@@ -457,7 +462,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory, pref
             {/* Grip specific fields */}
             {formData.category === 'grip' && (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="size">Size</Label>
                     <Input
