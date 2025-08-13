@@ -35,7 +35,7 @@ export function BagCreatedCard({ post, onLike, isLiked }: BagCreatedCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3)] overflow-hidden"
+      className="bg-[#1a1a1a] border border-white/10 rounded-xl shadow-lg overflow-hidden"
     >
       {/* Header */}
       <div className="p-4 border-b border-white/10">

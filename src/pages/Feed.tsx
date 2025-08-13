@@ -172,7 +172,7 @@ const FeedContent = () => {
             <Button
               variant={filter === 'all' ? 'default' : 'outline'}
               onClick={() => setFilter('all')}
-              className={filter === 'all' ? 'bg-primary hover:bg-primary/90' : 'bg-white/10 backdrop-blur-[10px] text-white border-white/20 hover:bg-white/20'}
+              className={filter === 'all' ? 'bg-primary hover:bg-primary/90' : 'bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]'}
             >
               <Sparkles className="w-4 h-4 mr-2" />
               All
@@ -181,7 +181,7 @@ const FeedContent = () => {
               <Button
                 variant={filter === 'following' ? 'default' : 'outline'}
                 onClick={() => setFilter('following')}
-                className={filter === 'following' ? 'bg-primary hover:bg-primary/90' : 'bg-white/10 backdrop-blur-[10px] text-white border-white/20 hover:bg-white/20'}
+                className={filter === 'following' ? 'bg-primary hover:bg-primary/90' : 'bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]'}
               >
                 <Users className="w-4 h-4 mr-2" />
                 Following
@@ -191,12 +191,12 @@ const FeedContent = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="bg-white/10 backdrop-blur-[10px] text-white border-white/20 hover:bg-white/20 ml-auto">
+              <Button variant="outline" className="bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a] ml-auto">
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-gray-900/95 backdrop-blur-[10px] border-white/20">
+            <DropdownMenuContent align="end" className="w-56 bg-[#1a1a1a] border-white/10">
               <DropdownMenuLabel className="text-white">Filter by</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-white/10" />
               <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
@@ -240,7 +240,7 @@ const FeedContent = () => {
               onClick={() => setDisplayCount(prev => prev + 12)}
               variant="outline"
               size="lg"
-              className="bg-white/10 backdrop-blur-[10px] text-white border-white/20 hover:bg-white/20"
+              className="bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]"
             >
               Load More
             </Button>
@@ -250,7 +250,7 @@ const FeedContent = () => {
         {/* Empty State */}
         {!loading && allPosts.length === 0 && (
           <div className="text-center py-20">
-            <div className="bg-gray-900/60 backdrop-blur-[10px] border border-white/20 rounded-xl p-12 max-w-md mx-auto">
+            <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-12 max-w-md mx-auto">
               <Trophy className="w-16 h-16 text-white/50 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">No Posts Yet</h3>
               <p className="text-white/70">
@@ -283,7 +283,7 @@ const FeedContent = () => {
                 <Plus className="w-6 h-6" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="top" className="bg-gray-900/95 backdrop-blur-[10px] border-white/20 mb-2">
+            <DropdownMenuContent align="end" side="top" className="bg-[#1a1a1a] border-white/10 mb-2">
               <DropdownMenuItem 
                 onClick={() => window.location.href = '/equipment'}
                 className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"

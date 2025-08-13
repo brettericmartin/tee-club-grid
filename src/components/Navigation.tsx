@@ -120,7 +120,7 @@ const Navigation = () => {
                       ? 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-black' 
                       : 'bg-primary hover:bg-primary/90'
                   }`}>
-                    <img src="/dog.png" alt="Feed" className="w-6 h-6" />
+                    <img src="/dog.png" alt="Feed" className="w-6 h-6" loading="eager" />
                     <span className="text-sm sm:text-base">Feed</span>
                   </div>
                 </div>
@@ -142,7 +142,7 @@ const Navigation = () => {
                       ? 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-black' 
                       : 'bg-primary hover:bg-primary/90'
                   }`}>
-                    <img src="/MYBAG.png" alt="My Bag" className="w-6 h-6" />
+                    <img src="/MYBAG.png" alt="My Bag" className="w-6 h-6" loading="eager" />
                     <span className="text-sm sm:text-base">My Bag</span>
                   </div>
                 </div>

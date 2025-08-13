@@ -1035,7 +1035,7 @@ const MyBagSupabase = () => {
                     </div>
                     
                     {/* Info */}
-                    <div className="p-2 bg-black/60 backdrop-blur-sm">
+                    <div className="p-2 bg-black/80">
                       <h3 className="font-medium text-xs text-white">{bg.name}</h3>
                       <p className="text-xs text-white/60 truncate">{bg.description}</p>
                     </div>
@@ -1105,19 +1105,19 @@ const MyBagSupabase = () => {
 
         {/* Stats Bar */}
         <div className="grid grid-cols-5 gap-2 sm:gap-3 mb-8">
-          <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
+          <Card className="bg-[#1a1a1a] border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
               <p className="text-xs sm:text-sm text-gray-200">Total Tees</p>
               <p className="text-lg sm:text-2xl font-bold text-white">{formatCompactNumber(totalTees)}</p>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
+          <Card className="bg-[#1a1a1a] border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
               <p className="text-xs sm:text-sm text-gray-200">Equipment</p>
               <p className="text-lg sm:text-2xl font-bold text-white">{bagItems.length}</p>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
+          <Card className="bg-[#1a1a1a] border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
               <p className="text-xs sm:text-sm text-gray-200">Featured</p>
               <p className="text-lg sm:text-2xl font-bold text-white">
@@ -1125,7 +1125,7 @@ const MyBagSupabase = () => {
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
+          <Card className="bg-[#1a1a1a] border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
               <p className="text-xs sm:text-sm text-gray-200">Badges</p>
               <p className="text-lg sm:text-2xl font-bold text-white">
@@ -1133,7 +1133,7 @@ const MyBagSupabase = () => {
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-[10px] border-white/20">
+          <Card className="bg-[#1a1a1a] border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
               <p className="text-[10px] sm:text-xs text-gray-300">Est. Value</p>
               <p className="text-sm sm:text-lg font-medium text-white">{formatCompactCurrency(totalValue)}</p>
@@ -1233,7 +1233,7 @@ const MyBagSupabase = () => {
         ) : viewMode === 'list' ? (
           <div className="space-y-4">
             {bagItems.map((item) => (
-              <Card key={item.id} className="bg-white/10 backdrop-blur-[10px] border-white/20">
+              <Card key={item.id} className="bg-[#1a1a1a] border-white/10">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
                     <div 

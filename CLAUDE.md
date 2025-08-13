@@ -62,12 +62,78 @@
 - Maintain single source of truth for equipment photos
 - Prevent duplicate assets or redundant components
 
-**Performance-First Design:**
-- Glassmorphism ONLY for navigation bars and primary bag cards
-- Use solid grays (#1a1a1a, #2a2a2a, #3a3a3a) for content areas
-- Minimize backdrop-filter usage to reduce GPU load
-- Lazy load all images with blur placeholders
-- Virtual scrolling for lists over 50 items
+## 🚀 PERFORMANCE-FIRST DESIGN REQUIREMENTS
+
+### **Critical Performance Rules**
+
+**Glassmorphism Restrictions:**
+- ✅ **ALLOWED ONLY ON:** Navigation bars (top nav only)
+- ❌ **NEVER USE ON:** Feed cards, content areas, modals, buttons, stats cards
+- **Replacement Strategy:** Use solid backgrounds (#1a1a1a, #2a2a2a, #3a3a3a)
+- **Why:** Backdrop-filter causes 60%+ GPU load on mobile devices
+
+**Color Palette for Performance:**
+```css
+/* Primary backgrounds - NO transparency */
+--bg-primary: #111111;      /* Main background */
+--bg-card: #1a1a1a;        /* Cards, modals */
+--bg-elevated: #2a2a2a;    /* Buttons, inputs */
+--bg-hover: #3a3a3a;       /* Hover states */
+
+/* Borders - Minimal opacity */
+--border-subtle: rgba(255,255,255,0.1);
+--border-strong: rgba(255,255,255,0.2);
+```
+
+**Image Optimization Requirements:**
+- **Max sizes:** Icons: 50KB, Hero images: 200KB, Product photos: 100KB
+- **Formats:** Use WebP with JPEG fallback, SVG for icons
+- **Loading:** `loading="lazy"` on ALL images except above-fold
+- **Responsive:** Provide srcset for 1x, 2x displays
+- **Current Issues:** dog.png (1.4MB), MYBAG.png (1.3MB) need immediate optimization
+
+**Mobile-First Requirements:**
+- **Touch targets:** Minimum 44x44px (WCAG AAA)
+- **Text sizing:** Body 16px minimum, buttons 14px minimum
+- **Spacing:** 16px minimum padding on mobile
+- **Viewport:** Prevent horizontal scroll with `overflow-x-hidden`
+- **Gestures:** Support swipe, pinch-zoom, pull-to-refresh
+
+**React Performance Patterns:**
+```tsx
+// REQUIRED for heavy components
+export default React.memo(ComponentName);
+
+// REQUIRED for expensive calculations
+const expensiveValue = useMemo(() => computeValue(data), [data]);
+
+// REQUIRED for stable callbacks
+const handleClick = useCallback(() => {}, [dependency]);
+
+// AVOID: 20+ useState in single component
+// USE: useReducer or split into smaller components
+```
+
+**CSS Performance Guidelines:**
+- **Avoid:** Complex selectors, deep nesting, :has() pseudo-class
+- **Use:** BEM naming, utility classes, CSS-in-JS for dynamic styles
+- **GPU Acceleration:** Use `transform` and `opacity` for animations
+- **Will-change:** Add only during animation, remove after
+
+### **Performance Monitoring Metrics**
+
+**Target Metrics:**
+- **LCP (Largest Contentful Paint):** < 2.5s
+- **FID (First Input Delay):** < 100ms
+- **CLS (Cumulative Layout Shift):** < 0.1
+- **TTI (Time to Interactive):** < 3.5s
+- **Bundle Size:** < 200KB initial, < 1MB total
+
+**Testing Requirements:**
+- Test on iPhone 12 mini (worst case iOS)
+- Test on mid-range Android (Pixel 4a)
+- Test on 3G connection speeds
+- Test with CPU throttling (4x slowdown)
 
 ## Platform Vision
 

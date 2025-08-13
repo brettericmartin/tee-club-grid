@@ -12,6 +12,7 @@ interface PostThreadProps {
   posts: ForumPostWithUser[];
   threadId: string;
   isLocked?: boolean;
+  categorySlug?: string;
   onPostUpdate?: () => void;
   maxDepth?: number;
 }
@@ -20,6 +21,7 @@ export default function PostThread({
   posts, 
   threadId, 
   isLocked = false,
+  categorySlug,
   onPostUpdate,
   maxDepth = 4 
 }: PostThreadProps) {
@@ -30,6 +32,9 @@ export default function PostThread({
 
   const handleReply = async (parentPostId: string) => {
     if (!user || !replyContent.trim()) return;
+
+    // Save current scroll position
+    const scrollPosition = window.scrollY;
 
     setIsSubmitting(true);
     try {
@@ -52,6 +57,10 @@ export default function PostThread({
       // Refresh the posts
       if (onPostUpdate) {
         onPostUpdate();
+        // Restore scroll position after update
+        setTimeout(() => {
+          window.scrollTo({ top: scrollPosition, behavior: 'instant' });
+        }, 100);
       }
     } catch (error) {
       console.error('Error posting reply:', error);
@@ -84,14 +93,30 @@ export default function PostThread({
           )}
           style={{ marginLeft: `${depth * 24}px` }}
         >
-          <PostCard
-            post={post}
-            onEdit={onPostUpdate}
-            onDelete={onPostUpdate}
-            showActions={true}
-          />
+          <div className="relative">
+            <PostCard
+              post={post}
+              categorySlug={categorySlug}
+              onEdit={onPostUpdate}
+              onDelete={onPostUpdate}
+              showActions={true}
+            />
+            
+            {/* Reply button at top-right of card */}
+            {canReply && !isReplying && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-2 right-16 text-white/60 hover:text-white hover:bg-white/10"
+                onClick={() => setReplyingTo(post.id)}
+              >
+                <MessageSquare className="w-4 h-4 mr-1" />
+                Reply
+              </Button>
+            )}
+          </div>
           
-          {/* Reply button */}
+          {/* Reply button at bottom with cancel option and reply count */}
           {canReply && (
             <div className="flex items-center gap-2 mt-2 ml-4">
               <Button
@@ -115,7 +140,7 @@ export default function PostThread({
           {isReplying && (
             <div className="mt-3 ml-4">
               <div className="text-sm text-white/60 mb-2">
-                Replying to @{post.user.username}
+                Replying to @{post.user.display_name || post.user.username}
               </div>
               <PostEditor
                 value={replyContent}

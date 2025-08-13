@@ -39,7 +39,7 @@ export function BagUpdateCard({ post, onLike, isLiked }: BagUpdateCardProps) {
         className="absolute inset-0 w-full h-full backface-hidden"
         style={{ backfaceVisibility: 'hidden' }}
       >
-        <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3)] overflow-hidden h-full">
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl shadow-lg overflow-hidden h-full">
           {/* Header */}
           <div className="p-4 border-b border-white/10">
             <div className="flex items-center justify-between">
@@ -124,7 +124,7 @@ export function BagUpdateCard({ post, onLike, isLiked }: BagUpdateCardProps) {
           </div>
 
           {/* Actions */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/20 backdrop-blur-sm">
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Button
@@ -165,7 +165,7 @@ export function BagUpdateCard({ post, onLike, isLiked }: BagUpdateCardProps) {
           transform: 'rotateY(180deg)'
         }}
       >
-        <div className="bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3)] overflow-hidden h-full">
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl shadow-lg overflow-hidden h-full">
           {/* Bag Header */}
           <div className="p-4 border-b border-white/10">
             <div className="flex items-center justify-between">
@@ -210,7 +210,7 @@ export function BagUpdateCard({ post, onLike, isLiked }: BagUpdateCardProps) {
           </div>
 
           {/* Bag Stats */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/20 backdrop-blur-sm">
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent">
             <div className="flex justify-between text-sm">
               <div className="text-center">
                 <p className="text-primary font-bold">{formatCompactCurrency(totalValue)}</p>

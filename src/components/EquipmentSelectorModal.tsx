@@ -21,11 +21,26 @@ interface EquipmentSelectorModalProps {
 }
 
 const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category }: EquipmentSelectorModalProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(category || "all");
-  const [selectedBrand, setSelectedBrand] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
+  // Load persisted state from sessionStorage
+  const loadPersistedState = () => {
+    try {
+      const persisted = sessionStorage.getItem('equipmentSelectorState');
+      if (persisted) {
+        return JSON.parse(persisted);
+      }
+    } catch (e) {
+      console.error('Failed to load persisted state:', e);
+    }
+    return null;
+  };
+
+  const persistedState = loadPersistedState();
+  
+  const [searchQuery, setSearchQuery] = useState(persistedState?.searchQuery || "");
+  const [selectedCategory, setSelectedCategory] = useState(category || persistedState?.selectedCategory || "all");
+  const [selectedBrand, setSelectedBrand] = useState(persistedState?.selectedBrand || "");
+  const [selectedYear, setSelectedYear] = useState(persistedState?.selectedYear || "");
+  const [showFilters, setShowFilters] = useState(persistedState?.showFilters || false);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [allEquipment, setAllEquipment] = useState<Equipment[]>([]); // Store all equipment
   const [loading, setLoading] = useState(true);
@@ -41,6 +56,22 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
   // Get unique brands and years from all equipment (not filtered)
   const brands = [...new Set(allEquipment.map(e => e.brand))].sort();
   const years = [...new Set(allEquipment.map(e => e.release_date ? new Date(e.release_date).getFullYear() : null).filter(Boolean))].sort((a, b) => (b || 0) - (a || 0));
+
+  // Persist state to sessionStorage whenever it changes
+  useEffect(() => {
+    const stateToSave = {
+      searchQuery,
+      selectedCategory,
+      selectedBrand,
+      selectedYear,
+      showFilters
+    };
+    try {
+      sessionStorage.setItem('equipmentSelectorState', JSON.stringify(stateToSave));
+    } catch (e) {
+      console.error('Failed to persist state:', e);
+    }
+  }, [searchQuery, selectedCategory, selectedBrand, selectedYear, showFilters]);
 
   // Load all equipment when modal opens
   useEffect(() => {

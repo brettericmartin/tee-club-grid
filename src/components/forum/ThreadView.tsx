@@ -62,6 +62,9 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
   const handleReply = async () => {
     if (!user || !replyContent.trim()) return;
 
+    // Save current scroll position
+    const scrollPosition = window.scrollY;
+
     setIsReplying(true);
     try {
       const { error } = await createForumPost({
@@ -81,6 +84,11 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
       
       // Refresh posts to show the new reply
       await fetchThreadData();
+      
+      // Restore scroll position after posts have loaded
+      setTimeout(() => {
+        window.scrollTo({ top: scrollPosition, behavior: 'instant' });
+      }, 100);
     } catch (error) {
       console.error('Error posting reply:', error);
       toast.error('Failed to post reply');
@@ -159,7 +167,7 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
           <span className="flex items-center gap-1">
-            Posted by {thread.user.username}
+            Posted by {thread.user.display_name || thread.user.username}
           </span>
           <span>•</span>
           <span>
@@ -200,6 +208,7 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
           posts={posts}
           threadId={threadId}
           isLocked={thread.is_locked}
+          categorySlug={thread.category.slug}
           onPostUpdate={fetchThreadData}
         />
       </div>

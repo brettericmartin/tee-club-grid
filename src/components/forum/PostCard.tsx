@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
-import { Edit2, MoreVertical, Flag, Flame } from 'lucide-react';
+import { Edit2, MoreVertical, Flag, Flame, CheckCircle } from 'lucide-react';
 import { TeedBallIcon } from '@/components/shared/TeedBallLike';
 import { cn } from '@/lib/utils';
 import {
@@ -35,12 +35,14 @@ interface PostCardProps {
       tee: number;
       helpful: number;
       fire: number;
+      fixed?: number;
       user_reactions?: string[]; // Changed to array for multiple reactions
     };
     depth?: number;
   };
   threadLocked?: boolean;
   showActions?: boolean;
+  categorySlug?: string;
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -49,6 +51,7 @@ export default function PostCard({
   post, 
   threadLocked = false, 
   showActions = true,
+  categorySlug,
   onEdit,
   onDelete 
 }: PostCardProps) {
@@ -57,12 +60,14 @@ export default function PostCard({
     tee: post.reactions?.tee || 0,
     helpful: post.reactions?.helpful || 0,
     fire: post.reactions?.fire || 0,
+    fixed: post.reactions?.fixed || 0,
     user_reactions: post.reactions?.user_reactions || []
   });
   const [isReacting, setIsReacting] = useState(false);
   const isOwner = user?.id === post.user?.id;
+  const isSiteFeedback = categorySlug === 'site-feedback';
 
-  const handleReaction = async (type: 'tee' | 'helpful' | 'fire') => {
+  const handleReaction = async (type: 'tee' | 'helpful' | 'fire' | 'fixed') => {
     if (!user || isReacting) return;
 
     setIsReacting(true);
@@ -220,6 +225,19 @@ export default function PostCard({
                   Hot Take {reactions.fire > 0 && `(${reactions.fire})`}
                 </span>
               </Button>
+              {isSiteFeedback && (
+                <Button
+                  variant={reactions.user_reactions.includes('fixed') ? 'secondary' : 'ghost'}
+                  className="h-12 px-4 flex flex-col sm:flex-row items-center gap-1 min-w-[80px]"
+                  onClick={() => handleReaction('fixed')}
+                  disabled={!user || isReacting}
+                >
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span className="text-xs sm:text-sm">
+                    Fixed {reactions.fixed > 0 && `(${reactions.fixed})`}
+                  </span>
+                </Button>
+              )}
             </div>
 
             {/* Right side - Tee button */}

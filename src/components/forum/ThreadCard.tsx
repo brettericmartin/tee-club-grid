@@ -53,7 +53,7 @@ export default function ThreadCard({ thread, onClick }: ThreadCardProps) {
         <Avatar className="h-10 w-10 flex-shrink-0">
           <AvatarImage src={thread.user.avatar_url} alt={thread.user.username} />
           <AvatarFallback className="bg-gradient-to-br from-green-400 to-blue-500 text-white">
-            {thread.user.username[0].toUpperCase()}
+            {(thread.user.display_name || thread.user.username)[0].toUpperCase()}
           </AvatarFallback>
         </Avatar>
 
@@ -125,7 +125,7 @@ export default function ThreadCard({ thread, onClick }: ThreadCardProps) {
             <Avatar className="h-6 w-6">
               <AvatarImage src={lastActivityUser.avatar_url} alt={lastActivityUser.username} />
               <AvatarFallback className="text-xs">
-                {lastActivityUser.username[0].toUpperCase()}
+                {(lastActivityUser.display_name || lastActivityUser.username)[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <span className="font-medium text-gray-300">{lastActivityUser.display_name || lastActivityUser.username}</span>
