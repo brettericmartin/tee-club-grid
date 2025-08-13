@@ -141,10 +141,15 @@ const BagCardComponent = ({
   const equipmentCount = allEquipment.length;
 
   const getEquipmentImage = (item: BagEquipmentItem) => {
-    // Prioritize custom photo URL if available
+    // First priority: User's custom selected photo
     if (item.custom_photo_url && !imageError[`${item.id}-custom`]) {
       return item.custom_photo_url;
     }
+    // Second priority: Equipment's primary photo (could be from equipment_photos)
+    if ((item.equipment as any)?.primaryPhoto && !imageError[`${item.id}-primary`]) {
+      return (item.equipment as any).primaryPhoto;
+    }
+    // Third priority: Default equipment image
     if (item.equipment?.image_url && !imageError[`${item.id}-equipment`]) {
       return item.equipment.image_url;
     }
