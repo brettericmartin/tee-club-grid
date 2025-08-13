@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
-import { Edit2, MoreVertical, Flag, Flame, CheckCircle } from 'lucide-react';
+import { Edit2, MoreVertical, Flag, Flame, CheckCircle, Trash2 } from 'lucide-react';
 import { TeedBallIcon } from '@/components/shared/TeedBallLike';
 import { cn } from '@/lib/utils';
 import {
@@ -15,6 +15,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import EditPostDialog from './EditPostDialog';
+import { deleteForumPost } from '@/services/forum';
+import { toast } from 'sonner';
 
 interface PostCardProps {
   post: {
@@ -64,8 +67,36 @@ export default function PostCard({
     user_reactions: post.reactions?.user_reactions || []
   });
   const [isReacting, setIsReacting] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const isOwner = user?.id === post.user?.id;
   const isSiteFeedback = categorySlug === 'site-feedback';
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const { error } = await deleteForumPost(post.id);
+      
+      if (error) {
+        toast.error('Failed to delete post');
+        return;
+      }
+
+      toast.success('Post deleted successfully');
+      if (onDelete) {
+        onDelete();
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast.error('Failed to delete post');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleReaction = async (type: 'tee' | 'helpful' | 'fire' | 'fixed') => {
     if (!user || isReacting) return;
@@ -124,7 +155,8 @@ export default function PostCard({
   };
 
   return (
-    <Card className="bg-[#1a1a1a] border-white/10 p-6">
+    <>
+      <Card className="bg-[#1a1a1a] border-white/10 p-6">
       <div className="flex gap-4">
         {/* User Avatar and Info */}
         <div className="flex flex-col items-center">
@@ -171,18 +203,19 @@ export default function PostCard({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-white/10">
-                  {isOwner && !threadLocked && onEdit && (
-                    <DropdownMenuItem onClick={onEdit}>
+                  {isOwner && !threadLocked && (
+                    <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
                       <Edit2 className="h-4 w-4 mr-2" />
                       Edit Post
                     </DropdownMenuItem>
                   )}
-                  {isOwner && !threadLocked && onDelete && (
+                  {isOwner && !threadLocked && (
                     <DropdownMenuItem 
-                      onClick={onDelete}
+                      onClick={handleDelete}
+                      disabled={isDeleting}
                       className="text-red-400 focus:text-red-400"
                     >
-                      <Flag className="h-4 w-4 mr-2" />
+                      <Trash2 className="h-4 w-4 mr-2" />
                       Delete Post
                     </DropdownMenuItem>
                   )}
@@ -199,73 +232,97 @@ export default function PostCard({
             {renderContent(post.content)}
           </div>
 
-          {/* Reactions - Split Layout */}
-          <div className="flex items-center justify-between">
-            {/* Left side reactions */}
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                variant={reactions.user_reactions.includes('helpful') ? 'secondary' : 'ghost'}
-                className="h-12 px-4 flex flex-col sm:flex-row items-center gap-1 min-w-[80px]"
-                onClick={() => handleReaction('helpful')}
-                disabled={!user || isReacting}
-              >
-                <span className="text-lg">💡</span>
-                <span className="text-xs sm:text-sm">
-                  Helpful {reactions.helpful > 0 && `(${reactions.helpful})`}
-                </span>
-              </Button>
-              <Button
-                variant={reactions.user_reactions.includes('fire') ? 'secondary' : 'ghost'}
-                className="h-12 px-4 flex flex-col sm:flex-row items-center gap-1 min-w-[80px]"
-                onClick={() => handleReaction('fire')}
-                disabled={!user || isReacting}
-              >
-                <Flame className="h-5 w-5" />
-                <span className="text-xs sm:text-sm">
-                  Hot Take {reactions.fire > 0 && `(${reactions.fire})`}
-                </span>
-              </Button>
-              {isSiteFeedback && (
-                <Button
-                  variant={reactions.user_reactions.includes('fixed') ? 'secondary' : 'ghost'}
-                  className="h-12 px-4 flex flex-col sm:flex-row items-center gap-1 min-w-[80px]"
-                  onClick={() => handleReaction('fixed')}
-                  disabled={!user || isReacting}
-                >
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span className="text-xs sm:text-sm">
-                    Fixed {reactions.fixed > 0 && `(${reactions.fixed})`}
-                  </span>
-                </Button>
-              )}
-            </div>
-
-            {/* Right side - Tee button */}
+          {/* Reactions - Unified Layout */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Primary Tee button */}
             <Button
-              variant="ghost"
+              variant={reactions.user_reactions.includes('tee') ? 'default' : 'ghost'}
               className={cn(
-                "h-12 px-4 flex items-center gap-2 transition-colors",
+                "h-10 px-3 flex items-center gap-2 transition-all",
                 reactions.user_reactions.includes('tee') 
-                  ? "text-[#10B981] hover:text-[#10B981]/80" 
-                  : "hover:text-[#10B981]/60"
+                  ? "bg-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/30 border-[#10B981]/30" 
+                  : "hover:text-[#10B981] hover:bg-[#10B981]/10"
               )}
               onClick={() => handleReaction('tee')}
               disabled={!user || isReacting}
             >
               <TeedBallIcon 
-                className={cn(
-                  "h-7 w-7 transition-all",
-                  reactions.user_reactions.includes('tee') && "text-[#10B981]"
-                )} 
+                className="h-5 w-5" 
                 filled={reactions.user_reactions.includes('tee')}
               />
               <span className="text-sm font-medium">
-                {reactions.tee > 0 ? reactions.tee : 'Tee'}
+                Tee {reactions.tee > 0 && `(${reactions.tee})`}
               </span>
             </Button>
+
+            {/* Helpful button */}
+            <Button
+              variant={reactions.user_reactions.includes('helpful') ? 'secondary' : 'ghost'}
+              className={cn(
+                "h-10 px-3 flex items-center gap-2",
+                reactions.user_reactions.includes('helpful') && "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+              )}
+              onClick={() => handleReaction('helpful')}
+              disabled={!user || isReacting}
+            >
+              <span>💡</span>
+              <span className="text-sm">
+                Helpful {reactions.helpful > 0 && `(${reactions.helpful})`}
+              </span>
+            </Button>
+
+            {/* Hot Take button */}
+            <Button
+              variant={reactions.user_reactions.includes('fire') ? 'secondary' : 'ghost'}
+              className={cn(
+                "h-10 px-3 flex items-center gap-2",
+                reactions.user_reactions.includes('fire') && "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"
+              )}
+              onClick={() => handleReaction('fire')}
+              disabled={!user || isReacting}
+            >
+              <Flame className="h-4 w-4" />
+              <span className="text-sm">
+                Hot Take {reactions.fire > 0 && `(${reactions.fire})`}
+              </span>
+            </Button>
+
+            {/* Fixed button for site feedback */}
+            {isSiteFeedback && (
+              <Button
+                variant={reactions.user_reactions.includes('fixed') ? 'secondary' : 'ghost'}
+                className={cn(
+                  "h-10 px-3 flex items-center gap-2",
+                  reactions.user_reactions.includes('fixed') && "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                )}
+                onClick={() => handleReaction('fixed')}
+                disabled={!user || isReacting}
+              >
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm">
+                  Fixed {reactions.fixed > 0 && `(${reactions.fixed})`}
+                </span>
+              </Button>
+            )}
           </div>
         </div>
       </div>
     </Card>
+
+    {/* Edit Post Dialog */}
+    {showEditDialog && (
+      <EditPostDialog
+        open={showEditDialog}
+        onClose={() => setShowEditDialog(false)}
+        post={post}
+        onSuccess={() => {
+          setShowEditDialog(false);
+          if (onEdit) {
+            onEdit();
+          }
+        }}
+      />
+    )}
+    </>
   );
 }
