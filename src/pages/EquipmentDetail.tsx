@@ -18,6 +18,7 @@ import ReviewList from '@/components/equipment/ReviewList';
 import { getTopBagsWithEquipment } from '@/services/equipmentBags';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TeedBallIcon } from '@/components/shared/TeedBallLike';
+import PriceComparison from '@/components/equipment/PriceComparison';
 
 export default function EquipmentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -399,48 +400,10 @@ export default function EquipmentDetail() {
           </TabsContent>
 
           <TabsContent value="prices" className="mt-6">
-            <div className="space-y-4">
-              {equipment.equipment_prices?.map((price: any) => (
-                <Card key={price.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold">{price.retailer}</p>
-                        <p className="text-2xl font-bold">
-                          ${price.sale_price || price.price}
-                        </p>
-                        {price.sale_price && price.sale_price < price.price && (
-                          <p className="text-sm text-green-600">
-                            Save ${(price.price - price.sale_price).toFixed(2)}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <Badge variant={price.in_stock ? 'default' : 'secondary'}>
-                          {price.in_stock ? 'In Stock' : 'Out of Stock'}
-                        </Badge>
-                        {price.url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2"
-                            onClick={() => window.open(price.url, '_blank')}
-                          >
-                            View Deal
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )) || (
-                <Card>
-                  <CardContent className="p-12 text-center">
-                    <p className="text-muted-foreground">No pricing information available</p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+            <PriceComparison 
+              equipmentId={equipment.id}
+              equipmentName={`${equipment.brand} ${equipment.model}`}
+            />
           </TabsContent>
         </Tabs>
       </div>
