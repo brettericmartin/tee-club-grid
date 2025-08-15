@@ -44,13 +44,17 @@ export function SignInModal({ isOpen, onClose, onSignUpClick }: SignInModalProps
 
   const handleGoogleSignIn = async () => {
     try {
+      setLoading(true);
       await signInWithGoogle();
+      // The OAuth flow will handle the redirect
     } catch (error: any) {
+      console.error('Google sign-in error:', error);
       toast({
-        title: 'Error',
-        description: error.message,
+        title: 'Google Sign-In Error',
+        description: error.message || 'Failed to sign in with Google. Please try again.',
         variant: 'destructive',
       });
+      setLoading(false);
     }
   };
 
@@ -106,6 +110,7 @@ export function SignInModal({ isOpen, onClose, onSignUpClick }: SignInModalProps
             variant="outline"
             className="w-full"
             onClick={handleGoogleSignIn}
+            disabled={loading}
           >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -127,18 +132,20 @@ export function SignInModal({ isOpen, onClose, onSignUpClick }: SignInModalProps
             </svg>
             Google
           </Button>
-          <div className="text-center text-sm">
-            Don't have an account?{' '}
+          <div className="text-center space-y-3">
+            <div className="text-sm text-muted-foreground">
+              Don't have an account?
+            </div>
             <Button
               type="button"
-              variant="link"
-              className="p-0"
+              variant="outline"
+              className="w-full border-primary text-primary hover:bg-primary/10"
               onClick={() => {
                 onClose();
                 onSignUpClick();
               }}
             >
-              Sign up
+              Create Account
             </Button>
           </div>
         </form>

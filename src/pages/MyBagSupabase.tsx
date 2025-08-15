@@ -182,12 +182,21 @@ const MyBagSupabase = () => {
               <p className="text-white/70 mb-6">
                 Create an account to build and showcase your golf bag collection.
               </p>
-              <Button 
-                onClick={() => setShowSignIn(true)} 
-                className="bg-primary hover:bg-primary/90 text-white"
-              >
-                Sign In
-              </Button>
+              <div className="flex gap-4 justify-center">
+                <Button 
+                  onClick={() => setShowSignIn(true)} 
+                  className="bg-primary hover:bg-primary/90 text-white"
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  onClick={() => setShowSignUp(true)} 
+                  variant="outline"
+                  className="border-primary text-primary hover:bg-primary/10"
+                >
+                  Sign Up
+                </Button>
+              </div>
             </div>
           </div>
         </div>

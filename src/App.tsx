@@ -32,6 +32,7 @@ import ForumCategoryPage from "@/pages/ForumCategory";
 import ForumThreadPage from "@/pages/ForumThread";
 import NotFoundPage from "@/pages/NotFound";
 import AIBagAnalyzerPage from "@/pages/AIBagAnalyzer";
+import AuthCallbackPage from "@/pages/AuthCallback";
 import SeedEquipmentPage from "@/pages/admin/SeedEquipment";
 import EquipmentMigrationPage from "@/pages/admin/EquipmentMigration";
 import DebugPage from "@/pages/Debug";
@@ -123,6 +124,7 @@ const ForumCategory = isDev ? ForumCategoryPage : lazyImport(() => import("@/pag
 const ForumThread = isDev ? ForumThreadPage : lazyImport(() => import("@/pages/ForumThread"), "Forum Thread");
 const NotFound = isDev ? NotFoundPage : lazyImport(() => import("@/pages/NotFound"), "Not Found");
 const AIBagAnalyzer = isDev ? AIBagAnalyzerPage : lazyImport(() => import("@/pages/AIBagAnalyzer"), "AI Bag Analyzer");
+const AuthCallback = isDev ? AuthCallbackPage : lazyImport(() => import("@/pages/AuthCallback"), "Auth Callback");
 
 // Admin routes (rarely accessed)
 const SeedEquipment = isDev ? SeedEquipmentPage : lazyImport(() => import("@/pages/admin/SeedEquipment"), "Seed Equipment");
@@ -196,6 +198,7 @@ function App() {
                         <Route path="/bag/:bagId" element={<BagDisplay />} />
                         <Route path="/u/:username" element={<UserBagPage />} />
                         <Route path="/my-bag" element={<MyBag />} />
+                        <Route path="/auth/callback" element={<AuthCallback />} />
                         <Route path="/equipment" element={<Equipment />} />
                         <Route path="/equipment/:id" element={<EquipmentDetail />} />
                         <Route path="/feed" element={<Feed />} />

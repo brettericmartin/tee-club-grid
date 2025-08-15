@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -47,6 +47,15 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
   const [title, setTitle] = useState('');
   const [titleOpen, setTitleOpen] = useState(false);
   
+  // Password change state
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   // Original values to detect changes
   const [originalValues, setOriginalValues] = useState({
     displayName: '',
@@ -70,15 +79,18 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
       if (profile) {
         console.log('[ProfileDialog] Loaded profile:', {
           display_name: profile.display_name,
-          avatar_url: profile.avatar_url
+          avatar_url: profile.avatar_url,
+          username: profile.username
         });
-        setDisplayName(profile.display_name || '');
+        // Ensure display_name is never empty - fallback to username
+        const displayNameValue = profile.display_name || profile.username || '';
+        setDisplayName(displayNameValue);
         setHandicap(profile.handicap?.toString() || '');
         setAvatarUrl(profile.avatar_url);
         setTitle(profile.title || 'Golfer');
         
         setOriginalValues({
-          displayName: profile.display_name || '',
+          displayName: displayNameValue,
           handicap: profile.handicap?.toString() || '',
           avatarUrl: profile.avatar_url,
           title: profile.title || 'Golfer'
@@ -146,9 +158,10 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
 
       const updates: any = {};
       
-      // Only include changed fields
-      if (displayName !== originalValues.displayName) {
-        updates.display_name = displayName;
+      // Always include display_name if it's empty in the original or has changed
+      if (displayName !== originalValues.displayName || !originalValues.displayName) {
+        // Ensure display_name is never null or empty
+        updates.display_name = displayName || user.email?.split('@')[0] || 'User';
       }
       
       if (handicap !== originalValues.handicap) {
@@ -218,12 +231,75 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
     }
   };
 
+  const handlePasswordChange = async () => {
+    if (!newPassword || !confirmPassword) {
+      toast.error('Please fill in all password fields');
+      return;
+    }
+    
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters long');
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    
+    setSaving(true);
+    try {
+      // For Google OAuth users, they might not have a password set, so we don't require current password
+      const isOAuthUser = user?.app_metadata?.provider === 'google';
+      
+      if (!isOAuthUser && currentPassword) {
+        // Verify current password first by attempting to sign in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: user?.email || '',
+          password: currentPassword
+        });
+        
+        if (signInError) {
+          toast.error('Current password is incorrect');
+          setSaving(false);
+          return;
+        }
+      }
+      
+      // Update password
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) {
+        toast.error(`Failed to update password: ${error.message}`);
+      } else {
+        toast.success('Password updated successfully');
+        // Clear password fields
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setShowPasswordSection(false);
+      }
+    } catch (error) {
+      console.error('Error updating password:', error);
+      toast.error('Failed to update password');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleCancel = () => {
     // Reset to original values
     setDisplayName(originalValues.displayName);
     setHandicap(originalValues.handicap);
     setAvatarUrl(originalValues.avatarUrl);
     setTitle(originalValues.title);
+    // Reset password fields
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setShowPasswordSection(false);
     onClose();
   };
 
@@ -334,6 +410,113 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                 </PopoverContent>
               </Popover>
               <p className="text-xs text-white/60">How you want to be known in the golf community</p>
+            </div>
+            
+            {/* Password Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-white flex items-center gap-2">
+                  <Lock className="h-4 w-4" />
+                  Account Security
+                </Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPasswordSection(!showPasswordSection)}
+                  className="text-primary hover:text-primary/90"
+                >
+                  {showPasswordSection ? 'Cancel' : 'Change Password'}
+                </Button>
+              </div>
+              
+              {showPasswordSection && (
+                <div className="space-y-3 p-4 bg-white/5 rounded-lg border border-white/10">
+                  {/* Current Password - only for non-OAuth users */}
+                  {user?.app_metadata?.provider !== 'google' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword" className="text-white">Current Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="currentPassword"
+                          type={showCurrentPassword ? "text" : "password"}
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          placeholder="Enter current password"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/50 pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
+                        >
+                          {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* New Password */}
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword" className="text-white">New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="newPassword"
+                        type={showNewPassword ? "text" : "password"}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Enter new password"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50 pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
+                      >
+                        {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    <p className="text-xs text-white/60">Must be at least 8 characters</p>
+                  </div>
+                  
+                  {/* Confirm Password */}
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-white">Confirm New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm new password"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50 pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Update Password Button */}
+                  <Button
+                    onClick={handlePasswordChange}
+                    disabled={saving || !newPassword || !confirmPassword}
+                    className="w-full bg-primary hover:bg-primary/90"
+                  >
+                    {saving ? 'Updating...' : 'Update Password'}
+                  </Button>
+                  
+                  {user?.app_metadata?.provider === 'google' && (
+                    <p className="text-xs text-white/60 text-center">
+                      As a Google sign-in user, you're setting a password for the first time
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
             
             {/* Actions */}
