@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import * as QRCode from "qrcode";
 import { displayNameToSlug } from "@/utils/slugify";
+import { DOMAIN_CONFIG } from "@/config/domain";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -44,8 +45,8 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
 
   // Generate the shareable URL using username slug
   const userSlug = displayNameToSlug(bag.profiles?.display_name || bag.profiles?.username || '');
-  const shareUrl = `${window.location.origin}/u/${userSlug}`;
-  const directBagUrl = `${window.location.origin}/bag/${bag.id}`;
+  const shareUrl = `${DOMAIN_CONFIG.production}/@${userSlug}`;
+  const directBagUrl = DOMAIN_CONFIG.getBagShareUrl(bag.id);
   
   const shareTitle = `Check out ${bag.profiles?.display_name || bag.profiles?.username || 'this'}'s golf bag on Teed.club`;
   const shareText = `${bag.name} - View my complete golf setup on Teed.club`;

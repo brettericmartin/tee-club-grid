@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import * as QRCode from "qrcode";
+import { DOMAIN_CONFIG } from "@/config/domain";
 
 interface ShareStripProps {
   bag: {
@@ -32,7 +33,7 @@ const ShareStrip = ({ bag, username }: ShareStripProps) => {
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
 
-  const bagUrl = `${window.location.origin}/@${username}`;
+  const bagUrl = DOMAIN_CONFIG.getProfileUrl(username);
   const shareTitle = `Check out ${bag.profiles.display_name || username}'s golf bag on Teed.club`;
   const shareText = `${bag.name} - View my complete golf setup on Teed.club`;
 
