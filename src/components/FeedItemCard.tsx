@@ -13,6 +13,13 @@ import CommentModal from '@/components/comments/CommentModal';
 import { toggleBagLike } from '@/services/bags';
 import { toast } from 'sonner';
 import { useScrollAnimation } from '@/utils/animations';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
 type Bag = Database['public']['Tables']['user_bags']['Row'] & {
@@ -174,14 +181,73 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
   const renderFrontContent = () => {
     const hasMultipleImages = post.mediaUrls && post.mediaUrls.length > 1;
     const isEquipmentPost = post.postType === 'equipment_photo' || post.postType === 'new_equipment';
+    const isMultiEquipmentPost = post.postType === 'multi_equipment_photos';
     
+    // Handle multi-equipment photo posts with carousel
+    if (isMultiEquipmentPost && post.content?.photos) {
+      return (
+        <div className="relative bg-black">
+          <Carousel className="w-full">
+            <CarouselContent>
+              {post.content.photos.map((photo: any, index: number) => (
+                <CarouselItem key={index}>
+                  <div className="relative h-full">
+                    <img 
+                      src={photo.url} 
+                      alt={photo.equipment_name}
+                      className="w-full h-full object-cover"
+                      loading={index === 0 ? "eager" : "lazy"}
+                    />
+                    {/* Equipment tag overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/equipment/${photo.equipment_id}`);
+                        }}
+                        className="inline-flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full hover:bg-black/80 transition-colors"
+                      >
+                        <span className="text-white text-sm font-medium">{photo.equipment_name}</span>
+                      </button>
+                      {photo.caption && (
+                        <p className="text-white/90 text-sm mt-2">{photo.caption}</p>
+                      )}
+                    </div>
+                    {/* Photo counter */}
+                    <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full">
+                      <span className="text-white text-xs font-medium">
+                        {index + 1} / {post.content.photos.length}
+                      </span>
+                    </div>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-2" />
+            <CarouselNext className="right-2" />
+          </Carousel>
+          
+          {/* Overall caption overlay */}
+          {post.content.overall_caption && (
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 pointer-events-none">
+              <p className="text-white text-sm">{post.content.overall_caption}</p>
+              <p className="text-white/60 text-xs mt-1">
+                {post.content.equipment_count} items • {post.content.photo_count} photos
+              </p>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // Original single image rendering
     return (
-      <div className="relative h-full">
+      <div className="relative">
         {/* Main Image */}
         <img 
           src={post.imageUrl} 
           alt={post.caption}
-          className="w-full h-full object-cover"
+          className="w-full object-cover"
         />
         
         {/* Multiple images indicator */}
@@ -223,7 +289,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
     // Always show the user's bag on the back
     if (loadingBag) {
       return (
-        <div className="h-full bg-gray-900 p-6 flex items-center justify-center">
+        <div className="bg-gray-900 p-12 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-white/60" />
         </div>
       );
@@ -231,7 +297,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
 
     if (!userBag) {
       return (
-        <div className="h-full bg-gray-900 p-6 flex flex-col justify-center items-center text-center">
+        <div className="bg-gray-900 p-12 flex flex-col justify-center items-center text-center">
           <p className="text-white text-lg font-medium mb-2">{post.userName} hasn't created a bag yet</p>
           <p className="text-gray-400 text-sm">Check back later to see their equipment</p>
         </div>
@@ -240,8 +306,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
 
     // Render the actual BagCard component
     return (
-      <div className="h-full overflow-auto">
-        <BagCard
+      <BagCard
           bag={{
             ...userBag,
             profiles: userProfile,
@@ -270,7 +335,6 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
           isFollowing={isFollowing}
           currentUserId={currentUserId}
         />
-      </div>
     );
   };
 
@@ -320,7 +384,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
         </div>
         
         {/* Card Content - Toggleable */}
-        <div className="relative h-[450px] sm:h-[450px] overflow-hidden">
+        <div className="relative overflow-hidden">
           {/* Toggle Button - Made larger and more prominent */}
           <button
             onClick={() => setIsFlipped(!isFlipped)}

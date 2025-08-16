@@ -1,6 +1,6 @@
 /* @refresh skip */
 import { useState, useEffect, Suspense } from "react";
-import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle, Share2 } from "lucide-react";
+import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle, Share2, Camera } from "lucide-react";
 import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer, { bagBackgrounds } from "@/components/BackgroundLayer";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import Navigation from "@/components/Navigation";
 import { BagSelectorDialog } from "@/components/bag/BagSelectorDialog";
 import { CreateBagDialog } from "@/components/bag/CreateBagDialog";
+import { CreatePostModal } from "@/components/feed/CreatePostModal";
 import { bagLayoutsService, type BagLayout } from "@/services/bagLayouts";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -117,6 +118,7 @@ const MyBagSupabase = () => {
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showCreatePost, setShowCreatePost] = useState(false);
   
   // AI Equipment flow states
   const [showMethodDialog, setShowMethodDialog] = useState(false);
@@ -1444,9 +1446,19 @@ const MyBagSupabase = () => {
           </div>
         )}
         
-        {/* Share Button - Bottom of Page */}
+        {/* Bottom Action Buttons */}
         {currentBag && (
-          <div className="mt-12 mb-8">
+          <div className="mt-12 mb-8 space-y-4">
+            {/* Create Post Button */}
+            <Button
+              onClick={() => setShowCreatePost(true)}
+              className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-white hover:bg-white/90 text-black font-semibold py-6 text-lg rounded-xl shadow-lg"
+            >
+              <Camera className="w-5 h-5" />
+              Create Post
+            </Button>
+            
+            {/* Share Button */}
             <Button
               onClick={() => setShowShareModal(true)}
               className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-black font-semibold py-6 text-lg rounded-xl shadow-lg"
@@ -1626,6 +1638,19 @@ const MyBagSupabase = () => {
           }}
         />
       )}
+      
+      {/* Create Post Modal */}
+      <CreatePostModal
+        isOpen={showCreatePost}
+        onClose={() => setShowCreatePost(false)}
+        onSuccess={() => {
+          setShowCreatePost(false);
+          // Optionally refresh the feed view if currently on feed tab
+          if (viewMode === 'feed') {
+            // The UserFeedView will refresh automatically
+          }
+        }}
+      />
 
     </div>
   );

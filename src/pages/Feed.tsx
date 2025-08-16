@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FeedItemCard } from '@/components/FeedItemCard';
 import { FeedErrorBoundary } from '@/components/FeedErrorBoundary';
+import { CreatePostModal } from '@/components/feed/CreatePostModal';
 import { supabase } from '@/lib/supabase';
+import Masonry from 'react-masonry-css';
 // Animation imports temporarily disabled to fix dynamic import errors
 // import { AnimatedPageWrapper, AnimatedGrid, ScrollReveal } from '@/components/animation/AnimatedPageWrapper';
 // import { AnimatedLoader } from '@/components/loading/AnimatedLoader';
@@ -24,6 +26,7 @@ const FeedContent = () => {
   const { allPosts, loading, error, loadMainFeed, updatePostLike } = useFeed();
   const [filter, setFilter] = useState<'all' | 'following'>('all');
   const [displayCount, setDisplayCount] = useState(12);
+  const [showCreatePost, setShowCreatePost] = useState(false);
 
   useEffect(() => {
     loadMainFeed(filter);
@@ -166,7 +169,7 @@ const FeedContent = () => {
     <div className="min-h-screen bg-black py-8">
       <div className="max-w-7xl mx-auto px-4 pb-24">
 
-        {/* Filter Section */}
+        {/* Filter Section with Create Post Button */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
           <div className="flex gap-2">
             <Button
@@ -189,9 +192,23 @@ const FeedContent = () => {
             )}
           </div>
 
+          {/* Create Post Button - Centered */}
+          {user && (
+            <div className="flex-1 flex justify-center">
+              <Button
+                onClick={() => setShowCreatePost(true)}
+                size="default"
+                className="bg-primary hover:bg-primary/90 text-black font-semibold"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Post
+              </Button>
+            </div>
+          )}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a] ml-auto">
+              <Button variant="outline" className="bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]">
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </Button>
@@ -216,22 +233,32 @@ const FeedContent = () => {
           </DropdownMenu>
         </div>
 
-        {/* Feed Posts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {displayedPosts.length > 0 ? (
-            displayedPosts.map((post) => (
-              <FeedItemCard 
-                key={post.postId} 
-                post={post} 
-                currentUserId={user?.id}
-                onLike={handleLike}
-                onFollow={handleFollow}
-              />
-            ))
-          ) : (
-            !loading && <div className="col-span-full text-center py-8 text-white/60">No posts to display</div>
-          )}
-        </div>
+        {/* Feed Posts - Masonry Layout */}
+        {displayedPosts.length > 0 ? (
+          <Masonry
+            breakpointCols={{
+              default: 3,  // 3 columns on xl screens
+              1280: 3,     // xl breakpoint
+              768: 2,      // md breakpoint - 2 columns
+              640: 1       // mobile - 1 column
+            }}
+            className="flex -ml-6 w-auto"
+            columnClassName="pl-6 bg-clip-padding"
+          >
+            {displayedPosts.map((post) => (
+              <div key={post.postId} className="mb-6">
+                <FeedItemCard 
+                  post={post} 
+                  currentUserId={user?.id}
+                  onLike={handleLike}
+                  onFollow={handleFollow}
+                />
+              </div>
+            ))}
+          </Masonry>
+        ) : (
+          !loading && <div className="text-center py-8 text-white/60">No posts to display</div>
+        )}
 
         {/* Load More */}
         {hasMore && (
@@ -302,6 +329,16 @@ const FeedContent = () => {
           </DropdownMenu>
         </div>
       )}
+
+      {/* Create Post Modal */}
+      <CreatePostModal
+        isOpen={showCreatePost}
+        onClose={() => setShowCreatePost(false)}
+        onSuccess={() => {
+          setShowCreatePost(false);
+          loadMainFeed(filter); // Refresh feed after posting
+        }}
+      />
 
     </div>
   );

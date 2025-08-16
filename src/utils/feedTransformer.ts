@@ -32,6 +32,7 @@ export interface FeedItemData {
     imageUrl?: string;
   };
   mediaUrls?: string[];
+  content?: any; // Add content for multi-equipment photos
 }
 
 // Transform database feed post to UI format
@@ -106,7 +107,8 @@ export function transformFeedPost(post: FeedPost & {
     equipmentId: post.equipment_id || content.equipment_id,
     bagData,
     equipmentData,
-    mediaUrls
+    mediaUrls,
+    content // Pass through content for multi-equipment photos
   };
 }
 
@@ -116,8 +118,11 @@ export function getPostTypeLabel(type: string): string {
     'new_equipment': 'New Equipment',
     'bag_update': 'Bag Update',
     'equipment_photo': 'Equipment Photo',
+    'multi_equipment_photos': 'Equipment Gallery',
     'milestone': 'Milestone',
-    'playing': 'Playing'
+    'playing': 'Playing',
+    'bag_created': 'New Bag',
+    'bag_updated': 'Bag Update'
   };
   return labels[type] || 'Post';
 }

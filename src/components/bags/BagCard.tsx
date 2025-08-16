@@ -229,7 +229,7 @@ const BagCardComponent = ({
 
       {/* Container - fully transparent to show background image */}
       <div 
-        className="relative p-4 h-full min-h-[350px] sm:min-h-[400px] cursor-pointer overflow-y-auto"
+        className="relative p-4 h-full cursor-pointer"
         onClick={() => onView(bag.id)}
       >
         {/* Header with user info */}
