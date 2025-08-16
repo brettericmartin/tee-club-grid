@@ -23,7 +23,7 @@ import Masonry from 'react-masonry-css';
 
 const FeedContent = () => {
   const { user } = useAuth();
-  const { allPosts, loading, error, loadMainFeed, updatePostLike } = useFeed();
+  const { allPosts, loading, error, loadMainFeed, updatePostLike, updateUserFollow } = useFeed();
   const [filter, setFilter] = useState<'all' | 'following'>('all');
   const [displayCount, setDisplayCount] = useState(12);
   const [showCreatePost, setShowCreatePost] = useState(false);
@@ -114,31 +114,52 @@ const FeedContent = () => {
     if (!user || user.id === userId) return;
     
     try {
-      // Toggle follow in database
-      const { data: existingFollow } = await supabase
+      // Check current follow status
+      const { data: existingFollow, error: fetchError } = await supabase
         .from('user_follows')
         .select('id')
         .eq('follower_id', user.id)
         .eq('following_id', userId)
-        .single();
+        .maybeSingle();
+      
+      if (fetchError) {
+        console.error('Error checking follow status:', fetchError);
+        return;
+      }
+      
+      let isNowFollowing = false;
       
       if (existingFollow) {
         // Unfollow
-        await supabase
+        const { error: deleteError } = await supabase
           .from('user_follows')
           .delete()
           .eq('id', existingFollow.id);
+          
+        if (deleteError) {
+          console.error('Error unfollowing:', deleteError);
+          return;
+        }
+        isNowFollowing = false;
       } else {
         // Follow
-        await supabase
+        const { error: insertError } = await supabase
           .from('user_follows')
           .insert({
             follower_id: user.id,
             following_id: userId
           });
+          
+        if (insertError) {
+          console.error('Error following:', insertError);
+          return;
+        }
+        isNowFollowing = true;
       }
       
-      // Don't reload the entire feed - let the UI handle optimistic updates
+      // Update the follow status in feed context
+      updateUserFollow(userId, isNowFollowing);
+      
     } catch (error) {
       console.error('Error toggling follow:', error);
     }

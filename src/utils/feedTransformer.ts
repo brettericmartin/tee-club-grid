@@ -85,8 +85,9 @@ export function transformFeedPost(post: FeedPost & {
     };
   }
   
-  // Get likes count from either feed_likes array or likes_count field
-  const likesCount = post.feed_likes?.[0]?.count ?? post.likes_count ?? 0;
+  // Get likes count - prefer likes_count field which is kept in sync via triggers
+  // feed_likes array contains actual like records, not a count
+  const likesCount = post.likes_count ?? post.feed_likes?.length ?? 0;
   
   return {
     postId: post.id,

@@ -376,7 +376,11 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
               variant="ghost"
               size="sm"
               onClick={handleFollowToggle}
-              className="text-white hover:text-primary"
+              className={`transition-colors ${
+                isFollowing 
+                  ? 'text-green-500 hover:text-green-400' 
+                  : 'text-white hover:text-primary'
+              }`}
             >
               {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
             </Button>

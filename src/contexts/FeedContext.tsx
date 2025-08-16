@@ -19,6 +19,7 @@ interface FeedContextType {
   deletePost: (postId: string) => void;
   addPost: (post: FeedPost) => void;
   updatePostLike: (postId: string, isLiked: boolean, newCount: number) => void;
+  updateUserFollow: (userId: string, isFollowing: boolean) => void;
   
   // Utilities
   refreshFeeds: () => Promise<void>;
@@ -79,6 +80,22 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       setError(null);
       setCurrentFilter(filter);
       
+      // Ensure followed users are loaded first if user is authenticated
+      let currentFollowedUsers = followedUsers;
+      if (user && followedUsers.size === 0) {
+        console.log('[FeedContext] Loading followed users before feed...');
+        const { data: follows } = await supabase
+          .from('user_follows')
+          .select('following_id')
+          .eq('follower_id', user.id);
+        
+        if (follows) {
+          currentFollowedUsers = new Set(follows.map(f => f.following_id));
+          setFollowedUsers(currentFollowedUsers);
+          console.log('[FeedContext] Loaded', currentFollowedUsers.size, 'followed users');
+        }
+      }
+      
       const feedPosts = await getFeedPosts(user?.id, filter);
       
       console.log('[FeedContext] Raw feed posts:', feedPosts.length, 'posts');
@@ -86,7 +103,7 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       
       // Transform posts to UI format
       const transformedPosts = feedPosts.map(post => {
-        const isFollowed = followedUsers.has(post.user_id);
+        const isFollowed = currentFollowedUsers.has(post.user_id);
         const transformed = transformFeedPost({ ...post, isFollowed });
         
         // Log the first post transformation for debugging
@@ -256,6 +273,51 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
     });
   }, []);
 
+  // Update follow status for a user
+  const updateUserFollow = useCallback((userId: string, isFollowing: boolean) => {
+    console.log(`Updating follow status for user ${userId}:`, { isFollowing });
+    
+    // Update followed users set
+    setFollowedUsers(prev => {
+      const newSet = new Set(prev);
+      if (isFollowing) {
+        newSet.add(userId);
+      } else {
+        newSet.delete(userId);
+      }
+      return newSet;
+    });
+
+    // Update all posts from this user
+    setAllPosts(prev => prev.map(post => {
+      if (post.userId === userId) {
+        return {
+          ...post,
+          isFromFollowed: isFollowing
+        };
+      }
+      return post;
+    }));
+
+    // Update in user posts cache
+    setUserPosts(prev => {
+      const newMap = new Map(prev);
+      for (const [cachedUserId, posts] of newMap) {
+        const updatedPosts = posts.map(post => {
+          if (post.userId === userId) {
+            return {
+              ...post,
+              isFromFollowed: isFollowing
+            };
+          }
+          return post;
+        });
+        newMap.set(cachedUserId, updatedPosts);
+      }
+      return newMap;
+    });
+  }, []);
+
   // Refresh all feeds
   const refreshFeeds = useCallback(async () => {
     console.log('Refreshing all feeds...');
@@ -372,6 +434,7 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
     deletePost,
     addPost,
     updatePostLike,
+    updateUserFollow,
     refreshFeeds,
     clearCache
   };

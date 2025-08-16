@@ -249,7 +249,7 @@ const MyBagSupabase = () => {
       if (userBags && Array.isArray(userBags) && userBags.length > 0) {
         const bagIds = userBags.map(bag => String(bag.id));
         const { count } = await supabase
-          .from('bag_likes')
+          .from('bag_tees')
           .select('*', { count: 'exact', head: true })
           .in('bag_id', bagIds);
         bagTees = count || 0;

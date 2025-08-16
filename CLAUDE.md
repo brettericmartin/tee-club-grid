@@ -29,6 +29,14 @@
 
 ## CRITICAL TASK EXECUTION RULES
 
+**MCP Tool Usage:**
+- ALWAYS use Postgres MCP for direct database queries and schema checks
+- ALWAYS use Supabase MCP for RLS policies, authentication, and Supabase-specific features  
+- ALWAYS use Context7 MCP for codebase understanding and file navigation
+- These MCPs should be leveraged for all database operations and codebase analysis
+- IMPORTANT: The Supabase MCP CAN execute SQL including RLS policy changes - USE IT instead of asking user to run SQL manually
+- When database changes are needed, ALWAYS attempt to use the MCP tools first before suggesting manual SQL execution
+
 **For ANY script or database operation:**
 1. Provide EXACT terminal command: `node scripts/[filename].js`
 2. Show expected output

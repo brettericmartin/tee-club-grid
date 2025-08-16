@@ -15,7 +15,7 @@ type Equipment = Database['public']['Tables']['equipment']['Row'];
 interface BagCompositeCardProps {
   bag: BagData;
   onToggleLike?: (bagId: string) => void;
-  onToggleFollow?: (bagId: string) => void;
+  onToggleFollow?: (userId: string) => void;
   onViewBag?: (bagId: string) => void;
 }
 
@@ -81,7 +81,7 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onToggleFollow?.(bag.id);
+    onToggleFollow?.(bag.userId);
   };
 
   const handleEquipmentClick = (equipmentId: string, e: React.MouseEvent) => {
@@ -181,7 +181,11 @@ const BagCompositeCard = ({ bag, onToggleLike, onToggleFollow, onViewBag }: BagC
               variant="ghost"
               size="sm"
               onClick={handleFollowClick}
-              className="text-xs text-white hover:text-white/80"
+              className={`text-xs transition-colors ${
+                bag.isFollowing 
+                  ? 'text-green-500 hover:text-green-400' 
+                  : 'text-white hover:text-white/80'
+              }`}
             >
               <UserPlus className="w-3.5 h-3.5 mr-1" />
               {bag.isFollowing ? 'Following' : 'Follow'}
