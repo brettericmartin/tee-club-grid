@@ -43,7 +43,6 @@ type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
   equipment: Database['public']['Tables']['equipment']['Row'];
   shaft?: Database['public']['Tables']['equipment']['Row'];
   grip?: Database['public']['Tables']['equipment']['Row'];
-  loft_option?: Database['public']['Tables']['loft_options']['Row'];
 };
 
 interface EquipmentEditorProps {
@@ -62,8 +61,29 @@ export function EquipmentEditor({
   const [loading, setLoading] = useState(false);
   const [shafts, setShafts] = useState<Database['public']['Tables']['equipment']['Row'][]>([]);
   const [grips, setGrips] = useState<Database['public']['Tables']['equipment']['Row'][]>([]);
-  const [loftOptions, setLoftOptions] = useState<any[]>([]);
   const [equipmentPhotos, setEquipmentPhotos] = useState<any[]>([]);
+  
+  // Loft options by club type
+  const LOFT_OPTIONS: Record<string, string[]> = {
+    driver: ['8°', '8.5°', '9°', '9.5°', '10°', '10.5°', '11°', '11.5°', '12°', '12.5°'],
+    fairway_wood: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
+    wood: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
+    woods: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
+    hybrid: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°', '25°', '26°', '27°'],
+    wedge: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°'],
+    wedges: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°']
+  };
+  
+  // Iron configuration options
+  const IRON_OPTIONS = [
+    '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'PW', 'AW', 'GW', 'SW', 'LW'
+  ];
+  
+  // Helper to get iron index for comparison
+  const getIronIndex = (iron: string) => {
+    return IRON_OPTIONS.indexOf(iron);
+  };
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
   const [showCropper, setShowCropper] = useState(false);
   const [cropperImage, setCropperImage] = useState<string>('');
@@ -86,10 +106,18 @@ export function EquipmentEditor({
   const isClub = ['driver', 'fairway_wood', 'wood', 'woods', 'hybrid', 'utility_iron', 
                   'iron', 'irons', 'wedge', 'wedges', 'putter', 'putters'].includes(equipment.equipment.category);
   
+  // Check if equipment is an iron that needs configuration
+  const isIron = ['iron', 'irons'].includes(equipment.equipment.category) || 
+                 equipment.equipment.model.toLowerCase().includes('iron set');
+  
   const [formData, setFormData] = useState({
     shaft_id: equipment.shaft_id || '',
     grip_id: equipment.grip_id || '',
-    loft_option_id: equipment.loft_option_id || '',
+    loft: equipment.custom_specs?.loft || '',
+    iron_config_type: equipment.custom_specs?.iron_config?.type || 'set',
+    iron_from: equipment.custom_specs?.iron_config?.from || '5',
+    iron_to: equipment.custom_specs?.iron_config?.to || 'PW',
+    iron_single: equipment.custom_specs?.iron_config?.single || '3',
     purchase_price: equipment.purchase_price?.toString() || '',
     purchase_date: equipment.purchase_date || '',
     condition: equipment.condition || 'new',
@@ -141,16 +169,8 @@ export function EquipmentEditor({
       
       if (gripData) setGrips(gripData);
 
-      // Load loft options if applicable
-      if (['driver', 'fairway_wood', 'hybrid', 'wedge', 'utility_iron'].includes(equipment.equipment.category)) {
-        const { data: loftData } = await supabase
-          .from('loft_options')
-          .select('*')
-          .eq('equipment_category', equipment.equipment.category)
-          .order('sort_order');
-        
-        if (loftData) setLoftOptions(loftData);
-      }
+      // Loft options are now handled in-component based on category
+      // No database call needed
     } catch (error) {
       console.error('Error loading options:', error);
     }
@@ -159,10 +179,28 @@ export function EquipmentEditor({
   const handleSave = async () => {
     setLoading(true);
     try {
+      // Build custom specs object with loft and iron config if provided
+      const customSpecs: any = equipment.custom_specs || {};
+      if (formData.loft) {
+        customSpecs.loft = formData.loft;
+      } else {
+        delete customSpecs.loft;
+      }
+      
+      // Add iron configuration if applicable
+      if (isIron) {
+        customSpecs.iron_config = {
+          type: formData.iron_config_type,
+          ...(formData.iron_config_type === 'set' 
+            ? { from: formData.iron_from, to: formData.iron_to }
+            : { single: formData.iron_single })
+        };
+      }
+      
       const updateData: any = {
         shaft_id: formData.shaft_id || null,
         grip_id: formData.grip_id || null,
-        loft_option_id: formData.loft_option_id || null,
+        custom_specs: Object.keys(customSpecs).length > 0 ? customSpecs : null,
         purchase_price: formData.purchase_price ? parseFloat(formData.purchase_price) : null,
         purchase_date: formData.purchase_date || null,
         condition: formData.condition,
@@ -466,43 +504,42 @@ export function EquipmentEditor({
                       <CommandList className="max-h-[30vh] sm:max-h-[40vh] overflow-y-auto">
                         <CommandGroup>
                           {shafts && shafts.length > 0 && shafts
-                            .filter(shaft => {
-                              const searchTerm = shaftSearch.toLowerCase();
-                              return shaft.brand.toLowerCase().includes(searchTerm) ||
-                                     shaft.model.toLowerCase().includes(searchTerm) ||
-                                     (shaft.specs?.flex && shaft.specs.flex.toLowerCase().includes(searchTerm));
-                            })
-                            .map((shaft) => (
-                              <CommandItem
-                            key={shaft.id}
-                            value={shaft.id}
-                            onSelect={() => {
-                              setFormData({ ...formData, shaft_id: shaft.id });
-                              setShaftOpen(false);
-                              setShaftSearch('');
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                formData.shaft_id === shaft.id ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            <div className="flex-1">
-                              <div className="font-medium">
-                                {shaft.brand} {shaft.model} {shaft.specs?.flex && `- ${shaft.specs.flex}`}
-                              </div>
-                              {shaft.specs?.weight && (
-                                <div className="text-sm text-muted-foreground">
-                                  {shaft.specs.weight}g
-                                </div>
-                              )}
-                            </div>
-                            {shaft.msrp > 0 && (
-                              <span className="text-sm text-muted-foreground">+${shaft.msrp}</span>
-                            )}
-                          </CommandItem>
-                          ))}
+                            .map((shaft) => {
+                              // Create a searchable string with all relevant shaft attributes
+                              const searchableText = `${shaft.brand} ${shaft.model} ${shaft.specs?.flex || ''} ${shaft.specs?.weight || ''}`.toLowerCase();
+                              
+                              return (
+                                <CommandItem
+                                  key={shaft.id}
+                                  value={searchableText}
+                                  onSelect={() => {
+                                    setFormData({ ...formData, shaft_id: shaft.id });
+                                    setShaftOpen(false);
+                                    setShaftSearch('');
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      formData.shaft_id === shaft.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex-1">
+                                    <div className="font-medium">
+                                      {shaft.brand} {shaft.model} {shaft.specs?.flex && `- ${shaft.specs.flex}`}
+                                    </div>
+                                    {shaft.specs?.weight && (
+                                      <div className="text-sm text-muted-foreground">
+                                        {shaft.specs.weight}g
+                                      </div>
+                                    )}
+                                  </div>
+                                  {shaft.msrp > 0 && (
+                                    <span className="text-sm text-muted-foreground">+${shaft.msrp}</span>
+                                  )}
+                                </CommandItem>
+                              );
+                            })}
                         </CommandGroup>
                       </CommandList>
                     </Command>
@@ -557,43 +594,42 @@ export function EquipmentEditor({
                       <CommandList className="max-h-[30vh] sm:max-h-[40vh] overflow-y-auto">
                         <CommandGroup>
                           {grips && grips.length > 0 && grips
-                            .filter(grip => {
-                              const searchTerm = gripSearch.toLowerCase();
-                              return grip.brand.toLowerCase().includes(searchTerm) ||
-                                     grip.model.toLowerCase().includes(searchTerm) ||
-                                     (grip.specs?.size && grip.specs.size.toLowerCase().includes(searchTerm));
-                            })
-                            .map((grip) => (
-                              <CommandItem
-                            key={grip.id}
-                            value={grip.id}
-                            onSelect={() => {
-                              setFormData({ ...formData, grip_id: grip.id });
-                              setGripOpen(false);
-                              setGripSearch('');
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                formData.grip_id === grip.id ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            <div className="flex-1">
-                              <div className="font-medium">
-                                {grip.brand} {grip.model} {grip.specs?.size && `- ${grip.specs.size}`}
-                              </div>
-                              {grip.specs?.color && (
-                                <div className="text-sm text-muted-foreground">
-                                  {grip.specs.color}
-                                </div>
-                              )}
-                            </div>
-                            {grip.msrp > 0 && (
-                              <span className="text-sm text-muted-foreground">+${grip.msrp}</span>
-                            )}
-                          </CommandItem>
-                          ))}
+                            .map((grip) => {
+                              // Create a searchable string with all relevant grip attributes
+                              const searchableText = `${grip.brand} ${grip.model} ${grip.specs?.size || ''} ${grip.specs?.color || ''}`.toLowerCase();
+                              
+                              return (
+                                <CommandItem
+                                  key={grip.id}
+                                  value={searchableText}
+                                  onSelect={() => {
+                                    setFormData({ ...formData, grip_id: grip.id });
+                                    setGripOpen(false);
+                                    setGripSearch('');
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      formData.grip_id === grip.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex-1">
+                                    <div className="font-medium">
+                                      {grip.brand} {grip.model} {grip.specs?.size && `- ${grip.specs.size}`}
+                                    </div>
+                                    {grip.specs?.color && (
+                                      <div className="text-sm text-muted-foreground">
+                                        {grip.specs.color}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {grip.msrp > 0 && (
+                                    <span className="text-sm text-muted-foreground">+${grip.msrp}</span>
+                                  )}
+                                </CommandItem>
+                              );
+                            })}
                         </CommandGroup>
                       </CommandList>
                     </Command>
@@ -603,24 +639,123 @@ export function EquipmentEditor({
             )}
 
             {/* Loft Selection - Only show for clubs with loft options */}
-            {isClub && loftOptions.length > 0 && (
+            {isClub && LOFT_OPTIONS[equipment.equipment.category] && (
               <div>
                 <Label>Loft/Configuration</Label>
                 <Select
-                  value={formData.loft_option_id}
-                  onValueChange={(value) => setFormData({ ...formData, loft_option_id: value })}
+                  value={formData.loft || 'none'}
+                  onValueChange={(value) => setFormData({ ...formData, loft: value === 'none' ? '' : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select loft" />
                   </SelectTrigger>
                   <SelectContent>
-                    {loftOptions.map((loft) => (
-                      <SelectItem key={loft.id} value={loft.id}>
-                        {loft.display_name}
+                    <SelectItem value="none">None</SelectItem>
+                    {LOFT_OPTIONS[equipment.equipment.category].map((loft) => (
+                      <SelectItem key={loft} value={loft}>
+                        {loft}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            )}
+
+            {/* Iron Configuration - Only show for iron sets */}
+            {isIron && (
+              <div className="space-y-3">
+                <Label>Iron Configuration</Label>
+                
+                {/* Configuration Type Toggle */}
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={formData.iron_config_type === 'set' ? 'default' : 'outline'}
+                    onClick={() => setFormData({ ...formData, iron_config_type: 'set' })}
+                    className="flex-1"
+                    size="sm"
+                  >
+                    Iron Set
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={formData.iron_config_type === 'single' ? 'default' : 'outline'}
+                    onClick={() => setFormData({ ...formData, iron_config_type: 'single' })}
+                    className="flex-1"
+                    size="sm"
+                  >
+                    Single Iron
+                  </Button>
+                </div>
+
+                {formData.iron_config_type === 'set' ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs">From</Label>
+                      <Select
+                        value={formData.iron_from}
+                        onValueChange={(value) => {
+                          setFormData({ ...formData, iron_from: value });
+                          // Ensure 'to' is not before 'from'
+                          if (getIronIndex(value) > getIronIndex(formData.iron_to)) {
+                            setFormData({ ...formData, iron_from: value, iron_to: value });
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {IRON_OPTIONS.map((iron) => (
+                            <SelectItem key={iron} value={iron}>
+                              {iron}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">To</Label>
+                      <Select
+                        value={formData.iron_to}
+                        onValueChange={(value) => setFormData({ ...formData, iron_to: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {IRON_OPTIONS.map((iron) => (
+                            <SelectItem 
+                              key={iron} 
+                              value={iron}
+                              disabled={getIronIndex(iron) < getIronIndex(formData.iron_from)}
+                            >
+                              {iron}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <Select
+                      value={formData.iron_single}
+                      onValueChange={(value) => setFormData({ ...formData, iron_single: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select iron" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {IRON_OPTIONS.map((iron) => (
+                          <SelectItem key={iron} value={iron}>
+                            {iron} iron
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
             )}
 

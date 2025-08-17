@@ -292,7 +292,7 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
           handicap,
           title
         ),
-        user_liked:feed_likes!left(
+        user_liked:feed_likes!feed_likes_post_id_fkey!left(
           id
         )
       `
@@ -315,7 +315,7 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
     
     // If we have a userId, filter the likes join
     if (userId) {
-      query = query.eq('feed_likes.user_id', userId);
+      query = query.eq('user_liked.user_id', userId);
     }
 
     // If filtering by following, join with follows table
@@ -415,7 +415,7 @@ export async function getUserFeedPosts(userId: string, limit: number = 100, offs
           description,
           background_image
         ),
-        user_liked:feed_likes!left(
+        user_liked:feed_likes!feed_likes_post_id_fkey!left(
           id
         )
       `

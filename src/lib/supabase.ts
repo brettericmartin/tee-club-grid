@@ -79,7 +79,6 @@ export interface Database {
           custom_photo_url?: string;
           shaft_id?: string;
           grip_id?: string;
-          loft_option_id?: string;
           condition?: string;
           created_at: string;
         };
@@ -265,6 +264,44 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['forum_categories']['Row'], 'id' | 'created_at'>;
         Update: Partial<Database['public']['Tables']['forum_categories']['Insert']>;
+      };
+      feed_posts: {
+        Row: {
+          id: string;
+          user_id: string;
+          content?: string;
+          equipment_id?: string;
+          bag_id?: string;
+          photo_ids?: string[];
+          post_type?: string;
+          visibility?: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['feed_posts']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['feed_posts']['Insert']>;
+      };
+      feed_likes: {
+        Row: {
+          id: string;
+          post_id: string;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['feed_likes']['Row'], 'id' | 'created_at'>;
+        Update: Partial<Database['public']['Tables']['feed_likes']['Insert']>;
+      };
+      feed_comments: {
+        Row: {
+          id: string;
+          post_id: string;
+          user_id: string;
+          content: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['feed_comments']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['feed_comments']['Insert']>;
       };
     };
   };
