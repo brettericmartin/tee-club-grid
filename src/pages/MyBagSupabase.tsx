@@ -34,6 +34,8 @@ import { BadgeService, type UserBadgeWithDetails } from "@/services/badgeService
 import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import { sortBadgesByPriority } from "@/utils/badgeSorting";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserFeedView } from "@/components/feed/UserFeedView";
 import { aiFlowMetrics } from "@/utils/performanceMonitor";
 import { lazyWithRetry } from "@/utils/dynamicImport";
@@ -71,11 +73,18 @@ type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
   equipment: Database['public']['Tables']['equipment']['Row'];
   shaft?: Database['public']['Tables']['shafts']['Row'];
   grip?: Database['public']['Tables']['grips']['Row'];
-  loft_option?: Database['public']['Tables']['loft_options']['Row'];
 };
 
 type Bag = Database['public']['Tables']['user_bags']['Row'] & {
   profile?: Database['public']['Tables']['profiles']['Row'];
+};
+
+// Loft options by club type
+const LOFT_OPTIONS: Record<string, string[]> = {
+  driver: ['8°', '8.5°', '9°', '9.5°', '10°', '10.5°', '11°', '11.5°', '12°', '12.5°'],
+  fairway_wood: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
+  hybrid: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°', '25°', '26°', '27°'],
+  wedge: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°']
 };
 
 const MyBagSupabase = () => {
@@ -119,6 +128,8 @@ const MyBagSupabase = () => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [editingLoftItem, setEditingLoftItem] = useState<BagEquipmentItem | null>(null);
+  const [editingLoftValue, setEditingLoftValue] = useState<string>('');
   
   // AI Equipment flow states
   const [showMethodDialog, setShowMethodDialog] = useState(false);
@@ -324,11 +335,25 @@ const MyBagSupabase = () => {
 
       // Create a bag if user doesn't have one
       if (!userBags || userBags.length === 0) {
+        // Get the user's display name or username for the bag name
+        const profile = authContext.profile;
+        let bagName = 'My Bag'; // Default fallback
+        
+        if (profile?.display_name) {
+          bagName = `${profile.display_name}'s Bag`;
+        } else if (profile?.username) {
+          bagName = `${profile.username}'s Bag`;
+        } else if (user.email) {
+          // Fallback to email prefix if no profile data
+          const emailPrefix = user.email.split('@')[0];
+          bagName = `${emailPrefix}'s Bag`;
+        }
+        
         const { data: newBag, error: createError } = await supabase
           .from('user_bags')
           .insert({
             user_id: user.id,
-            name: 'My Bag',
+            name: bagName,
             bag_type: 'real'
           })
           .select('*, profile:profiles(*)')
@@ -600,12 +625,27 @@ const MyBagSupabase = () => {
     equipment_id: string;
     shaft_id?: string;
     grip_id?: string;
-    loft_option_id?: string;
+    loft?: string;
+    iron_config?: {
+      type: 'set' | 'single';
+      from?: string;
+      to?: string;
+      single?: string;
+    };
   }) => {
     if (!currentBag) return;
     
     try {
       // Adding equipment to bag
+      
+      // Build custom specs object with loft and iron config if provided
+      const customSpecs: any = {};
+      if (selection.loft) {
+        customSpecs.loft = selection.loft;
+      }
+      if (selection.iron_config) {
+        customSpecs.iron_config = selection.iron_config;
+      }
       
       // First, let's try a minimal insert to see what works
       const insertData = {
@@ -614,7 +654,7 @@ const MyBagSupabase = () => {
         condition: 'new',
         shaft_id: selection.shaft_id || null,
         grip_id: selection.grip_id || null,
-        loft_option_id: selection.loft_option_id || null
+        custom_specs: Object.keys(customSpecs).length > 0 ? customSpecs : null
       };
       
       // Preparing equipment insert
@@ -809,6 +849,48 @@ const MyBagSupabase = () => {
   const handleEditEquipment = (item: BagEquipmentItem) => {
     setSelectedBagEquipment(item);
     setEquipmentEditorOpen(true);
+  };
+
+  const handleEditLoft = (item: BagEquipmentItem) => {
+    setEditingLoftItem(item);
+    setEditingLoftValue(item.custom_specs?.loft || 'standard');
+  };
+
+  const handleSaveLoft = async () => {
+    if (!editingLoftItem || !currentBag) return;
+
+    try {
+      const updatedSpecs = {
+        ...(editingLoftItem.custom_specs || {}),
+        loft: editingLoftValue === 'none' ? undefined : editingLoftValue
+      };
+
+      // Remove loft if 'none' selected
+      if (editingLoftValue === 'none') {
+        delete updatedSpecs.loft;
+      }
+
+      const { error } = await supabase
+        .from('bag_equipment')
+        .update({ custom_specs: updatedSpecs })
+        .eq('id', editingLoftItem.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setBagItems(prev => prev.map(item => 
+        item.id === editingLoftItem.id 
+          ? { ...item, custom_specs: updatedSpecs }
+          : item
+      ));
+
+      toast.success('Loft updated successfully');
+      setEditingLoftItem(null);
+      setEditingLoftValue('');
+    } catch (error) {
+      console.error('Error updating loft:', error);
+      toast.error('Failed to update loft');
+    }
   };
 
   const handleToggleFeatured = async (item: BagEquipmentItem) => {
@@ -1274,9 +1356,38 @@ const MyBagSupabase = () => {
                         {item.equipment.brand} {item.equipment.model}
                       </h3>
                       <p className="text-sm text-gray-300">
+                        {item.custom_specs?.iron_config && (
+                          item.custom_specs.iron_config.type === 'set' 
+                            ? `${item.custom_specs.iron_config.from}-${item.custom_specs.iron_config.to} • `
+                            : `${item.custom_specs.iron_config.single} iron • `
+                        )}
                         {item.shaft && `${item.shaft.brand} ${item.shaft.model} - ${item.shaft.flex}`}
                         {item.grip && ` • ${item.grip.brand} ${item.grip.model}`}
-                        {item.loft_option && ` • ${item.loft_option.display_name}`}
+                        {item.custom_specs?.loft ? (
+                          <span
+                            className="cursor-pointer hover:text-primary transition-colors inline-flex items-center gap-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditLoft(item);
+                            }}
+                          >
+                            {` • ${item.custom_specs.loft}`}
+                            {isEditing && <span className="text-xs ml-1">(edit)</span>}
+                          </span>
+                        ) : (
+                          item.equipment.category && ['driver', 'fairway_wood', 'hybrid', 'wedge'].includes(item.equipment.category) && isEditing && (
+                            <span
+                              className="cursor-pointer text-white/40 hover:text-primary transition-colors inline-flex items-center gap-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditLoft(item);
+                              }}
+                            >
+                              {` • `}
+                              <span className="text-xs">+ Add loft</span>
+                            </span>
+                          )
+                        )}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -1640,6 +1751,64 @@ const MyBagSupabase = () => {
       )}
       
       {/* Create Post Modal */}
+      {/* Loft Edit Dialog */}
+      <Dialog open={!!editingLoftItem} onOpenChange={(open) => !open && setEditingLoftItem(null)}>
+        <DialogContent className="bg-[#1a1a1a] border-white/20 text-white">
+          <DialogHeader>
+            <DialogTitle>Edit Loft</DialogTitle>
+          </DialogHeader>
+          {editingLoftItem && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-white/60 mb-2">
+                  {editingLoftItem.equipment.brand} {editingLoftItem.equipment.model}
+                </p>
+                <Select
+                  value={editingLoftValue}
+                  onValueChange={setEditingLoftValue}
+                >
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectValue placeholder="Select loft angle" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#1a1a1a] border-white/20 z-[102]">
+                    <SelectItem value="standard" className="text-white hover:bg-white/10">
+                      Standard / Stock Loft
+                    </SelectItem>
+                    <SelectItem value="none" className="text-white/50 hover:bg-white/10 italic">
+                      No preference (remove loft)
+                    </SelectItem>
+                    {(LOFT_OPTIONS[editingLoftItem.equipment.category] || []).map((loft) => (
+                      <SelectItem 
+                        key={loft} 
+                        value={loft}
+                        className="text-white hover:bg-white/10"
+                      >
+                        {loft}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setEditingLoftItem(null)}
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveLoft}
+                  className="bg-primary hover:bg-primary/90 text-black"
+                >
+                  Save Loft
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <CreatePostModal
         isOpen={showCreatePost}
         onClose={() => setShowCreatePost(false)}

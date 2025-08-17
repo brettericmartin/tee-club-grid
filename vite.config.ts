@@ -10,9 +10,14 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       host: true,
-      port: 3000,
+      port: 3333,
       strictPort: false,
       open: true,
+      // Add HMR configuration for better stability
+      hmr: {
+        overlay: true,
+        timeout: 5000,
+      },
     },
     plugins: [
       react(),
@@ -26,6 +31,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       chunkSizeWarningLimit: 600,
+      sourcemap: mode === 'development', // Enable sourcemaps in development
     },
     optimizeDeps: {
       include: [
@@ -40,10 +46,13 @@ export default defineConfig(({ mode }) => {
         '@dnd-kit/sortable',
         '@dnd-kit/core',
         '@dnd-kit/utilities',
+        'clsx',
+        '@radix-ui/react-slot',
+        '@radix-ui/react-dialog',
       ],
       exclude: [],
-      // Force pre-bundling of dynamic imports in development
-      force: mode === 'development',
+      // Don't force in development to avoid constant re-optimization
+      force: false,
       // Entries to optimize even if not directly imported
       entries: [
         'src/components/equipment/*.tsx',

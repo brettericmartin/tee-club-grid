@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { getEquipmentDetails, toggleEquipmentSave, isEquipmentSaved } from '@/services/equipment';
 import { EquipmentPhotoRepository } from '@/components/equipment/EquipmentPhotoRepository';
+import EquipmentSpecs from '@/components/equipment-detail/EquipmentSpecs';
 import { toast } from 'sonner';
 import { getForumThreadsByEquipment } from '@/services/forum';
 import ForumThreadPreview from '@/components/forum/ForumThreadPreview';
@@ -53,10 +54,14 @@ export default function EquipmentDetail() {
       const data = await getEquipmentDetails(id);
       setEquipment(data);
       
-      // Check if user has saved this equipment
+      // Check if user has saved this equipment (non-blocking)
       if (user && id) {
-        const saved = await isEquipmentSaved(user.id, id);
-        setIsSaved(saved);
+        isEquipmentSaved(user.id, id).then(saved => {
+          setIsSaved(saved);
+        }).catch(error => {
+          console.error('Error checking saved status:', error);
+          // Don't show error - saved status is optional
+        });
       }
     } catch (error) {
       console.error('Error loading equipment:', error);
@@ -96,7 +101,7 @@ export default function EquipmentDetail() {
 
   const handleSaveToggle = async () => {
     if (!user) {
-      toast.error('Please sign in to save equipment');
+      toast.info('Please sign in to save equipment to your favorites');
       return;
     }
 
@@ -268,8 +273,9 @@ export default function EquipmentDetail() {
 
         {/* Tabs Section */}
         <Tabs defaultValue="photos" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto">
             <TabsTrigger value="photos">Photos</TabsTrigger>
+            <TabsTrigger value="specs">Specs</TabsTrigger>
             <TabsTrigger value="bags">
               <Users className="w-4 h-4 mr-2" />
               Bags
@@ -285,6 +291,13 @@ export default function EquipmentDetail() {
               equipmentName={`${equipment.brand} ${equipment.model}`}
               brand={equipment.brand}
               model={equipment.model}
+            />
+          </TabsContent>
+
+          <TabsContent value="specs" className="mt-6">
+            <EquipmentSpecs 
+              equipment={equipment}
+              loading={loading}
             />
           </TabsContent>
 

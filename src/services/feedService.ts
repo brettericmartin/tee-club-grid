@@ -311,7 +311,7 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
       .from('feed_posts')
       .select(selectQuery)
       .order('created_at', { ascending: false })
-      .limit(50);
+      .limit(20); // Reduce initial load for better performance
     
     // If we have a userId, filter the likes join
     if (userId) {
@@ -344,37 +344,26 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
     
     console.log('Fetched feed posts:', data?.length || 0, 'posts');
     
-    // For posts with bag_id, fetch the bag data separately
-    const postsWithBags = await Promise.all((data || []).map(async (post) => {
-      // Check both the column and content for bag_id
-      const bagId = post.bag_id || post.content?.bag_id;
+    // Check user likes separately if userId exists (batch query)
+    let userLikes: string[] = [];
+    if (userId && data && data.length > 0) {
+      const postIds = data.map(p => p.id);
+      const { data: likes } = await supabase
+        .from('feed_likes')
+        .select('post_id')
+        .eq('user_id', userId)
+        .in('post_id', postIds);
       
-      if (bagId) {
-        const { data: bagData } = await supabase
-          .from('user_bags')
-          .select(`
-            id,
-            name,
-            description,
-            background_image,
-            bag_equipment(
-              equipment(
-                brand,
-                model,
-                category,
-                msrp
-              )
-            )
-          `)
-          .eq('id', bagId)
-          .single();
-        
-        return { ...post, bag: bagData };
-      }
-      return post;
-    }));
+      userLikes = likes?.map(l => l.post_id) || [];
+    }
     
-    return postsWithBags;
+    // Map posts with user_liked data
+    const posts = data?.map(post => ({
+      ...post,
+      user_liked: userLikes.includes(post.id) ? [{ id: 'liked' }] : []
+    })) || [];
+    
+    return posts;
   } catch (error) {
     console.error('Error fetching feed posts:', error);
     return [];

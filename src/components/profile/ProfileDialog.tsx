@@ -42,6 +42,7 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
   
   // Form state
   const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
   const [handicap, setHandicap] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [title, setTitle] = useState('');
@@ -59,6 +60,7 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
   // Original values to detect changes
   const [originalValues, setOriginalValues] = useState({
     displayName: '',
+    username: '',
     handicap: '',
     avatarUrl: null as string | null,
     title: ''
@@ -85,14 +87,16 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
         // Ensure display_name is never empty - fallback to username
         const displayNameValue = profile.display_name || profile.username || '';
         setDisplayName(displayNameValue);
+        setUsername(profile.username || '');
         setHandicap(profile.handicap?.toString() || '');
-        setAvatarUrl(profile.avatar_url);
+        setAvatarUrl(profile.avatar_url || '/teed-icon.svg');
         setTitle(profile.title || 'Golfer');
         
         setOriginalValues({
           displayName: displayNameValue,
+          username: profile.username || '',
           handicap: profile.handicap?.toString() || '',
-          avatarUrl: profile.avatar_url,
+          avatarUrl: profile.avatar_url || '/teed-icon.svg',
           title: profile.title || 'Golfer'
         });
       } else {
@@ -100,7 +104,8 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
         console.log('No profile found for user, will create on save');
         // Use metadata as defaults
         setDisplayName(user.user_metadata?.display_name || user.user_metadata?.username || '');
-        setAvatarUrl(user.user_metadata?.avatar_url || null);
+        setUsername(user.user_metadata?.username || user.email?.split('@')[0] || '');
+        setAvatarUrl(user.user_metadata?.avatar_url || '/teed-icon.svg');
         setTitle('Golfer'); // Default title for new users
       }
     } catch (error) {
@@ -162,6 +167,10 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
       if (displayName !== originalValues.displayName || !originalValues.displayName) {
         // Ensure display_name is never null or empty
         updates.display_name = displayName || user.email?.split('@')[0] || 'User';
+      }
+      
+      if (username !== originalValues.username) {
+        updates.username = username;
       }
       
       if (handicap !== originalValues.handicap) {
@@ -305,6 +314,7 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
 
   const hasChanges = 
     displayName !== originalValues.displayName ||
+    username !== originalValues.username ||
     handicap !== originalValues.handicap ||
     avatarUrl !== originalValues.avatarUrl ||
     title !== originalValues.title;
@@ -343,6 +353,19 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
               />
               <p className="text-xs text-white/60">This is how your name appears across Teed.club</p>
+            </div>
+            
+            {/* Username */}
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-white">Username</Label>
+              <Input
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                placeholder="Enter your username"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              />
+              <p className="text-xs text-white/60">Your unique username (letters, numbers, underscore only)</p>
             </div>
             
             {/* Handicap */}

@@ -50,118 +50,83 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
   const [commentCount, setCommentCount] = useState(post.commentCount || 0);
   const [bagLiked, setBagLiked] = useState(false);
   const [bagLikeCount, setBagLikeCount] = useState(0);
+  const [bagDataLoaded, setBagDataLoaded] = useState(false);
 
-  // Load user's bag data for flip card back
+  // Use profile data from the post
   useEffect(() => {
-    const loadUserBag = async () => {
-      if (!post.userId) return;
-      
-      setLoadingBag(true);
-      try {
-        // Get user's profile
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', post.userId)
-          .single();
-        
-        if (profile) {
-          setUserProfile(profile);
-        }
+    if (post.userAvatar || post.userName) {
+      setUserProfile({
+        avatar_url: post.userAvatar,
+        username: post.userName,
+        display_name: post.userName
+      });
+    }
+  }, [post]);
 
-        // Get user's primary bag with full equipment relationships
-        const { data: primaryBag, error: bagError } = await supabase
-          .from('user_bags')
-          .select(`
-            *,
-            bag_equipment (
-              *,
-              equipment (
-                *,
-                equipment_photos (
-                  id,
-                  photo_url,
-                  likes_count,
-                  is_primary
-                )
-              )
-            )
-          `)
-          .eq('user_id', post.userId)
-          .eq('is_primary', true)
-          .single();
-        
-        if (bagError) {
-          console.error('Error fetching user bag:', bagError);
-          // Try simpler query without foreign key joins
-          const { data: simpleBag } = await supabase
-            .from('user_bags')
-            .select(`
-              *,
-              bag_equipment (
-                *,
-                equipment (
-                  *,
-                  equipment_photos (
-                    id,
-                    photo_url,
-                    likes_count,
-                    is_primary
-                  )
-                )
-              )
-            `)
-            .eq('user_id', post.userId)
-            .eq('is_primary', true)
-            .single();
-          
-          if (simpleBag) {
-            setUserBag(simpleBag);
-            setBagLikeCount(simpleBag.likes_count || 0);
-          }
-          return;
-        }
-        
-        if (primaryBag) {
-          setUserBag(primaryBag);
-          setBagLikeCount(primaryBag.likes_count || 0);
-          
-          // Check if current user has liked this bag
-          if (currentUserId) {
-            const { data: likeData } = await supabase
-              .from('bag_likes')
-              .select('id')
-              .eq('user_id', currentUserId)
-              .eq('bag_id', primaryBag.id)
-              .single();
-            
-            setBagLiked(!!likeData);
-          }
-          
-          // Load equipment data for featured clubs
-          const equipment = primaryBag.bag_equipment
-            ?.filter(be => be.equipment)
-            .slice(0, 3)
-            .map(be => be.equipment!)
-            .filter(Boolean);
-          
-          if (equipment) {
-            const equipmentMap = equipment.reduce((acc, eq) => ({
-              ...acc,
-              [eq.id]: eq
-            }), {});
-            setEquipmentData(equipmentMap);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading user bag:', error);
-      } finally {
-        setLoadingBag(false);
-      }
-    };
+  // Only load bag data when user actually flips the card
+  const loadUserBagData = async () => {
+    if (bagDataLoaded || !post.userId) return;
     
-    loadUserBag();
-  }, [post.userId, currentUserId]);
+    setLoadingBag(true);
+    setBagDataLoaded(true);
+    try {
+      // Use simpler query - just get basic bag info
+      const { data: primaryBag } = await supabase
+        .from('user_bags')
+        .select(`
+          *,
+          bag_equipment (
+            equipment_id,
+            equipment (
+              id,
+              brand,
+              model,
+              category,
+              image_url
+            )
+          )
+        `)
+        .eq('user_id', post.userId)
+        .eq('is_primary', true)
+        .single();
+      
+      if (primaryBag) {
+        setUserBag(primaryBag);
+        setBagLikeCount(primaryBag.likes_count || 0);
+        
+        // Check if current user has liked this bag
+        if (currentUserId) {
+          const { data: likeData } = await supabase
+            .from('bag_likes')
+            .select('id')
+            .eq('user_id', currentUserId)
+            .eq('bag_id', primaryBag.id)
+            .maybeSingle();
+          
+          setBagLiked(!!likeData);
+        }
+        
+        // Load basic equipment data
+        const equipment = primaryBag.bag_equipment
+          ?.filter(be => be.equipment)
+          .slice(0, 3)
+          .map(be => be.equipment!)
+          .filter(Boolean);
+        
+        if (equipment) {
+          const equipmentMap = equipment.reduce((acc, eq) => ({
+            ...acc,
+            [eq.id]: eq
+          }), {});
+          setEquipmentData(equipmentMap);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading bag data:', error);
+    } finally {
+      setLoadingBag(false);
+    }
+  };
 
 
   const handleFollowToggle = () => {
@@ -391,7 +356,13 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
         <div className="relative overflow-hidden">
           {/* Toggle Button - Made larger and more prominent */}
           <button
-            onClick={() => setIsFlipped(!isFlipped)}
+            onClick={async () => {
+              // Load bag data on first flip
+              if (!isFlipped && !bagDataLoaded) {
+                await loadUserBagData();
+              }
+              setIsFlipped(!isFlipped);
+            }}
             className="absolute top-3 right-3 z-10 bg-primary/90 hover:bg-primary hover:scale-110 text-black p-3 rounded-full transition-all shadow-lg"
             aria-label="Toggle view"
           >

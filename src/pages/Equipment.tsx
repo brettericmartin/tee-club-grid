@@ -36,7 +36,11 @@ const Equipment = () => {
   }, [category, sortBy]);
 
   useEffect(() => {
+    // Only load saved equipment if user is logged in AND showSavedOnly is true
     if (user && showSavedOnly) {
+      loadSavedEquipment();
+    } else if (user) {
+      // Load saved items in background if user is logged in
       loadSavedEquipment();
     }
   }, [user, showSavedOnly]);
@@ -64,15 +68,17 @@ const Equipment = () => {
       const uniqueBrands = Array.from(new Set(data?.map(item => item.brand) || [])).sort();
       setBrands(uniqueBrands);
       
-      // Load saved items if user is logged in
+      // Load saved items in background if user is logged in (non-blocking)
       if (user) {
-        const saved = await getUserSavedEquipment(user.id);
-        console.log('Saved equipment data:', saved);
-        
-        // getUserSavedEquipment returns equipment objects with their IDs at the top level
-        const savedIds = saved?.map(item => item.id).filter(Boolean) || [];
-        console.log('Saved equipment IDs:', savedIds);
-        setSavedItems(new Set(savedIds));
+        getUserSavedEquipment(user.id).then(saved => {
+          console.log('Saved equipment data:', saved);
+          const savedIds = saved?.map(item => item.id).filter(Boolean) || [];
+          console.log('Saved equipment IDs:', savedIds);
+          setSavedItems(new Set(savedIds));
+        }).catch(error => {
+          console.error('Error loading saved equipment:', error);
+          // Don't show error to user - saved items are optional
+        });
       }
     } catch (error) {
       console.error('Error loading equipment:', error);
@@ -142,7 +148,8 @@ const Equipment = () => {
     if (!user) {
       toast({
         title: "Sign in required",
-        description: "Please sign in to save equipment to your favorites."
+        description: "Please sign in to save equipment to your favorites.",
+        variant: "default"
       });
       return;
     }

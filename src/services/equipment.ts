@@ -12,17 +12,10 @@ export async function getEquipment(options?: {
   sortBy?: 'popular' | 'newest' | 'price-low' | 'price-high';
   search?: string;
 }) {
+  // Simplified query - don't join photos initially
   let query = supabase
     .from('equipment')
-    .select(`
-      *,
-      equipment_photos (
-        id,
-        photo_url,
-        likes_count,
-        is_primary
-      )
-    `);
+    .select('*');
 
   // Apply filters
   if (options?.category && options.category !== 'all') {
@@ -57,26 +50,15 @@ export async function getEquipment(options?: {
   
   if (error) throw error;
   
-  // Return simplified data with proper photo handling
-  return data?.map(equipment => {
-    // Sort photos by likes_count to get the most liked one
-    const sortedPhotos = equipment.equipment_photos?.sort((a, b) => 
-      (b.likes_count || 0) - (a.likes_count || 0)
-    );
-    
-    // Use the most liked photo, or the first one, or fall back to image_url
-    const mostLikedPhoto = sortedPhotos?.[0]?.photo_url || null;
-    const primaryPhoto = mostLikedPhoto || equipment.image_url;
-    
-    return {
-      ...equipment,
-      averageRating: null,
-      primaryPhoto,
-      most_liked_photo: mostLikedPhoto,
-      savesCount: 0,
-      totalLikes: 0
-    };
-  });
+  // Return simplified data - use image_url directly
+  return data?.map(equipment => ({
+    ...equipment,
+    averageRating: null,
+    primaryPhoto: equipment.image_url,
+    most_liked_photo: equipment.image_url,
+    savesCount: 0,
+    totalLikes: 0
+  }));
 }
 
 // Get single equipment details

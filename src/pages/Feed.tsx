@@ -34,7 +34,8 @@ const FeedContent = () => {
 
   const handleLike = async (postId: string) => {
     if (!user) {
-      console.error('No user found for like action');
+      console.log('User must be logged in to like posts');
+      // Could show a sign-in modal here
       return;
     }
     
@@ -111,7 +112,12 @@ const FeedContent = () => {
   };
 
   const handleFollow = async (userId: string) => {
-    if (!user || user.id === userId) return;
+    if (!user) {
+      console.log('User must be logged in to follow');
+      // Could show a sign-in modal here
+      return;
+    }
+    if (user.id === userId) return;
     
     try {
       // Check current follow status

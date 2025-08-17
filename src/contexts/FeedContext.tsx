@@ -49,10 +49,13 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
   const [currentFilter, setCurrentFilter] = useState<'all' | 'following'>('all');
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set());
 
-  // Load followed users if authenticated
+  // Load followed users if authenticated (non-blocking)
   useEffect(() => {
     if (user) {
       loadFollowedUsers();
+    } else {
+      // Clear followed users when user logs out
+      setFollowedUsers(new Set());
     }
   }, [user]);
 
@@ -70,6 +73,7 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error('Error loading followed users:', error);
+      // Don't block feed loading on follow errors
     }
   };
 
@@ -80,30 +84,18 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       setError(null);
       setCurrentFilter(filter);
       
-      // Ensure followed users are loaded first if user is authenticated
-      let currentFollowedUsers = followedUsers;
-      if (user && followedUsers.size === 0) {
-        console.log('[FeedContext] Loading followed users before feed...');
-        const { data: follows } = await supabase
-          .from('user_follows')
-          .select('following_id')
-          .eq('follower_id', user.id);
-        
-        if (follows) {
-          currentFollowedUsers = new Set(follows.map(f => f.following_id));
-          setFollowedUsers(currentFollowedUsers);
-          console.log('[FeedContext] Loaded', currentFollowedUsers.size, 'followed users');
-        }
-      }
+      // Don't block on loading followed users - use what we have
+      // If filter is 'following' and no user, just show all posts
+      const effectiveFilter = filter === 'following' && !user ? 'all' : filter;
       
-      const feedPosts = await getFeedPosts(user?.id, filter);
+      const feedPosts = await getFeedPosts(user?.id, effectiveFilter);
       
       console.log('[FeedContext] Raw feed posts:', feedPosts.length, 'posts');
       console.log('[FeedContext] Sample post:', feedPosts[0]);
       
       // Transform posts to UI format
       const transformedPosts = feedPosts.map(post => {
-        const isFollowed = currentFollowedUsers.has(post.user_id);
+        const isFollowed = followedUsers.has(post.user_id);
         const transformed = transformFeedPost({ ...post, isFollowed });
         
         // Log the first post transformation for debugging
