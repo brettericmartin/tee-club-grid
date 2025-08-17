@@ -1,4 +1,4 @@
-import { User, Grid, Heart, Users, LogOut, MessageSquare } from "lucide-react";
+import { User, Grid, Heart, Users, LogOut, MessageSquare, FileText } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -149,14 +149,22 @@ const Navigation = () => {
               </Link>
             </div>
 
-            {/* Right Side - Forum + Profile */}
-            <div className="flex items-center gap-4">
+            {/* Right Side - Forum + Patch Notes + Profile */}
+            <div className="flex items-center gap-3">
               <Link
                 to="/forum"
                 className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
               >
                 <MessageSquare className="w-5 h-5" />
                 <span className="font-medium">Forum</span>
+              </Link>
+              
+              <Link
+                to="/patch-notes"
+                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <FileText className="w-5 h-5" />
+                <span className="font-medium">Updates</span>
               </Link>
               
               <div className="flex items-center">

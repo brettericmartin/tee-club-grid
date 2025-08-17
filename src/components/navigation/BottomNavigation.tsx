@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Grid, Heart, Users, Package, MessageSquare } from "lucide-react";
+import { Grid, Heart, Users, Package, MessageSquare, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const BottomNavigation = () => {
@@ -26,6 +26,11 @@ const BottomNavigation = () => {
       to: "/forum",
       icon: MessageSquare,
       label: "Forum",
+    },
+    {
+      to: "/patch-notes",
+      icon: FileText,
+      label: "Updates",
     },
   ];
 

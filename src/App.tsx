@@ -32,6 +32,7 @@ import ForumCategoryPage from "@/pages/ForumCategory";
 import ForumThreadPage from "@/pages/ForumThread";
 import NotFoundPage from "@/pages/NotFound";
 import AIBagAnalyzerPage from "@/pages/AIBagAnalyzer";
+import PatchNotesPage from "@/pages/PatchNotes";
 import AuthCallbackPage from "@/pages/AuthCallback";
 import SeedEquipmentPage from "@/pages/admin/SeedEquipment";
 import EquipmentMigrationPage from "@/pages/admin/EquipmentMigration";
@@ -124,6 +125,7 @@ const ForumCategory = isDev ? ForumCategoryPage : lazyImport(() => import("@/pag
 const ForumThread = isDev ? ForumThreadPage : lazyImport(() => import("@/pages/ForumThread"), "Forum Thread");
 const NotFound = isDev ? NotFoundPage : lazyImport(() => import("@/pages/NotFound"), "Not Found");
 const AIBagAnalyzer = isDev ? AIBagAnalyzerPage : lazyImport(() => import("@/pages/AIBagAnalyzer"), "AI Bag Analyzer");
+const PatchNotes = isDev ? PatchNotesPage : lazyImport(() => import("@/pages/PatchNotes"), "Patch Notes");
 const AuthCallback = isDev ? AuthCallbackPage : lazyImport(() => import("@/pages/AuthCallback"), "Auth Callback");
 
 // Admin routes (rarely accessed)
@@ -207,6 +209,7 @@ function App() {
                         <Route path="/badge/:badgeType" element={<BadgePreview />} />
                         <Route path="/forum/*" element={<ForumIndex />} />
                         <Route path="/ai-bag-analyzer" element={<AIBagAnalyzer />} />
+                        <Route path="/patch-notes" element={<PatchNotes />} />
                         
                         {/* Admin routes */}
                         <Route path="/admin/seed-equipment" element={<SeedEquipment />} />
