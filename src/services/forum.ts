@@ -15,7 +15,8 @@ export interface ForumPostWithUser extends ForumPost {
     tee: number;
     helpful: number;
     fire: number;
-    user_reaction?: string;
+    fixed?: number;
+    user_reactions?: string[];
   };
   replies?: ForumPostWithUser[];
   depth?: number;
@@ -80,7 +81,7 @@ export function buildPostTree(posts: ForumPostWithUser[]): ForumPostWithUser[] {
 }
 
 // Fetch thread posts with user information and build tree structure
-export async function getThreadPosts(threadId: string) {
+export async function getThreadPosts(threadId: string, userId?: string) {
   const { data: posts, error } = await supabase
     .from('forum_posts')
     .select(`
@@ -99,15 +100,74 @@ export async function getThreadPosts(threadId: string) {
     console.error('Error fetching thread posts:', error);
     return { posts: [], error };
   }
+
+  // Get all post IDs for fetching reactions
+  const postIds = posts.map(p => p.id);
+  
+  // Fetch reaction counts for all posts
+  const { data: reactionCounts, error: reactionsError } = await supabase
+    .from('forum_reactions')
+    .select('post_id, reaction_type')
+    .in('post_id', postIds);
+
+  if (reactionsError) {
+    console.error('Error fetching reaction counts:', reactionsError);
+  }
+
+  // Fetch current user's reactions if user is provided
+  let userReactions: any[] = [];
+  if (userId) {
+    const { data, error: userReactionsError } = await supabase
+      .from('forum_reactions')
+      .select('post_id, reaction_type')
+      .in('post_id', postIds)
+      .eq('user_id', userId);
+
+    if (userReactionsError) {
+      console.error('Error fetching user reactions:', userReactionsError);
+    } else {
+      userReactions = data || [];
+    }
+  }
+
+  // Build reaction counts and user reactions maps
+  const reactionCountsMap: Record<string, { tee: number; helpful: number; fire: number; fixed: number }> = {};
+  const userReactionsMap: Record<string, string[]> = {};
+
+  // Initialize counts for all posts
+  postIds.forEach(postId => {
+    reactionCountsMap[postId] = { tee: 0, helpful: 0, fire: 0, fixed: 0 };
+    userReactionsMap[postId] = [];
+  });
+
+  // Count reactions
+  if (reactionCounts) {
+    reactionCounts.forEach(reaction => {
+      const counts = reactionCountsMap[reaction.post_id];
+      if (counts && reaction.reaction_type in counts) {
+        (counts as any)[reaction.reaction_type]++;
+      }
+    });
+  }
+
+  // Map user reactions
+  userReactions.forEach(reaction => {
+    if (!userReactionsMap[reaction.post_id]) {
+      userReactionsMap[reaction.post_id] = [];
+    }
+    userReactionsMap[reaction.post_id].push(reaction.reaction_type);
+  });
   
   // Transform the data to match our interface
   const transformedPosts: ForumPostWithUser[] = posts.map(post => ({
     ...post,
     user: post.user || { id: post.user_id, username: 'Unknown User' },
     reactions: {
-      tee: 0,
-      helpful: 0,
-      fire: 0,
+      tee: reactionCountsMap[post.id]?.tee || 0,
+      helpful: reactionCountsMap[post.id]?.helpful || 0,
+      fire: reactionCountsMap[post.id]?.fire || 0,
+      fixed: reactionCountsMap[post.id]?.fixed || 0,
+      user_reactions: userReactionsMap[post.id] || []
     }
   }));
   
@@ -185,6 +245,8 @@ export async function createForumPost({
       tee: 0,
       helpful: 0,
       fire: 0,
+      fixed: 0,
+      user_reactions: []
     },
     replies: [],
     depth: 0

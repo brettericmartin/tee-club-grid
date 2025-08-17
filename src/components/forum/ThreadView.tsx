@@ -48,7 +48,7 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
       setThread(threadData);
       
       // Fetch posts with tree structure
-      const { posts: postsData, error: postsError } = await getThreadPosts(threadId);
+      const { posts: postsData, error: postsError } = await getThreadPosts(threadId, user?.id);
       if (postsError) throw postsError;
       setPosts(postsData || []);
     } catch (error) {
