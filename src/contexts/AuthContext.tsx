@@ -4,6 +4,12 @@ import { supabase } from '@/lib/supabase';
 import { DOMAIN_CONFIG } from '@/config/domain';
 import type { Database } from '@/lib/supabase';
 
+export const AUTH_EVENTS = {
+  REFRESHED: 'auth:refreshed',
+  CHANGED: 'auth:changed',
+  FOREGROUND: 'auth:foreground',
+} as const;
+
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface AuthContextType {
@@ -119,10 +125,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null);
       }
       if (event === 'TOKEN_REFRESHED') {
-        window.dispatchEvent(new CustomEvent('auth:refreshed'));
+        window.dispatchEvent(new CustomEvent(AUTH_EVENTS.REFRESHED));
       }
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
-        window.dispatchEvent(new CustomEvent('auth:changed'));
+        window.dispatchEvent(new CustomEvent(AUTH_EVENTS.CHANGED));
       }
     });
 
@@ -145,9 +151,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             } else {
               setProfile(null);
             }
-            window.dispatchEvent(new CustomEvent('auth:refreshed'));
+            window.dispatchEvent(new CustomEvent(AUTH_EVENTS.REFRESHED));
           }
-          window.dispatchEvent(new CustomEvent('auth:foreground'));
+          window.dispatchEvent(new CustomEvent(AUTH_EVENTS.FOREGROUND));
         } catch (e) {
         }
       }

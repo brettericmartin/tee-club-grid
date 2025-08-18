@@ -1,3 +1,4 @@
+import { AUTH_EVENTS } from '@/contexts/AuthContext';
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getFeedPosts, getUserFeedPosts, type FeedPost } from '@/services/feedService';
@@ -337,13 +338,13 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       loadFollowedUsers();
       refreshFeeds();
     };
-    window.addEventListener('auth:refreshed', onAuthSignal);
-    window.addEventListener('auth:foreground', onAuthSignal);
-    window.addEventListener('auth:changed', onAuthSignal);
+    window.addEventListener(AUTH_EVENTS.REFRESHED, onAuthSignal);
+    window.addEventListener(AUTH_EVENTS.FOREGROUND, onAuthSignal);
+    window.addEventListener(AUTH_EVENTS.CHANGED, onAuthSignal);
     return () => {
-      window.removeEventListener('auth:refreshed', onAuthSignal);
-      window.removeEventListener('auth:foreground', onAuthSignal);
-      window.removeEventListener('auth:changed', onAuthSignal);
+      window.removeEventListener(AUTH_EVENTS.REFRESHED, onAuthSignal);
+      window.removeEventListener(AUTH_EVENTS.FOREGROUND, onAuthSignal);
+      window.removeEventListener(AUTH_EVENTS.CHANGED, onAuthSignal);
     };
   }, [refreshFeeds]);
 
