@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { DOMAIN_CONFIG } from '@/config/domain';
 import { setupSessionMonitor, getValidSession } from '@/lib/authHelpers';
 import enhancedAuth from '@/lib/enhancedAuth';
-import tabFocusAuth from '@/lib/tabFocusAuth';
+// import tabFocusAuth from '@/lib/tabFocusAuth'; // TEMPORARILY DISABLED
 import { toast } from 'sonner';
 import type { Database } from '@/lib/supabase';
 
@@ -108,22 +108,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Initialize enhanced auth monitoring
     const cleanupEnhancedAuth = enhancedAuth.initialize();
     
-    // Initialize tab focus auth handling
-    const cleanupTabFocusAuth = tabFocusAuth.initialize();
+    // TEMPORARILY DISABLED: Tab focus auth causing issues
+    // const cleanupTabFocusAuth = tabFocusAuth.initialize();
     
-    // Listen for auth refresh events from tab focus handler
-    const handleAuthRefreshed = (event: CustomEvent) => {
-      console.log('[AuthContext] Auth refreshed from tab focus');
-      const { session } = event.detail;
-      if (session) {
-        setSession(session);
-        setUser(session.user);
-        if (session.user) {
-          fetchProfile(session.user.id).then(setProfile);
-        }
-      }
-    };
-    window.addEventListener('auth-refreshed', handleAuthRefreshed as EventListener);
+    // TEMPORARILY DISABLED: Listen for auth refresh events from tab focus handler
+    // const handleAuthRefreshed = (event: CustomEvent) => {
+    //   console.log('[AuthContext] Auth refreshed from tab focus');
+    //   const { session } = event.detail;
+    //   if (session) {
+    //     setSession(session);
+    //     setUser(session.user);
+    //     if (session.user) {
+    //       fetchProfile(session.user.id).then(setProfile);
+    //     }
+    //   }
+    // };
+    // window.addEventListener('auth-refreshed', handleAuthRefreshed as EventListener);
     
     // Get initial session
     const initializeAuth = async () => {
@@ -245,9 +245,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         sessionMonitorCleanup.current();
       }
       cleanupEnhancedAuth();
-      cleanupTabFocusAuth();
+      // TEMPORARILY DISABLED: cleanupTabFocusAuth();
       unsubscribeAuth();
-      window.removeEventListener('auth-refreshed', handleAuthRefreshed as EventListener);
+      // TEMPORARILY DISABLED: window.removeEventListener('auth-refreshed', handleAuthRefreshed as EventListener);
     };
   }, []);
 

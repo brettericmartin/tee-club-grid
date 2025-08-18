@@ -9,12 +9,12 @@ import { Session, AuthChangeEvent } from '@supabase/supabase-js';
 let authStateListeners: ((event: AuthChangeEvent, session: Session | null) => void)[] = [];
 
 // Session refresh configuration
-const SESSION_REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes (aggressive refresh)
-const SESSION_CHECK_INTERVAL = 30 * 1000; // 30 seconds
+const SESSION_REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes (less aggressive)
+const SESSION_CHECK_INTERVAL = 60 * 1000; // 60 seconds (less frequent)
 const TOKEN_EXPIRY_BUFFER = 5 * 60; // 5 minutes before expiry
 
 // Debug logging
-const DEBUG = true;
+const DEBUG = false; // Disabled to reduce console noise
 let log = (message: string, data?: any) => {
   if (DEBUG) {
     console.log(`[EnhancedAuth] ${new Date().toISOString()} - ${message}`, data || '');
@@ -335,12 +335,15 @@ if (typeof window !== 'undefined') {
     error: (msg: string) => console.error('❌', msg)
   };
   
-  console.log('🔐 Auth Debug Tools Available:');
-  console.log('  authDebug.checkSession() - Check current session status');
-  console.log('  authDebug.refreshToken() - Force token refresh');
-  console.log('  authDebug.getSession() - Get current session');
-  console.log('  authDebug.showLogs() - Show recent auth logs');
-  console.log('  authDebug.clearLogs() - Clear auth logs');
+  // Only show debug tools in development
+  if (import.meta.env.DEV) {
+    console.log('🔐 Auth Debug Tools Available:');
+    console.log('  authDebug.checkSession() - Check current session status');
+    console.log('  authDebug.refreshToken() - Force token refresh');
+    console.log('  authDebug.getSession() - Get current session');
+    console.log('  authDebug.showLogs() - Show recent auth logs');
+    console.log('  authDebug.clearLogs() - Clear auth logs');
+  }
 }
 
 export default {
