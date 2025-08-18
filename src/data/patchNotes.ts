@@ -10,7 +10,7 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
-    version: "1.3.0",
+    version: "0.13.0",
     date: "2025-08-17",
     title: "Patch Notes System",
     changes: [
@@ -29,7 +29,7 @@ export const patchNotes: PatchNote[] = [
     ]
   },
   {
-    version: "1.2.0",
+    version: "0.12.0",
     date: "2025-08-17",
     title: "Equipment Modal & Performance Overhaul",
     changes: [
@@ -68,7 +68,7 @@ export const patchNotes: PatchNote[] = [
     ]
   },
   {
-    version: "1.1.0",
+    version: "0.11.0",
     date: "2025-08-16",
     title: "Authentication & Social Features",
     changes: [
@@ -83,7 +83,7 @@ export const patchNotes: PatchNote[] = [
     ]
   },
   {
-    version: "1.0.9",
+    version: "0.10.0",
     date: "2025-08-15",
     title: "Feed Enhancement & OAuth Fix",
     changes: [
@@ -98,7 +98,7 @@ export const patchNotes: PatchNote[] = [
     ]
   },
   {
-    version: "1.0.8",
+    version: "0.9.0",
     date: "2025-08-14",
     title: "Equipment Pricing System",
     changes: [
@@ -117,7 +117,7 @@ export const patchNotes: PatchNote[] = [
     ]
   },
   {
-    version: "1.0.7",
+    version: "0.8.0",
     date: "2025-08-13",
     title: "Forum Automation",
     changes: [
@@ -132,7 +132,7 @@ export const patchNotes: PatchNote[] = [
     ]
   },
   {
-    version: "1.0.6",
+    version: "0.7.0",
     date: "2025-08-12",
     title: "Forum Feedback Implementation",
     changes: [
@@ -151,7 +151,7 @@ export const patchNotes: PatchNote[] = [
     ]
   },
   {
-    version: "1.0.5",
+    version: "0.6.0",
     date: "2025-08-11",
     title: "Mobile UX & Feed Improvements",
     changes: [
@@ -182,7 +182,7 @@ export const patchNotes: PatchNote[] = [
     ]
   },
   {
-    version: "1.0.4",
+    version: "0.5.0",
     date: "2025-08-10",
     title: "Share Card Enhancement",
     changes: [
@@ -204,7 +204,8 @@ export const patchNotes: PatchNote[] = [
 
 // NOTE FOR FUTURE COMMITS:
 // When making commits, please update this file with the new version and changes.
-// Version numbering:
-// - Major (X.0.0): Breaking changes or major new features
-// - Minor (1.X.0): New features or significant improvements
-// - Patch (1.0.X): Bug fixes and small improvements
+// Version numbering (Alpha phase):
+// - We're in alpha (0.x.x) until the platform is feature-complete
+// - Minor (0.X.0): New features or significant improvements
+// - Patch (0.X.Y): Bug fixes and small improvements
+// - Version 1.0.0 will be our official launch out of alpha

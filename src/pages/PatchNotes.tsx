@@ -48,8 +48,13 @@ const PatchNotes: React.FC = () => {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-2xl font-bold">Patch Notes</h1>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold">Patch Notes</h1>
+                <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded-full text-xs font-semibold border border-orange-500/30">
+                  ALPHA
+                </span>
+              </div>
               <p className="text-sm text-gray-400">Track all updates and improvements to Teed.club</p>
             </div>
           </div>
