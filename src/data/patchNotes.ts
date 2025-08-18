@@ -12,11 +12,11 @@ export const patchNotes: PatchNote[] = [
   {
     version: "0.15.0",
     date: "2025-08-18",
-    title: "Tab Focus Authentication & Enhanced UX",
+    title: "Authentication Simplification & Enhanced UX",
     changes: [
       {
-        category: "feature",
-        description: "Revolutionary tab focus authentication - no more lost sessions when switching browser tabs"
+        category: "fix",
+        description: "Simplified authentication to prevent issues when switching browser tabs"
       },
       {
         category: "feature",
@@ -27,24 +27,20 @@ export const patchNotes: PatchNote[] = [
         description: "Equipment specifications (shaft, grip, loft) now visible in MyBag list view"
       },
       {
-        category: "performance",
-        description: "Aggressive token refresh every 10 minutes with pre-emptive refresh before expiry"
+        category: "fix",
+        description: "Removed aggressive auth monitoring that was causing site breakage"
       },
       {
         category: "improvement",
-        description: "Multi-layer auth protection with automatic session recovery"
-      },
-      {
-        category: "feature",
-        description: "Debug tools in browser console: tabFocusAuth.status() and authDebug.checkSession()"
+        description: "Basic session management without intrusive monitoring"
       },
       {
         category: "fix",
         description: "Fixed critical auth initialization error that was causing blank screen"
       },
       {
-        category: "performance",
-        description: "Tab visibility detection with smart refresh strategies based on hidden duration"
+        category: "fix",
+        description: "Disabled Supabase auth state listener that was firing incorrectly on tab switches"
       }
     ]
   },

@@ -1,11 +1,11 @@
-import { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { DOMAIN_CONFIG } from '@/config/domain';
-import { setupSessionMonitor, getValidSession } from '@/lib/authHelpers';
-import enhancedAuth from '@/lib/enhancedAuth';
-// import tabFocusAuth from '@/lib/tabFocusAuth'; // TEMPORARILY DISABLED
-import { toast } from 'sonner';
+// import { setupSessionMonitor, getValidSession } from '@/lib/authHelpers'; // DISABLED
+// import enhancedAuth from '@/lib/enhancedAuth'; // DISABLED
+// import tabFocusAuth from '@/lib/tabFocusAuth'; // DISABLED
+// import { toast } from 'sonner'; // DISABLED
 import type { Database } from '@/lib/supabase';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
-  const sessionMonitorCleanup = useRef<(() => void) | null>(null);
+  // const sessionMonitorCleanup = useRef<(() => void) | null>(null); // DISABLED
 
   // Fetch user profile
   const fetchProfile = async (userId: string) => {
@@ -105,32 +105,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Initialize enhanced auth monitoring
-    const cleanupEnhancedAuth = enhancedAuth.initialize();
+    // DISABLED ALL ENHANCED AUTH - Just use basic Supabase auth
+    // const cleanupEnhancedAuth = enhancedAuth.initialize();
     
-    // TEMPORARILY DISABLED: Tab focus auth causing issues
-    // const cleanupTabFocusAuth = tabFocusAuth.initialize();
-    
-    // TEMPORARILY DISABLED: Listen for auth refresh events from tab focus handler
-    // const handleAuthRefreshed = (event: CustomEvent) => {
-    //   console.log('[AuthContext] Auth refreshed from tab focus');
-    //   const { session } = event.detail;
-    //   if (session) {
-    //     setSession(session);
-    //     setUser(session.user);
-    //     if (session.user) {
-    //       fetchProfile(session.user.id).then(setProfile);
-    //     }
-    //   }
-    // };
-    // window.addEventListener('auth-refreshed', handleAuthRefreshed as EventListener);
-    
-    // Get initial session
+    // Get initial session - SIMPLE VERSION
     const initializeAuth = async () => {
       console.log('[AuthContext] Initializing auth...');
       try {
-        // Use enhanced auth to get valid session
-        const validSession = await enhancedAuth.getValidSession();
+        // Just use basic Supabase getSession
+        const { data: { session: validSession } } = await supabase.auth.getSession();
         setSession(validSession);
         setUser(validSession?.user ?? null);
         
@@ -155,108 +138,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     initializeAuth();
 
-    // Set up enhanced auth state change listener
-    const unsubscribeAuth = enhancedAuth.onAuthStateChange((event, session) => {
-      console.log(`[AuthContext] Auth event: ${event}`, session?.user?.email);
-      
-      if (event === 'SIGNED_OUT') {
-        setSession(null);
-        setUser(null);
-        setProfile(null);
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          fetchProfile(session.user.id).then(setProfile);
-        }
-      }
-    });
+    // DISABLED enhanced auth state change listener
+    // const unsubscribeAuth = enhancedAuth.onAuthStateChange((event, session) => {
+    
+    // DISABLED legacy session monitor
+    // sessionMonitorCleanup.current = setupSessionMonitor(
 
-    // Set up legacy session monitor as backup
-    sessionMonitorCleanup.current = setupSessionMonitor(
-      // On session expired
-      () => {
-        console.log('[AuthContext] Session expired, clearing auth state');
-        setSession(null);
-        setUser(null);
-        setProfile(null);
-        toast.error('Your session has expired. Please sign in again.');
-      },
-      // On session refreshed
-      (newSession) => {
-        console.log('[AuthContext] Session auto-refreshed (legacy)');
-        setSession(newSession);
-        setUser(newSession.user);
-      }
-    );
-
-    // Listen for auth changes
+    // MINIMAL auth change listener - only for actual sign in/out actions
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[AuthContext] Auth state changed:', event);
-      
-      // Handle different auth events
-      switch (event) {
-        case 'SIGNED_IN':
-          console.log('[AuthContext] User signed in');
-          setSession(session);
-          setUser(session?.user ?? null);
-          if (session?.user) {
-            const profileData = await fetchProfile(session.user.id);
-            setProfile(profileData);
-          }
-          break;
-          
-        case 'SIGNED_OUT':
-          console.log('[AuthContext] User signed out');
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setProfileLoading(false);
-          break;
-          
-        case 'TOKEN_REFRESHED':
-          console.log('[AuthContext] Token refreshed successfully');
-          setSession(session);
-          setUser(session?.user ?? null);
-          break;
-          
-        case 'USER_UPDATED':
-          console.log('[AuthContext] User updated');
-          setSession(session);
-          setUser(session?.user ?? null);
-          if (session?.user) {
-            const profileData = await fetchProfile(session.user.id);
-            setProfile(profileData);
-          }
-          break;
-          
-        default:
-          // Handle any other events
-          setSession(session);
-          setUser(session?.user ?? null);
+      // ONLY handle explicit sign out - ignore all other events to prevent tab switching issues
+      if (event === 'SIGNED_OUT') {
+        console.log('[AuthContext] User explicitly signed out');
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        setProfileLoading(false);
       }
+      // IGNORE all other events including SIGNED_IN, TOKEN_REFRESHED, etc.
+      // These fire when switching tabs and cause issues
     });
 
     return () => {
       subscription.unsubscribe();
-      if (sessionMonitorCleanup.current) {
-        sessionMonitorCleanup.current();
-      }
-      cleanupEnhancedAuth();
-      // TEMPORARILY DISABLED: cleanupTabFocusAuth();
-      unsubscribeAuth();
-      // TEMPORARILY DISABLED: window.removeEventListener('auth-refreshed', handleAuthRefreshed as EventListener);
+      // DISABLED: All other cleanup since we disabled the features
+      // if (sessionMonitorCleanup.current) {
+      //   sessionMonitorCleanup.current();
+      // }
+      // cleanupEnhancedAuth();
+      // unsubscribeAuth();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     if (error) throw error;
+    
+    // Manually set session since we disabled auth state change listener
+    if (data.session) {
+      setSession(data.session);
+      setUser(data.session.user);
+      if (data.session.user) {
+        const profileData = await fetchProfile(data.session.user.id);
+        setProfile(profileData);
+      }
+    }
   };
 
   const signUp = async (email: string, password: string, username: string) => {

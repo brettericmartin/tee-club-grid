@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { Suspense } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
 import { FeedProvider } from "./contexts/FeedContext";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -105,36 +105,35 @@ const lazyImport = (importFn: () => Promise<any>, componentName?: string) => {
   );
 };
 
-// Use direct imports in development, lazy loading in production
-const isDev = import.meta.env.DEV;
+// ALWAYS use direct imports to avoid dynamic import issues
+// This prevents "Failed to fetch dynamically imported module" errors
+const Index = IndexPage;
+const Landing = LandingPage;
+const BagsBrowser = BagsBrowserPage;
+const BagDisplay = BagDisplayPage;
+const MyBag = MyBagPage;
+const Equipment = EquipmentPage;
+const EquipmentDetail = EquipmentDetailPage;
+const Feed = FeedPage;
+const Wishlist = WishlistPage;
+const Badges = BadgesPage;
+const BadgePreview = BadgePreviewPage;
+const Forum = ForumPage;
+const ForumIndex = ForumIndexPage;
+const ForumCategory = ForumCategoryPage;
+const ForumThread = ForumThreadPage;
+const NotFound = NotFoundPage;
+const AIBagAnalyzer = AIBagAnalyzerPage;
+const PatchNotes = PatchNotesPage;
+const AuthCallback = AuthCallbackPage;
 
-const Index = isDev ? IndexPage : lazyImport(() => import("@/pages/Index"), "Home");
-const Landing = isDev ? LandingPage : lazyImport(() => import("@/pages/Landing"), "Landing");
-const BagsBrowser = isDev ? BagsBrowserPage : lazyImport(() => import("@/pages/BagsBrowser"), "Bags Browser");
-const BagDisplay = isDev ? BagDisplayPage : lazyImport(() => import("@/pages/BagDisplayStyled"), "Bag Display");
-const MyBag = isDev ? MyBagPage : lazyImport(() => import("@/pages/MyBagSupabase"), "My Bag");
-const Equipment = isDev ? EquipmentPage : lazyImport(() => import("@/pages/Equipment"), "Equipment");
-const EquipmentDetail = isDev ? EquipmentDetailPage : lazyImport(() => import("@/pages/EquipmentDetail"), "Equipment Detail");
-const Feed = isDev ? FeedPage : lazyImport(() => import("@/pages/Feed"), "Feed");
-const Wishlist = isDev ? WishlistPage : lazyImport(() => import("@/pages/Wishlist"), "Wishlist");
-const Badges = isDev ? BadgesPage : lazyImport(() => import("@/pages/Badges"), "Badges");
-const BadgePreview = isDev ? BadgePreviewPage : lazyImport(() => import("@/pages/BadgePreview"), "Badge Preview");
-const Forum = isDev ? ForumPage : lazyImport(() => import("@/pages/Forum"), "Forum");
-const ForumIndex = isDev ? ForumIndexPage : lazyImport(() => import("@/pages/ForumIndex"), "Forum Index");
-const ForumCategory = isDev ? ForumCategoryPage : lazyImport(() => import("@/pages/ForumCategory"), "Forum Category");
-const ForumThread = isDev ? ForumThreadPage : lazyImport(() => import("@/pages/ForumThread"), "Forum Thread");
-const NotFound = isDev ? NotFoundPage : lazyImport(() => import("@/pages/NotFound"), "Not Found");
-const AIBagAnalyzer = isDev ? AIBagAnalyzerPage : lazyImport(() => import("@/pages/AIBagAnalyzer"), "AI Bag Analyzer");
-const PatchNotes = isDev ? PatchNotesPage : lazyImport(() => import("@/pages/PatchNotes"), "Patch Notes");
-const AuthCallback = isDev ? AuthCallbackPage : lazyImport(() => import("@/pages/AuthCallback"), "Auth Callback");
+// Admin routes
+const SeedEquipment = SeedEquipmentPage;
+const EquipmentMigration = EquipmentMigrationPage;
 
-// Admin routes (rarely accessed)
-const SeedEquipment = isDev ? SeedEquipmentPage : lazyImport(() => import("@/pages/admin/SeedEquipment"), "Seed Equipment");
-const EquipmentMigration = isDev ? EquipmentMigrationPage : lazyImport(() => import("@/pages/admin/EquipmentMigration"), "Equipment Migration");
-
-// Debug routes (developer-only)
-const Debug = isDev ? DebugPage : lazyImport(() => import("@/pages/Debug"), "Debug");
-const DebugFeed = isDev ? DebugFeedPage : lazyImport(() => import("@/pages/DebugFeed"), "Debug Feed");
+// Debug routes
+const Debug = DebugPage;
+const DebugFeed = DebugFeedPage;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -170,9 +169,8 @@ function App() {
     supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY ? "Set" : "Not set",
   });
 
-  if (isDev) {
-    console.log("[DEBUG] Running in development mode - using direct imports to avoid dynamic import issues");
-  }
+  // Using direct imports to avoid dynamic import issues
+  console.log("[DEBUG] Using direct imports to avoid dynamic import issues");
 
   return (
     <QueryClientProvider client={queryClient}>
