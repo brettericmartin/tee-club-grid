@@ -116,7 +116,7 @@
     "lovable-tagger": "^1.1.7",
     "node-fetch": "^3.3.2",
     "postcss": "^8.4.47",
-    "puppeteer": "^24.12.1",
+    "puppeteer": "^24.16.2",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "sharp": "^0.34.3",

@@ -386,14 +386,16 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
       user_liked: userLikes.includes(post.id) ? [{ id: 'liked' }] : []
     })) || [];
     
-    // Filter out posts without pictures
-    const postsWithPictures = posts.filter(post => 
-      post.media_urls && post.media_urls.length > 0
-    );
+    // Filter out ALL posts that don't have pictures (checking both media_urls and content.photo_url)
+    const filteredPosts = posts.filter(post => {
+      const hasMediaUrls = post.media_urls && post.media_urls.length > 0;
+      const hasContentPhoto = post.content?.photo_url || (post.content?.photos && post.content.photos.length > 0);
+      return hasMediaUrls || hasContentPhoto;
+    });
     
-    console.log(`Filtered ${posts.length} posts to ${postsWithPictures.length} with pictures`);
+    console.log(`Filtered ${posts.length} posts to ${filteredPosts.length} (removed posts without any pictures)`);
     
-    return postsWithPictures;
+    return filteredPosts;
   } catch (error) {
     console.error('Error fetching feed posts:', error);
     return [];
@@ -486,10 +488,12 @@ export async function getUserFeedPosts(userId: string, limit: number = 100, offs
       console.log('[getUserFeedPosts] Sample post types:', data.slice(0, 3).map(p => p.type));
     }
     
-    // Filter out posts without pictures
-    const postsWithPictures = (data || []).filter(post => 
-      post.media_urls && post.media_urls.length > 0
-    );
+    // Filter out posts without pictures (checking both media_urls and content.photo_url)
+    const postsWithPictures = (data || []).filter(post => {
+      const hasMediaUrls = post.media_urls && post.media_urls.length > 0;
+      const hasContentPhoto = post.content?.photo_url || (post.content?.photos && post.content.photos.length > 0);
+      return hasMediaUrls || hasContentPhoto;
+    });
     
     console.log(`[getUserFeedPosts] Filtered to ${postsWithPictures.length} posts with pictures`);
     

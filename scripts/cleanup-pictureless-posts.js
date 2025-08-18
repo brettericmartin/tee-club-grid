@@ -20,14 +20,18 @@ async function cleanupPicturelessPosts() {
 
     console.log(`Total posts in database: ${allPosts.length}`);
 
-    // Categorize posts
-    const postsWithPictures = allPosts.filter(post => 
-      post.media_urls && post.media_urls.length > 0
-    );
+    // Categorize posts - check BOTH media_urls and content.photo_url
+    const postsWithPictures = allPosts.filter(post => {
+      const hasMediaUrls = post.media_urls && post.media_urls.length > 0;
+      const hasContentPhoto = post.content?.photo_url || (post.content?.photos && post.content.photos.length > 0);
+      return hasMediaUrls || hasContentPhoto;
+    });
     
-    const postsWithoutPictures = allPosts.filter(post => 
-      !post.media_urls || post.media_urls.length === 0
-    );
+    const postsWithoutPictures = allPosts.filter(post => {
+      const hasMediaUrls = post.media_urls && post.media_urls.length > 0;
+      const hasContentPhoto = post.content?.photo_url || (post.content?.photos && post.content.photos.length > 0);
+      return !hasMediaUrls && !hasContentPhoto;
+    });
 
     console.log(`Posts WITH pictures: ${postsWithPictures.length}`);
     console.log(`Posts WITHOUT pictures: ${postsWithoutPictures.length}`);

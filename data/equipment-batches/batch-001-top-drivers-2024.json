@@ -1,0 +1,225 @@
+{
+  "batch_info": {
+    "name": "Top 5 Most Popular 2024 Drivers",
+    "created_date": "2024-08-17",
+    "collected_by": "Driver Specialist Agent",
+    "description": "Comprehensive data collection for the 5 most popular 2024 drivers missing complete information",
+    "sources": [
+      "TaylorMade.com",
+      "Callaway.com", 
+      "Ping.com",
+      "Titleist.com",
+      "Cobra.com",
+      "MyGolfSpy 2024 Driver Reviews",
+      "PGA Tour Equipment Reports",
+      "Golf Digest Hot List 2024"
+    ]
+  },
+  "equipment": [
+    {
+      "brand": "TaylorMade",
+      "model": "Qi10 Max",
+      "category": "driver",
+      "msrp": 599.99,
+      "release_year": 2024,
+      "specs": {
+        "head_size": "460cc",
+        "face_material": "60X Carbon Twist Face",
+        "loft_options": ["9°", "10.5°", "12°"],
+        "adjustability": "4° loft sleeve (±2°)",
+        "shaft_flex": ["Light", "Regular", "Stiff", "X-Stiff"],
+        "stock_shaft": [
+          "Speeder NX TCS 50 (S/R/A)",
+          "Speeder NX TCS 40 (L)",
+          "Mitsubishi Diamana T+60 (X/S/R)"
+        ],
+        "moi": "10,000 g-cm²",
+        "weight_system": "32g heel-side back weight",
+        "crown_material": "Infinity Carbon Crown (97% coverage)",
+        "special_features": [
+          "Thru-Slot Speed Pocket",
+          "Largest-looking profile from address",
+          "30% tighter dispersion than Stealth 2"
+        ]
+      },
+      "description": "The first TaylorMade driver to achieve an unprecedented 10,000 MOI, the Qi10 Max features the new Infinity Carbon Crown covering 97% of the total crown area and a 60X Carbon Twist Face that is markedly lighter than traditional titanium. Designed for maximum forgiveness with a larger footprint (8mm larger from face to back) and heel-side weight setup containing 32g of back mass. Only 71g of Titanium in the entire head, making it TaylorMade's most forgiving driver ever.",
+      "image_url": "https://www.taylormadegolf.com/dw/image/v2/BGQB_PRD/on/demandware.static/-/Sites-tmag-master-catalog/default/dw8a0b3c1b/images/large/N6865201_Qi10_Max_Driver_Face.jpg",
+      "tour_usage": [
+        "Rory McIlroy",
+        "Multiple TaylorMade Tour Staffers"
+      ],
+      "key_features": [
+        "Unprecedented 10,000 MOI for maximum forgiveness",
+        "Infinity Carbon Crown covers 97% of crown area", 
+        "60X Carbon Twist Face lighter than titanium",
+        "4° loft sleeve for precise adjustments",
+        "Thru-Slot Speed Pocket preserves ball speed on low strikes"
+      ]
+    },
+    {
+      "brand": "Callaway",
+      "model": "Paradym Ai Smoke Max",
+      "category": "driver", 
+      "msrp": 599.99,
+      "release_year": 2024,
+      "specs": {
+        "head_size": "460cc",
+        "face_material": "Ai Smart Face (AI-designed)",
+        "loft_options": ["9°", "10.5°", "12°"],
+        "adjustability": "Adjustable perimeter weighting, adjustable hosel",
+        "shaft_flex": ["Light", "Regular", "Stiff", "X-Stiff"],
+        "stock_shaft": [
+          "Project X Cypher 2.0 40g (Light)",
+          "Project X Cypher 2.0 50g (Light/Regular)",
+          "MCA Tensei AV Blue 60g (Regular/Stiff)",
+          "MCA Tensei AV Blue 70g (Stiff/X-Stiff)"
+        ],
+        "moi": "High MOI design",
+        "weight_system": "Adjustable perimeter weighting",
+        "crown_material": "360° Carbon Chassis (15% lighter)",
+        "special_features": [
+          "Up to 19 yards shot shape correction",
+          "Internal titanium support structure",
+          "Multiple sweet spots across face"
+        ]
+      },
+      "description": "Features the most sophisticated driver face in Callaway history with the all-new Ai Smart Face that optimizes performance using swing dynamics from thousands of real golfers. The refined 360° Carbon Chassis is 15% lighter with internal titanium support, redistributing mass for improved launch conditions and forgiveness. Offers adjustable perimeter weighting to deliver up to 19 yards of shot shape correction for maximum customization.",
+      "image_url": "https://www.callawaygolf.com/dw/image/v2/AANJ_PRD/on/demandware.static/-/Sites-callaway-master-catalog/default/dw3e0f4a4a/images/large/CG_24_Paradym_Ai_Smoke_Max_Driver_Hero.jpg",
+      "tour_usage": [
+        "Multiple Callaway Tour Staffers",
+        "Popular choice for distance and forgiveness"
+      ],
+      "key_features": [
+        "AI Smart Face optimized from thousands of swing dynamics",
+        "360° Carbon Chassis 15% lighter than previous generation",
+        "Adjustable perimeter weighting for shot shape correction",
+        "Up to 19 yards of shot shape adjustment",
+        "Forgiving shape with generous profile at address"
+      ]
+    },
+    {
+      "brand": "Ping",
+      "model": "G430 Max", 
+      "category": "driver",
+      "msrp": 549.00,
+      "release_year": 2023,
+      "specs": {
+        "head_size": "460cc",
+        "face_material": "VFT (Variable Face Thickness) forged titanium face",
+        "loft_options": ["9°", "10.5°", "12°"],
+        "adjustability": "Trajectory Tuning 2.0 (±1.5° loft, up to 3° lie)",
+        "shaft_flex": ["Light", "Regular", "Stiff", "X-Stiff"],
+        "stock_shaft": [
+          "PING ALTA CB Black (mid-to-high launch)",
+          "PING Tour 2.0 Chrome (mid launch)",
+          "PING Tour 2.0 Black (lowest trajectory)",
+          "Project X HZRDUS Smoke Red RDX (higher launch)",
+          "Mitsubishi Kai'li White (lower launch)"
+        ],
+        "moi": "Highest MOI in G430 lineup",
+        "weight_system": "Movable 25g high-density tungsten backweight",
+        "crown_material": "Carbon fiber crown",
+        "special_features": [
+          "Shot shape adjustment ±10 yards",
+          "Eight hosel positions",
+          "High Launch option for <85mph swing speeds"
+        ]
+      },
+      "description": "The G430 MAX delivers the highest MOI of all G430 drivers, providing extreme forgiveness for golfers of all skill levels. Features a shallower, thinner VFT forged face generating PING's fastest ball speed to date. The movable 25-gram tungsten backweight allows dialing in desired ball flight between draw, neutral, and fade settings, influencing shot shape by ±10 yards. Suitable for professionals to high handicappers due to its exceptional forgiveness and adjustability.",
+      "image_url": "https://ping.com/ccstore/v1/images/?source=/file/v3/1/2796301/products/Drivers/G430-MAX/Driver_G430_MAX_Hero.jpg",
+      "tour_usage": [
+        "Multiple PGA Tour professionals",
+        "Popular choice for forgiveness-seeking tour players"
+      ],
+      "key_features": [
+        "Highest MOI in G430 driver lineup for maximum forgiveness",
+        "VFT forged face generates PING's fastest ball speed",
+        "25g tungsten backweight adjusts shot shape ±10 yards",
+        "Trajectory Tuning 2.0 with 8 hosel positions",
+        "Suitable for wide range from tour pros to high handicappers"
+      ]
+    },
+    {
+      "brand": "Titleist",
+      "model": "TSR2",
+      "category": "driver",
+      "msrp": 599.00,
+      "release_year": 2022,
+      "specs": {
+        "head_size": "460cc",
+        "face_material": "Multi-plateau variable face thickness titanium",
+        "loft_options": ["8°", "9°", "10°", "11°"],
+        "adjustability": "SureFit hosel (16 loft/lie combinations)",
+        "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+        "stock_shaft": [
+          "True Temper HZRDUS Red CB",
+          "True Temper HZRDUS Black 4G",
+          "Mitsubishi Tensei AV Blue (XLink)",
+          "Mitsubishi Tensei 1K Black"
+        ],
+        "moi": "High MOI design for forgiveness",
+        "weight_system": "Adjustable rear weight system",
+        "crown_material": "Aerospace-grade titanium",
+        "special_features": [
+          "Lower and forward CG positioning",
+          "Nearly constant CT across hitting surface",
+          "Improved aerodynamics with refined shape"
+        ]
+      },
+      "description": "The perfect combination of distance and forgiveness, the TSR2 is a high launch, low spin, maximum performance driver built from aerospace-grade titanium. Features multi-plateau variable face thickness design for impressive forgiveness and ball speed on mis-hits. The CG has been shifted lower and more forward to increase ball speed while improving launch and spin. Most popular Titleist driver model on tour while remaining well-suited for average golfers.",
+      "image_url": "https://www.titleist.com/dw/image/v2/BJBQ_PRD/on/demandware.static/-/Sites-titleist-master-catalog/default/dw8b2e3e58/images/golf-clubs/drivers/TSR2/TSR2_Driver_Hero.jpg",
+      "tour_usage": [
+        "Most popular Titleist driver on tour",
+        "Cam Smith (tested, uses TSR3)",
+        "Multiple tour professionals seeking control and workability"
+      ],
+      "key_features": [
+        "Perfect combination of distance and forgiveness",
+        "Multi-plateau variable face thickness for consistent performance",
+        "Lower and forward CG for increased ball speed",
+        "SureFit hosel with 16 adjustment combinations",
+        "Popular on tour yet suitable for all skill levels"
+      ]
+    },
+    {
+      "brand": "Cobra",
+      "model": "Darkspeed Max",
+      "category": "driver",
+      "msrp": 549.00,
+      "release_year": 2024,
+      "specs": {
+        "head_size": "460cc",
+        "face_material": "PWRSHELL L-cup face with A.I. H.O.T. Face",
+        "loft_options": ["9°", "10.5°", "12°"],
+        "adjustability": "MyFly adjustability (±1.5°, 8 settings)",
+        "shaft_flex": ["Regular", "Stiff", "X-Stiff"],
+        "stock_shaft": [
+          "Project X HZRDUS CB Red",
+          "UST Mamiya LIN-Q M40X Red"
+        ],
+        "moi": "Highest MOI in Darkspeed lineup (>5,000)",
+        "weight_system": "Adjustable heel/toe weighting system",
+        "crown_material": "Carbon fiber crown and sole plates",
+        "special_features": [
+          "Suspended PWR-BRIDGE technology",
+          "13% larger face area",
+          "15 A.I.-designed hot spots",
+          "Draw bias design"
+        ]
+      },
+      "description": "Engineered for golfers needing maximum forgiveness and draw bias, the Darkspeed Max offers the highest MOI in the Darkspeed driver lineup. Features the revolutionary suspended PWR-BRIDGE technology that's positioned lower and more forward for faster ball speeds and minimized spin. The 13% larger PWRSHELL L-cup face improves flexibility for robust launch conditions, while A.I. designed H.O.T. Face creates 15 different hot spots across the face for consistent performance on off-center hits.",
+      "image_url": "https://www.cobragolf.com/dw/image/v2/BJHZ_PRD/on/demandware.static/-/Sites-cobra-master-catalog/default/dw0f5c6e4c/images/large/DARKSPEED_MAX_Driver_Face.jpg",
+      "tour_usage": [
+        "Gary Woodland (Darkspeed LS model)",
+        "Rickie Fowler (switched from LS to X model)"
+      ],
+      "key_features": [
+        "Highest MOI in Darkspeed lineup for maximum forgiveness",
+        "Suspended PWR-BRIDGE for faster ball speeds and reduced spin",
+        "13% larger face with A.I. designed hot spots",
+        "Draw bias design helps golfers hit straighter drives",
+        "MyFly adjustability with 8 different settings"
+      ]
+    }
+  ]
+}

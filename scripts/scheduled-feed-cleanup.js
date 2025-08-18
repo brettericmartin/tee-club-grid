@@ -18,17 +18,24 @@ async function scheduledFeedCleanup() {
 
     console.log('1️⃣ Finding posts without pictures older than 24 hours...');
     
-    const { data: postsToDelete, error: fetchError } = await supabase
+    // Get ALL posts to check both media_urls and content.photo_url
+    const { data: allOldPosts, error: fetchError } = await supabase
       .from('feed_posts')
-      .select('id, type, created_at, user_id, content')
-      .or('media_urls.is.null,media_urls.eq.{}')
+      .select('id, type, created_at, user_id, content, media_urls')
       .lt('created_at', oneDayAgo.toISOString())
       .order('created_at', { ascending: false });
-
+    
     if (fetchError) {
       console.error('Error fetching posts:', fetchError);
       return;
     }
+    
+    // Filter to only posts that have NO pictures anywhere
+    const postsToDelete = allOldPosts.filter(post => {
+      const hasMediaUrls = post.media_urls && post.media_urls.length > 0;
+      const hasContentPhoto = post.content?.photo_url || (post.content?.photos && post.content.photos.length > 0);
+      return !hasMediaUrls && !hasContentPhoto;
+    });
 
     if (!postsToDelete || postsToDelete.length === 0) {
       console.log('✅ No posts to clean up. Feed is clean!');
