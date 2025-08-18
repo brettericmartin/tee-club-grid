@@ -1,8 +1,14 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { DOMAIN_CONFIG } from '@/config/domain';
 import type { Database } from '@/lib/supabase';
+
+export const AUTH_EVENTS = {
+  REFRESHED: 'auth:refreshed',
+  CHANGED: 'auth:changed',
+  FOREGROUND: 'auth:foreground',
+} as const;
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -38,7 +44,7 @@ export function useAuth() {
   return context;
 }
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -110,29 +116,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('[AuthContext] Auth state changed:', event);
-      
-      // Handle token refresh
-      if (event === 'TOKEN_REFRESHED') {
-        console.log('[AuthContext] Token refreshed successfully');
-      }
-      
       setSession(session);
       setUser(session?.user ?? null);
-      
-      // Fetch profile when user logs in
       if (session?.user) {
         const profileData = await fetchProfile(session.user.id);
         setProfile(profileData);
       } else {
         setProfile(null);
       }
-      
-      // Don't force reload - this is a temporary fix
-      // The real issue is queries failing after session changes
+      if (event === 'TOKEN_REFRESHED') {
+        window.dispatchEvent(new CustomEvent(AUTH_EVENTS.REFRESHED));
+      }
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+        window.dispatchEvent(new CustomEvent(AUTH_EVENTS.CHANGED));
+      }
     });
+
 
     return () => subscription.unsubscribe();
   }, []);
+  useEffect(() => {
+    const handleVisibility = async () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          const { data: { session: newSession } } = await supabase.auth.getSession();
+          const prevToken = session?.access_token || null;
+          const nextToken = newSession?.access_token || null;
+          if (prevToken !== nextToken) {
+            setSession(newSession);
+            setUser(newSession?.user ?? null);
+            if (newSession?.user) {
+              const profileData = await fetchProfile(newSession.user.id);
+              setProfile(profileData);
+            } else {
+              setProfile(null);
+            }
+            window.dispatchEvent(new CustomEvent(AUTH_EVENTS.REFRESHED));
+          }
+          window.dispatchEvent(new CustomEvent(AUTH_EVENTS.FOREGROUND));
+        } catch (e) {
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [session]);
+
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
@@ -155,8 +186,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) throw error;
 
-    // Profile creation is now handled by database trigger
-    // but we'll try to create it anyway as a fallback
     if (data.user) {
       try {
         const { error: profileError } = await supabase
@@ -168,12 +197,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             updated_at: new Date().toISOString()
           });
 
-        // Only throw if it's not a duplicate key error
         if (profileError && profileError.code !== '23505') {
-          // Profile creation error - might be created by trigger
         }
       } catch (err) {
-        // Profile creation failed, might be created by trigger
       }
     }
   };
@@ -184,8 +210,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(null);
   };
 
-  const signInWithGoogle = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+  const signInWithGoogle = async (): Promise<void> => {
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: DOMAIN_CONFIG.getAuthCallbackUrl(),
@@ -201,11 +227,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Google sign-in error:', error);
       throw error;
     }
-    
-    console.log('Google OAuth initiated, redirecting to:', data?.url);
-    
-    // The OAuth flow will redirect automatically if successful
-    return data;
   };
 
   return (
