@@ -1753,7 +1753,7 @@ const MyBagSupabase = () => {
       {/* Create Post Modal */}
       {/* Loft Edit Dialog */}
       <Dialog open={!!editingLoftItem} onOpenChange={(open) => !open && setEditingLoftItem(null)}>
-        <DialogContent className="bg-[#1a1a1a] border-white/20 text-white">
+        <DialogContent className="bg-[#1a1a1a] border-white/20 text-white relative">
           <DialogHeader>
             <DialogTitle>Edit Loft</DialogTitle>
           </DialogHeader>
