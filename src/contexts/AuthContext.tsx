@@ -204,8 +204,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
-  const signInWithGoogle = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+  const signInWithGoogle = async (): Promise<void> => {
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: DOMAIN_CONFIG.getAuthCallbackUrl(),
@@ -221,11 +221,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Google sign-in error:', error);
       throw error;
     }
-    
-    console.log('Google OAuth initiated, redirecting to:', data?.url);
-    
-    // The OAuth flow will redirect automatically if successful
-    return data;
   };
 
   return (
