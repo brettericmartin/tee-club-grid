@@ -386,7 +386,14 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
       user_liked: userLikes.includes(post.id) ? [{ id: 'liked' }] : []
     })) || [];
     
-    return posts;
+    // Filter out posts without pictures
+    const postsWithPictures = posts.filter(post => 
+      post.media_urls && post.media_urls.length > 0
+    );
+    
+    console.log(`Filtered ${posts.length} posts to ${postsWithPictures.length} with pictures`);
+    
+    return postsWithPictures;
   } catch (error) {
     console.error('Error fetching feed posts:', error);
     return [];
@@ -478,7 +485,15 @@ export async function getUserFeedPosts(userId: string, limit: number = 100, offs
     if (data && data.length > 0) {
       console.log('[getUserFeedPosts] Sample post types:', data.slice(0, 3).map(p => p.type));
     }
-    return { posts: data || [], totalCount: count || 0 };
+    
+    // Filter out posts without pictures
+    const postsWithPictures = (data || []).filter(post => 
+      post.media_urls && post.media_urls.length > 0
+    );
+    
+    console.log(`[getUserFeedPosts] Filtered to ${postsWithPictures.length} posts with pictures`);
+    
+    return { posts: postsWithPictures, totalCount: postsWithPictures.length };
   } catch (error) {
     console.error('Error fetching user feed posts:', error);
     return { posts: [], totalCount: 0 };

@@ -10,6 +10,29 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.14.0",
+    date: "2025-08-17",
+    title: "Feed Quality Improvements",
+    changes: [
+      {
+        category: "feature",
+        description: "Feed now only shows posts with pictures for better visual experience"
+      },
+      {
+        category: "feature",
+        description: "Added cleanup script to remove old posts without pictures"
+      },
+      {
+        category: "improvement",
+        description: "Automatic filtering of pictureless posts in feed service"
+      },
+      {
+        category: "feature",
+        description: "Scheduled cleanup script for automated feed maintenance"
+      }
+    ]
+  },
+  {
     version: "0.13.3",
     date: "2025-08-17",
     title: "Google Authentication Profile Fixes",
