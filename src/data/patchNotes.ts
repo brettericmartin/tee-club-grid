@@ -10,25 +10,48 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
-    version: "1.2.0",
+    version: "1.3.0",
     date: "2025-08-17",
-    title: "Equipment Modal & Performance Improvements",
+    title: "Patch Notes System",
     changes: [
       {
         category: "feature",
-        description: "Added comprehensive equipment customization with shaft/grip search"
+        description: "Added patch notes page to track all updates and improvements"
       },
       {
         category: "feature",
-        description: "Added 'No preference' options for all equipment customizations"
+        description: "Added Updates button to navigation (desktop and mobile)"
+      },
+      {
+        category: "improvement",
+        description: "Version history with categorized changes and badges"
+      }
+    ]
+  },
+  {
+    version: "1.2.0",
+    date: "2025-08-17",
+    title: "Equipment Modal & Performance Overhaul",
+    changes: [
+      {
+        category: "feature",
+        description: "Comprehensive equipment customization with shaft/grip search"
+      },
+      {
+        category: "feature",
+        description: "'No preference' options for all equipment customizations"
+      },
+      {
+        category: "feature",
+        description: "Loft editing for existing equipment in bags"
       },
       {
         category: "fix",
-        description: "Fixed modal UX issues - added X button, tap outside to close, fixed z-index"
+        description: "Fixed modal UX - added X button, tap outside to close, z-index issues"
       },
       {
-        category: "feature",
-        description: "Added loft editing for existing equipment in bags"
+        category: "fix",
+        description: "Critical UI and database stability improvements"
       },
       {
         category: "performance",
@@ -36,39 +59,152 @@ export const patchNotes: PatchNote[] = [
       },
       {
         category: "performance",
-        description: "Fixed N+1 query problem in FeedItemCard"
-      },
-      {
-        category: "improvement",
-        description: "Reduced network requests and improved overall performance"
+        description: "Fixed N+1 query problem reducing database calls"
       },
       {
         category: "fix",
-        description: "Changed dev server to port 3333 for better stability"
+        description: "Forum reactions now persist after page refresh"
       }
     ]
   },
   {
     version: "1.1.0",
     date: "2025-08-16",
-    title: "Forum Reactions & Follow System",
+    title: "Authentication & Social Features",
     changes: [
-      {
-        category: "fix",
-        description: "Forum reactions now persist after page refresh"
-      },
       {
         category: "fix",
         description: "Critical fixes for likes/tees and follow system"
       },
       {
         category: "feature",
-        description: "Configure custom domain auth.teed.club for Supabase"
+        description: "Custom domain auth.teed.club for Supabase authentication"
+      }
+    ]
+  },
+  {
+    version: "1.0.9",
+    date: "2025-08-15",
+    title: "Feed Enhancement & OAuth Fix",
+    changes: [
+      {
+        category: "feature",
+        description: "Multi-equipment photo posts with masonry feed layout"
+      },
+      {
+        category: "fix",
+        description: "Google OAuth authentication and profile editing"
+      }
+    ]
+  },
+  {
+    version: "1.0.8",
+    date: "2025-08-14",
+    title: "Equipment Pricing System",
+    changes: [
+      {
+        category: "feature",
+        description: "Equipment pricing system with comparison and verification"
       },
       {
         category: "feature",
-        description: "Add multi-equipment photo posts with masonry feed layout"
+        description: "Price tracking across multiple retailers"
+      },
+      {
+        category: "improvement",
+        description: "Enhanced equipment detail pages with pricing data"
+      }
+    ]
+  },
+  {
+    version: "1.0.7",
+    date: "2025-08-13",
+    title: "Forum Automation",
+    changes: [
+      {
+        category: "feature",
+        description: "Automated forum feedback agent workflow"
+      },
+      {
+        category: "improvement",
+        description: "Enhanced forum moderation capabilities"
+      }
+    ]
+  },
+  {
+    version: "1.0.6",
+    date: "2025-08-12",
+    title: "Forum Feedback Implementation",
+    changes: [
+      {
+        category: "fix",
+        description: "Updated equipment photo priority logic"
+      },
+      {
+        category: "fix",
+        description: "Addressed multiple batches of forum feedback"
+      },
+      {
+        category: "improvement",
+        description: "Enhanced user experience based on community input"
+      }
+    ]
+  },
+  {
+    version: "1.0.5",
+    date: "2025-08-11",
+    title: "Mobile UX & Feed Improvements",
+    changes: [
+      {
+        category: "fix",
+        description: "Equipment editor modal mobile responsiveness"
+      },
+      {
+        category: "feature",
+        description: "Animations and mobile optimizations throughout the app"
+      },
+      {
+        category: "fix",
+        description: "Simplified feed post creation - only create posts when adding photos"
+      },
+      {
+        category: "fix",
+        description: "Prevented duplicate feed posts when adding equipment photos"
+      },
+      {
+        category: "feature",
+        description: "Quick featured toggle for equipment items"
+      },
+      {
+        category: "improvement",
+        description: "Optimized modals for mobile devices"
+      }
+    ]
+  },
+  {
+    version: "1.0.4",
+    date: "2025-08-10",
+    title: "Share Card Enhancement",
+    changes: [
+      {
+        category: "fix",
+        description: "Share card now uses actual BagCard component"
+      },
+      {
+        category: "improvement",
+        description: "Improved mobile scaling for share functionality"
+      },
+      {
+        category: "improvement",
+        description: "Better social sharing preview rendering"
       }
     ]
   }
 ];
+
+// NOTE FOR FUTURE COMMITS:
+// When making commits, please update this file with the new version and changes.
+// Version numbering:
+// - Major (X.0.0): Breaking changes or major new features
+// - Minor (1.X.0): New features or significant improvements
+// - Patch (1.0.X): Bug fixes and small improvements
