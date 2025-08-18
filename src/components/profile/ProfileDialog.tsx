@@ -198,16 +198,20 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
         const result = await updateProfile(user.id, updates);
         console.log('[ProfileDialog] Profile updated result:', result);
         
-        // Update auth metadata for immediate UI updates
-        const { error: authError } = await supabase.auth.updateUser({
-          data: { 
-            display_name: displayName || user.user_metadata.display_name,
-            avatar_url: avatarUrl || user.user_metadata.avatar_url
+        // Only update auth metadata if not a Google user or if explicitly changed
+        // This prevents overwriting Google avatar with each save
+        const isGoogleUser = user.app_metadata?.provider === 'google';
+        if (!isGoogleUser || avatarUrl !== originalValues.avatarUrl) {
+          const { error: authError } = await supabase.auth.updateUser({
+            data: { 
+              display_name: displayName || user.user_metadata.display_name,
+              avatar_url: avatarUrl || user.user_metadata.avatar_url
+            }
+          });
+          
+          if (authError) {
+            console.error('Error updating auth metadata:', authError);
           }
-        });
-        
-        if (authError) {
-          console.error('Error updating auth metadata:', authError);
         }
         
         toast.success(profileExists ? 'Profile updated successfully' : 'Profile created successfully');

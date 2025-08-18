@@ -55,6 +55,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error('Error fetching profile:', error);
+        
+        // If profile doesn't exist and this is a Google user, create one
+        if (error.code === 'PGRST116' && user?.app_metadata?.provider === 'google') {
+          console.log('[AuthContext] Creating profile for Google user');
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              username: user.email?.split('@')[0] || userId.substring(0, 8),
+              display_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0],
+              avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+          
+          if (createError) {
+            console.error('Error creating Google user profile:', createError);
+            return null;
+          }
+          
+          return newProfile;
+        }
+        
         return null;
       }
       

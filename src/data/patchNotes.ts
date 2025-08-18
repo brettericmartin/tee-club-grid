@@ -10,6 +10,29 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.13.3",
+    date: "2025-08-17",
+    title: "Google Authentication Profile Fixes",
+    changes: [
+      {
+        category: "fix",
+        description: "Fixed Google profile pictures being overwritten on profile updates"
+      },
+      {
+        category: "fix",
+        description: "Improved Google user profile creation with proper username and display name"
+      },
+      {
+        category: "fix",
+        description: "Prevented auth metadata from being unnecessarily updated for Google users"
+      },
+      {
+        category: "improvement",
+        description: "Added SQL migration to properly handle Google avatar URLs separately"
+      }
+    ]
+  },
+  {
     version: "0.13.2",
     date: "2025-08-17",
     title: "Auth Session & Loading Fixes",
