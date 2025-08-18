@@ -332,6 +332,21 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
     setAllPosts([]);
     setUserPosts(new Map());
   }, []);
+  useEffect(() => {
+    const onAuthSignal = (e: Event) => {
+      loadFollowedUsers();
+      refreshFeeds();
+    };
+    window.addEventListener('auth:refreshed', onAuthSignal);
+    window.addEventListener('auth:foreground', onAuthSignal);
+    window.addEventListener('auth:changed', onAuthSignal);
+    return () => {
+      window.removeEventListener('auth:refreshed', onAuthSignal);
+      window.removeEventListener('auth:foreground', onAuthSignal);
+      window.removeEventListener('auth:changed', onAuthSignal);
+    };
+  }, [refreshFeeds]);
+
 
   // Set up real-time subscriptions
   useEffect(() => {
@@ -340,6 +355,7 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       .on(
         'postgres_changes',
         {
+
           event: 'INSERT',
           schema: 'public',
           table: 'feed_posts'
