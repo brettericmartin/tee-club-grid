@@ -1341,7 +1341,7 @@ const MyBagSupabase = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
                     <div 
-                      className="w-16 h-16 rounded-lg overflow-hidden bg-white/10 cursor-pointer"
+                      className="w-20 h-20 rounded-lg overflow-hidden bg-white/10 cursor-pointer flex-shrink-0"
                       onClick={() => handleEditEquipment(item)}
                     >
                       <img
@@ -1352,45 +1352,107 @@ const MyBagSupabase = () => {
                       />
                     </div>
                     <div className="flex-1 cursor-pointer" onClick={() => handleEditEquipment(item)}>
-                      <h3 className="font-semibold text-white hover:text-primary transition-colors">
-                        {item.equipment.brand} {item.equipment.model}
-                      </h3>
-                      <p className="text-sm text-gray-300">
-                        {item.custom_specs?.iron_config && (
-                          item.custom_specs.iron_config.type === 'set' 
-                            ? `${item.custom_specs.iron_config.from}-${item.custom_specs.iron_config.to} • `
-                            : `${item.custom_specs.iron_config.single} iron • `
-                        )}
-                        {item.shaft && `${item.shaft.brand} ${item.shaft.model} - ${item.shaft.flex}`}
-                        {item.grip && ` • ${item.grip.brand} ${item.grip.model}`}
-                        {item.custom_specs?.loft ? (
-                          <span
-                            className="cursor-pointer hover:text-primary transition-colors inline-flex items-center gap-1"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditLoft(item);
-                            }}
-                          >
-                            {` • ${item.custom_specs.loft}`}
-                            {isEditing && <span className="text-xs ml-1">(edit)</span>}
-                          </span>
-                        ) : (
-                          item.equipment.category && ['driver', 'fairway_wood', 'hybrid', 'wedge'].includes(item.equipment.category) && isEditing && (
-                            <span
-                              className="cursor-pointer text-white/40 hover:text-primary transition-colors inline-flex items-center gap-1"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditLoft(item);
-                              }}
-                            >
-                              {` • `}
-                              <span className="text-xs">+ Add loft</span>
+                      {/* Title and Category */}
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h3 className="font-semibold text-white hover:text-primary transition-colors text-lg">
+                            {item.equipment.brand} {item.equipment.model}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs px-2 py-0.5 bg-white/10 rounded-full text-white/80 capitalize">
+                              {item.equipment.category?.replace('_', ' ')}
                             </span>
-                          )
+                            {item.is_featured && (
+                              <span className="text-xs px-2 py-0.5 bg-primary/20 rounded-full text-primary">
+                                Featured
+                              </span>
+                            )}
+                            {item.custom_specs?.iron_config && (
+                              <span className="text-xs px-2 py-0.5 bg-white/10 rounded-full text-white/80">
+                                {item.custom_specs.iron_config.type === 'set' 
+                                  ? `${item.custom_specs.iron_config.from}-${item.custom_specs.iron_config.to}`
+                                  : `${item.custom_specs.iron_config.single} iron`
+                                }
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {item.purchase_price && (
+                          <div className="text-right">
+                            <p className="text-lg font-semibold text-primary">
+                              ${item.purchase_price}
+                            </p>
+                          </div>
                         )}
-                      </p>
+                      </div>
+                      
+                      {/* Equipment Specs Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                        {/* Loft */}
+                        {(item.custom_specs?.loft || item.equipment.category && ['driver', 'fairway_wood', 'hybrid', 'wedge', 'putter'].includes(item.equipment.category)) && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-white/50">Loft:</span>
+                            {item.custom_specs?.loft ? (
+                              <span
+                                className="text-white hover:text-primary transition-colors cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isEditing) handleEditLoft(item);
+                                }}
+                              >
+                                {item.custom_specs.loft}
+                                {isEditing && <span className="text-xs ml-1 text-white/40">(edit)</span>}
+                              </span>
+                            ) : isEditing ? (
+                              <span
+                                className="text-white/40 hover:text-primary transition-colors cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditLoft(item);
+                                }}
+                              >
+                                <span className="text-xs">+ Add loft</span>
+                              </span>
+                            ) : (
+                              <span className="text-white/30">-</span>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Shaft */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-white/50">Shaft:</span>
+                          {item.shaft ? (
+                            <span className="text-white">
+                              {item.shaft.brand} {item.shaft.model} - {item.shaft.flex}
+                            </span>
+                          ) : (
+                            <span className="text-white/30">Stock shaft</span>
+                          )}
+                        </div>
+                        
+                        {/* Grip */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-white/50">Grip:</span>
+                          {item.grip ? (
+                            <span className="text-white">
+                              {item.grip.brand} {item.grip.model}
+                              {item.grip.size && item.grip.size !== 'Standard' && ` (${item.grip.size})`}
+                            </span>
+                          ) : (
+                            <span className="text-white/30">Stock grip</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Notes */}
+                      {item.notes && (
+                        <p className="text-sm text-white/60 mt-2 italic">
+                          {item.notes}
+                        </p>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 ml-4">
                       {isEditing && (
                         <>
                           <Button

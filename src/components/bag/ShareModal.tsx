@@ -43,9 +43,9 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
   const [copied, setCopied] = useState(false);
   const [copiedEmbed, setCopiedEmbed] = useState(false);
 
-  // Generate the shareable URL using username slug
-  const userSlug = displayNameToSlug(bag.profiles?.display_name || bag.profiles?.username || '');
-  const shareUrl = `${DOMAIN_CONFIG.production}/@${userSlug}`;
+  // Generate the shareable URL using the actual username
+  const username = bag.profiles?.username || '';
+  const shareUrl = username ? `${DOMAIN_CONFIG.production}/@${username}` : DOMAIN_CONFIG.getBagShareUrl(bag.id);
   const directBagUrl = DOMAIN_CONFIG.getBagShareUrl(bag.id);
   
   const shareTitle = `Check out ${bag.profiles?.display_name || bag.profiles?.username || 'this'}'s golf bag on Teed.club`;

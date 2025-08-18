@@ -5,42 +5,33 @@ import { Loader2 } from "lucide-react";
 import { displayNameToSlug } from "@/utils/slugify";
 
 /**
- * UserBagPage handles username-based routing (/@username)
- * It finds the user by their display_name slug and shows their primary bag
- * Similar to Facebook: "John Smith" -> @johnsmith
+ * UserBagPage handles username-based routing (/@username or /u/:username)
+ * It finds the user by their username and shows their primary bag
  */
 const UserBagPage = () => {
-  const { username: slugParam } = useParams(); // This is actually the slug from display_name
+  const { username } = useParams();
 
-  // Find the user by searching for matching display_name slug
+  // Find the user by their username
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
-    queryKey: ["user-profile-by-slug", slugParam],
+    queryKey: ["user-profile-by-username", username],
     queryFn: async () => {
-      if (!slugParam) throw new Error("No username provided");
+      if (!username) throw new Error("No username provided");
 
-      // First, get all profiles and find the one whose display_name matches the slug
-      const { data: profiles, error } = await supabase
+      // Get the profile by username
+      const { data: profile, error } = await supabase
         .from("profiles")
-        .select("id, username, display_name");
+        .select("id, username, display_name")
+        .eq("username", username)
+        .single();
 
       if (error) {
-        console.error("Error fetching profiles:", error);
-        throw error;
+        console.error("Error fetching profile:", error);
+        throw new Error(`No user found with username @${username}`);
       }
 
-      // Find the profile whose display_name converts to this slug
-      const matchingProfile = profiles?.find(p => {
-        const profileSlug = displayNameToSlug(p.display_name || '');
-        return profileSlug === slugParam.toLowerCase();
-      });
-
-      if (!matchingProfile) {
-        throw new Error(`No user found with slug @${slugParam}`);
-      }
-
-      return matchingProfile;
+      return profile;
     },
-    enabled: !!slugParam,
+    enabled: !!username,
   });
 
   // Then, find their primary bag
@@ -86,7 +77,7 @@ const UserBagPage = () => {
       <div className="min-h-screen bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-emerald-400 mx-auto mb-4" />
-          <p className="text-emerald-200">Loading @{slugParam}'s bag...</p>
+          <p className="text-emerald-200">Loading @{username}'s bag...</p>
         </div>
       </div>
     );
@@ -99,7 +90,7 @@ const UserBagPage = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4">User Not Found</h2>
           <p className="text-emerald-100/60 mb-6">
-            No user found at @{slugParam}
+            No user found at @{username}
           </p>
           <a href="/bags" className="text-emerald-400 hover:text-emerald-300">
             Browse all bags →
