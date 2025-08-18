@@ -10,6 +10,45 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.15.0",
+    date: "2025-08-18",
+    title: "Tab Focus Authentication & Enhanced UX",
+    changes: [
+      {
+        category: "feature",
+        description: "Revolutionary tab focus authentication - no more lost sessions when switching browser tabs"
+      },
+      {
+        category: "feature",
+        description: "Username-based routing for cleaner share URLs (/@username instead of /bag/uuid)"
+      },
+      {
+        category: "feature",
+        description: "Equipment specifications (shaft, grip, loft) now visible in MyBag list view"
+      },
+      {
+        category: "performance",
+        description: "Aggressive token refresh every 10 minutes with pre-emptive refresh before expiry"
+      },
+      {
+        category: "improvement",
+        description: "Multi-layer auth protection with automatic session recovery"
+      },
+      {
+        category: "feature",
+        description: "Debug tools in browser console: tabFocusAuth.status() and authDebug.checkSession()"
+      },
+      {
+        category: "fix",
+        description: "Fixed critical auth initialization error that was causing blank screen"
+      },
+      {
+        category: "performance",
+        description: "Tab visibility detection with smart refresh strategies based on hidden duration"
+      }
+    ]
+  },
+  {
     version: "0.14.0",
     date: "2025-08-17",
     title: "Feed Quality Improvements",
