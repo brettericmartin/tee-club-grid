@@ -322,7 +322,7 @@ const MyBagSupabase = () => {
         .from('user_bags')
         .select(`
           *,
-          profile:profiles(*)
+          profiles!user_bags_user_id_fkey(*)
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
@@ -518,7 +518,7 @@ const MyBagSupabase = () => {
           bag_type: type,
           is_primary: isPrimary || bags.length === 0
         })
-        .select('*, profile:profiles(*)')
+        .select('*, profiles!user_bags_user_id_fkey(*)')
         .single();
 
       if (error) throw new Error(error?.message || 'Database operation failed');
@@ -1804,7 +1804,7 @@ const MyBagSupabase = () => {
           onClose={() => setShowShareModal(false)}
           bag={{
             ...currentBag,
-            profiles: {
+            profiles: currentBag.profiles || {
               username: user?.user_metadata?.username || user?.email?.split('@')[0],
               display_name: user?.user_metadata?.display_name || user?.user_metadata?.full_name
             }

@@ -23,7 +23,7 @@ import { toggleBagLike } from "@/services/bags";
 import ShareModal from "@/components/bag/ShareModal";
 
 const BagDisplayStyled = () => {
-  const { bagId } = useParams();
+  const { bagId, username, bagname } = useParams();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -35,12 +35,18 @@ const BagDisplayStyled = () => {
   const [totalTees, setTotalTees] = useState(0);
   const [userBadges, setUserBadges] = useState<any[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [actualBagId, setActualBagId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (bagId) {
-      loadBag();
+    if (username && bagname) {
+      // Load bag by username and bagname
+      loadBagByUserAndName();
+    } else if (bagId) {
+      // Load bag by UUID
+      setActualBagId(bagId);
+      loadBag(bagId);
     }
-  }, [bagId]);
+  }, [bagId, username, bagname]);
 
   const calculateTotalTees = async (userId: string) => {
     try {
@@ -76,7 +82,58 @@ const BagDisplayStyled = () => {
     }
   };
   
-  const loadBag = async () => {
+  const loadBagByUserAndName = async () => {
+    try {
+      setLoading(true);
+      
+      // First get the user by username
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', username)
+        .single();
+      
+      if (profileError) throw profileError;
+      
+      // Generate a slug from the bag name for comparison
+      const bagSlug = bagname?.toLowerCase().replace(/\s+/g, '-');
+      
+      // Find the bag by user and name
+      const { data: bags, error: bagError } = await supabase
+        .from('user_bags')
+        .select(`
+          *,
+          profiles (*),
+          bag_equipment (
+            *,
+            equipment (*)
+          )
+        `)
+        .eq('user_id', profile.id);
+      
+      if (bagError) throw bagError;
+      
+      // Find the bag with matching name (compare slugified versions)
+      const bag = bags?.find(b => 
+        b.name.toLowerCase().replace(/\s+/g, '-') === bagSlug ||
+        b.name === bagname
+      );
+      
+      if (!bag) {
+        throw new Error('Bag not found');
+      }
+      
+      setActualBagId(bag.id);
+      setBagData(bag);
+      await loadBagExtras(bag.id, bag);
+    } catch (error) {
+      console.error('Error loading bag by username/name:', error);
+      toast.error('Failed to load bag');
+      setLoading(false);
+    }
+  };
+
+  const loadBag = async (id: string) => {
     try {
       setLoading(true);
       
@@ -90,14 +147,23 @@ const BagDisplayStyled = () => {
             equipment (*)
           )
         `)
-        .eq('id', bagId)
+        .eq('id', id)
         .single();
 
       if (error) throw error;
       setBagData(data);
-
+      await loadBagExtras(id, data);
+    } catch (err: any) {
+      console.error('Error loading bag:', err);
+      toast.error('Failed to load bag');
+      setLoading(false);
+    }
+  };
+  
+  const loadBagExtras = async (id: string, data: any) => {
+    try {
       // Load layout data
-      const loadedLayout = await bagLayoutsService.loadLayout(bagId!);
+      const loadedLayout = await bagLayoutsService.loadLayout(id);
       if (loadedLayout) {
         setLayout(loadedLayout);
       } else if (data?.bag_equipment) {
@@ -116,7 +182,7 @@ const BagDisplayStyled = () => {
         const { data: likeData } = await supabase
           .from('bag_likes')
           .select('id')
-          .eq('bag_id', bagId)
+          .eq('bag_id', id)
           .eq('user_id', currentUser.id)
           .single();
         
@@ -131,9 +197,6 @@ const BagDisplayStyled = () => {
         const badges = await BadgeService.getUserBadges(data.user_id);
         setUserBadges(badges);
       }
-    } catch (err: any) {
-      console.error('Error loading bag:', err);
-      toast.error('Failed to load bag');
     } finally {
       setLoading(false);
     }
@@ -145,8 +208,11 @@ const BagDisplayStyled = () => {
       return;
     }
 
+    const idToUse = actualBagId || bagId;
+    if (!idToUse) return;
+
     try {
-      const newLikedState = await toggleBagLike(currentUser.id, bagId!);
+      const newLikedState = await toggleBagLike(currentUser.id, idToUse);
       setIsLiked(newLikedState);
       // Update local likes count
       setBagData((prev: any) => ({
@@ -164,9 +230,10 @@ const BagDisplayStyled = () => {
   };
 
   const handleSaveLayout = async () => {
-    if (!bagId) return;
+    const idToUse = actualBagId || bagId;
+    if (!idToUse) return;
 
-    const success = await bagLayoutsService.saveLayout(bagId, layout);
+    const success = await bagLayoutsService.saveLayout(idToUse, layout);
     if (success) {
       toast.success('Layout saved successfully!');
       setIsEditingLayout(false);

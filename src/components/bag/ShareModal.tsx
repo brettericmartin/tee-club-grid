@@ -43,12 +43,17 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
   const [copied, setCopied] = useState(false);
   const [copiedEmbed, setCopiedEmbed] = useState(false);
 
-  // Generate the shareable URL using the actual username
+  // Generate the shareable URL with /bag/username/bagname format
   const username = bag.profiles?.username || '';
-  const shareUrl = username ? `${DOMAIN_CONFIG.production}/@${username}` : DOMAIN_CONFIG.getBagShareUrl(bag.id);
+  const bagSlug = bag.name?.toLowerCase().replace(/\s+/g, '-') || 'bag';
+  
+  // Always use the new format if we have a username, otherwise fall back to UUID
+  const shareUrl = username && username.trim() !== ''
+    ? `${DOMAIN_CONFIG.production}/bag/${username}/${bagSlug}` 
+    : DOMAIN_CONFIG.getBagShareUrl(bag.id);
   const directBagUrl = DOMAIN_CONFIG.getBagShareUrl(bag.id);
   
-  const shareTitle = `Check out ${bag.profiles?.display_name || bag.profiles?.username || 'this'}'s golf bag on Teed.club`;
+  const shareTitle = `Check out ${bag.profiles?.display_name || bag.profiles?.username || 'this'}'s ${bag.name} on Teed.club`;
   const shareText = `${bag.name} - View my complete golf setup on Teed.club`;
 
   const copyLink = async () => {
@@ -95,7 +100,7 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
 
   const downloadQRCode = () => {
     const link = document.createElement("a");
-    link.download = `${userSlug}-bag-qr.png`;
+    link.download = `${username || 'bag'}-qr.png`;
     link.href = qrCodeUrl;
     link.click();
     toast.success("QR code downloaded!");
@@ -302,7 +307,6 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
                   setShowEquipmentList(true);
                   setShowQRCode(false);
                   setShowEmbedCode(false);
-                  setShowShareCard(false);
                 }}
                 variant="outline"
                 className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
@@ -325,7 +329,6 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
                 onClick={() => {
                   setShowEmbedCode(true);
                   setShowQRCode(false);
-                  setShowShareCard(false);
                   setShowEquipmentList(false);
                 }}
                 variant="outline"

@@ -1,12 +1,14 @@
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { displayNameToSlug } from "@/utils/slugify";
+import { BagCard } from "@/components/bags/BagCard";
+import { Button } from "@/components/ui/button";
 
 /**
- * UserBagPage handles username-based routing (/@username or /u/:username)
- * It finds the user by their username and shows their primary bag
+ * UserBagPage handles username-based routing (/bag/:username)
+ * It shows all bags for a user
  */
 const UserBagPage = () => {
   const { username } = useParams();
@@ -34,39 +36,31 @@ const UserBagPage = () => {
     enabled: !!username,
   });
 
-  // Then, find their primary bag
-  const { data: primaryBag, isLoading: bagLoading, error: bagError } = useQuery({
-    queryKey: ["user-primary-bag", profile?.id],
+  // Get all bags for this user
+  const { data: userBags, isLoading: bagLoading, error: bagError } = useQuery({
+    queryKey: ["user-bags", profile?.id],
     queryFn: async () => {
       if (!profile?.id) throw new Error("No profile found");
 
-      // First try to get the primary bag
-      let { data: bag, error } = await supabase
+      const { data: bags, error } = await supabase
         .from("user_bags")
-        .select("id, name, is_primary")
+        .select(`
+          *,
+          profiles (*),
+          bag_equipment (
+            count
+          )
+        `)
         .eq("user_id", profile.id)
-        .eq("is_primary", true)
-        .single();
+        .order("is_primary", { ascending: false })
+        .order("created_at", { ascending: false });
 
-      // If no primary bag, get the first bag
-      if (error || !bag) {
-        const { data: anyBag, error: anyError } = await supabase
-          .from("user_bags")
-          .select("id, name")
-          .eq("user_id", profile.id)
-          .order("created_at", { ascending: true })
-          .limit(1)
-          .single();
-
-        if (anyError) {
-          console.error("Error fetching any bag:", anyError);
-          throw new Error("User has no bags");
-        }
-
-        bag = anyBag;
+      if (error) {
+        console.error("Error fetching bags:", error);
+        throw new Error("Failed to load bags");
       }
 
-      return bag;
+      return bags || [];
     },
     enabled: !!profile?.id,
   });
@@ -100,25 +94,64 @@ const UserBagPage = () => {
     );
   }
 
-  if (bagError || !primaryBag) {
+  if (bagError || !userBags || userBags.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#111111] flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">No Bag Found</h2>
-          <p className="text-emerald-100/60 mb-6">
-            {profile.display_name} hasn't created a bag yet.
+          <h2 className="text-2xl font-bold text-white mb-4">No Bags Found</h2>
+          <p className="text-white/60 mb-6">
+            {profile.display_name || profile.username} hasn't created any bags yet.
           </p>
-          <a href="/bags" className="text-emerald-400 hover:text-emerald-300">
+          <Link to="/bags" className="text-primary hover:text-primary/80">
             Browse other bags →
-          </a>
+          </Link>
         </div>
       </div>
     );
   }
 
-  // Redirect to the bag page with the bag ID
-  // This way BagProfilePage can handle the actual display
-  return <Navigate to={`/bag/${primaryBag.id}`} replace />;
+  // If there's only one bag, redirect directly to it
+  if (userBags.length === 1) {
+    const bagSlug = userBags[0].name?.toLowerCase().replace(/\s+/g, '-');
+    return <Navigate to={`/bag/${username}/${bagSlug}`} replace />;
+  }
+
+  // Show all bags for this user
+  return (
+    <div className="min-h-screen bg-[#111111] py-8">
+      <div className="container mx-auto px-4">
+        <div className="mb-8">
+          <Link to="/bags">
+            <Button variant="ghost" size="sm" className="mb-4">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to All Bags
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            {profile.display_name || profile.username}'s Bags
+          </h1>
+          <p className="text-white/60">
+            {userBags.length} bag{userBags.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {userBags.map((bag) => {
+            const bagSlug = bag.name?.toLowerCase().replace(/\s+/g, '-');
+            return (
+              <Link 
+                key={bag.id} 
+                to={`/bag/${username}/${bagSlug}`}
+                className="block hover:scale-105 transition-transform"
+              >
+                <BagCard bag={bag} />
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default UserBagPage;

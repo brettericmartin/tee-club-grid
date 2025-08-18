@@ -196,8 +196,8 @@ function App() {
                         <Route path="/bags-browser" element={<BagsBrowser />} />
                         <Route path="/bags" element={<BagsBrowser />} />
                         <Route path="/bag/:bagId" element={<BagDisplay />} />
-                        <Route path="/u/:username" element={<UserBagPage />} />
-                        <Route path="/@:username" element={<UserBagPage />} />
+                        <Route path="/bag/:username/:bagname" element={<BagDisplay />} />
+                        <Route path="/bag/:username" element={<UserBagPage />} />
                         <Route path="/my-bag" element={<MyBag />} />
                         <Route path="/auth/callback" element={<AuthCallback />} />
                         <Route path="/equipment" element={<Equipment />} />
