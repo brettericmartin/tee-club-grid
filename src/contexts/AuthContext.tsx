@@ -83,7 +83,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[AuthContext] Auth state changed:', event);
+      
+      // Handle token refresh
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('[AuthContext] Token refreshed successfully');
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -94,6 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setProfile(null);
       }
+      
+      // Don't force reload - this is a temporary fix
+      // The real issue is queries failing after session changes
     });
 
     return () => subscription.unsubscribe();

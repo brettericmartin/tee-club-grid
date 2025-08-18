@@ -48,7 +48,30 @@ export async function getEquipment(options?: {
 
   const { data, error } = await query;
   
-  if (error) throw error;
+  if (error) {
+    console.error('[EquipmentService] Error fetching equipment:', error);
+    
+    // Check for auth/session errors and retry
+    if (error.message?.includes('JWT') || error.message?.includes('token')) {
+      console.log('[EquipmentService] Auth error detected, attempting to refresh...');
+      const { data: { session } } = await supabase.auth.refreshSession();
+      if (session) {
+        // Retry the query
+        const retryResult = await query;
+        if (!retryResult.error) {
+          return retryResult.data?.map(equipment => ({
+            ...equipment,
+            averageRating: null,
+            primaryPhoto: equipment.image_url,
+            most_liked_photo: equipment.image_url,
+            savesCount: 0,
+            totalLikes: 0
+          }));
+        }
+      }
+    }
+    throw error;
+  }
   
   // Return simplified data - use image_url directly
   return data?.map(equipment => ({

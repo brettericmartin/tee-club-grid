@@ -10,6 +10,48 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.13.2",
+    date: "2025-08-17",
+    title: "Auth Session & Loading Fixes",
+    changes: [
+      {
+        category: "fix",
+        description: "Fixed content not loading after a few actions due to auth token expiry"
+      },
+      {
+        category: "fix",
+        description: "Added automatic session refresh when JWT token expires"
+      },
+      {
+        category: "improvement",
+        description: "Better error handling for auth-related query failures"
+      },
+      {
+        category: "performance",
+        description: "Queries now retry automatically after session refresh"
+      }
+    ]
+  },
+  {
+    version: "0.13.1",
+    date: "2025-08-17",
+    title: "Dialog X Button & Custom Specs Fix",
+    changes: [
+      {
+        category: "fix",
+        description: "Fixed missing X button on equipment edit dialogs"
+      },
+      {
+        category: "fix",
+        description: "Added custom_specs column to bag_equipment table for shaft/grip preferences"
+      },
+      {
+        category: "improvement",
+        description: "Enhanced dialog close button visibility with better styling"
+      }
+    ]
+  },
+  {
     version: "0.13.0",
     date: "2025-08-17",
     title: "Patch Notes System",

@@ -339,6 +339,29 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
 
     if (error) {
       console.error('Error fetching feed posts from Supabase:', error);
+      
+      // Check for auth/session errors
+      if (error.message?.includes('JWT') || error.message?.includes('token') || error.code === 'PGRST301') {
+        console.error('[FeedService] Auth error detected, attempting to refresh session...');
+        
+        // Try to refresh the session
+        const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.error('[FeedService] Failed to refresh session:', refreshError);
+          throw error;
+        }
+        
+        if (session) {
+          console.log('[FeedService] Session refreshed, retrying query...');
+          // Retry the query once after refresh
+          const retryResult = await query;
+          if (retryResult.error) {
+            throw retryResult.error;
+          }
+          return retryResult.data || [];
+        }
+      }
+      
       throw error;
     }
     
