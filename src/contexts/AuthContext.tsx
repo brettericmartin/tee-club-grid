@@ -25,14 +25,13 @@ export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
     // Return a safe default for components that might render before AuthProvider
-    console.warn('useAuth called outside AuthProvider, returning default values');
     return {
       user: null,
       session: null,
       profile: null,
-      loading: true, // Default to loading to prevent premature renders
-      profileLoading: true,
-      initialized: false,
+      loading: false,
+      profileLoading: false,
+      initialized: true,
       signIn: async () => { throw new Error('Auth not initialized'); },
       signUp: async () => { throw new Error('Auth not initialized'); },
       signOut: async () => { throw new Error('Auth not initialized'); },
@@ -47,130 +46,133 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
-  // Fetch user profile
-  const fetchProfile = async (userId: string) => {
-    setProfileLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+  useEffect(() => {
+    let mounted = true;
+
+    // Initialize auth state
+    const initializeAuth = async () => {
+      console.log('[AuthContext] Checking auth status...');
       
-      if (error) {
-        // PGRST116 means no rows found - profile doesn't exist
-        if (error.code === 'PGRST116') {
-          console.log('[AuthContext] Profile does not exist for user:', userId);
-          // Try to create profile
-          const user = session?.user;
-          if (user) {
-            const { data: newProfile } = await supabase
-              .from('profiles')
-              .insert({
-                id: user.id,
-                username: user.email?.split('@')[0] || user.id.substring(0, 8),
-                display_name: user.user_metadata?.full_name || 
-                             user.user_metadata?.name || 
-                             user.email?.split('@')[0],
-                avatar_url: user.user_metadata?.avatar_url || 
-                           user.user_metadata?.picture,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              })
-              .select()
-              .single();
-            
-            if (newProfile) {
-              console.log('[AuthContext] Profile created successfully');
-              return newProfile;
-            }
-          }
-          return null;
+      try {
+        // Get current session from Supabase
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+        
+        if (error) {
+          console.error('[AuthContext] Error getting session:', error);
+          // Continue anyway - user is just logged out
         }
         
-        console.error('Error fetching profile:', error);
-        return null;
-      }
-      
-      console.log('[AuthContext] Profile fetched successfully:', data.username);
-      return data;
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      return null;
-    } finally {
-      setProfileLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // Initialize auth - the RIGHT way according to Supabase docs
-    const initializeAuth = async () => {
-      console.log('[AuthContext] Initializing auth...');
-      try {
-        // Get the session from Supabase - this handles ALL the complexity
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session) {
-          console.log('[AuthContext] Session found, setting user...');
+        if (session?.user) {
+          console.log('[AuthContext] User session found');
           setSession(session);
           setUser(session.user);
           
-          // Fetch profile
-          const profileData = await fetchProfile(session.user.id);
-          setProfile(profileData);
+          // Try to fetch profile but don't block
+          fetchProfile(session.user.id);
         } else {
-          console.log('[AuthContext] No session found');
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setProfileLoading(false);
+          console.log('[AuthContext] No active session');
         }
+        
       } catch (error) {
-        console.error('[AuthContext] Error during initialization:', error);
-        setSession(null);
-        setUser(null);
-        setProfile(null);
-        setProfileLoading(false);
+        console.error('[AuthContext] Unexpected error:', error);
+        // Continue anyway - treat as logged out
       } finally {
-        setLoading(false);
-        setInitialized(true);
-        console.log('[AuthContext] Auth initialization complete');
+        if (mounted) {
+          setLoading(false);
+          setInitialized(true);
+          console.log('[AuthContext] Auth check complete');
+        }
       }
     };
-    
-    // Initialize immediately
+
+    // Fetch user profile
+    const fetchProfile = async (userId: string) => {
+      if (!mounted) return;
+      
+      setProfileLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        
+        if (!mounted) return;
+        
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // Profile doesn't exist - try to create it
+            console.log('[AuthContext] Creating profile for new user');
+            const currentUser = session?.user || user;
+            if (currentUser) {
+              const { data: newProfile } = await supabase
+                .from('profiles')
+                .insert({
+                  id: currentUser.id,
+                  username: currentUser.email?.split('@')[0] || currentUser.id.substring(0, 8),
+                  display_name: currentUser.user_metadata?.full_name || 
+                               currentUser.user_metadata?.name || 
+                               currentUser.email?.split('@')[0],
+                  avatar_url: currentUser.user_metadata?.avatar_url || 
+                             currentUser.user_metadata?.picture,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                })
+                .select()
+                .single();
+              
+              if (mounted && newProfile) {
+                setProfile(newProfile);
+              }
+            }
+          }
+        } else if (data && mounted) {
+          console.log('[AuthContext] Profile loaded:', data.username);
+          setProfile(data);
+        }
+      } catch (error) {
+        console.error('[AuthContext] Profile error:', error);
+      } finally {
+        if (mounted) {
+          setProfileLoading(false);
+        }
+      }
+    };
+
+    // Start initialization
     initializeAuth();
 
-    // Listen for auth changes - let Supabase handle the complexity
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('[AuthContext] Auth event:', event);
+      async (event, newSession) => {
+        if (!mounted) return;
         
-        // Update our state based on what Supabase tells us
-        if (session) {
-          setSession(session);
-          setUser(session.user);
-          
-          // Fetch/create profile for new sessions
-          if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-            const profileData = await fetchProfile(session.user.id);
-            setProfile(profileData);
-          }
-        } else {
-          // No session means logged out
+        console.log('[AuthContext] Auth state changed:', event);
+        
+        if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
           setProfile(null);
-          setProfileLoading(false);
+        } else if (newSession?.user) {
+          setSession(newSession);
+          setUser(newSession.user);
+          
+          // Fetch profile on sign in
+          if (event === 'SIGNED_IN') {
+            fetchProfile(newSession.user.id);
+          }
         }
       }
     );
 
     // Cleanup
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -181,7 +183,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
     if (error) throw error;
-    // Auth state change listener will handle the rest
   };
 
   const signUp = async (email: string, password: string, username: string) => {
@@ -194,31 +195,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       },
     });
-
     if (error) throw error;
-    // Profile creation will be handled by auth state change listener
   };
 
   const signOut = async () => {
     console.log('[AuthContext] Signing out...');
     
-    // Clear local state immediately for better UX
+    // Clear local state immediately
     setSession(null);
     setUser(null);
     setProfile(null);
-    setProfileLoading(false);
     
     try {
-      // Tell Supabase to sign out
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('[AuthContext] Error signing out:', error);
-      }
-    } catch (err) {
-      console.error('[AuthContext] Unexpected error during sign out:', err);
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('[AuthContext] Sign out error:', error);
     }
     
-    // Redirect to home
+    // Navigate to home
     window.location.href = '/';
   };
 
@@ -235,14 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
     });
     
-    if (error) {
-      console.error('Google sign-in error:', error);
-      throw error;
-    }
-    
-    console.log('Google OAuth initiated, redirecting to:', data?.url);
-    
-    // The OAuth flow will redirect automatically if successful
+    if (error) throw error;
     return data;
   };
 
