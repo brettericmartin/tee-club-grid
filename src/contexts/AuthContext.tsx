@@ -66,35 +66,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
       
       if (error) {
-        console.error('Error fetching profile:', error);
-        
-        // If profile doesn't exist and this is a Google user, create one
-        if (error.code === 'PGRST116' && user?.app_metadata?.provider === 'google') {
-          console.log('[AuthContext] Creating profile for Google user');
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: userId,
-              username: user.email?.split('@')[0] || userId.substring(0, 8),
-              display_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0],
-              avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-          
-          if (createError) {
-            console.error('Error creating Google user profile:', createError);
-            return null;
-          }
-          
-          return newProfile;
+        // PGRST116 means no rows found - profile doesn't exist
+        if (error.code === 'PGRST116') {
+          console.log('[AuthContext] Profile does not exist for user:', userId);
+          return null;
         }
         
+        console.error('Error fetching profile:', error);
         return null;
       }
       
+      console.log('[AuthContext] Profile fetched successfully:', data.username);
       return data;
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -144,20 +126,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // DISABLED legacy session monitor
     // sessionMonitorCleanup.current = setupSessionMonitor(
 
-    // MINIMAL auth change listener - only for actual sign in/out actions
+    // Auth change listener - handle sign in/out but ignore token refreshes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // ONLY handle explicit sign out - ignore all other events to prevent tab switching issues
+      console.log('[AuthContext] Auth event:', event);
+      
       if (event === 'SIGNED_OUT') {
         console.log('[AuthContext] User explicitly signed out');
         setSession(null);
         setUser(null);
         setProfile(null);
         setProfileLoading(false);
+      } else if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        // Handle sign in and initial session events
+        // This ensures profiles are created for new users
+        console.log('[AuthContext] User signed in or initial session');
+        
+        if (session?.user) {
+          setSession(session);
+          setUser(session.user);
+          
+          // Fetch or create profile
+          const profileData = await fetchProfile(session.user.id);
+          
+          // If profile doesn't exist, create it
+          if (!profileData && session.user) {
+            console.log('[AuthContext] No profile found, creating one...');
+            const { data: newProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert({
+                id: session.user.id,
+                username: session.user.email?.split('@')[0] || session.user.id.substring(0, 8),
+                display_name: session.user.user_metadata?.full_name || 
+                             session.user.user_metadata?.name || 
+                             session.user.email?.split('@')[0],
+                avatar_url: session.user.user_metadata?.avatar_url || 
+                           session.user.user_metadata?.picture,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              .select()
+              .single();
+            
+            if (createError) {
+              console.error('[AuthContext] Error creating profile:', createError);
+            } else {
+              console.log('[AuthContext] Profile created successfully');
+              setProfile(newProfile);
+            }
+          } else {
+            setProfile(profileData);
+          }
+        }
       }
-      // IGNORE all other events including SIGNED_IN, TOKEN_REFRESHED, etc.
-      // These fire when switching tabs and cause issues
+      // IGNORE TOKEN_REFRESHED events - these fire when switching tabs
+      // and we don't need to handle them
     });
 
     return () => {
