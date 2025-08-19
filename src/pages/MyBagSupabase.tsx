@@ -34,7 +34,7 @@ import { BadgeService, type UserBadgeWithDetails } from "@/services/badgeService
 import { formatCompactCurrency, formatCompactNumber } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import { sortBadgesByPriority } from "@/utils/badgeSorting";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserFeedView } from "@/components/feed/UserFeedView";
 import { aiFlowMetrics } from "@/utils/performanceMonitor";
@@ -1818,6 +1818,7 @@ const MyBagSupabase = () => {
         <DialogContent className="bg-[#1a1a1a] border-white/20 text-white relative">
           <DialogHeader>
             <DialogTitle>Edit Loft</DialogTitle>
+            <DialogDescription>Adjust the loft angle for this club</DialogDescription>
           </DialogHeader>
           {editingLoftItem && (
             <div className="space-y-4">

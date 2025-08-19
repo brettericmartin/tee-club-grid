@@ -6,6 +6,7 @@ import { SignInModal } from "@/components/auth/SignInModal";
 import { SignUpModal } from "@/components/auth/SignUpModal";
 import { ProfileDialog } from "@/components/profile/ProfileDialog";
 import { getProfile } from "@/services/profileService";
+import EmergencyLogout from "@/components/EmergencyLogout";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,12 +74,17 @@ const Navigation = () => {
     }
   }, [user, showProfile]); // Also refetch when profile dialog closes
 
+  const [signOutFailed, setSignOutFailed] = useState(false);
+
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/');
+      // signOut now handles the redirect
     } catch (error) {
       console.error('Error signing out:', error);
+      setSignOutFailed(true);
+      // Show emergency logout after 2 seconds
+      setTimeout(() => setSignOutFailed(true), 2000);
     }
   };
 
@@ -202,6 +208,13 @@ const Navigation = () => {
                         <LogOut className="mr-2 h-4 w-4" />
                         Sign Out
                       </DropdownMenuItem>
+                      {signOutFailed && (
+                        <DropdownMenuItem asChild>
+                          <div className="px-2 py-1">
+                            <EmergencyLogout />
+                          </div>
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (

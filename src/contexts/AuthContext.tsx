@@ -94,10 +94,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       console.log('[AuthContext] Initializing auth...');
       try {
-        // Just use basic Supabase getSession
-        const { data: { session: validSession } } = await supabase.auth.getSession();
-        setSession(validSession);
-        setUser(validSession?.user ?? null);
+        // First check if we have a stuck/invalid session
+        const { data: { session: validSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('[AuthContext] Error getting session:', error);
+          // Clear any stuck auth state
+          await supabase.auth.signOut({ scope: 'local' });
+          setSession(null);
+          setUser(null);
+          setProfileLoading(false);
+          return;
+        }
+        
+        // Only set session if it's actually valid
+        if (validSession && validSession.expires_at && new Date(validSession.expires_at * 1000) > new Date()) {
+          setSession(validSession);
+          setUser(validSession.user ?? null);
+        } else {
+          console.log('[AuthContext] No valid session found or session expired');
+          // Clear any stuck auth tokens
+          if (validSession) {
+            await supabase.auth.signOut({ scope: 'local' });
+          }
+          setSession(null);
+          setUser(null);
+        }
         
         // Fetch profile if user exists
         if (validSession?.user) {
@@ -138,10 +160,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setProfile(null);
         setProfileLoading(false);
-      } else if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        // Handle sign in and initial session events
-        // This ensures profiles are created for new users
-        console.log('[AuthContext] User signed in or initial session');
+      } else if (event === 'SIGNED_IN') {
+        // Only handle explicit sign in events, not initial session
+        console.log('[AuthContext] User explicitly signed in');
         
         if (session?.user) {
           setSession(session);
@@ -177,6 +198,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           } else {
             setProfile(profileData);
+          }
+        }
+      } else if (event === 'INITIAL_SESSION' && session?.user) {
+        // Handle initial session for profile creation ONLY
+        // Don't update auth state - that's handled by initializeAuth
+        console.log('[AuthContext] Initial session - checking profile...');
+        
+        // Just check if profile exists, create if needed
+        const profileData = await fetchProfile(session.user.id);
+        if (!profileData) {
+          console.log('[AuthContext] No profile found for initial session user, creating...');
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: session.user.id,
+              username: session.user.email?.split('@')[0] || session.user.id.substring(0, 8),
+              display_name: session.user.user_metadata?.full_name || 
+                           session.user.user_metadata?.name || 
+                           session.user.email?.split('@')[0],
+              avatar_url: session.user.user_metadata?.avatar_url || 
+                         session.user.user_metadata?.picture,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+          
+          if (!createError && newProfile) {
+            console.log('[AuthContext] Profile created for initial session');
           }
         }
       }
@@ -250,9 +300,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    console.log('[AuthContext] Signing out...');
+    
+    // Clear all state first
+    setSession(null);
+    setUser(null);
     setProfile(null);
+    setProfileLoading(false);
+    
+    try {
+      // Clear ALL auth-related items from localStorage
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('supabase') || key.includes('auth') || key.includes('sb-'))) {
+          keysToRemove.push(key);
+        }
+      }
+      
+      keysToRemove.forEach(key => {
+        console.log('[AuthContext] Removing localStorage key:', key);
+        localStorage.removeItem(key);
+      });
+      
+      // Clear session storage
+      sessionStorage.clear();
+      
+      // Force sign out from Supabase with scope: global to sign out all sessions
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error('[AuthContext] Error signing out:', error);
+        // Even if there's an error, we've cleared local state
+        // Force a page reload to ensure clean state
+        window.location.href = '/';
+      } else {
+        console.log('[AuthContext] Sign out completed');
+        // Force reload to ensure clean state
+        window.location.href = '/';
+      }
+    } catch (err) {
+      console.error('[AuthContext] Unexpected error during sign out:', err);
+      // Force reload as last resort
+      window.location.href = '/';
+    }
   };
 
   const signInWithGoogle = async () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Camera, Search, Clock } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -22,6 +22,9 @@ export default function AddEquipmentMethodDialog({
           <DialogTitle className="text-xl font-bold text-white text-center">
             How would you like to add equipment?
           </DialogTitle>
+          <DialogDescription className="text-center text-gray-400">
+            Choose a method to add equipment to your bag
+          </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
