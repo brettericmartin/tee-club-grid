@@ -307,6 +307,22 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
         avatar_url,
         handicap,
         title
+      ),
+      bag:user_bags!feed_posts_bag_id_fkey!left(
+        id,
+        user_id,
+        name,
+        background_image,
+        created_at,
+        likes_count,
+        views_count
+      ),
+      equipment:equipment!feed_posts_equipment_id_fkey!left(
+        id,
+        brand,
+        model,
+        category,
+        image_url
       )
     `;
     
@@ -352,6 +368,7 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
     
     console.log('Fetched feed posts:', data?.length || 0, 'posts');
     
+    
     // Check user likes separately if userId exists (batch query)
     let userLikes: string[] = [];
     if (userId && data && data.length > 0) {
@@ -382,7 +399,9 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
     
     return filteredPosts;
   } catch (error) {
-    console.error('Error fetching feed posts:', error);
+    console.error('Error fetching feed posts - Full error:', error);
+    console.error('Error stack:', (error as any).stack);
+    // Return empty array to prevent app crash
     return [];
   }
 }
@@ -417,9 +436,17 @@ export async function getUserFeedPosts(userId: string, limit: number = 100, offs
         ),
         bag:user_bags(
           id,
+          user_id,
           name,
           description,
-          background_image
+          background_image,
+          created_at,
+          likes_count,
+          views_count,
+          bag_equipment(
+            *,
+            equipment(*)
+          )
         ),
         user_liked:feed_likes!feed_likes_post_id_fkey!left(
           id
@@ -443,9 +470,17 @@ export async function getUserFeedPosts(userId: string, limit: number = 100, offs
         ),
         bag:user_bags(
           id,
+          user_id,
           name,
           description,
-          background_image
+          background_image,
+          created_at,
+          likes_count,
+          views_count,
+          bag_equipment(
+            *,
+            equipment(*)
+          )
         )
       `;
     

@@ -99,7 +99,8 @@ export async function uploadPhotosInBatches(
 export async function createMultiEquipmentPost(
   userId: string,
   photos: PhotoUpload[],
-  overallCaption: string
+  overallCaption: string,
+  bagId?: string
 ): Promise<{ success: boolean; postId?: string; error?: string }> {
   try {
     // Validate input
@@ -117,6 +118,21 @@ export async function createMultiEquipmentPost(
       throw new Error('All photos must have equipment selected');
     }
     
+    // Get user's current bag if not provided
+    if (!bagId) {
+      const { data: userBag } = await supabase
+        .from('user_bags')
+        .select('id')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (userBag) {
+        bagId = userBag.id;
+      }
+    }
+    
     // Upload all photos
     const uploadedPhotos = await uploadPhotosInBatches(photos, userId);
     
@@ -132,6 +148,7 @@ export async function createMultiEquipmentPost(
       .insert({
         user_id: userId,
         type: 'multi_equipment_photos',
+        bag_id: bagId, // Include bag_id so feed knows which bag to show
         content: {
           photos: uploadedPhotos.map(photo => ({
             url: photo.url,
@@ -145,7 +162,8 @@ export async function createMultiEquipmentPost(
           photo_count: uploadedPhotos.length,
           // Include first equipment_id for backwards compatibility
           equipment_id: uploadedPhotos[0].equipmentId,
-          equipment_name: uploadedPhotos[0].equipmentName
+          equipment_name: uploadedPhotos[0].equipmentName,
+          bag_id: bagId // Also include in content for backward compatibility
         },
         media_urls: mediaUrls,
         // Set the main equipment_id for indexing (uses first photo's equipment)

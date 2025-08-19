@@ -149,7 +149,7 @@ export default function ThreadList({ categorySlug, sortBy: propSortBy }: ThreadL
           // Get post count
           const { count: postCount } = await supabase
             .from('forum_posts')
-            .select('*', { count: 'exact', head: true })
+            .select('*', { count: 'exact' })
             .eq('thread_id', thread.id);
 
           // Get latest post

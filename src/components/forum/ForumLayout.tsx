@@ -57,7 +57,7 @@ export default function ForumLayout() {
         (data || []).map(async (category) => {
           const { count } = await supabase
             .from('forum_threads')
-            .select('*', { count: 'exact', head: true })
+            .select('*', { count: 'exact' })
             .eq('category_id', category.id);
 
           return { ...category, thread_count: count || 0 };

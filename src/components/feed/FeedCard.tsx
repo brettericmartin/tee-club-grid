@@ -13,6 +13,7 @@ import { EquipmentShowcaseModal } from '@/components/EquipmentShowcaseModal';
 import { toggleFollow } from '@/services/users';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { useNavigate } from 'react-router-dom';
+import { getBagById } from '@/services/bags';
 
 interface FeedCardProps {
   post: {
@@ -67,24 +68,29 @@ export const FeedCard = memo(function FeedCard({ post, onUpdate }: FeedCardProps
   const [userBagId, setUserBagId] = useState<string | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [isBagLiked, setIsBagLiked] = useState(false);
 
   // Debug logging
   if (post.type === 'equipment_photo') {
     console.log('Equipment photo post:', post);
   }
 
-  // Fetch user's primary bag on mount
+  // Fetch user's bag for this post
   useEffect(() => {
     const fetchUserBag = async () => {
-      if (post.user_id && !post.bag_id) {
+      // Only fetch if we don't have a specific bag_id
+      if (post.user_id && !post.bag_id && !post.bag?.id) {
+        // Get the user's most recent bag (not primary since that field might not exist)
         const { data } = await supabase
           .from('user_bags')
-          .select('id')
+          .select('id, name')
           .eq('user_id', post.user_id)
-          .eq('is_primary', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .single();
         
         if (data) {
+          console.log('[FeedCard] Found user bag:', data.name, 'ID:', data.id);
           setUserBagId(data.id);
         }
       }
@@ -93,9 +99,9 @@ export const FeedCard = memo(function FeedCard({ post, onUpdate }: FeedCardProps
     fetchUserBag();
   }, [post.user_id, post.bag_id]);
 
-  // Check if following
+  // Check if following and if bag is liked
   useEffect(() => {
-    const checkFollowStatus = async () => {
+    const checkStatuses = async () => {
       if (user && post.user_id && user.id !== post.user_id) {
         const { data } = await supabase
           .from('user_follows')
@@ -106,10 +112,62 @@ export const FeedCard = memo(function FeedCard({ post, onUpdate }: FeedCardProps
         
         setIsFollowing(!!data);
       }
+      
+      // Check if bag is liked
+      if (user && bagCardData?.id) {
+        const { data } = await supabase
+          .from('bag_tees')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('bag_id', bagCardData.id)
+          .single();
+        
+        setIsBagLiked(!!data);
+      }
     };
     
-    checkFollowStatus();
-  }, [user, post.user_id]);
+    checkStatuses();
+  }, [user, post.user_id, bagCardData?.id]);
+
+  const handleBagLike = async () => {
+    if (!user || !bagCardData) return;
+
+    try {
+      if (isBagLiked) {
+        // Unlike bag
+        const { error } = await supabase
+          .from('bag_tees')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('bag_id', bagCardData.id);
+
+        if (error) throw error;
+        setIsBagLiked(false);
+        setBagCardData(prev => ({
+          ...prev,
+          likes_count: Math.max(0, (prev?.likes_count || 0) - 1)
+        }));
+      } else {
+        // Like bag
+        const { error } = await supabase
+          .from('bag_tees')
+          .insert({
+            user_id: user.id,
+            bag_id: bagCardData.id
+          });
+
+        if (error) throw error;
+        setIsBagLiked(true);
+        setBagCardData(prev => ({
+          ...prev,
+          likes_count: (prev?.likes_count || 0) + 1
+        }));
+      }
+    } catch (error) {
+      console.error('Error toggling bag like:', error);
+      toast.error('Failed to update bag like');
+    }
+  };
 
   const handleLike = async () => {
     if (!user || isLiking) return;
@@ -191,71 +249,38 @@ export const FeedCard = memo(function FeedCard({ post, onUpdate }: FeedCardProps
   // State for bag data
   const [bagCardData, setBagCardData] = useState<any>(null);
 
-  // Add missing handleBagLike function
-  const handleBagLike = async () => {
-    // For now, just use the regular handleLike function
-    // In the future, this could handle bag-specific likes
-    handleLike();
-  };
 
   // Fetch bag data when needed
   useEffect(() => {
     const fetchBagData = async () => {
-      const bagId = post.bag_id || userBagId;
-      if (!bagId || bagCardData) return;
+      const bagId = post.bag_id || post.bag?.id || userBagId;
+      if (!bagId) return;
+      
+      console.log('[FeedCard] Fetching bag data for:', {
+        postId: post.id,
+        postType: post.type,
+        bagId,
+        source: post.bag_id ? 'post.bag_id' : post.bag?.id ? 'post.bag.id' : 'userBagId fallback'
+      });
 
-      const { data } = await supabase
-        .from('user_bags')
-        .select(`
-          *,
-          profiles (*),
-          bag_equipment (
-            *,
-            custom_photo_url,
-            equipment (*)
-          )
-        `)
-        .eq('id', bagId)
-        .single();
-
-      if (data) {
-        // Process equipment to set primaryPhoto from custom_photo_url
-        const processedEquipment = data.bag_equipment?.map(item => {
-          if (item.equipment) {
-            // Use custom photo if available, otherwise use default image
-            item.equipment.primaryPhoto = item.custom_photo_url || item.equipment.image_url;
-          }
-          return item;
-        }) || [];
+      try {
+        // Use the same getBagById function that bags browser uses
+        const bagData = await getBagById(bagId);
         
-        setBagCardData({
-          id: data.id,
-          user_id: data.user_id,
-          name: data.name,
-          background_image: data.background_image,
-          created_at: data.created_at,
-          likes_count: data.likes_count || 0,
-          views_count: data.views_count || 0,
-          profiles: data.profiles,
-          bag_equipment: processedEquipment,
+        console.log('[FeedCard] Fetched bag:', {
+          bagName: bagData.name,
+          equipmentCount: bagData.bag_equipment?.length,
+          totalValue: bagData.totalValue
         });
+        
+        setBagCardData(bagData);
+      } catch (error) {
+        console.error('[FeedCard] Error fetching bag:', error);
       }
     };
 
-    if (post.bag) {
-      // Use existing bag data from post
-      setBagCardData({
-        id: post.bag.id,
-        user_id: post.bag.user_id,
-        name: post.bag.name,
-        background_image: post.bag.background_image,
-        created_at: post.bag.created_at,
-        likes_count: 0,
-        views_count: 0,
-        profiles: post.profiles || post.profile,
-        bag_equipment: post.bag.bag_equipment || [],
-      });
-    } else if (userBagId || post.bag_id) {
+    // Always fetch fresh bag data with equipment
+    if (post.bag_id || post.bag?.id || userBagId) {
       fetchBagData();
     }
   }, [post.bag, userBagId, post.bag_id]);
@@ -366,31 +391,44 @@ export const FeedCard = memo(function FeedCard({ post, onUpdate }: FeedCardProps
           "absolute inset-0 backface-hidden rotate-y-180",
           !isFlipped && "invisible"
         )}>
-          <div className="relative h-full">
-            {bagCardData ? (
+          {bagCardData ? (
+            <>
               <BagCard 
                 bag={bagCardData}
                 onView={() => navigate(`/bag/${bagCardData.id}`)}
                 onLike={handleBagLike}
-                isLiked={false}
+                onFollow={async (userId: string, username: string) => {
+                  setFollowLoading(true);
+                  try {
+                    await toggleFollow(user?.id || '', userId);
+                    setIsFollowing(!isFollowing);
+                    toast.success(isFollowing ? 'Unfollowed' : 'Following');
+                  } catch (error) {
+                    toast.error('Failed to update follow status');
+                  } finally {
+                    setFollowLoading(false);
+                  }
+                }}
+                isLiked={isBagLiked}
+                isFollowing={isFollowing}
                 currentUserId={user?.id}
               />
-            ) : (
-              <Card className="glass-card p-6 h-full flex items-center justify-center min-h-[400px]">
-                <div className="text-center text-white/60">
-                  <p>Loading bag details...</p>
-                </div>
-              </Card>
-            )}
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsFlipped(false)}
-              className="absolute top-2 right-2 text-white/60 hover:text-white z-10"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </Button>
-          </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsFlipped(false)}
+                className="absolute top-4 right-4 text-white/60 hover:text-white z-50"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </Button>
+            </>
+          ) : (
+            <Card className="glass-card p-6 h-full flex items-center justify-center min-h-[400px]">
+              <div className="text-center text-white/60">
+                <p>Loading bag details...</p>
+              </div>
+            </Card>
+          )}
         </div>
       )}
 

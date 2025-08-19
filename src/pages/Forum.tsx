@@ -39,12 +39,12 @@ export default function Forum() {
       // Fetch total threads
       const { count: threadCount } = await supabase
         .from('forum_threads')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact' });
 
       // Fetch total posts
       const { count: postCount } = await supabase
         .from('forum_posts')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact' });
 
       // Fetch latest threads
       const { data: latestThreads } = await supabase

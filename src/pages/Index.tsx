@@ -235,10 +235,10 @@ const Index = () => {
       // Get real stats from database with correct table names
       // Use Promise.allSettled to handle individual failures
       const results = await Promise.allSettled([
-        supabase.from('user_bags').select('*', { count: 'exact', head: true }),
-        supabase.from('equipment').select('*', { count: 'exact', head: true }),
-        supabase.from('equipment_photos').select('*', { count: 'exact', head: true }),
-        supabase.from('feed_posts').select('*', { count: 'exact', head: true })
+        supabase.from('user_bags').select('*', { count: 'exact' }),
+        supabase.from('equipment').select('*', { count: 'exact' }),
+        supabase.from('equipment_photos').select('*', { count: 'exact' }),
+        supabase.from('feed_posts').select('*', { count: 'exact' })
       ]);
 
       const stats = {

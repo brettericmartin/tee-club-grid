@@ -69,10 +69,10 @@ const FeedContent = () => {
         }
         console.log('Successfully unliked post');
         
-        // Get updated count
-        const { count } = await supabase
+        // Get updated count (don't use head: true to avoid hanging)
+        const { data: countData, count } = await supabase
           .from('feed_likes')
-          .select('*', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('post_id', postId);
         
         // Update the post in the feed context
@@ -93,10 +93,10 @@ const FeedContent = () => {
         }
         console.log('Successfully liked post');
         
-        // Get updated count
-        const { count } = await supabase
+        // Get updated count (don't use head: true to avoid hanging)
+        const { data: countData, count } = await supabase
           .from('feed_likes')
-          .select('*', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('post_id', postId);
         
         // Update the post in the feed context

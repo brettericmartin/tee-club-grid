@@ -124,7 +124,7 @@ export class BadgeService {
     // Count users created before this user
     const { count } = await supabase
       .from('profiles')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
       .lte('created_at', data.created_at);
 
     return (count || 0) <= maxUsers;
@@ -133,7 +133,7 @@ export class BadgeService {
   private static async checkPhotoCountCriteria(userId: string, threshold: number): Promise<boolean> {
     const { count } = await supabase
       .from('equipment_photos')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
       .eq('uploaded_by', userId);
 
     return (count || 0) >= threshold;
@@ -142,7 +142,7 @@ export class BadgeService {
   private static async checkEquipmentCountCriteria(userId: string, threshold: number): Promise<boolean> {
     const { count } = await supabase
       .from('equipment')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
       .eq('submitted_by', userId);
 
     return (count || 0) >= threshold;
@@ -168,7 +168,7 @@ export class BadgeService {
       .from('bag_equipment')
       .select(`
         equipment!inner(brand)
-      `, { count: 'exact', head: true })
+      `, { count: 'exact' })  // Don't use head: true to avoid hanging
       .eq('bag_id', bag.id)
       .eq('equipment.brand', brand);
 
@@ -179,13 +179,13 @@ export class BadgeService {
     // Count tees given to bags
     const { count: bagTees } = await supabase
       .from('bag_likes')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
       .eq('user_id', userId);
 
     // Count tees given to posts
     const { count: postTees } = await supabase
       .from('likes')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
       .eq('user_id', userId);
 
     return ((bagTees || 0) + (postTees || 0)) >= threshold;

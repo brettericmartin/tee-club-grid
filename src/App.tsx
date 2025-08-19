@@ -21,6 +21,7 @@ import MyBagPage from "@/pages/MyBagSupabase";
 import EquipmentPage from "@/pages/Equipment";
 import EquipmentDetailPage from "@/pages/EquipmentDetail";
 import FeedPage from "@/pages/Feed";
+import TestSupabase from "@/pages/TestSupabase";
 import WishlistPage from "@/pages/Wishlist";
 import BadgesPage from "@/pages/Badges";
 import BadgePreviewPage from "@/pages/BadgePreview";
@@ -202,6 +203,7 @@ function App() {
                         <Route path="/auth/callback" element={<AuthCallback />} />
                         <Route path="/equipment" element={<Equipment />} />
                         <Route path="/equipment/:id" element={<EquipmentDetail />} />
+                        <Route path="/test-supabase" element={<TestSupabase />} />
                         <Route path="/feed" element={<Feed />} />
                         <Route path="/wishlist" element={<Wishlist />} />
                         <Route path="/badges" element={<Badges />} />

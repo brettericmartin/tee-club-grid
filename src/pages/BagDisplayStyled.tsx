@@ -12,6 +12,7 @@ import { BagGalleryDndKit } from "@/components/bag/BagGalleryDndKit";
 import { bagLayoutsService, type BagLayout } from "@/services/bagLayouts";
 import BagStatsRow from "@/components/bag/BagStatsRow";
 import { BagCard } from "@/components/bags/BagCard";
+import { processEquipmentPhotos } from "@/utils/equipmentPhotos";
 import BagEquipmentGallery from "@/components/bag/BagEquipmentGallery";
 import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
 import { BadgeService } from "@/services/badgeService";
@@ -53,7 +54,7 @@ const BagDisplayStyled = () => {
       // Count tees from bags
       const { count: bagTees } = await supabase
         .from('bag_likes')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
         .eq('user_id', userId);
       
       // First get the user's post IDs
@@ -68,7 +69,7 @@ const BagDisplayStyled = () => {
         const postIds = userPosts.map(post => post.id);
         const { count } = await supabase
           .from('likes')
-          .select('*', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
           .in('post_id', postIds);
         postTees = count || 0;
       }
@@ -106,7 +107,15 @@ const BagDisplayStyled = () => {
           profiles (*),
           bag_equipment (
             *,
-            equipment (*),
+            equipment (
+              *,
+              equipment_photos (
+                id,
+                photo_url,
+                likes_count,
+                is_primary
+              )
+            ),
             shaft_id,
             grip_id,
             custom_specs
@@ -126,9 +135,15 @@ const BagDisplayStyled = () => {
         throw new Error('Bag not found');
       }
       
+      // Process equipment photos for proper display
+      const processedBag = {
+        ...bag,
+        bag_equipment: processEquipmentPhotos(bag.bag_equipment || [])
+      };
+      
       setActualBagId(bag.id);
-      setBagData(bag);
-      await loadBagExtras(bag.id, bag);
+      setBagData(processedBag);
+      await loadBagExtras(bag.id, processedBag);
     } catch (error) {
       console.error('Error loading bag by username/name:', error);
       toast.error('Failed to load bag');
@@ -147,7 +162,15 @@ const BagDisplayStyled = () => {
           profiles (*),
           bag_equipment (
             *,
-            equipment (*),
+            equipment (
+              *,
+              equipment_photos (
+                id,
+                photo_url,
+                likes_count,
+                is_primary
+              )
+            ),
             shaft_id,
             grip_id,
             custom_specs
@@ -157,8 +180,15 @@ const BagDisplayStyled = () => {
         .single();
 
       if (error) throw error;
-      setBagData(data);
-      await loadBagExtras(id, data);
+      
+      // Process equipment photos for proper display
+      const processedBag = {
+        ...data,
+        bag_equipment: processEquipmentPhotos(data.bag_equipment || [])
+      };
+      
+      setBagData(processedBag);
+      await loadBagExtras(id, processedBag);
     } catch (err: any) {
       console.error('Error loading bag:', err);
       toast.error('Failed to load bag');
@@ -542,7 +572,7 @@ const BagDisplayStyled = () => {
                       onClick={() => navigate(`/equipment/${item.equipment.id}`)}
                     >
                       <img
-                        src={item.custom_photo_url || item.equipment.image_url}
+                        src={(item.equipment as any)?.primaryPhoto || item.custom_photo_url || item.equipment.image_url}
                         alt={`${item.equipment.brand} ${item.equipment.model}`}
                         className="w-full h-full object-cover"
                         loading="lazy"

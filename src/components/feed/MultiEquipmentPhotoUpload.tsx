@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { createMultiEquipmentPost, type PhotoUpload } from '@/services/multiEquipmentUpload';
 import { EquipmentSelectorSimple } from '../equipment/EquipmentSelectorSimple';
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '@/lib/supabase';
 
 interface MultiEquipmentPhotoUploadProps {
   isOpen: boolean;
@@ -31,6 +32,28 @@ export function MultiEquipmentPhotoUpload({
   const [overallCaption, setOverallCaption] = useState('');
   const [showEquipmentSelector, setShowEquipmentSelector] = useState(false);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
+  const [userBagId, setUserBagId] = useState<string | null>(null);
+  
+  // Fetch user's current bag when component mounts
+  React.useEffect(() => {
+    const fetchUserBag = async () => {
+      if (user && isOpen) {
+        const { data } = await supabase
+          .from('user_bags')
+          .select('id')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (data) {
+          setUserBagId(data.id);
+        }
+      }
+    };
+    
+    fetchUserBag();
+  }, [user, isOpen]);
 
   const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -98,7 +121,8 @@ export function MultiEquipmentPhotoUpload({
       const result = await createMultiEquipmentPost(
         user.id,
         photos,
-        overallCaption
+        overallCaption,
+        userBagId || undefined
       );
 
       if (result.success) {

@@ -83,12 +83,14 @@ const Equipment = () => {
 
   const loadEquipment = async () => {
     console.log('[Equipment] loadEquipment called with category:', category, 'sortBy:', sortBy, 'page:', currentPage);
+    
     setLoading(true);
     try {
       // First, get the total count for pagination
+      // IMPORTANT: Don't use head: true as it can cause queries to hang
       let countQuery = supabase
         .from('equipment')
-        .select('*', { count: 'exact', head: true });
+        .select('id', { count: 'exact' });  // Select minimal field for count
       
       // Apply filters to count query
       if (category && category !== 'all') {
@@ -98,10 +100,18 @@ const Equipment = () => {
         countQuery = countQuery.eq('brand', brand);
       }
       
-      const { count } = await countQuery;
+      const { data: countData, count, error: countError } = await countQuery;
+      
+      if (countError) {
+        console.error('[Equipment] Count query error:', countError);
+        throw countError;
+      }
+      
+      console.log('[Equipment] Count result:', count);
       setTotalCount(count || 0);
       
       // Now get the actual data for the current page
+      console.log('[Equipment] Starting data query...');
       const from = (currentPage - 1) * itemsPerPage;
       const to = from + itemsPerPage - 1;
       

@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { EQUIPMENT_CATEGORIES } from '@/lib/equipment-categories';
 import { useNavigate } from 'react-router-dom';
+import { getEquipmentImageUrl } from '@/utils/equipmentPhotos';
 import type { Database } from '@/lib/supabase';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
@@ -179,9 +180,9 @@ function SortableItem({
 
         {/* Equipment Image */}
         <div className="relative h-full flex items-center justify-center p-4">
-          {item.custom_photo_url || item.equipment.image_url ? (
+          {getEquipmentImageUrl(item) ? (
             <img
-              src={item.custom_photo_url || item.equipment.image_url}
+              src={getEquipmentImageUrl(item)!}
               alt={`${item.equipment.brand} ${item.equipment.model}`}
               className="w-full h-full object-contain"
               draggable={false}
@@ -453,9 +454,9 @@ export function BagGalleryDndKit({
               }}
             >
               <div className="relative h-full flex items-center justify-center p-4">
-                {activeItem.custom_photo_url || activeItem.equipment.image_url ? (
+                {getEquipmentImageUrl(activeItem) ? (
                   <img
-                    src={activeItem.custom_photo_url || activeItem.equipment.image_url}
+                    src={getEquipmentImageUrl(activeItem)!}
                     alt={`${activeItem.equipment.brand} ${activeItem.equipment.model}`}
                     className="w-full h-full object-contain"
                     draggable={false}

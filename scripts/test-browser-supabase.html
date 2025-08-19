@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Supabase Connection</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Testing Supabase Connection</h1>
+  <div id="results"></div>
+  
+  <script>
+    const supabaseUrl = 'https://kgleorvvtrqlgolzdbbw.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnbGVvcnZ2dHJxbGdvbHpkYmJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3MzY5NDEsImV4cCI6MjA2NjMxMjk0MX0.VcUxzGYQm5PuhwCPJjacSox6D3dJUs_ejmmCYHWwJDA';
+    
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    const results = document.getElementById('results');
+    
+    async function test() {
+      results.innerHTML += '<p>Starting test...</p>';
+      
+      try {
+        console.log('Testing count query...');
+        results.innerHTML += '<p>Testing count query...</p>';
+        
+        const { count, error } = await supabase
+          .from('equipment')
+          .select('*', { count: 'exact', head: true });
+        
+        if (error) {
+          results.innerHTML += `<p style="color: red;">Error: ${JSON.stringify(error)}</p>`;
+          console.error('Error:', error);
+        } else {
+          results.innerHTML += `<p style="color: green;">Success! Count: ${count}</p>`;
+          console.log('Count:', count);
+        }
+        
+        console.log('Testing data fetch...');
+        results.innerHTML += '<p>Testing data fetch...</p>';
+        
+        const { data, error: dataError } = await supabase
+          .from('equipment')
+          .select('id, brand, model')
+          .limit(5);
+        
+        if (dataError) {
+          results.innerHTML += `<p style="color: red;">Data Error: ${JSON.stringify(dataError)}</p>`;
+          console.error('Data Error:', dataError);
+        } else {
+          results.innerHTML += `<p style="color: green;">Success! Fetched ${data.length} items</p>`;
+          results.innerHTML += `<pre>${JSON.stringify(data[0], null, 2)}</pre>`;
+          console.log('Data:', data);
+        }
+        
+      } catch (err) {
+        results.innerHTML += `<p style="color: red;">Unexpected error: ${err.message}</p>`;
+        console.error('Unexpected error:', err);
+      }
+    }
+    
+    test();
+  </script>
+</body>
+</html>

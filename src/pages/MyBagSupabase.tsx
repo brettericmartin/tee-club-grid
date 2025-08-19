@@ -44,10 +44,12 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Lazy load heavy components with retry logic for Vite HMR stability
 const BagGalleryDndKit = lazyWithRetry(() => import("@/components/bag/BagGalleryDndKit"));
-const EquipmentSelectorImproved = lazyWithRetry(() => import("@/components/equipment/EquipmentSelectorImproved"));
 const EquipmentEditor = lazyWithRetry(() => import("@/components/bag/EquipmentEditor"));
-const AddEquipmentMethodDialog = lazyWithRetry(() => import("@/components/equipment/AddEquipmentMethodDialog"));
 const AIEquipmentAnalyzer = lazyWithRetry(() => import("@/components/equipment/AIEquipmentAnalyzer"));
+
+// Import these directly to avoid dynamic import issues
+import EquipmentSelectorImproved from "@/components/equipment/EquipmentSelectorImproved";
+import AddEquipmentMethodDialog from "@/components/equipment/AddEquipmentMethodDialog";
 const AIAnalysisResultsDialog = lazyWithRetry(() => import("@/components/equipment/AIAnalysisResultsDialog"));
 
 // Loading component for heavy components
@@ -261,7 +263,7 @@ const MyBagSupabase = () => {
         const bagIds = userBags.map(bag => String(bag.id));
         const { count } = await supabase
           .from('bag_tees')
-          .select('*', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
           .in('bag_id', bagIds);
         bagTees = count || 0;
       }
@@ -282,7 +284,7 @@ const MyBagSupabase = () => {
         const postIds = userPosts.map(post => String(post.id));
         const { count } = await supabase
           .from('likes')
-          .select('*', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
           .in('post_id', postIds);
         postTees = count || 0;
       }
@@ -1345,7 +1347,7 @@ const MyBagSupabase = () => {
                       onClick={() => handleEditEquipment(item)}
                     >
                       <img
-                        src={item.custom_photo_url || item.equipment.image_url}
+                        src={(item.equipment as any)?.primaryPhoto || item.custom_photo_url || item.equipment.image_url}
                         alt={`${item.equipment.brand} ${item.equipment.model}`}
                         className="w-full h-full object-cover"
                         loading="lazy"

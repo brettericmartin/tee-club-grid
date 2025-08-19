@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
 import { retryQuery } from '@/utils/supabaseQuery';
 import { executeWithRetry } from '@/lib/authHelpers';
+import { processEquipmentPhotos } from '@/utils/equipmentPhotos';
 
 type UserBag = Database['public']['Tables']['user_bags']['Row'];
 type BagEquipment = Database['public']['Tables']['bag_equipment']['Row'];
@@ -43,13 +44,20 @@ export async function getBags(options?: {
         purchase_price,
         is_featured,
         equipment_id,
+        created_at,
         equipment:equipment (
           id,
           brand,
           model,
           category,
           image_url,
-          msrp
+          msrp,
+          equipment_photos (
+            id,
+            photo_url,
+            likes_count,
+            is_primary
+          )
         )
       )
     `);
@@ -140,7 +148,13 @@ export async function getBags(options?: {
             model,
             category,
             image_url,
-            msrp
+            msrp,
+            equipment_photos (
+              id,
+              photo_url,
+              likes_count,
+              is_primary
+            )
           )
         )
       `);
@@ -156,15 +170,8 @@ export async function getBags(options?: {
   
   // Process the data to add primaryPhoto to equipment
   const processedData = data?.map(bag => {
-    // Process each bag_equipment item to set primaryPhoto
-    const processedEquipment = bag.bag_equipment?.map(item => {
-      if (item.equipment) {
-        // Use custom photo if available, otherwise use default image
-        // We're simplifying this to avoid the nested query issue
-        item.equipment.primaryPhoto = item.custom_photo_url || item.equipment.image_url;
-      }
-      return item;
-    }) || [];
+    // Use shared utility to process equipment photos
+    const processedEquipment = processEquipmentPhotos(bag.bag_equipment || []);
     
     return {
       ...bag,
@@ -177,6 +184,72 @@ export async function getBags(options?: {
   }) || [];
   
   return processedData;
+}
+
+// Get a bag by ID (for feed cards)
+export async function getBagById(bagId: string) {
+  const { data, error } = await supabase
+    .from('user_bags')
+    .select(`
+      id,
+      name,
+      bag_type,
+      background_image,
+      description,
+      created_at,
+      updated_at,
+      likes_count,
+      views_count,
+      user_id,
+      profiles (
+        id,
+        username,
+        display_name,
+        avatar_url,
+        handicap,
+        location,
+        title
+      ),
+      bag_equipment (
+        id,
+        position,
+        custom_photo_url,
+        purchase_price,
+        is_featured,
+        equipment_id,
+        created_at,
+        equipment:equipment (
+          id,
+          brand,
+          model,
+          category,
+          image_url,
+          msrp,
+          equipment_photos (
+            id,
+            photo_url,
+            likes_count,
+            is_primary
+          )
+        )
+      )
+    `)
+    .eq('id', bagId)
+    .single();
+
+  if (error) throw error;
+  
+  // Use the same processing as getBags to ensure consistency
+  const processedEquipment = processEquipmentPhotos(data.bag_equipment || []);
+  
+  return {
+    ...data,
+    bag_equipment: processedEquipment,
+    totalValue: processedEquipment.reduce((sum, item) => 
+      sum + (item.purchase_price || item.equipment?.msrp || 0), 0
+    ) || 0,
+    likesCount: data.likes_count || 0
+  };
 }
 
 // Get a specific user's bag

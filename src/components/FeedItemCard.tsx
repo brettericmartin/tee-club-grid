@@ -13,6 +13,7 @@ import CommentModal from '@/components/comments/CommentModal';
 import { toggleBagLike } from '@/services/bags';
 import { toast } from 'sonner';
 import { useScrollAnimation } from '@/utils/animations';
+import { processEquipmentPhotos } from '@/utils/equipmentPhotos';
 import {
   Carousel,
   CarouselContent,
@@ -70,19 +71,30 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
     setLoadingBag(true);
     setBagDataLoaded(true);
     try {
-      // Use simpler query - just get basic bag info
+      // Fetch bag with equipment photos for proper display
       const { data: primaryBag } = await supabase
         .from('user_bags')
         .select(`
           *,
           bag_equipment (
+            *,
+            custom_photo_url,
+            purchase_price,
+            is_featured,
             equipment_id,
             equipment (
               id,
               brand,
               model,
               category,
-              image_url
+              image_url,
+              msrp,
+              equipment_photos (
+                id,
+                photo_url,
+                likes_count,
+                is_primary
+              )
             )
           )
         `)
@@ -91,7 +103,12 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
         .single();
       
       if (primaryBag) {
-        setUserBag(primaryBag);
+        // Process equipment photos for proper display
+        const processedBag = {
+          ...primaryBag,
+          bag_equipment: processEquipmentPhotos(primaryBag.bag_equipment || [])
+        };
+        setUserBag(processedBag);
         setBagLikeCount(primaryBag.likes_count || 0);
         
         // Check if current user has liked this bag
