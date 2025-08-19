@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ChevronRight, X, Plus } from 'lucide-react';
+import { Search, ChevronRight, X, Plus, RotateCcw, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -13,6 +13,7 @@ import { EQUIPMENT_CATEGORIES as STANDARD_CATEGORIES, CATEGORY_DISPLAY_NAMES } f
 import { useCategoryImages } from '@/hooks/useCategoryImages';
 import SubmitEquipmentModal from '@/components/SubmitEquipmentModal';
 import { toast } from 'sonner';
+import { useFormPersistence } from '@/hooks/useFormPersistence';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'] & {
   most_liked_photo?: string;
@@ -184,22 +185,79 @@ const EquipmentImage = ({
   );
 };
 
+interface FormState {
+  step: 'category' | 'brand' | 'equipment' | 'shaft' | 'grip' | 'loft';
+  selectedCategory: typeof EQUIPMENT_CATEGORIES[0] | null;
+  selectedBrand: string;
+  brands: string[];
+  equipment: Equipment[];
+  selectedEquipment: Equipment | null;
+  shafts: Shaft[];
+  selectedShaft: Shaft | null;
+  grips: Grip[];
+  selectedGrip: Grip | null;
+  loftOptions: LoftOption[];
+  selectedLoft: LoftOption | null;
+  searchQuery: string;
+}
+
+const initialFormState: FormState = {
+  step: 'category',
+  selectedCategory: null,
+  selectedBrand: '',
+  brands: [],
+  equipment: [],
+  selectedEquipment: null,
+  shafts: [],
+  selectedShaft: null,
+  grips: [],
+  selectedGrip: null,
+  loftOptions: [],
+  selectedLoft: null,
+  searchQuery: ''
+};
+
 export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }: EquipmentSelectorImprovedProps) {
-  // State management
-  const [step, setStep] = useState<'category' | 'brand' | 'equipment' | 'shaft' | 'grip' | 'loft'>('category');
-  const [selectedCategory, setSelectedCategory] = useState<typeof EQUIPMENT_CATEGORIES[0] | null>(null);
-  const [selectedBrand, setSelectedBrand] = useState<string>('');
-  const [brands, setBrands] = useState<string[]>([]);
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+  // Use form persistence hook
+  const {
+    state: formState,
+    setState: setFormState,
+    persistState,
+    clearPersistedData,
+    handleSuccess,
+    hasPersistedData,
+    isLoading: isPersistenceLoading
+  } = useFormPersistence<FormState>(initialFormState, {
+    key: 'equipment-selector-form',
+    expirationMinutes: 30,
+    clearOnSuccess: true
+  });
+
+  // Extract individual state values for easier access
+  const { 
+    step, selectedCategory, selectedBrand, brands, equipment, 
+    selectedEquipment, shafts, selectedShaft, grips, selectedGrip, 
+    loftOptions, selectedLoft, searchQuery 
+  } = formState;
+
+  // State setters that update the persisted state
+  const setStep = (value: FormState['step']) => setFormState(prev => ({ ...prev, step: value }));
+  const setSelectedCategory = (value: FormState['selectedCategory']) => setFormState(prev => ({ ...prev, selectedCategory: value }));
+  const setSelectedBrand = (value: FormState['selectedBrand']) => setFormState(prev => ({ ...prev, selectedBrand: value }));
+  const setBrands = (value: FormState['brands']) => setFormState(prev => ({ ...prev, brands: value }));
+  const setEquipment = (value: FormState['equipment']) => setFormState(prev => ({ ...prev, equipment: value }));
+  const setSelectedEquipment = (value: FormState['selectedEquipment']) => setFormState(prev => ({ ...prev, selectedEquipment: value }));
+  const setShafts = (value: FormState['shafts']) => setFormState(prev => ({ ...prev, shafts: value }));
+  const setSelectedShaft = (value: FormState['selectedShaft']) => setFormState(prev => ({ ...prev, selectedShaft: value }));
+  const setGrips = (value: FormState['grips']) => setFormState(prev => ({ ...prev, grips: value }));
+  const setSelectedGrip = (value: FormState['selectedGrip']) => setFormState(prev => ({ ...prev, selectedGrip: value }));
+  const setLoftOptions = (value: FormState['loftOptions']) => setFormState(prev => ({ ...prev, loftOptions: value }));
+  const setSelectedLoft = (value: FormState['selectedLoft']) => setFormState(prev => ({ ...prev, selectedLoft: value }));
+  const setSearchQuery = (value: FormState['searchQuery']) => setFormState(prev => ({ ...prev, searchQuery: value }));
   
-  // Customization options
-  const [shafts, setShafts] = useState<Shaft[]>([]);
-  const [selectedShaft, setSelectedShaft] = useState<Shaft | null>(null);
-  const [grips, setGrips] = useState<Grip[]>([]);
-  const [selectedGrip, setSelectedGrip] = useState<Grip | null>(null);
-  const [loftOptions, setLoftOptions] = useState<LoftOption[]>([]);
-  const [selectedLoft, setSelectedLoft] = useState<LoftOption | null>(null);
+  // Other state not persisted
+  const [loading, setLoading] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
   
   // Double tap detection for mobile
   const [lastTap, setLastTap] = useState(0);
@@ -210,35 +268,19 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   const [touchEnd, setTouchEnd] = useState(0);
   const minSwipeDistance = 50;
   
-  // Search and filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showSubmitModal, setShowSubmitModal] = useState(false);
-  
   // Category images for fallbacks
   const { categoryImages } = useCategoryImages(Object.values(STANDARD_CATEGORIES));
 
-  // Reset state when dialog closes
+  // Don't reset state when dialog closes - persist it instead
   useEffect(() => {
-    if (!isOpen) {
-      resetState();
+    if (!isOpen && formState !== initialFormState) {
+      // Save state when closing
+      persistState();
     }
   }, [isOpen]);
 
   const resetState = () => {
-    setStep('category');
-    setSelectedCategory(null);
-    setSelectedBrand('');
-    setBrands([]);
-    setEquipment([]);
-    setSelectedEquipment(null);
-    setShafts([]);
-    setSelectedShaft(null);
-    setGrips([]);
-    setSelectedGrip(null);
-    setLoftOptions([]);
-    setSelectedLoft(null);
-    setSearchQuery('');
+    clearPersistedData();
   };
 
   // Load brands when category is selected
@@ -455,6 +497,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     if (selectedLoft) selection.loft_option_id = selectedLoft.id;
 
     onSelectEquipment(selection);
+    handleSuccess(); // Clear persisted data on success
     onClose();
   };
 
@@ -562,36 +605,65 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   return (
     <>
     <Dialog open={isOpen} onOpenChange={(open) => {
-      // Only close if explicitly closing (not clicking outside)
       if (!open) {
-        // Don't close on outside click - require explicit close
-        return;
+        // Save state when closing instead of resetting
+        persistState();
+        onClose();
       }
     }}>
       <DialogContent 
-        className="glass-card border-white/20 text-white max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="glass-card border-white/20 text-white max-w-3xl h-[90vh] sm:h-auto sm:max-h-[85vh] flex flex-col"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
+        hideCloseButton={true}
       >
-        <DialogHeader>
+        <DialogHeader className="shrink-0">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl">{getStepTitle()}</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="text-white hover:bg-white/10"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <DialogTitle className="text-lg sm:text-2xl truncate">{getStepTitle()}</DialogTitle>
+              {hasPersistedData && !isPersistenceLoading && (
+                <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 hidden sm:flex">
+                  <Save className="w-3 h-3 mr-1" />
+                  Draft Saved
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              {hasPersistedData && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    resetState();
+                    toast.success('Form cleared');
+                  }}
+                  className="text-white/60 hover:text-white hover:bg-white/10 h-10 w-10"
+                  title="Clear form"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  persistState();
+                  onClose();
+                }}
+                className="text-white hover:bg-white/10 h-10 w-10"
+                title="Save and close"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 
         {/* Progress breadcrumb - mobile-friendly navigation */}
-        <div className="flex items-center flex-wrap gap-2 mb-6 p-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
+        <div className="flex items-center flex-wrap gap-2 mb-4 p-2 sm:p-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 shrink-0">
           <Badge 
             variant="secondary" 
             className="bg-white/20 text-white hover:bg-white/30 cursor-pointer transition-colors text-sm py-2 px-3 min-h-[40px] flex items-center"
@@ -654,7 +726,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           )}
         </div>
 
-        <ScrollArea className="flex-1 pr-4 -mr-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+        <ScrollArea className="flex-1 overflow-y-auto min-h-0">
           {/* Category Selection */}
           {step === 'category' && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -957,30 +1029,33 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           )}
         </ScrollArea>
 
-        {/* Mobile swipe hint */}
-        {step !== 'category' && (
-          <div className="flex justify-center items-center mt-4 pt-4 border-t border-white/10 text-white/40 text-sm md:hidden">
-            <span>← Swipe to go back</span>
-            {canProceed() && step !== 'loft' && (
-              <span className="ml-4">Swipe to continue →</span>
-            )}
-          </div>
-        )}
-        
-        {/* Action button for completion steps */}
-        {(step === 'loft' || (step === 'equipment' && !selectedCategory?.hasShaft) || 
-          (step === 'shaft' && !selectedCategory?.hasGrip && !selectedCategory?.hasLoft) ||
-          (step === 'grip' && !selectedCategory?.hasLoft)) && (
-          <div className="mt-4 pt-4 border-t border-white/10">
-            <Button
-              onClick={handleComplete}
-              disabled={!canProceed()}
-              className="w-full bg-primary hover:bg-primary/90"
-            >
-              Add to Bag
-            </Button>
-          </div>
-        )}
+        {/* Bottom section - fixed at bottom on mobile */}
+        <div className="shrink-0 mt-auto">
+          {/* Mobile swipe hint */}
+          {step !== 'category' && (
+            <div className="flex justify-center items-center py-3 border-t border-white/10 text-white/40 text-sm md:hidden">
+              <span>← Swipe to go back</span>
+              {canProceed() && step !== 'loft' && (
+                <span className="ml-4">Swipe to continue →</span>
+              )}
+            </div>
+          )}
+          
+          {/* Action button for completion steps */}
+          {(step === 'loft' || (step === 'equipment' && !selectedCategory?.hasShaft) || 
+            (step === 'shaft' && !selectedCategory?.hasGrip && !selectedCategory?.hasLoft) ||
+            (step === 'grip' && !selectedCategory?.hasLoft)) && (
+            <div className="pt-3 pb-1 px-1 border-t border-white/10">
+              <Button
+                onClick={handleComplete}
+                disabled={!canProceed()}
+                className="w-full bg-primary hover:bg-primary/90 h-12"
+              >
+                Add to Bag
+              </Button>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
     
@@ -1021,6 +1096,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                 onSelectEquipment({
                   equipment_id: result.equipment.id
                 });
+                handleSuccess(); // Clear persisted data on success
                 onClose();
                 toast.success('Equipment added to your bag!');
               } else {

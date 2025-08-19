@@ -176,6 +176,15 @@ export default function ThreadList({ categorySlug, sortBy: propSortBy }: ThreadL
       if (effectiveSortBy === 'most-replies') {
         threadsWithStats.sort((a, b) => b.post_count - a.post_count);
       }
+      
+      // Always sort pinned threads to the top
+      threadsWithStats.sort((a, b) => {
+        // Pinned threads always come first
+        if (a.is_pinned && !b.is_pinned) return -1;
+        if (!a.is_pinned && b.is_pinned) return 1;
+        // If both are pinned or both are not, maintain existing order
+        return 0;
+      });
 
       setThreads(threadsWithStats);
     } catch (error) {

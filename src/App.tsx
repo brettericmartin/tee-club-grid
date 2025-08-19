@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
+import { AdminProvider } from "./contexts/AdminContext";
 import { FeedProvider } from "./contexts/FeedContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Navigation from "./components/Navigation";
@@ -178,8 +179,9 @@ function App() {
       <TooltipProvider>
         <BrowserRouter>
           <AuthProvider>
-            <FeedProvider>
-              <ErrorBoundary>
+            <AdminProvider>
+              <FeedProvider>
+                <ErrorBoundary>
                 <Toaster />
                 <Sonner />
                 <Analytics />
@@ -235,8 +237,9 @@ function App() {
                     <BottomNavigation />
                   </div>
                 </div>
-              </ErrorBoundary>
-            </FeedProvider>
+                </ErrorBoundary>
+              </FeedProvider>
+            </AdminProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

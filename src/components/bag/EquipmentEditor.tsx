@@ -416,7 +416,7 @@ export function EquipmentEditor({
                 className="flex-1"
               >
                 <Images className="w-4 h-4 mr-2" />
-                Browse Community Photos {equipmentPhotos.length > 0 && `(${equipmentPhotos.length})`}
+                <span className="hidden sm:inline">Browse Community </span>Photos {equipmentPhotos.length > 0 && `(${equipmentPhotos.length})`}
               </Button>
               <Button
                 variant="outline"
@@ -424,7 +424,7 @@ export function EquipmentEditor({
                 className="flex-1"
               >
                 <Camera className="w-4 h-4 mr-2" />
-                View Equipment Page
+                <span className="hidden sm:inline">View </span>Equipment Page
               </Button>
             </div>
           </div>
@@ -444,13 +444,13 @@ export function EquipmentEditor({
             >
               {formData.is_featured ? (
                 <>
-                  <Star className="w-4 h-4 mr-2 fill-current" />
-                  Featured
+                  <Star className="w-4 h-4 sm:mr-2 fill-current" />
+                  <span className="ml-1 sm:ml-0">Featured</span>
                 </>
               ) : (
                 <>
-                  <StarOff className="w-4 h-4 mr-2" />
-                  Not Featured
+                  <StarOff className="w-4 h-4 sm:mr-2" />
+                  <span className="ml-1 sm:ml-0 hidden sm:inline">Not </span><span className="ml-1 sm:ml-0">Featured</span>
                 </>
               )}
             </Button>

@@ -35,9 +35,11 @@ export default function ForumLayout() {
   const [showCreateThread, setShowCreateThread] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
-  // Extract current category from URL
+  // Extract current category and thread from URL
   const pathParts = location.pathname.split('/');
   const currentCategorySlug = pathParts[2];
+  const currentThreadId = pathParts[3];
+  const isInThread = Boolean(currentThreadId && currentThreadId !== 'new');
 
   useEffect(() => {
     fetchCategories();
@@ -162,10 +164,25 @@ export default function ForumLayout() {
               <Button
                 size="sm"
                 className="bg-[#10B981] hover:bg-[#0ea674]"
-                onClick={() => setShowCreateThread(true)}
+                onClick={() => {
+                  if (isInThread) {
+                    // Scroll to reply editor at bottom of thread
+                    const replyEditor = document.querySelector('[data-reply-editor]');
+                    if (replyEditor) {
+                      replyEditor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      // Focus the textarea after scrolling
+                      setTimeout(() => {
+                        const textarea = replyEditor.querySelector('textarea');
+                        if (textarea) textarea.focus();
+                      }, 500);
+                    }
+                  } else {
+                    setShowCreateThread(true);
+                  }
+                }}
               >
                 <Plus className="h-4 w-4 mr-1" />
-                New
+                {isInThread ? 'Reply' : 'New'}
               </Button>
             )}
           </div>
@@ -200,7 +217,23 @@ export default function ForumLayout() {
                     <Button
                       size="sm"
                       className="bg-[#10B981] hover:bg-[#0ea674]"
-                      onClick={() => setShowCreateThread(true)}
+                      onClick={() => {
+                        if (isInThread) {
+                          // Scroll to reply editor at bottom of thread
+                          const replyEditor = document.querySelector('[data-reply-editor]');
+                          if (replyEditor) {
+                            replyEditor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Focus the textarea after scrolling
+                            setTimeout(() => {
+                              const textarea = replyEditor.querySelector('textarea');
+                              if (textarea) textarea.focus();
+                            }, 500);
+                          }
+                        } else {
+                          setShowCreateThread(true);
+                        }
+                      }}
+                      title={isInThread ? 'Reply to thread' : 'Create new thread'}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>

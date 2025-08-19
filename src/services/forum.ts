@@ -31,8 +31,10 @@ export interface ForumThreadWithDetails extends ForumThread {
   user: {
     id: string;
     username: string;
+    display_name?: string;
     avatar_url?: string;
   };
+  actual_reply_count?: number;
 }
 
 // Build a tree structure from flat list of posts
@@ -300,6 +302,7 @@ export async function getThreadDetails(threadId: string) {
       user:profiles!forum_threads_user_id_fkey (
         id,
         username,
+        display_name,
         avatar_url
       )
     `)
@@ -311,13 +314,29 @@ export async function getThreadDetails(threadId: string) {
     return { thread: null, error };
   }
   
+  // Get actual reply count from posts table
+  const { count: replyCount } = await supabase
+    .from('forum_posts')
+    .select('id', { count: 'exact' })
+    .eq('thread_id', threadId);
+  
   // Increment view count
   await supabase
     .from('forum_threads')
-    .update({ view_count: (thread.view_count || 0) + 1 })
+    .update({ 
+      view_count: (thread.view_count || 0) + 1,
+      reply_count: replyCount || 0  // Update stored count too
+    })
     .eq('id', threadId);
   
-  return { thread: thread as ForumThreadWithDetails, error: null };
+  // Add actual reply count to thread data
+  const threadWithStats = {
+    ...thread,
+    actual_reply_count: replyCount || 0,
+    reply_count: replyCount || 0  // Override with actual count
+  } as ForumThreadWithDetails;
+  
+  return { thread: threadWithStats, error: null };
 }
 
 // Update an existing post

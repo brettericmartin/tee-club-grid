@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdmin } from '@/contexts/AdminContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import PostThread from './PostThread';
 import PostEditor from './PostEditor';
+import ThreadAdminControls from './ThreadAdminControls';
 import { Eye, Lock, Pin, MessageSquare, ArrowLeft } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { 
@@ -26,6 +28,7 @@ interface ThreadViewProps {
 export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const [thread, setThread] = useState<ForumThreadWithDetails | null>(null);
   const [posts, setPosts] = useState<ForumPostWithUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -185,21 +188,36 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
           </span>
         </div>
 
-        {/* Thread status badges */}
-        {(thread.is_pinned || thread.is_locked) && (
-          <div className="flex gap-2 mt-4">
-            {thread.is_pinned && (
-              <Badge variant="secondary" className="bg-green-500/20 text-green-400">
-                Pinned
-              </Badge>
-            )}
-            {thread.is_locked && (
-              <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400">
-                Thread Locked
-              </Badge>
-            )}
-          </div>
-        )}
+        {/* Thread status badges and admin controls */}
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mt-4">
+          {(thread.is_pinned || thread.is_locked) && (
+            <div className="flex gap-2">
+              {thread.is_pinned && (
+                <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                  <Pin className="h-3 w-3 mr-1" />
+                  Pinned
+                </Badge>
+              )}
+              {thread.is_locked && (
+                <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                  <Lock className="h-3 w-3 mr-1" />
+                  Locked
+                </Badge>
+              )}
+            </div>
+          )}
+          
+          {/* Admin controls */}
+          {isAdmin && (
+            <ThreadAdminControls
+              threadId={threadId}
+              categorySlug={thread.category.slug}
+              isLocked={thread.is_locked || false}
+              isPinned={thread.is_pinned || false}
+              onUpdate={fetchThreadData}
+            />
+          )}
+        </div>
       </div>
 
       {/* Posts with nested replies */}
@@ -214,8 +232,14 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
       </div>
 
       {/* Reply Editor for top-level replies */}
-      {user && !thread.is_locked && (
-        <div className="bg-[#1a1a1a] rounded-lg border border-white/10 p-6">
+      {thread.is_locked ? (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 text-center">
+          <Lock className="h-8 w-8 text-yellow-500 mx-auto mb-3" />
+          <p className="text-yellow-400 font-medium">This thread is locked</p>
+          <p className="text-gray-400 text-sm mt-1">No new replies can be posted</p>
+        </div>
+      ) : user ? (
+        <div className="bg-[#1a1a1a] rounded-lg border border-white/10 p-6" data-reply-editor>
           <h3 className="text-lg font-semibold mb-4">Post a Reply</h3>
           <PostEditor
             value={replyContent}
@@ -232,6 +256,10 @@ export default function ThreadView({ threadId, categorySlug }: ThreadViewProps) 
               {isReplying ? 'Posting...' : 'Post Reply'}
             </Button>
           </div>
+        </div>
+      ) : (
+        <div className="bg-[#1a1a1a] rounded-lg border border-white/10 p-6 text-center">
+          <p className="text-gray-400">Please sign in to reply to this thread</p>
         </div>
       )}
 
