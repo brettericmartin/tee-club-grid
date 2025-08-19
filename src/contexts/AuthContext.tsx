@@ -2,10 +2,6 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { DOMAIN_CONFIG } from '@/config/domain';
-// import { setupSessionMonitor, getValidSession } from '@/lib/authHelpers'; // DISABLED
-// import enhancedAuth from '@/lib/enhancedAuth'; // DISABLED
-// import tabFocusAuth from '@/lib/tabFocusAuth'; // DISABLED
-// import { toast } from 'sonner'; // DISABLED
 import type { Database } from '@/lib/supabase';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -53,7 +49,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
-  // const sessionMonitorCleanup = useRef<(() => void) | null>(null); // DISABLED
 
   // Fetch user profile
   const fetchProfile = async (userId: string) => {
@@ -69,6 +64,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // PGRST116 means no rows found - profile doesn't exist
         if (error.code === 'PGRST116') {
           console.log('[AuthContext] Profile does not exist for user:', userId);
+          // Try to create profile
+          const user = session?.user;
+          if (user) {
+            const { data: newProfile } = await supabase
+              .from('profiles')
+              .insert({
+                id: user.id,
+                username: user.email?.split('@')[0] || user.id.substring(0, 8),
+                display_name: user.user_metadata?.full_name || 
+                             user.user_metadata?.name || 
+                             user.email?.split('@')[0],
+                avatar_url: user.user_metadata?.avatar_url || 
+                           user.user_metadata?.picture,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              .select()
+              .single();
+            
+            if (newProfile) {
+              console.log('[AuthContext] Profile created successfully');
+              return newProfile;
+            }
+          }
           return null;
         }
         
@@ -87,51 +106,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // DISABLED ALL ENHANCED AUTH - Just use basic Supabase auth
-    // const cleanupEnhancedAuth = enhancedAuth.initialize();
-    
-    // Get initial session - SIMPLE VERSION
+    // Initialize auth - the RIGHT way according to Supabase docs
     const initializeAuth = async () => {
       console.log('[AuthContext] Initializing auth...');
       try {
-        // First check if we have a stuck/invalid session
-        const { data: { session: validSession }, error } = await supabase.auth.getSession();
+        // Get the session from Supabase - this handles ALL the complexity
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error('[AuthContext] Error getting session:', error);
-          // Clear any stuck auth state
-          await supabase.auth.signOut({ scope: 'local' });
-          setSession(null);
-          setUser(null);
-          setProfileLoading(false);
-          return;
-        }
-        
-        // Only set session if it's actually valid
-        if (validSession && validSession.expires_at && new Date(validSession.expires_at * 1000) > new Date()) {
-          setSession(validSession);
-          setUser(validSession.user ?? null);
-        } else {
-          console.log('[AuthContext] No valid session found or session expired');
-          // Clear any stuck auth tokens
-          if (validSession) {
-            await supabase.auth.signOut({ scope: 'local' });
-          }
-          setSession(null);
-          setUser(null);
-        }
-        
-        // Fetch profile if user exists
-        if (validSession?.user) {
-          console.log('[AuthContext] User found, fetching profile...');
-          const profileData = await fetchProfile(validSession.user.id);
+        if (session) {
+          console.log('[AuthContext] Session found, setting user...');
+          setSession(session);
+          setUser(session.user);
+          
+          // Fetch profile
+          const profileData = await fetchProfile(session.user.id);
           setProfile(profileData);
         } else {
-          console.log('[AuthContext] No user session found');
+          console.log('[AuthContext] No session found');
+          setSession(null);
+          setUser(null);
+          setProfile(null);
           setProfileLoading(false);
         }
       } catch (error) {
-        console.error('[AuthContext] Error initializing auth:', error);
+        console.error('[AuthContext] Error during initialization:', error);
+        setSession(null);
+        setUser(null);
+        setProfile(null);
         setProfileLoading(false);
       } finally {
         setLoading(false);
@@ -140,108 +141,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
     
+    // Initialize immediately
     initializeAuth();
 
-    // DISABLED enhanced auth state change listener
-    // const unsubscribeAuth = enhancedAuth.onAuthStateChange((event, session) => {
-    
-    // DISABLED legacy session monitor
-    // sessionMonitorCleanup.current = setupSessionMonitor(
-
-    // Auth change listener - handle sign in/out but ignore token refreshes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[AuthContext] Auth event:', event);
-      
-      if (event === 'SIGNED_OUT') {
-        console.log('[AuthContext] User explicitly signed out');
-        setSession(null);
-        setUser(null);
-        setProfile(null);
-        setProfileLoading(false);
-      } else if (event === 'SIGNED_IN') {
-        // Only handle explicit sign in events, not initial session
-        console.log('[AuthContext] User explicitly signed in');
+    // Listen for auth changes - let Supabase handle the complexity
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('[AuthContext] Auth event:', event);
         
-        if (session?.user) {
+        // Update our state based on what Supabase tells us
+        if (session) {
           setSession(session);
           setUser(session.user);
           
-          // Fetch or create profile
-          const profileData = await fetchProfile(session.user.id);
-          
-          // If profile doesn't exist, create it
-          if (!profileData && session.user) {
-            console.log('[AuthContext] No profile found, creating one...');
-            const { data: newProfile, error: createError } = await supabase
-              .from('profiles')
-              .insert({
-                id: session.user.id,
-                username: session.user.email?.split('@')[0] || session.user.id.substring(0, 8),
-                display_name: session.user.user_metadata?.full_name || 
-                             session.user.user_metadata?.name || 
-                             session.user.email?.split('@')[0],
-                avatar_url: session.user.user_metadata?.avatar_url || 
-                           session.user.user_metadata?.picture,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              })
-              .select()
-              .single();
-            
-            if (createError) {
-              console.error('[AuthContext] Error creating profile:', createError);
-            } else {
-              console.log('[AuthContext] Profile created successfully');
-              setProfile(newProfile);
-            }
-          } else {
+          // Fetch/create profile for new sessions
+          if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+            const profileData = await fetchProfile(session.user.id);
             setProfile(profileData);
           }
-        }
-      } else if (event === 'INITIAL_SESSION' && session?.user) {
-        // Handle initial session for profile creation ONLY
-        // Don't update auth state - that's handled by initializeAuth
-        console.log('[AuthContext] Initial session - checking profile...');
-        
-        // Just check if profile exists, create if needed
-        const profileData = await fetchProfile(session.user.id);
-        if (!profileData) {
-          console.log('[AuthContext] No profile found for initial session user, creating...');
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: session.user.id,
-              username: session.user.email?.split('@')[0] || session.user.id.substring(0, 8),
-              display_name: session.user.user_metadata?.full_name || 
-                           session.user.user_metadata?.name || 
-                           session.user.email?.split('@')[0],
-              avatar_url: session.user.user_metadata?.avatar_url || 
-                         session.user.user_metadata?.picture,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-          
-          if (!createError && newProfile) {
-            console.log('[AuthContext] Profile created for initial session');
-          }
+        } else {
+          // No session means logged out
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setProfileLoading(false);
         }
       }
-      // IGNORE TOKEN_REFRESHED events - these fire when switching tabs
-      // and we don't need to handle them
-    });
+    );
 
+    // Cleanup
     return () => {
       subscription.unsubscribe();
-      // DISABLED: All other cleanup since we disabled the features
-      // if (sessionMonitorCleanup.current) {
-      //   sessionMonitorCleanup.current();
-      // }
-      // cleanupEnhancedAuth();
-      // unsubscribeAuth();
     };
   }, []);
 
@@ -251,16 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
     if (error) throw error;
-    
-    // Manually set session since we disabled auth state change listener
-    if (data.session) {
-      setSession(data.session);
-      setUser(data.session.user);
-      if (data.session.user) {
-        const profileData = await fetchProfile(data.session.user.id);
-        setProfile(profileData);
-      }
-    }
+    // Auth state change listener will handle the rest
   };
 
   const signUp = async (email: string, password: string, username: string) => {
@@ -275,74 +196,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (error) throw error;
-
-    // Profile creation is now handled by database trigger
-    // but we'll try to create it anyway as a fallback
-    if (data.user) {
-      try {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            username,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-
-        // Only throw if it's not a duplicate key error
-        if (profileError && profileError.code !== '23505') {
-          // Profile creation error - might be created by trigger
-        }
-      } catch (err) {
-        // Profile creation failed, might be created by trigger
-      }
-    }
+    // Profile creation will be handled by auth state change listener
   };
 
   const signOut = async () => {
     console.log('[AuthContext] Signing out...');
     
-    // Clear all state first
+    // Clear local state immediately for better UX
     setSession(null);
     setUser(null);
     setProfile(null);
     setProfileLoading(false);
     
     try {
-      // Clear ALL auth-related items from localStorage
-      const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.includes('supabase') || key.includes('auth') || key.includes('sb-'))) {
-          keysToRemove.push(key);
-        }
-      }
-      
-      keysToRemove.forEach(key => {
-        console.log('[AuthContext] Removing localStorage key:', key);
-        localStorage.removeItem(key);
-      });
-      
-      // Clear session storage
-      sessionStorage.clear();
-      
-      // Force sign out from Supabase with scope: global to sign out all sessions
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      // Tell Supabase to sign out
+      const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('[AuthContext] Error signing out:', error);
-        // Even if there's an error, we've cleared local state
-        // Force a page reload to ensure clean state
-        window.location.href = '/';
-      } else {
-        console.log('[AuthContext] Sign out completed');
-        // Force reload to ensure clean state
-        window.location.href = '/';
       }
     } catch (err) {
       console.error('[AuthContext] Unexpected error during sign out:', err);
-      // Force reload as last resort
-      window.location.href = '/';
     }
+    
+    // Redirect to home
+    window.location.href = '/';
   };
 
   const signInWithGoogle = async () => {
@@ -375,7 +252,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         session,
         profile,
-        loading: loading || profileLoading, // Consider loading if either auth or profile is loading
+        loading,
         profileLoading,
         initialized,
         signIn,
