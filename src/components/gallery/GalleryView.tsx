@@ -91,13 +91,13 @@ const GalleryTile = ({ item, size, isOwnBag, onClick }: GalleryTileProps) => {
         {/* Action Buttons */}
         <div className="absolute bottom-2 right-2 flex gap-2">
           {item.isFeatured && (
-            <div className="w-8 h-8 bg-accent/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-[#2a2a2a] rounded-full flex items-center justify-center">
               <Star className="w-4 h-4 text-accent fill-current" />
             </div>
           )}
           {isOwnBag && (
             <button 
-              className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+              className="w-8 h-8 bg-[#2a2a2a] rounded-full flex items-center justify-center hover:bg-[#3a3a3a] transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 // Handle edit action

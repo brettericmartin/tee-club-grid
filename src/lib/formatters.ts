@@ -1,7 +1,11 @@
 /**
  * Formats a number into a compact representation (e.g., 5.4k, 12.3k, 1.2M)
  */
-export function formatCompactNumber(value: number): string {
+export function formatCompactNumber(value: number | null | undefined): string {
+  if (value == null || isNaN(value)) {
+    return '0';
+  }
+  
   if (value < 1000) {
     return value.toString();
   }
@@ -24,20 +28,29 @@ export function formatCompactNumber(value: number): string {
 /**
  * Formats a currency value into a compact representation with $ prefix
  */
-export function formatCompactCurrency(value: number): string {
+export function formatCompactCurrency(value: number | null | undefined): string {
+  if (value == null || isNaN(value)) {
+    return '$0';
+  }
   return `$${formatCompactNumber(value)}`;
 }
 
 /**
  * Formats a number with thousand separators
  */
-export function formatNumberWithCommas(value: number): string {
+export function formatNumberWithCommas(value: number | null | undefined): string {
+  if (value == null || isNaN(value)) {
+    return '0';
+  }
   return value.toLocaleString();
 }
 
 /**
  * Formats a currency value with $ prefix and thousand separators
  */
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number | null | undefined): string {
+  if (value == null || isNaN(value)) {
+    return '$0';
+  }
   return `$${value.toLocaleString()}`;
 }

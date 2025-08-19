@@ -7,6 +7,7 @@ import { getEquipment, getUserSavedEquipment } from "@/services/equipment";
 import { useAuth } from "@/contexts/AuthContext";
 import { toggleEquipmentSave } from "@/services/equipment";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 import EquipmentDataInfo from "@/components/EquipmentDataInfo";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EQUIPMENT_CATEGORIES, CATEGORY_DISPLAY_NAMES } from "@/lib/equipment-categories";
@@ -25,48 +26,127 @@ const Equipment = () => {
   const [brands, setBrands] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
-  const itemsPerPage = 20;
+  const [totalCount, setTotalCount] = useState(0);
+  const itemsPerPage = 50; // Items per page for server-side pagination
   
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading, initialized } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
+    // Load equipment immediately - page is public
+    console.log('[Equipment] useEffect running, calling loadEquipment with category:', category, 'sortBy:', sortBy, 'page:', currentPage);
     loadEquipment();
-  }, [category, sortBy]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, sortBy, currentPage, brand]); // Added currentPage and brand to dependencies
 
   useEffect(() => {
-    // Only load saved equipment if user is logged in AND showSavedOnly is true
-    if (user && showSavedOnly) {
-      loadSavedEquipment();
-    } else if (user) {
-      // Load saved items in background if user is logged in
-      loadSavedEquipment();
+    // Load all unique brands on mount
+    loadAllBrands();
+  }, []);
+
+  useEffect(() => {
+    // Only load saved equipment if user is logged in
+    if (user && initialized) {
+      if (showSavedOnly) {
+        loadSavedEquipment();
+      } else {
+        // Load saved items in background if user is logged in
+        loadSavedEquipment();
+      }
     }
-  }, [user, showSavedOnly]);
+  }, [user, showSavedOnly, initialized]);
 
-  useEffect(() => {
-    filterEquipment();
-  }, [brand, showSavedOnly, allEquipment, savedItems]);
+  // Removed filterEquipment useEffect - now handled by server-side pagination
 
   useEffect(() => {
     setCurrentPage(1); // Reset to first page when filters change
   }, [category, sortBy, brand, showSavedOnly]);
 
+  const loadAllBrands = async () => {
+    try {
+      // Get all unique brands from the database
+      const { data, error } = await supabase
+        .from('equipment')
+        .select('brand')
+        .order('brand');
+      
+      if (!error && data) {
+        const uniqueBrands = Array.from(new Set(data.map(item => item.brand).filter(Boolean))).sort();
+        setBrands(uniqueBrands);
+        console.log('[Equipment] Loaded', uniqueBrands.length, 'unique brands');
+      }
+    } catch (error) {
+      console.error('[Equipment] Error loading brands:', error);
+    }
+  };
+
   const loadEquipment = async () => {
-    console.log('loadEquipment called');
+    console.log('[Equipment] loadEquipment called with category:', category, 'sortBy:', sortBy, 'page:', currentPage);
     setLoading(true);
     try {
-      const data = await getEquipment({
-        category: category === 'all' ? undefined : category,
-        sortBy: sortBy === 'popular' ? 'newest' : sortBy // Change 'popular' to 'newest' for now since we don't have likes data
-      });
-      console.log('Equipment data received:', data);
-      setAllEquipment(data || []);
+      // First, get the total count for pagination
+      let countQuery = supabase
+        .from('equipment')
+        .select('*', { count: 'exact', head: true });
       
-      // Extract unique brands
-      const uniqueBrands = Array.from(new Set(data?.map(item => item.brand) || [])).sort();
-      setBrands(uniqueBrands);
+      // Apply filters to count query
+      if (category && category !== 'all') {
+        countQuery = countQuery.eq('category', category);
+      }
+      if (brand && brand !== 'all') {
+        countQuery = countQuery.eq('brand', brand);
+      }
+      
+      const { count } = await countQuery;
+      setTotalCount(count || 0);
+      
+      // Now get the actual data for the current page
+      const from = (currentPage - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
+      
+      let query = supabase
+        .from('equipment')
+        .select('*')
+        .range(from, to); // Server-side pagination
+      
+      // Apply category filter
+      if (category && category !== 'all') {
+        query = query.eq('category', category);
+      }
+      
+      // Apply brand filter
+      if (brand && brand !== 'all') {
+        query = query.eq('brand', brand);
+      }
+      
+      // Apply sorting
+      if (sortBy === 'newest') {
+        query = query.order('created_at', { ascending: false });
+      } else if (sortBy === 'price-low') {
+        query = query.order('msrp', { ascending: true, nullsFirst: true }); // Handle nulls properly
+      } else if (sortBy === 'price-high') {
+        query = query.order('msrp', { ascending: false, nullsFirst: false }); // Handle nulls properly
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('[Equipment] Error loading equipment:', error);
+        setAllEquipment([]);
+        toast({
+          title: "Error",
+          description: "Failed to load equipment. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      console.log('[Equipment] Equipment data received:', data?.length || 0, 'items');
+      setEquipment(data || []); // Set equipment directly - this is just the current page
+      setAllEquipment(data || []); // Keep for backward compatibility
       
       // Load saved items in background if user is logged in (non-blocking)
       if (user) {
@@ -112,30 +192,7 @@ const Equipment = () => {
     }
   };
 
-  const filterEquipment = () => {
-    try {
-      let filtered = allEquipment;
-      
-      // Filter by brand
-      if (brand !== 'all') {
-        filtered = filtered.filter(item => item.brand === brand);
-      }
-      
-      // Filter by saved only
-      if (showSavedOnly && user) {
-        filtered = filtered.filter(item => savedItems.has(item.id));
-      }
-      
-      setEquipment(filtered);
-    } catch (error) {
-      console.error('Error filtering equipment:', error);
-      toast({
-        title: "Error",
-        description: "Failed to filter equipment. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
+  // Removed filterEquipment - now handled by server-side filtering in loadEquipment
 
   // Categories from our standardized list
   const categoryOptions = Object.entries(EQUIPMENT_CATEGORIES).map(([key, value]) => ({
@@ -178,7 +235,7 @@ const Equipment = () => {
         
         // If we're showing saved only and this was the last item, refresh
         if (showSavedOnly && savedItems.size === 1) {
-          filterEquipment();
+          loadEquipment(); // Reload from server with filters
         }
       }
     } catch (error) {
@@ -232,6 +289,8 @@ const Equipment = () => {
     }
   };
 
+
+  // Don't block on auth - equipment page is public
 
   return (
     <div className="min-h-screen bg-[#111111] pt-20">
@@ -325,7 +384,7 @@ const Equipment = () => {
             <>
               <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
                 <p className="text-sm text-muted-foreground text-center sm:text-left">
-                  Showing {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, equipment.length)} of {equipment.length} items
+                  Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalCount)}-{Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} items
                 </p>
                 <div className="flex gap-2 items-center">
                   <Button
@@ -338,20 +397,20 @@ const Equipment = () => {
                     <span className="sm:hidden">Prev</span>
                   </Button>
                   <span className="flex items-center px-2 sm:px-3 text-sm">
-                    Page {currentPage} of {Math.ceil(equipment.length / itemsPerPage)}
+                    Page {currentPage} of {Math.ceil(totalCount / itemsPerPage)}
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(equipment.length / itemsPerPage), p + 1))}
-                    disabled={currentPage >= Math.ceil(equipment.length / itemsPerPage)}
+                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(totalCount / itemsPerPage), p + 1))}
+                    disabled={currentPage >= Math.ceil(totalCount / itemsPerPage)}
                   >
                     Next
                   </Button>
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                {equipment.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(item => (
+                {equipment.map(item => (
                   <EquipmentCard
                     key={item.id}
                     equipment={item}

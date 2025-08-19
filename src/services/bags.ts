@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
+import { retryQuery } from '@/utils/supabaseQuery';
+import { executeWithRetry } from '@/lib/authHelpers';
 
 type UserBag = Database['public']['Tables']['user_bags']['Row'];
 type BagEquipment = Database['public']['Tables']['bag_equipment']['Row'];
@@ -80,21 +82,101 @@ export async function getBags(options?: {
       query = query.order('created_at', { ascending: false });
   }
 
-  const { data, error } = await query;
+  // Execute query with proper error handling and auth retry
+  const result = await executeWithRetry(
+    () => query,
+    {
+      maxRetries: 1,
+      fallbackFn: async () => {
+        // Fallback to simpler query without auth if session expired
+        console.log('[Bags Service] Using fallback query for anonymous access');
+        return await supabase
+          .from('user_bags')
+          .select('*')
+          .order('created_at', { ascending: false });
+      }
+    }
+  );
+  
+  let { data, error } = result;
+  
+  // If there's still an error with the query, try a simpler version
+  if (error) {
+    console.warn('[Bags Service] Error with main query, trying simpler fallback:', error);
+    
+    // Try a simpler query without nested selects
+    const fallbackResult = await supabase
+      .from('user_bags')
+      .select(`
+        id,
+        name,
+        bag_type,
+        background_image,
+        description,
+        created_at,
+        updated_at,
+        likes_count,
+        views_count,
+        user_id,
+        profiles!left (
+          id,
+          username,
+          display_name,
+          avatar_url,
+          handicap,
+          location,
+          title
+        ),
+        bag_equipment!left (
+          id,
+          position,
+          custom_photo_url,
+          purchase_price,
+          is_featured,
+          equipment_id,
+          equipment:equipment!left (
+            id,
+            brand,
+            model,
+            category,
+            image_url,
+            msrp
+          )
+        )
+      `);
+    
+    data = fallbackResult.data;
+    error = fallbackResult.error;
+  }
   
   if (error) {
     console.error('Error fetching bags:', error);
     throw error;
   }
   
-  // Calculate total value for each bag
-  return data?.map(bag => ({
-    ...bag,
-    totalValue: bag.bag_equipment?.reduce((sum, item) => 
-      sum + (item.purchase_price || item.equipment?.msrp || 0), 0
-    ) || 0,
-    likesCount: bag.likes_count || 0
-  })) || [];
+  // Process the data to add primaryPhoto to equipment
+  const processedData = data?.map(bag => {
+    // Process each bag_equipment item to set primaryPhoto
+    const processedEquipment = bag.bag_equipment?.map(item => {
+      if (item.equipment) {
+        // Use custom photo if available, otherwise use default image
+        // We're simplifying this to avoid the nested query issue
+        item.equipment.primaryPhoto = item.custom_photo_url || item.equipment.image_url;
+      }
+      return item;
+    }) || [];
+    
+    return {
+      ...bag,
+      bag_equipment: processedEquipment,
+      totalValue: processedEquipment.reduce((sum, item) => 
+        sum + (item.purchase_price || item.equipment?.msrp || 0), 0
+      ) || 0,
+      likesCount: bag.likes_count || 0
+    };
+  }) || [];
+  
+  return processedData;
 }
 
 // Get a specific user's bag
@@ -131,24 +213,48 @@ export async function getUserBag(username: string) {
     .single();
 
   if (error) throw error;
+  
+  // Process equipment to set primaryPhoto from custom_photo_url
+  if (data && data.bag_equipment) {
+    data.bag_equipment = data.bag_equipment.map(item => {
+      if (item.equipment) {
+        // Use custom photo if available, otherwise use default image
+        item.equipment.primaryPhoto = item.custom_photo_url || item.equipment.image_url;
+      }
+      return item;
+    });
+  }
+  
   return data;
 }
 
 // Get current user's bag
 export async function getMyBag(userId: string) {
-  const { data, error } = await supabase
-    .from('user_bags')
-    .select(`
-      *,
-      bag_equipment (
+  const data = await retryQuery(async () => {
+    return await supabase
+      .from('user_bags')
+      .select(`
         *,
-        equipment:equipment (*)
-      )
-    `)
-    .eq('user_id', userId)
-    .single();
+        bag_equipment (
+          *,
+          equipment:equipment (*)
+        )
+      `)
+      .eq('user_id', userId)
+      .single();
+  });
 
-  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+  // Process equipment to set primaryPhoto from custom_photo_url
+  if (data && data.bag_equipment) {
+    data.bag_equipment = data.bag_equipment.map(item => {
+      if (item.equipment) {
+        // Use custom photo if available, otherwise use default image
+        item.equipment.primaryPhoto = item.custom_photo_url || item.equipment.image_url;
+      }
+      return item;
+    });
+  }
+  
   return data;
 }
 

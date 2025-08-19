@@ -227,13 +227,13 @@ const BagProfilePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950">
       {/* Back Navigation */}
-      <div className="sticky top-0 z-40 bg-emerald-950/80 backdrop-blur-md border-b border-emerald-800/30">
+      <div className="sticky top-0 z-40 bg-[#1a1a1a] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            className="text-emerald-100 hover:text-white hover:bg-emerald-800/30"
+            className="text-white hover:text-white hover:bg-[#2a2a2a]"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>

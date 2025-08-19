@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { getFeedPosts, getUserFeedPosts, type FeedPost } from '@/services/feedService';
 import { transformFeedPost, type FeedItemData } from '@/utils/feedTransformer';
 import { useAuth } from '@/contexts/AuthContext';
+import { executeWithRetry } from '@/lib/authHelpers';
 import { toast } from 'sonner';
 
 interface FeedContextType {
@@ -44,10 +45,11 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
   const { user } = useAuth();
   const [allPosts, setAllPosts] = useState<FeedItemData[]>([]);
   const [userPosts, setUserPosts] = useState<Map<string, FeedItemData[]>>(new Map());
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Don't start loading
   const [error, setError] = useState<string | null>(null);
   const [currentFilter, setCurrentFilter] = useState<'all' | 'following'>('all');
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set());
+
 
   // Load followed users if authenticated (non-blocking)
   useEffect(() => {
@@ -63,13 +65,16 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
     if (!user) return;
     
     try {
-      const { data: follows } = await supabase
-        .from('user_follows')
-        .select('following_id')
-        .eq('follower_id', user.id);
+      const result = await executeWithRetry(
+        () => supabase
+          .from('user_follows')
+          .select('following_id')
+          .eq('follower_id', user.id),
+        { maxRetries: 1 }
+      );
       
-      if (follows) {
-        setFollowedUsers(new Set(follows.map(f => f.following_id)));
+      if (result.data) {
+        setFollowedUsers(new Set(result.data.map(f => f.following_id)));
       }
     } catch (error) {
       console.error('Error loading followed users:', error);
@@ -79,6 +84,13 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
 
   // Load main feed
   const loadMainFeed = useCallback(async (filter: 'all' | 'following' = 'all') => {
+    console.log('[FeedContext.loadMainFeed] Called with filter:', filter, 'user:', user?.id);
+    console.log('[FeedContext.loadMainFeed] Current auth state:', {
+      hasUser: !!user,
+      userId: user?.id,
+      userEmail: user?.email
+    });
+    
     try {
       setLoading(true);
       setError(null);
@@ -88,9 +100,13 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       // If filter is 'following' and no user, just show all posts
       const effectiveFilter = filter === 'following' && !user ? 'all' : filter;
       
+      console.log('[FeedContext.loadMainFeed] Calling getFeedPosts with:', user?.id, effectiveFilter);
       const feedPosts = await getFeedPosts(user?.id, effectiveFilter);
       
-      console.log('[FeedContext] Raw feed posts:', feedPosts.length, 'posts');
+      console.log('[FeedContext] Raw feed posts received:', feedPosts.length, 'posts');
+      if (feedPosts.length === 0) {
+        console.warn('[FeedContext] No posts returned - check browser console for errors');
+      }
       console.log('[FeedContext] Sample post:', feedPosts[0]);
       
       // Transform posts to UI format
@@ -119,7 +135,7 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [user, followedUsers]);
+  }, [user?.id, followedUsers]); // Only depend on user.id, not the whole user object
 
   // Load user-specific feed
   const loadUserFeed = useCallback(async (userId: string, forceRefresh = false) => {
@@ -153,6 +169,21 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       setLoading(false);
     }
   }, [followedUsers, user]);
+
+  // Load feed immediately on mount - after all functions are defined
+  useEffect(() => {
+    console.log('[FeedContext] Loading initial feed on mount');
+    // Use the loadMainFeed function which handles auth properly
+    loadMainFeed('all');
+  }, []); // Empty deps - only run once on mount
+  
+  // Reload feed when user authentication state changes
+  useEffect(() => {
+    if (user) {
+      console.log('[FeedContext] User authenticated, reloading feed with user context');
+      loadMainFeed(currentFilter);
+    }
+  }, [user?.id]); // Only trigger on user id change, not the whole object
 
   // Update a post in both feeds
   const updatePost = useCallback((postId: string, updates: Partial<FeedPost>) => {

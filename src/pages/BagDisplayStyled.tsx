@@ -106,7 +106,10 @@ const BagDisplayStyled = () => {
           profiles (*),
           bag_equipment (
             *,
-            equipment (*)
+            equipment (*),
+            shaft_id,
+            grip_id,
+            custom_specs
           )
         `)
         .eq('user_id', profile.id);
@@ -144,7 +147,10 @@ const BagDisplayStyled = () => {
           profiles (*),
           bag_equipment (
             *,
-            equipment (*)
+            equipment (*),
+            shaft_id,
+            grip_id,
+            custom_specs
           )
         `)
         .eq('id', id)
@@ -328,7 +334,10 @@ const BagDisplayStyled = () => {
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode('list')}
+                  onClick={() => {
+                    console.log('Setting view mode to list');
+                    setViewMode('list');
+                  }}
                   className={viewMode === 'list' ? '' : 'text-white hover:text-white hover:bg-white/10'}
                 >
                   <List className="w-4 h-4" />
@@ -417,6 +426,7 @@ const BagDisplayStyled = () => {
         )}
 
         {/* Equipment Display */}
+        {console.log('Current viewMode:', viewMode)}
         {viewMode === 'card' ? (
           /* Card View */
           <>
@@ -521,58 +531,110 @@ const BagDisplayStyled = () => {
             onSaveLayout={handleSaveLayout}
           />
         ) : (
-          <div className="space-y-8">
-            {categoryOrder.map(category => {
-              const items = equipmentByCategory[category];
-              if (!items || items.length === 0) return null;
-
-              return (
-                <div key={category}>
-                  <h3 className="text-lg font-semibold text-white mb-4">
-                    {CATEGORY_DISPLAY_NAMES[category as keyof typeof CATEGORY_DISPLAY_NAMES] || category}
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {items.map((item: any) => (
-                      <div
-                        key={item.id}
-                        className="bg-[#1a1a1a] border border-white/20 rounded-xl p-4 shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:bg-[#2a2a2a] transition-colors cursor-pointer"
-                        onClick={() => navigate(`/equipment/${item.equipment.id}`)}
-                      >
-                        <div className="flex items-start gap-4">
-                          {item.equipment.image_url && (
-                            <img
-                              src={item.equipment.image_url}
-                              alt={`${item.equipment.brand} ${item.equipment.model}`}
-                              className="w-20 h-20 object-contain bg-white/5 rounded-lg"
-                              loading="lazy"
-                            />
-                          )}
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-white">
-                              {item.equipment.brand}
-                            </h4>
-                            <p className="text-white/70 text-sm">
-                              {item.equipment.model}
-                            </p>
-                            <p className="text-primary font-semibold mt-2">
-                              ${item.purchase_price || item.equipment.msrp || 0}
-                            </p>
+          /* List View - Detailed equipment specifications */
+          <div className="space-y-4">
+            {bagData.bag_equipment?.map((item: any) => (
+              <div key={item.id} className="bg-[#1a1a1a] border border-white/20 rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3)]">
+                <div className="p-4">
+                  <div className="flex items-center gap-4">
+                    <div 
+                      className="w-20 h-20 rounded-lg overflow-hidden bg-white/10 cursor-pointer flex-shrink-0"
+                      onClick={() => navigate(`/equipment/${item.equipment.id}`)}
+                    >
+                      <img
+                        src={item.custom_photo_url || item.equipment.image_url}
+                        alt={`${item.equipment.brand} ${item.equipment.model}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="flex-1 cursor-pointer" onClick={() => navigate(`/equipment/${item.equipment.id}`)}>
+                      {/* Title and Category */}
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h3 className="font-semibold text-white hover:text-primary transition-colors text-lg">
+                            {item.equipment.brand} {item.equipment.model}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs px-2 py-0.5 bg-white/10 rounded-full text-white/80 capitalize">
+                              {item.equipment.category?.replace('_', ' ')}
+                            </span>
                             {item.is_featured && (
-                              <Badge className="mt-2 bg-primary/20 text-primary border-0">
+                              <span className="text-xs px-2 py-0.5 bg-primary/20 rounded-full text-primary">
                                 Featured
-                              </Badge>
+                              </span>
+                            )}
+                            {item.custom_specs?.iron_config && (
+                              <span className="text-xs px-2 py-0.5 bg-white/10 rounded-full text-white/80">
+                                {item.custom_specs.iron_config.type === 'set' 
+                                  ? `${item.custom_specs.iron_config.from}-${item.custom_specs.iron_config.to}`
+                                  : `${item.custom_specs.iron_config.single} iron`
+                                }
+                              </span>
                             )}
                           </div>
                         </div>
-                        {item.notes && (
-                          <p className="mt-3 text-white/60 text-sm">{item.notes}</p>
+                        {item.purchase_price && (
+                          <div className="text-right">
+                            <p className="text-lg font-semibold text-primary">
+                              ${item.purchase_price}
+                            </p>
+                          </div>
                         )}
                       </div>
-                    ))}
+                      
+                      {/* Equipment Specs Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                        {/* Loft */}
+                        {(item.custom_specs?.loft || item.equipment.category && ['driver', 'fairway_wood', 'hybrid', 'wedge', 'putter'].includes(item.equipment.category)) && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-white/50">Loft:</span>
+                            {item.custom_specs?.loft ? (
+                              <span className="text-white">
+                                {item.custom_specs.loft}
+                              </span>
+                            ) : (
+                              <span className="text-white/30">-</span>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Shaft */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-white/50">Shaft:</span>
+                          {item.custom_specs?.shaft ? (
+                            <span className="text-white">
+                              {item.custom_specs.shaft}
+                            </span>
+                          ) : (
+                            <span className="text-white/30">Stock shaft</span>
+                          )}
+                        </div>
+                        
+                        {/* Grip */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-white/50">Grip:</span>
+                          {item.custom_specs?.grip ? (
+                            <span className="text-white">
+                              {item.custom_specs.grip}
+                            </span>
+                          ) : (
+                            <span className="text-white/30">Stock grip</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Notes */}
+                      {item.notes && (
+                        <p className="text-sm text-white/60 mt-2 italic">
+                          {item.notes}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         )}
 

@@ -49,7 +49,7 @@ const Wishlist = () => {
       <Button
         variant="ghost"
         size="sm"
-        className="absolute top-2 right-2 h-8 w-8 rounded-full bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        className="absolute top-2 right-2 h-8 w-8 rounded-full bg-[#1a1a1a] opacity-0 group-hover:opacity-100 transition-opacity z-10"
         onClick={() => onRemove(item.id)}
       >
         <X className="w-4 h-4 text-white" />

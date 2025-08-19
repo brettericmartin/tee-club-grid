@@ -52,9 +52,57 @@ export async function getEquipment(options?: {
     console.error('[EquipmentService] Error fetching equipment:', error);
     
     // Check for auth/session errors and retry
-    if (error.message?.includes('JWT') || error.message?.includes('token')) {
+    if (error.message?.includes('JWT') || error.message?.includes('token') || error.code === 'PGRST301') {
       console.log('[EquipmentService] Auth error detected, attempting to refresh...');
-      const { data: { session } } = await supabase.auth.refreshSession();
+      const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError) {
+        console.log('[EquipmentService] Session refresh failed, trying anonymous access');
+        // Try without auth context for public data
+        const anonymousQuery = supabase
+          .from('equipment')
+          .select('*');
+        
+        // Reapply filters
+        if (options?.category && options.category !== 'all') {
+          anonymousQuery.eq('category', options.category);
+        }
+        if (options?.search) {
+          const sanitizedSearch = options.search.replace(/[%_]/g, '\\$&');
+          anonymousQuery.or(`brand.ilike.%${sanitizedSearch}%,model.ilike.%${sanitizedSearch}%`);
+        }
+        
+        // Reapply sorting
+        switch (options?.sortBy) {
+          case 'popular':
+            anonymousQuery.order('popularity_score', { ascending: false });
+            break;
+          case 'newest':
+            anonymousQuery.order('created_at', { ascending: false });
+            break;
+          case 'price-low':
+            anonymousQuery.order('msrp', { ascending: true });
+            break;
+          case 'price-high':
+            anonymousQuery.order('msrp', { ascending: false });
+            break;
+          default:
+            anonymousQuery.order('popularity_score', { ascending: false });
+        }
+        
+        const { data: anonymousData, error: anonymousError } = await anonymousQuery;
+        if (!anonymousError && anonymousData) {
+          return anonymousData.map(equipment => ({
+            ...equipment,
+            averageRating: null,
+            primaryPhoto: equipment.image_url,
+            most_liked_photo: equipment.image_url,
+            savesCount: 0,
+            totalLikes: 0
+          }));
+        }
+      }
+      
       if (session) {
         // Retry the query
         const retryResult = await query;

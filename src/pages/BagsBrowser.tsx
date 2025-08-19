@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users, Loader2 } from "lucide-react";
+import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users, Loader2, ShoppingBag } from "lucide-react";
 import { TeedBallIcon } from "@/components/shared/TeedBallLike";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLikedBags } from "@/hooks/useLikedBags";
 import { toggleFollow, getUserFollowing } from "@/services/users";
 import { toast } from "sonner";
+import { DataLoader } from "@/components/shared/DataLoader";
 
 type SortOption = "trending" | "newest" | "most-liked" | "following" | "price-high" | "price-low";
 type HandicapRange = "all" | "0-5" | "6-15" | "16+";
@@ -19,8 +20,9 @@ type FilterOption = "all" | "teed" | "following";
 
 const BagsBrowser = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading, initialized } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const [bags, setBags] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -62,6 +64,7 @@ const BagsBrowser = () => {
   }, [searchQuery]);
 
   useEffect(() => {
+    // Load bags immediately - page is public
     // Clear any existing timeout
     if (loadingTimeoutRef.current) {
       clearTimeout(loadingTimeoutRef.current);
@@ -89,6 +92,7 @@ const BagsBrowser = () => {
   const loadBags = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await getBags({
         sortBy: sortBy,
         userId: user?.id
@@ -101,7 +105,7 @@ const BagsBrowser = () => {
     } catch (error) {
       console.error('Error loading bags:', error);
       if (isMountedRef.current) {
-        toast.error('Failed to load bags. Please try refreshing the page.');
+        setError(error as Error);
         setBags([]); // Ensure bags is always an array
       }
     } finally {
@@ -264,17 +268,7 @@ const BagsBrowser = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Don't block on auth - bags browser is public
 
   return (
     <div className="min-h-screen bg-background">
@@ -409,59 +403,50 @@ const BagsBrowser = () => {
           )}
         </div>
 
-        {/* Results count */}
-        <div className="mb-6">
-          <p className="text-muted-foreground">
-            Showing {filteredBags.length} bag{filteredBags.length !== 1 ? 's' : ''}
-            {searchQuery && (
-              <span> for "{searchQuery}"</span>
-            )}
-            {filterBy === "teed" && (
-              <span className="text-primary"> • Teed bags only</span>
-            )}
-            {filterBy === "following" && (
-              <span className="text-primary"> • From people you follow</span>
-            )}
-          </p>
-        </div>
+        {/* Data Content with Loading/Error States */}
+        <DataLoader
+          loading={loading}
+          error={error}
+          empty={filteredBags.length === 0 && !loading}
+          emptyMessage={searchQuery ? `No bags found for "${searchQuery}"` : "No bags found"}
+          emptyIcon={<ShoppingBag className="w-16 h-16 text-white/30 mx-auto mb-4" />}
+          loadingMessage="Loading bags..."
+          onRetry={loadBags}
+        >
+          <>
+            {/* Results count */}
+            <div className="mb-6">
+              <p className="text-muted-foreground">
+                Showing {filteredBags.length} bag{filteredBags.length !== 1 ? 's' : ''}
+                {searchQuery && (
+                  <span> for "{searchQuery}"</span>
+                )}
+                {filterBy === "teed" && (
+                  <span className="text-primary"> • Teed bags only</span>
+                )}
+                {filterBy === "following" && (
+                  <span className="text-primary"> • From people you follow</span>
+                )}
+              </p>
+            </div>
 
-        {/* Bags Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBags.map((bag) => (
-            <BagCard
-              key={bag.id}
-              bag={bag}
-              onView={handleViewBag}
-              onLike={() => handleToggleLike(bag.id)}
-              onFollow={handleToggleFollow}
-              isLiked={likedBags.has(bag.id)}
-              isFollowing={followedBags.has(bag.profiles?.id || '')}
-              currentUserId={user?.id}
-            />
-          ))}
-        </div>
-
-        {/* Empty state */}
-        {filteredBags.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🏌️</div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">No bags found</h3>
-            <p className="text-muted-foreground mb-4">
-              Try adjusting your search terms or filters
-            </p>
-            <Button 
-              variant="outline"
-              onClick={() => {
-                setSearchQuery("");
-                setSortBy("newest");
-                setHandicapRange("all");
-                setPriceRange("all");
-              }}
-            >
-              Clear all filters
-            </Button>
-          </div>
-        )}
+            {/* Bags Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBags.map((bag) => (
+                <BagCard
+                  key={bag.id}
+                  bag={bag}
+                  onView={handleViewBag}
+                  onLike={() => handleToggleLike(bag.id)}
+                  onFollow={handleToggleFollow}
+                  isLiked={likedBags.has(bag.id)}
+                  isFollowing={followedBags.has(bag.profiles?.id || '')}
+                  currentUserId={user?.id}
+                />
+              ))}
+            </div>
+          </>
+        </DataLoader>
       </div>
     </div>
   );

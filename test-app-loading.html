@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test App Loading</title>
+</head>
+<body>
+    <h1>Testing Teed.club Loading</h1>
+    <p>Open browser console (F12) and check for errors</p>
+    <iframe src="http://localhost:3333" width="100%" height="600" style="border: 1px solid #ccc;"></iframe>
+    
+    <script>
+        // Try to fetch and check the app
+        fetch('http://localhost:3333')
+            .then(response => response.text())
+            .then(html => {
+                console.log('HTML loaded, length:', html.length);
+                
+                // Check for root element
+                if (html.includes('id="root"')) {
+                    console.log('✅ Root element found in HTML');
+                } else {
+                    console.error('❌ Root element NOT found in HTML');
+                }
+                
+                // Check for main.tsx script
+                if (html.includes('src="/src/main.tsx"')) {
+                    console.log('✅ main.tsx script tag found');
+                } else {
+                    console.error('❌ main.tsx script tag NOT found');
+                }
+            })
+            .catch(error => {
+                console.error('Failed to fetch app:', error);
+            });
+    </script>
+</body>
+</html>

@@ -9,7 +9,7 @@ const BottomNavigation = () => {
     {
       to: "/feed",
       icon: "custom",
-      customIcon: "/dog.png",
+      customIcon: "/icons/teed-hotdog-icon.svg",
       label: "Feed",
     },
     {

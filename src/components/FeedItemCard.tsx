@@ -170,7 +170,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
                           e.stopPropagation();
                           navigate(`/equipment/${photo.equipment_id}`);
                         }}
-                        className="inline-flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full hover:bg-black/80 transition-colors"
+                        className="inline-flex items-center gap-2 bg-[#1a1a1a] px-3 py-1.5 rounded-full hover:bg-[#2a2a2a] transition-colors"
                       >
                         <span className="text-white text-sm font-medium">{photo.equipment_name}</span>
                       </button>
@@ -179,7 +179,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
                       )}
                     </div>
                     {/* Photo counter */}
-                    <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full">
+                    <div className="absolute top-3 left-3 bg-[#1a1a1a] px-2 py-1 rounded-full">
                       <span className="text-white text-xs font-medium">
                         {index + 1} / {post.content.photos.length}
                       </span>
@@ -217,7 +217,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
         
         {/* Multiple images indicator */}
         {hasMultipleImages && (
-          <div className="absolute top-3 right-3 bg-black/60 px-2 py-1 rounded-full">
+          <div className="absolute top-3 right-3 bg-[#1a1a1a] px-2 py-1 rounded-full">
             <span className="text-white text-xs font-medium">
               1/{post.mediaUrls.length}
             </span>
@@ -236,7 +236,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
           {/* Equipment info for equipment posts */}
           {isEquipmentPost && post.equipmentData && (
             <div 
-              className="mt-2 inline-flex items-center gap-2 bg-black/40 backdrop-blur px-3 py-1 rounded-full cursor-pointer hover:bg-black/60 transition-colors"
+              className="mt-2 inline-flex items-center gap-2 bg-[#1a1a1a] px-3 py-1 rounded-full cursor-pointer hover:bg-[#2a2a2a] transition-colors"
               onClick={handleEquipmentClick}
             >
               <span className="text-white text-xs">
@@ -317,7 +317,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
         }}
       >
         {/* Card Header */}
-        <div className="flex items-center justify-between p-4 bg-black/50">
+        <div className="flex items-center justify-between p-4 bg-[#1a1a1a]">
           <Link to={userBag ? `/bag/${userBag.id}` : '#'} className="flex items-center gap-3">
             <Avatar className="w-10 h-10">
               <AvatarImage 
@@ -366,7 +366,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
             className="absolute top-3 right-3 z-10 bg-primary/90 hover:bg-primary hover:scale-110 text-black p-3 rounded-full transition-all shadow-lg"
             aria-label="Toggle view"
           >
-            <img src="/MYBAG.png" alt="View Bag" className="w-6 h-6" />
+            <img src="/icons/teed-golf-bag-icon.svg" alt="View Bag" className="w-6 h-6" />
           </button>
           
           {/* Content */}
@@ -374,7 +374,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
         </div>
         
         {/* Card Footer */}
-        <div className="flex items-center justify-between p-4 bg-black/50">
+        <div className="flex items-center justify-between p-4 bg-[#1a1a1a]">
           <div className="flex items-center gap-4">
             <TeedBallLike
               isLiked={isLiked}

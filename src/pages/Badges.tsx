@@ -85,19 +85,19 @@ export default function BadgesPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
+        <div className="bg-[#1a1a1a] rounded-lg p-4 border border-white/10">
           <div className="text-3xl font-bold text-primary">{earnedBadges.length}</div>
           <div className="text-sm text-white/70">Badges Earned</div>
         </div>
-        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
+        <div className="bg-[#1a1a1a] rounded-lg p-4 border border-white/10">
           <div className="text-3xl font-bold text-yellow-500">{inProgressBadges.length}</div>
           <div className="text-sm text-white/70">In Progress</div>
         </div>
-        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
+        <div className="bg-[#1a1a1a] rounded-lg p-4 border border-white/10">
           <div className="text-3xl font-bold text-white">{badges.length}</div>
           <div className="text-sm text-white/70">Total Available</div>
         </div>
-        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
+        <div className="bg-[#1a1a1a] rounded-lg p-4 border border-white/10">
           <div className="text-3xl font-bold text-white">
             {badges.length > 0 ? Math.round((earnedBadges.length / badges.length) * 100) : 0}%
           </div>
@@ -117,7 +117,7 @@ export default function BadgesPage() {
                 'flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all',
                 selectedCategory === category.id
                   ? 'bg-primary text-white'
-                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+                  : 'bg-[#2a2a2a] text-white/70 hover:bg-[#3a3a3a]'
               )}
             >
               <Icon className="w-4 h-4" />
@@ -129,7 +129,7 @@ export default function BadgesPage() {
 
       {/* Badges Tabs */}
       <Tabs defaultValue="earned" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-white/5">
+        <TabsList className="grid w-full grid-cols-3 bg-[#2a2a2a]">
           <TabsTrigger value="earned">
             Earned ({earnedBadges.length})
           </TabsTrigger>

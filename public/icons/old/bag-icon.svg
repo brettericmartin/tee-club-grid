@@ -1,0 +1,12 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Golf bag silhouette -->
+  <path d="M7 4C7 3.44772 7.44772 3 8 3H16C16.5523 3 17 3.44772 17 4V6L18 7V20C18 20.5523 17.5523 21 17 21H7C6.44772 21 6 20.5523 6 20V7L7 6V4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Club heads at top -->
+  <path d="M9 3V1.5C9 1.22386 9.22386 1 9.5 1H10.5C10.7761 1 11 1.22386 11 1.5V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M13 3V1.5C13 1.22386 13.2239 1 13.5 1H14.5C14.7761 1 15 1.22386 15 1.5V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <!-- Bag detail lines -->
+  <line x1="6" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+  <line x1="6" y1="14" x2="18" y2="14" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+  <!-- Pocket -->
+  <rect x="9" y="16" width="6" height="3" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+</svg>

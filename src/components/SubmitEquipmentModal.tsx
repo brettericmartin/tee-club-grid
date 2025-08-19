@@ -509,7 +509,7 @@ const SubmitEquipmentModal = ({ isOpen, onClose, onSubmit, initialCategory, pref
             </div>
 
             {/* Submission Guidelines */}
-            <div className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-4 space-y-2">
+            <div className="bg-[#1a1a1a] border border-white/10 rounded-lg p-4 space-y-2">
               <h4 className="font-medium text-sm text-foreground">Submission Guidelines</h4>
               <ul className="text-xs text-foreground/80 space-y-1">
                 <li>• Equipment must be authentic golf equipment</li>

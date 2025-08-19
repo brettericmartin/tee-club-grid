@@ -167,37 +167,37 @@
     margin-bottom: 1.5rem;
   }
 
-  /* Glassmorphism Effects - Premium Golf Aesthetic */
+  /* Solid Card Effects - Performance Optimized (NO GLASSMORPHISM) */
   .glass-card {
-    @apply bg-white/[0.08] border border-white/[0.12] rounded-xl;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    @apply bg-[#1a1a1a] border border-white/10 rounded-xl;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   
-  /* Only apply blur to hero/important elements */
+  /* Hero cards use same solid background - NO BLUR */
   .glass-card-hero {
-    @apply backdrop-blur-[8px];
+    @apply bg-[#1a1a1a];
   }
   
-  /* Minimal blur for better performance */
+  /* No blur for performance */
   .glass-card-blur {
-    @apply backdrop-blur-[8px];
+    @apply bg-[#1a1a1a];
   }
 
   .glass-card:hover {
-    @apply bg-white/[0.12] scale-[1.02];
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    @apply bg-[#2a2a2a] scale-[1.02];
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
   }
 
-  /* Dark glass for content areas (no blur for performance) */
+  /* Dark solid for content areas - NO TRANSPARENCY */
   .glass-dark {
-    @apply bg-gray-900/90 border-t border-white/[0.08];
+    @apply bg-[#111111] border-t border-white/10;
   }
 
-  /* Button styles matching design system (reduced blur) */
+  /* Button styles with solid backgrounds - NO TRANSPARENCY */
   .glass-button {
-    @apply bg-white/[0.08] border border-white/[0.12] rounded-lg;
-    @apply hover:bg-white/[0.14] transition-colors duration-200;
+    @apply bg-[#2a2a2a] border border-white/10 rounded-lg;
+    @apply hover:bg-[#3a3a3a] transition-colors duration-200;
   }
 
   .primary-button {
@@ -327,10 +327,10 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom, 
-      rgba(15,15,15,0.7) 0%, 
-      rgba(15,15,15,0.8) 50%, 
-      rgba(15,15,15,0.9) 100%);
-    backdrop-filter: blur(8px);
+      #111111 0%, 
+      #0f0f0f 50%, 
+      #0a0a0a 100%);
+    /* backdrop-filter removed for performance */
   }
 
   /* Smooth Animations - Use sparingly for performance */

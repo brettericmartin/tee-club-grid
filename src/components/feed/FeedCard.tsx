@@ -219,6 +219,15 @@ export const FeedCard = memo(function FeedCard({ post, onUpdate }: FeedCardProps
         .single();
 
       if (data) {
+        // Process equipment to set primaryPhoto from custom_photo_url
+        const processedEquipment = data.bag_equipment?.map(item => {
+          if (item.equipment) {
+            // Use custom photo if available, otherwise use default image
+            item.equipment.primaryPhoto = item.custom_photo_url || item.equipment.image_url;
+          }
+          return item;
+        }) || [];
+        
         setBagCardData({
           id: data.id,
           user_id: data.user_id,
@@ -228,7 +237,7 @@ export const FeedCard = memo(function FeedCard({ post, onUpdate }: FeedCardProps
           likes_count: data.likes_count || 0,
           views_count: data.views_count || 0,
           profiles: data.profiles,
-          bag_equipment: data.bag_equipment || [],
+          bag_equipment: processedEquipment,
         });
       }
     };
