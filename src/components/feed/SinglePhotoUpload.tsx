@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, Loader2, Camera } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Loader2, Camera, Package, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { EquipmentSelectorSimple } from '../equipment/EquipmentSelectorSimple';
+import { BagEquipmentSelector } from '../equipment/BagEquipmentSelector';
 
 interface SinglePhotoUploadProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export function SinglePhotoUpload({ isOpen, onClose, onSuccess }: SinglePhotoUpl
   const [selectedEquipmentName, setSelectedEquipmentName] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [showEquipmentSelector, setShowEquipmentSelector] = useState(false);
+  const [showBagEquipmentSelector, setShowBagEquipmentSelector] = useState(false);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -175,14 +177,24 @@ export function SinglePhotoUpload({ isOpen, onClose, onSuccess }: SinglePhotoUpl
                   </div>
                 </div>
               ) : (
-                <Button
-                  onClick={() => setShowEquipmentSelector(true)}
-                  className="w-full mt-2 bg-white/10 border-white/20 hover:bg-white/20"
-                  variant="outline"
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Choose Equipment
-                </Button>
+                <div className="flex gap-2 mt-2">
+                  <Button
+                    onClick={() => setShowBagEquipmentSelector(true)}
+                    className="flex-1 bg-white/10 border-white/20 hover:bg-white/20"
+                    variant="outline"
+                  >
+                    <Package className="w-4 h-4 mr-2" />
+                    From My Bag
+                  </Button>
+                  <Button
+                    onClick={() => setShowEquipmentSelector(true)}
+                    className="flex-1 bg-white/10 border-white/20 hover:bg-white/20"
+                    variant="outline"
+                  >
+                    <Search className="w-4 h-4 mr-2" />
+                    All Equipment
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -277,6 +289,15 @@ export function SinglePhotoUpload({ isOpen, onClose, onSuccess }: SinglePhotoUpl
         <EquipmentSelectorSimple
           isOpen={showEquipmentSelector}
           onClose={() => setShowEquipmentSelector(false)}
+          onSelect={handleEquipmentSelect}
+        />
+      )}
+      
+      {/* Bag Equipment Selector Dialog */}
+      {showBagEquipmentSelector && (
+        <BagEquipmentSelector
+          isOpen={showBagEquipmentSelector}
+          onClose={() => setShowBagEquipmentSelector(false)}
           onSelect={handleEquipmentSelect}
         />
       )}

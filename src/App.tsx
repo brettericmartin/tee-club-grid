@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AdminProvider } from "./contexts/AdminContext";
 import { FeedProvider } from "./contexts/FeedContext";
+import { OnboardingProvider } from "./contexts/OnboardingContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Navigation from "./components/Navigation";
 import BottomNavigation from "./components/navigation/BottomNavigation";
@@ -179,12 +180,13 @@ function App() {
       <TooltipProvider>
         <BrowserRouter>
           <AuthProvider>
-            <AdminProvider>
-              <FeedProvider>
-                <ErrorBoundary>
-                <Toaster />
-                <Sonner />
-                <Analytics />
+            <OnboardingProvider>
+              <AdminProvider>
+                <FeedProvider>
+                  <ErrorBoundary>
+                    <Toaster />
+                    <Sonner />
+                    <Analytics />
                 
                 <div className="flex flex-col min-h-screen bg-black">
                   {/* Header navigation */}
@@ -237,9 +239,10 @@ function App() {
                     <BottomNavigation />
                   </div>
                 </div>
-                </ErrorBoundary>
-              </FeedProvider>
-            </AdminProvider>
+                  </ErrorBoundary>
+                </FeedProvider>
+              </AdminProvider>
+            </OnboardingProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

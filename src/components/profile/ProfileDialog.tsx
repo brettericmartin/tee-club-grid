@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, ChevronDown, Lock, Eye, EyeOff } from 'lucide-react';
+import { X, ChevronDown, Lock, Eye, EyeOff, HelpCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnboarding } from '@/contexts/OnboardingContext';
 import { getProfile, updateProfile, createProfile } from '@/services/profileService';
 import { AvatarUpload } from './AvatarUpload';
 import { toast } from 'sonner';
@@ -37,6 +39,7 @@ interface ProfileDialogProps {
 
 export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
   const { user } = useAuth();
+  const { state: onboardingState, toggleTips, resetOnboarding } = useOnboarding();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   
@@ -437,6 +440,44 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                 </PopoverContent>
               </Popover>
               <p className="text-xs text-white/60">How you want to be known in the golf community</p>
+            </div>
+            
+            {/* Onboarding Tips Section */}
+            <div className="space-y-4 p-4 bg-white/5 rounded-lg border border-white/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <HelpCircle className="h-4 w-4 text-primary" />
+                  <Label className="text-white">New User Tips</Label>
+                </div>
+                <Switch
+                  checked={onboardingState.enabled}
+                  onCheckedChange={toggleTips}
+                  className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-white/20"
+                />
+              </div>
+              <p className="text-xs text-white/60">
+                Show helpful tips and guided tour for new features
+              </p>
+              {onboardingState.completedSteps.length > 0 && (
+                <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                  <span className="text-xs text-white/60">
+                    Progress: {onboardingState.completedSteps.length} of 5 steps completed
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      resetOnboarding();
+                      toast.success('Onboarding tour reset. Refresh to start again.');
+                    }}
+                    className="text-xs text-white/60 hover:text-white"
+                  >
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    Reset Tour
+                  </Button>
+                </div>
+              )}
             </div>
             
             {/* Password Section */}

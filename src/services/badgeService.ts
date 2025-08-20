@@ -106,6 +106,9 @@ export class BadgeService {
       case 'single_brand_bag':
         return await this.checkSingleBrandBagCriteria(userId, criteria.min_items);
       
+      case 'onboarding_complete':
+        return await this.checkOnboardingCompleteCriteria(userId);
+      
       default:
         return false;
     }
@@ -244,6 +247,25 @@ export class BadgeService {
 
     // Check if any brand has enough items
     return Object.values(brandCounts).some(count => count >= minItems);
+  }
+
+  private static async checkOnboardingCompleteCriteria(userId: string): Promise<boolean> {
+    // Check if user has already completed onboarding (stored in profile)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('id', userId)
+      .single();
+
+    // If the column exists and is true, they've completed onboarding
+    if (profile?.onboarding_completed) {
+      return true;
+    }
+
+    // Otherwise check localStorage state (for backward compatibility)
+    // This would need to be checked client-side and passed to the service
+    // For now, we'll rely on the database flag set by the OnboardingContext
+    return false;
   }
 
   // Award badge to user

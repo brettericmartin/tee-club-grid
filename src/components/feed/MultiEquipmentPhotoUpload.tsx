@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { X, Upload, Image, Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
+import { X, Upload, Image, Loader2, Plus, Trash2, GripVertical, Package, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { createMultiEquipmentPost, type PhotoUpload } from '@/services/multiEquipmentUpload';
 import { EquipmentSelectorSimple } from '../equipment/EquipmentSelectorSimple';
+import { BagEquipmentSelector } from '../equipment/BagEquipmentSelector';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/lib/supabase';
 
@@ -31,6 +32,7 @@ export function MultiEquipmentPhotoUpload({
   const [photos, setPhotos] = useState<PhotoUpload[]>([]);
   const [overallCaption, setOverallCaption] = useState('');
   const [showEquipmentSelector, setShowEquipmentSelector] = useState(false);
+  const [showBagEquipmentSelector, setShowBagEquipmentSelector] = useState(false);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [userBagId, setUserBagId] = useState<string | null>(null);
   
@@ -220,12 +222,22 @@ export function MultiEquipmentPhotoUpload({
                           <button
                             onClick={() => {
                               setSelectedPhotoId(photo.id);
+                              setShowBagEquipmentSelector(true);
+                            }}
+                            className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
+                            title="Tag from Bag"
+                          >
+                            <Package className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedPhotoId(photo.id);
                               setShowEquipmentSelector(true);
                             }}
                             className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
                             title="Tag Equipment"
                           >
-                            <Image className="h-4 w-4" />
+                            <Search className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleRemovePhoto(photo.id)}
@@ -322,6 +334,18 @@ export function MultiEquipmentPhotoUpload({
           isOpen={showEquipmentSelector}
           onClose={() => {
             setShowEquipmentSelector(false);
+            setSelectedPhotoId(null);
+          }}
+          onSelect={handleEquipmentSelect}
+        />
+      )}
+      
+      {/* Bag Equipment Selector Dialog */}
+      {showBagEquipmentSelector && (
+        <BagEquipmentSelector
+          isOpen={showBagEquipmentSelector}
+          onClose={() => {
+            setShowBagEquipmentSelector(false);
             setSelectedPhotoId(null);
           }}
           onSelect={handleEquipmentSelect}

@@ -18,6 +18,10 @@ import { CreateBagDialog } from "@/components/bag/CreateBagDialog";
 import { CreatePostModal } from "@/components/feed/CreatePostModal";
 import { bagLayoutsService, type BagLayout } from "@/services/bagLayouts";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
+import { GolfBallProgress } from "@/components/onboarding/GolfBallProgress";
+import { OnboardingTooltips } from "@/components/onboarding/OnboardingTooltips";
+import { GolfCelebration } from "@/components/onboarding/GolfCelebration";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import type { Database } from "@/lib/supabase";
@@ -105,6 +109,9 @@ const MyBagSupabase = () => {
     );
   }
   
+  // Onboarding hook
+  const { state: onboardingState, completeStep, recordViewMode, showCelebration, setShowCelebration } = useOnboarding();
+  
   // All hooks at the top, no logic between them
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -141,6 +148,27 @@ const MyBagSupabase = () => {
   
   // Badge check hook
   const { checkBadgeProgress, newBadges, clearNewBadges } = useBadgeCheck();
+  
+  // Track view mode changes for onboarding
+  useEffect(() => {
+    if (viewMode) {
+      recordViewMode(viewMode);
+    }
+  }, [viewMode, recordViewMode]);
+
+  // Track when share modal is opened for step 5
+  useEffect(() => {
+    if (showShareModal && onboardingState.currentStep === 5 && !onboardingState.completedSteps.includes(5)) {
+      completeStep(5);
+    }
+  }, [showShareModal, onboardingState.currentStep, onboardingState.completedSteps, completeStep]);
+
+  // Track when create post modal is opened for step 3
+  useEffect(() => {
+    if (showCreatePost && onboardingState.currentStep === 3 && !onboardingState.completedSteps.includes(3)) {
+      completeStep(3);
+    }
+  }, [showCreatePost, onboardingState.currentStep, onboardingState.completedSteps, completeStep]);
   
   // Extract values after all hooks
   if (!authContext) {
@@ -599,6 +627,11 @@ const MyBagSupabase = () => {
       setIsEditing(false);
       toast.success("Bag saved successfully!");
       
+      // Complete onboarding step 1 if bag was edited
+      if (onboardingState.currentStep === 1 && !onboardingState.completedSteps.includes(1)) {
+        completeStep(1);
+      }
+      
       // Track changes for feed post
       const changes = [];
       if (currentBag.name !== bagName) changes.push(`Renamed bag to "${bagName}"`);
@@ -1001,6 +1034,9 @@ const MyBagSupabase = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-primary/10">
       <BackgroundLayer backgroundId={selectedBackground} />
       <Navigation />
+      
+      {/* Golf Ball Progress - shown above main content */}
+      <GolfBallProgress />
       
       <div className="container mx-auto px-4 pt-20 pb-8 relative z-10">
         {/* Header */}
@@ -1421,30 +1457,34 @@ const MyBagSupabase = () => {
                           </div>
                         )}
                         
-                        {/* Shaft */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-white/50">Shaft:</span>
-                          {item.shaft ? (
-                            <span className="text-white">
-                              {item.shaft.brand} {item.shaft.model} - {item.shaft.flex}
-                            </span>
-                          ) : (
-                            <span className="text-white/30">Stock shaft</span>
-                          )}
-                        </div>
+                        {/* Shaft - Only show for clubs */}
+                        {item.equipment.category && ['driver', 'fairway_wood', 'hybrid', 'iron', 'irons', 'wedge', 'wedges', 'putter'].includes(item.equipment.category) && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-white/50">Shaft:</span>
+                            {item.shaft ? (
+                              <span className="text-white">
+                                {item.shaft.brand} {item.shaft.model} - {item.shaft.flex}
+                              </span>
+                            ) : (
+                              <span className="text-white/30">Stock shaft</span>
+                            )}
+                          </div>
+                        )}
                         
-                        {/* Grip */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-white/50">Grip:</span>
-                          {item.grip ? (
-                            <span className="text-white">
-                              {item.grip.brand} {item.grip.model}
-                              {item.grip.size && item.grip.size !== 'Standard' && ` (${item.grip.size})`}
-                            </span>
-                          ) : (
-                            <span className="text-white/30">Stock grip</span>
-                          )}
-                        </div>
+                        {/* Grip - Only show for clubs */}
+                        {item.equipment.category && ['driver', 'fairway_wood', 'hybrid', 'iron', 'irons', 'wedge', 'wedges', 'putter'].includes(item.equipment.category) && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-white/50">Grip:</span>
+                            {item.grip ? (
+                              <span className="text-white">
+                                {item.grip.brand} {item.grip.model}
+                                {item.grip.size && item.grip.size !== 'Standard' && ` (${item.grip.size})`}
+                              </span>
+                            ) : (
+                              <span className="text-white/30">Stock grip</span>
+                            )}
+                          </div>
+                        )}
                       </div>
                       
                       {/* Notes */}
@@ -1884,6 +1924,25 @@ const MyBagSupabase = () => {
             // The UserFeedView will refresh automatically
           }
         }}
+      />
+      
+      {/* Onboarding Tooltips */}
+      <OnboardingTooltips 
+        bagItems={bagItems}
+        isEditingBag={isEditing}
+        viewMode={viewMode}
+        onCreatePost={() => setShowCreatePost(true)}
+        onAddEquipment={() => {
+          aiFlowMetrics.trackMethodDialogOpen();
+          setShowMethodDialog(true);
+        }}
+        onShareBag={() => setShowShareModal(true)}
+      />
+      
+      {/* Golf Celebration for completing onboarding */}
+      <GolfCelebration 
+        isVisible={showCelebration}
+        onComplete={() => setShowCelebration(false)}
       />
 
     </div>
