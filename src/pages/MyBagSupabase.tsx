@@ -21,7 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { GolfBallProgress } from "@/components/onboarding/GolfBallProgress";
 import { OnboardingTooltips } from "@/components/onboarding/OnboardingTooltips";
-import { GolfCelebration } from "@/components/onboarding/GolfCelebration";
+import { TourChampionDialog } from "@/components/onboarding/TourChampionDialog";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import type { Database } from "@/lib/supabase";
@@ -169,6 +169,13 @@ const MyBagSupabase = () => {
       completeStep(3);
     }
   }, [showCreatePost, onboardingState.currentStep, onboardingState.completedSteps, completeStep]);
+  
+  // Track equipment count for step 2 - complete when 3+ items exist
+  useEffect(() => {
+    if (bagItems.length >= 3 && onboardingState.currentStep === 2 && !onboardingState.completedSteps.includes(2)) {
+      completeStep(2);
+    }
+  }, [bagItems.length, onboardingState.currentStep, onboardingState.completedSteps, completeStep]);
   
   // Extract values after all hooks
   if (!authContext) {
@@ -1939,10 +1946,10 @@ const MyBagSupabase = () => {
         onShareBag={() => setShowShareModal(true)}
       />
       
-      {/* Golf Celebration for completing onboarding */}
-      <GolfCelebration 
-        isVisible={showCelebration}
-        onComplete={() => setShowCelebration(false)}
+      {/* Tour Champion Dialog for completing onboarding */}
+      <TourChampionDialog 
+        isOpen={showCelebration}
+        onClose={() => setShowCelebration(false)}
       />
 
     </div>
