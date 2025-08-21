@@ -1070,46 +1070,51 @@ const MyBagSupabase = () => {
             )}
           </div>
           
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center sm:justify-end">
+          <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end overflow-x-auto max-w-full">
             {!isEditing && (
               <>
-                {/* Add Equipment Button - Always visible */}
-                <Button
-                  onClick={() => {
-                    aiFlowMetrics.trackMethodDialogOpen();
-                    setShowMethodDialog(true);
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="text-white hover:text-white hover:bg-white/20 whitespace-nowrap"
-                >
-                  <Plus className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Add Equipment</span>
-                  <span className="sm:hidden">Add</span>
-                </Button>
-                <Button 
-                  onClick={() => setShowBagSelector(true)} 
-                  variant="outline"
-                  size="sm"
-                  className="text-white hover:text-white hover:bg-white/20 whitespace-nowrap"
-                >
-                  <Settings className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Manage</span> Bags
-                </Button>
-                <Button
-                  onClick={() => setManageBadgesOpen(true)}
-                  variant="outline"
-                  size="sm"
-                  className="text-white hover:text-white hover:bg-white/20 whitespace-nowrap"
-                >
-                  <Trophy className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Manage</span> Badges
-                </Button>
+                {/* Mobile: Grouped buttons in rows */}
+                <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
+                  {/* Add Equipment Button - Always visible */}
+                  <Button
+                    onClick={() => {
+                      aiFlowMetrics.trackMethodDialogOpen();
+                      setShowMethodDialog(true);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="text-white hover:text-white hover:bg-white/20 flex-1 sm:flex-initial"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    <span className="sm:hidden">Add</span>
+                    <span className="hidden sm:inline">Add Equipment</span>
+                  </Button>
+                  <Button 
+                    onClick={() => setShowBagSelector(true)} 
+                    variant="outline"
+                    size="sm"
+                    className="text-white hover:text-white hover:bg-white/20 flex-1 sm:flex-initial"
+                  >
+                    <Settings className="w-4 h-4 mr-1" />
+                    <span className="sm:hidden">Bags</span>
+                    <span className="hidden sm:inline">Manage Bags</span>
+                  </Button>
+                  <Button
+                    onClick={() => setManageBadgesOpen(true)}
+                    variant="outline"
+                    size="sm"
+                    className="text-white hover:text-white hover:bg-white/20 flex-1 sm:flex-initial"
+                  >
+                    <Trophy className="w-4 h-4 mr-1" />
+                    <span className="sm:hidden">Badges</span>
+                    <span className="hidden sm:inline">Manage Badges</span>
+                  </Button>
+                </div>
               </>
             )}
             {isEditing ? (
-              <>
-                <Button onClick={handleSave} variant="default">
+              <div className="flex gap-2 w-full sm:w-auto justify-center">
+                <Button onClick={handleSave} variant="default" className="flex-1 sm:flex-initial">
                   <Save className="w-4 h-4 mr-2" />
                   Save
                 </Button>
@@ -1120,35 +1125,34 @@ const MyBagSupabase = () => {
                     setBagDescription(currentBag.description || '');
                     setSelectedBackground(currentBag.background_image || 'midwest-lush');
                   }
-                }} variant="outline">
+                }} variant="outline" className="flex-1 sm:flex-initial">
                   <X className="w-4 h-4 mr-2" />
                   Cancel
                 </Button>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
                 {viewMode === 'gallery' && (
                   <Button
                     onClick={() => setIsEditingLayout(!isEditingLayout)}
                     variant={isEditingLayout ? 'destructive' : 'outline'}
                     size="sm"
-                    className="whitespace-nowrap"
+                    className="flex-1 sm:flex-initial"
                   >
-                    <span className="hidden sm:inline">{isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}</span>
                     <span className="sm:hidden">{isEditingLayout ? 'Cancel' : 'Layout'}</span>
+                    <span className="hidden sm:inline">{isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}</span>
                   </Button>
                 )}
-                <Button onClick={() => setShowShareModal(true)} variant="outline" size="sm" className="whitespace-nowrap">
-                  <Share2 className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Share</span>
-                  <span className="sm:hidden">Share</span>
+                <Button onClick={() => setShowShareModal(true)} variant="outline" size="sm" className="flex-1 sm:flex-initial">
+                  <Share2 className="w-4 h-4 mr-1" />
+                  Share
                 </Button>
-                <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="whitespace-nowrap">
-                  <Edit3 className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Edit Bag</span>
+                <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="flex-1 sm:flex-initial">
+                  <Edit3 className="w-4 h-4 mr-1" />
                   <span className="sm:hidden">Edit</span>
+                  <span className="hidden sm:inline">Edit Bag</span>
                 </Button>
-              </>
+              </div>
             )}
           </div>
         </div>

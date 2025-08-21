@@ -10,8 +10,43 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
-    version: "0.16.0",
+    version: "0.17.0",
     date: "2025-08-21",
+    title: "Deployment Optimizations & Share Feature Fix",
+    changes: [
+      {
+        category: "fix",
+        description: "Fixed BagShareView component by replacing html2canvas with html-to-image library"
+      },
+      {
+        category: "fix",
+        description: "Resolved Vercel deployment issues by consolidating API functions (12 function limit)"
+      },
+      {
+        category: "fix",
+        description: "Moved middleware and utils out of api folder to reduce function count"
+      },
+      {
+        category: "fix",
+        description: "Changed cron job frequency to daily (3 AM UTC) to comply with Vercel hobby plan"
+      },
+      {
+        category: "fix",
+        description: "Removed test/debug endpoints and fixed TypeScript errors for production"
+      },
+      {
+        category: "fix",
+        description: "Fixed duplicate variable declarations in App.tsx causing build errors"
+      },
+      {
+        category: "feature",
+        description: "Created comprehensive technical fixes repository documenting 127+ commits"
+      }
+    ]
+  },
+  {
+    version: "0.16.0",
+    date: "2025-08-20",
     title: "Beta System, Admin Dashboard & Critical Fixes",
     changes: [
       {
@@ -375,6 +410,102 @@ export const patchNotes: PatchNote[] = [
       {
         category: "improvement",
         description: "Better social sharing preview rendering"
+      }
+    ]
+  },
+  {
+    version: "0.4.0",
+    date: "2025-08-05",
+    title: "Equipment Reviews & Tee System",
+    changes: [
+      {
+        category: "feature",
+        description: "Equipment review system with tee functionality"
+      },
+      {
+        category: "fix",
+        description: "Feed tee persistence across sessions"
+      },
+      {
+        category: "feature",
+        description: "Bag management features and organization"
+      },
+      {
+        category: "fix",
+        description: "Equipment page mobile layout improvements"
+      }
+    ]
+  },
+  {
+    version: "0.3.0",
+    date: "2025-07-25",
+    title: "AI Bag Analyzer Integration",
+    changes: [
+      {
+        category: "feature",
+        description: "OpenAI Vision API integration for equipment detection"
+      },
+      {
+        category: "feature",
+        description: "Structured 3-step AI bag analysis workflow"
+      },
+      {
+        category: "fix",
+        description: "Robust JSON extraction for OpenAI responses"
+      },
+      {
+        category: "fix",
+        description: "Updated from gpt-4-vision-preview to gpt-4o model"
+      }
+    ]
+  },
+  {
+    version: "0.2.0",
+    date: "2025-07-19",
+    title: "Forum System & Landing Page",
+    changes: [
+      {
+        category: "feature",
+        description: "Comprehensive forum system with mobile-optimized UI"
+      },
+      {
+        category: "feature",
+        description: "Redesigned landing page with real equipment showcase"
+      },
+      {
+        category: "feature",
+        description: "Nested comments and replies in forum"
+      },
+      {
+        category: "fix",
+        description: "Dynamic import errors and user profile enhancements"
+      }
+    ]
+  },
+  {
+    version: "0.1.0",
+    date: "2025-07-12",
+    title: "Initial Platform Launch",
+    changes: [
+      {
+        category: "feature",
+        description: "Core platform with equipment management system"
+      },
+      {
+        category: "feature",
+        description: "User authentication with Supabase"
+      },
+      {
+        category: "feature",
+        description: "Golf ball on tee branding and Tees engagement metrics"
+      },
+      {
+        category: "feature",
+        description: "Mobile navigation with bottom navigation bar"
+      },
+      {
+        category: "feature",
+        description: "Equipment submission with smart autocomplete"
       }
     ]
   }

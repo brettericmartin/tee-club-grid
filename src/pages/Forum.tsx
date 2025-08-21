@@ -90,42 +90,56 @@ export default function Forum() {
       {/* Header */}
       <div className="bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Community Forum</h1>
-              <p className="text-gray-400">Connect with fellow golfers, share tips, and discuss equipment</p>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">Community Forum</h1>
+              <p className="text-sm sm:text-base text-gray-400">Connect with fellow golfers, share tips, and discuss equipment</p>
             </div>
-            <div className="flex items-center gap-2">
-              {/* Sort Toggle */}
-              <Button
-                variant={sortBy === 'latest' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSortBy('latest')}
-                className={cn(
-                  "gap-2",
-                  sortBy === 'latest' ? "bg-white/10" : "bg-transparent"
-                )}
-              >
-                <Clock className="w-4 h-4" />
-                Latest
-              </Button>
-              <Button
-                variant={sortBy === 'hot' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSortBy('hot')}
-                className={cn(
-                  "gap-2",
-                  sortBy === 'hot' ? "bg-white/10" : "bg-transparent"
-                )}
-              >
-                <Flame className="w-4 h-4" />
-                Hot
-              </Button>
-              
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              {/* Mobile: New Thread button at top */}
               {user && (
                 <Button 
                   onClick={() => navigate('/forum/new')}
-                  className="bg-green-600 hover:bg-green-700 ml-2"
+                  className="bg-green-600 hover:bg-green-700 sm:hidden w-full"
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  New Thread
+                </Button>
+              )}
+              
+              {/* Sort Toggle */}
+              <div className="flex gap-2">
+                <Button
+                  variant={sortBy === 'latest' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('latest')}
+                  className={cn(
+                    "gap-2 flex-1 sm:flex-initial",
+                    sortBy === 'latest' ? "bg-white/10" : "bg-transparent"
+                  )}
+                >
+                  <Clock className="w-4 h-4" />
+                  Latest
+                </Button>
+                <Button
+                  variant={sortBy === 'hot' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortBy('hot')}
+                  className={cn(
+                    "gap-2 flex-1 sm:flex-initial",
+                    sortBy === 'hot' ? "bg-white/10" : "bg-transparent"
+                  )}
+                >
+                  <Flame className="w-4 h-4" />
+                  Hot
+                </Button>
+              </div>
+              
+              {/* Desktop: New Thread button on right */}
+              {user && (
+                <Button 
+                  onClick={() => navigate('/forum/new')}
+                  className="bg-green-600 hover:bg-green-700 ml-2 hidden sm:flex"
                 >
                   <MessageSquare className="w-4 h-4 mr-2" />
                   New Thread
@@ -135,7 +149,7 @@ export default function Forum() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <Card className="bg-white/5 border-white/10 p-4">
               <div className="flex items-center justify-between">
                 <div>

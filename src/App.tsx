@@ -18,36 +18,37 @@ import { BetaGuard } from "./components/auth/BetaGuard";
 import { AdminGuard } from "./components/auth/AdminGuard";
 
 // Direct imports for development to avoid dynamic import issues
-import IndexPage from "@/pages/Index";
-import LandingPage from "@/pages/Landing";
-import BagsBrowserPage from "@/pages/BagsBrowser";
-import BagDisplayPage from "@/pages/BagDisplayStyled";
-import MyBagPage from "@/pages/MyBagSupabase";
-import EquipmentPage from "@/pages/Equipment";
-import EquipmentDetailPage from "@/pages/EquipmentDetail";
-import FeedPage from "@/pages/Feed";
+import Index from "@/pages/Index";
+import Landing from "@/pages/Landing";
+import BagsBrowser from "@/pages/BagsBrowser";
+import BagDisplay from "@/pages/BagDisplayStyled";
+import MyBag from "@/pages/MyBagSupabase";
+import Equipment from "@/pages/Equipment";
+import EquipmentDetail from "@/pages/EquipmentDetail";
+import Feed from "@/pages/Feed";
 import TestSupabase from "@/pages/TestSupabase";
-import WishlistPage from "@/pages/Wishlist";
-import BadgesPage from "@/pages/Badges";
-import BadgePreviewPage from "@/pages/BadgePreview";
-import ForumPage from "@/pages/Forum";
+import Wishlist from "@/pages/Wishlist";
+import Badges from "@/pages/Badges";
+import BadgePreview from "@/pages/BadgePreview";
+import Forum from "@/pages/Forum";
 import BagProfilePage from "@/pages/BagProfilePage";
 import UserBagPage from "@/pages/UserBagPage";
-import ForumIndexPage from "@/pages/ForumIndex";
-import ForumCategoryPage from "@/pages/ForumCategory";
-import ForumThreadPage from "@/pages/ForumThread";
-import NotFoundPage from "@/pages/NotFound";
-import AIBagAnalyzerPage from "@/pages/AIBagAnalyzer";
-import PatchNotesPage from "@/pages/PatchNotes";
-import AuthCallbackPage from "@/pages/AuthCallback";
-import WaitlistPage from "@/pages/Waitlist";
-import BetaInfoPage from "@/pages/BetaInfo";
-import SeedEquipmentPage from "@/pages/admin/SeedEquipment";
-import EquipmentMigrationPage from "@/pages/admin/EquipmentMigration";
-import WaitlistAdminPage from "@/pages/admin/WaitlistAdmin";
-import AdminDashboardPage from "@/pages/admin/AdminDashboard";
-import DebugPage from "@/pages/Debug";
-import DebugFeedPage from "@/pages/DebugFeed";
+import BagShareView from "@/pages/BagShareView";
+import ForumIndex from "@/pages/ForumIndex";
+import ForumCategory from "@/pages/ForumCategory";
+import ForumThread from "@/pages/ForumThread";
+import NotFound from "@/pages/NotFound";
+import AIBagAnalyzer from "@/pages/AIBagAnalyzer";
+import PatchNotes from "@/pages/PatchNotes";
+import AuthCallback from "@/pages/AuthCallback";
+import Waitlist from "@/pages/Waitlist";
+import BetaInfo from "@/pages/BetaInfo";
+import SeedEquipment from "@/pages/admin/SeedEquipment";
+import EquipmentMigration from "@/pages/admin/EquipmentMigration";
+import WaitlistAdmin from "@/pages/admin/WaitlistAdmin";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import Debug from "@/pages/Debug";
+import DebugFeed from "@/pages/DebugFeed";
 import { lazy } from "react";
 
 // Lazy load pages for code splitting with enhanced error handling and debugging
@@ -116,39 +117,7 @@ const lazyImport = (importFn: () => Promise<any>, componentName?: string) => {
   );
 };
 
-// ALWAYS use direct imports to avoid dynamic import issues
-// This prevents "Failed to fetch dynamically imported module" errors
-const Index = IndexPage;
-const Landing = LandingPage;
-const BagsBrowser = BagsBrowserPage;
-const BagDisplay = BagDisplayPage;
-const MyBag = MyBagPage;
-const Equipment = EquipmentPage;
-const EquipmentDetail = EquipmentDetailPage;
-const Feed = FeedPage;
-const Wishlist = WishlistPage;
-const Badges = BadgesPage;
-const BadgePreview = BadgePreviewPage;
-const Forum = ForumPage;
-const ForumIndex = ForumIndexPage;
-const ForumCategory = ForumCategoryPage;
-const ForumThread = ForumThreadPage;
-const NotFound = NotFoundPage;
-const AIBagAnalyzer = AIBagAnalyzerPage;
-const PatchNotes = PatchNotesPage;
-const AuthCallback = AuthCallbackPage;
-const Waitlist = WaitlistPage;
-const BetaInfo = BetaInfoPage;
-
-// Admin routes
-const SeedEquipment = SeedEquipmentPage;
-const EquipmentMigration = EquipmentMigrationPage;
-const WaitlistAdmin = WaitlistAdminPage;
-const AdminDashboard = AdminDashboardPage;
-
-// Debug routes
-const Debug = DebugPage;
-const DebugFeed = DebugFeedPage;
+// Page imports are defined above as direct imports to avoid dynamic import issues
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -204,6 +173,7 @@ function AppRoutes() {
             <Route path="/bags-browser" element={<BagsBrowser />} />
             <Route path="/bags" element={<BagsBrowser />} />
             <Route path="/bag/:bagId" element={<BagDisplay />} />
+            <Route path="/bag/:bagId/share" element={<BagShareView />} />
             <Route path="/bag/:username/:bagname" element={<BagDisplay />} />
             <Route path="/bag/:username" element={<UserBagPage />} />
             <Route path="/my-bag" element={<BetaGuard requireAuth={true}><MyBag /></BetaGuard>} />

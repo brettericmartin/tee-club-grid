@@ -55,6 +55,7 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
   
   const shareTitle = `Check out ${bag.profiles?.display_name || bag.profiles?.username || 'this'}'s ${bag.name} on Teed.club`;
   const shareText = `${bag.name} - View my complete golf setup on Teed.club`;
+  const shareViewUrl = `/bag/${bag.id}/share`;
 
   const copyLink = async () => {
     try {
@@ -300,7 +301,15 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
           {/* Advanced Options */}
           <div className="space-y-2">
             <label className="text-sm text-white/70">Advanced Options</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={() => window.open(shareViewUrl, '_blank')}
+                variant="outline"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] col-span-2"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Open Screenshot-Friendly View
+              </Button>
               <Button
                 onClick={() => {
                   copyEquipmentList();

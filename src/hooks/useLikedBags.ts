@@ -21,7 +21,7 @@ export function useLikedBags() {
     
     try {
       const { data } = await supabase
-        .from('bag_likes')
+        .from('bag_tees')
         .select('bag_id')
         .eq('user_id', user.id);
       
@@ -42,9 +42,9 @@ export function useLikedBags() {
     
     try {
       if (isLiked) {
-        // Unlike
+        // Unlike (untee)
         await supabase
-          .from('bag_likes')
+          .from('bag_tees')
           .delete()
           .eq('user_id', user.id)
           .eq('bag_id', bagId);
@@ -55,9 +55,9 @@ export function useLikedBags() {
           return newSet;
         });
       } else {
-        // Like
+        // Like (tee)
         await supabase
-          .from('bag_likes')
+          .from('bag_tees')
           .insert({
             user_id: user.id,
             bag_id: bagId

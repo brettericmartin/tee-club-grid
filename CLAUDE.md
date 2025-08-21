@@ -1,5 +1,17 @@
 # CLAUDE.md - Teed.club Development Guide
 
+## 📚 Documentation References
+
+### Technical Documentation
+- **`/docs/TECHNICAL_FIXES_REPOSITORY.md`** - Comprehensive repository of ALL technical fixes (127+ commits analyzed)
+- **`/CHANGELOG.md`** - Standard developer changelog following Keep a Changelog format
+- **`/src/data/patchNotes.ts`** - User-facing patch notes displayed in the app
+
+### When Making Changes
+1. Update `/src/data/patchNotes.ts` with user-facing changes
+2. Update `/CHANGELOG.md` with technical details
+3. For major fixes, consider adding to `/docs/TECHNICAL_FIXES_REPOSITORY.md`
+
 ## 🚨 CRITICAL DATA PROTECTION RULES 🚨
 
 **NEVER DELETE USER DATA WITHOUT EXPLICIT PERMISSION**
