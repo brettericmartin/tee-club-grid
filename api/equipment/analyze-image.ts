@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { withAuth, AuthenticatedRequest } from '../middleware/auth';
-import { strictRateLimit } from '../middleware/rate-limit';
-import { analyzeGolfBagImage, validateEquipmentData } from '../utils/openai';
+import { withAuth, AuthenticatedRequest } from '../../lib/middleware/auth';
+import { strictRateLimit } from '../../lib/middleware/rateLimit';
+import { analyzeGolfBagImage, validateEquipmentData } from '../../lib/utils/openai';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';

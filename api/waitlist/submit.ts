@@ -12,7 +12,7 @@ import {
   sendInvitePackEmail 
 } from '../../src/services/emailService';
 import { sanitizeDisplayName } from '../../src/utils/sanitization';
-import { checkRateLimit } from '../middleware/rateLimit';
+import { checkRateLimit } from '../../lib/middleware/rateLimit';
 import { RateLimiter, getClientIp } from '../../src/services/rateLimiter';
 
 // Initialize Supabase

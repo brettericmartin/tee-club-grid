@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { requireAdmin, type AdminAuthenticatedRequest } from '../middleware/adminAuth';
+import { requireAdmin, type AdminAuthenticatedRequest } from '../../lib/middleware/adminAuth';
 import { 
   sendWaitlistApprovedEmail,
   sendInvitePackEmail 

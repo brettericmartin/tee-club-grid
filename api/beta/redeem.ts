@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { withAuth, type AuthenticatedRequest } from '../middleware/auth';
+import { withAuth, type AuthenticatedRequest } from '../../lib/middleware/auth';
 
 // Initialize Supabase
 const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
