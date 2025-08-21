@@ -69,8 +69,8 @@ async function approveHandler(
       email = data.email;
       displayName = sanitizeDisplayName(data.display_name);
     } else {
-      email = body.email.toLowerCase();
-      displayName = sanitizeDisplayName(body.email.split('@')[0]);
+      email = body.email!.toLowerCase();
+      displayName = sanitizeDisplayName(body.email!.split('@')[0]);
     }
     
     // Use the atomic approval function with capacity locking

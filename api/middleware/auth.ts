@@ -30,7 +30,7 @@ export interface AuthenticatedRequest extends VercelRequest {
  * Extracts and validates the JWT from the Authorization header
  */
 export async function withAuth(
-  handler: (req: AuthenticatedRequest, res: VercelResponse) => Promise<void>
+  handler: (req: AuthenticatedRequest, res: VercelResponse) => Promise<VercelResponse | void>
 ) {
   return async (req: AuthenticatedRequest, res: VercelResponse) => {
     console.log('[Auth] Processing request:', {

@@ -26,7 +26,7 @@ export interface AdminAuthenticatedRequest extends AuthenticatedRequest {
  * Must be used after withAuth middleware
  */
 export function requireAdmin(
-  handler: (req: AdminAuthenticatedRequest, res: VercelResponse) => Promise<void>
+  handler: (req: AdminAuthenticatedRequest, res: VercelResponse) => Promise<VercelResponse | void>
 ) {
   return withAuth(async (req: AuthenticatedRequest, res: VercelResponse) => {
     try {
