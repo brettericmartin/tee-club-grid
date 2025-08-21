@@ -45,6 +45,8 @@ import { aiFlowMetrics } from "@/utils/performanceMonitor";
 import { lazyWithRetry } from "@/utils/dynamicImport";
 import ShareModal from "@/components/bag/ShareModal";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { sanitizeDisplayName } from "@/utils/sanitization";
+import { getDisplayName } from "@/utils/displayName";
 
 // Lazy load heavy components with retry logic for Vite HMR stability
 const BagGalleryDndKit = lazyWithRetry(() => import("@/components/bag/BagGalleryDndKit"));
@@ -1855,7 +1857,7 @@ const MyBagSupabase = () => {
             ...currentBag,
             profiles: currentBag.profiles || {
               username: user?.user_metadata?.username || user?.email?.split('@')[0],
-              display_name: user?.user_metadata?.display_name || user?.user_metadata?.full_name
+              display_name: sanitizeDisplayName(user?.user_metadata?.display_name || user?.user_metadata?.full_name)
             }
           }}
         />

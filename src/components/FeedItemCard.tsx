@@ -6,6 +6,7 @@ import { formatCompactCurrency } from '@/lib/formatters';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/lib/supabase';
+import { getDisplayName, getDisplayInitials } from '@/utils/displayName';
 import type { Database } from '@/lib/supabase';
 import { FeedItemData, getPostTypeLabel, formatTimestamp } from '@/utils/feedTransformer';
 import { BagCard } from '@/components/bags/BagCard';

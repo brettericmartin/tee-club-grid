@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Trophy, TrendingUp, Users, Filter, Sparkles, Loader2, Plus, Camera } from 'lucide-react';
+import { Trophy, TrendingUp, Users, Filter, Sparkles, Loader2, Plus, Camera, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFeed } from '@/contexts/FeedContext';
+import { useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,15 +23,41 @@ import Masonry from 'react-masonry-css';
 // import { AnimatedLoader } from '@/components/loading/AnimatedLoader';
 
 const FeedContent = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const { allPosts, loading, error, loadMainFeed, updatePostLike, updateUserFollow } = useFeed();
   const [filter, setFilter] = useState<'all' | 'following'>('all');
   const [displayCount, setDisplayCount] = useState(12);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [betaAccess, setBetaAccess] = useState<boolean | null>(null);
+  const [publicBetaEnabled, setPublicBetaEnabled] = useState(false);
 
   useEffect(() => {
     loadMainFeed(filter);
   }, [filter, loadMainFeed]);
+
+  // Check beta access for posting
+  useEffect(() => {
+    const checkBetaAccess = async () => {
+      // Check feature flags
+      const { data: flags } = await supabase
+        .from('feature_flags')
+        .select('public_beta_enabled')
+        .eq('id', 1)
+        .single();
+      
+      if (flags?.public_beta_enabled) {
+        setPublicBetaEnabled(true);
+        setBetaAccess(true);
+      } else if (profile) {
+        setBetaAccess(profile.beta_access || false);
+      } else {
+        setBetaAccess(false);
+      }
+    };
+
+    checkBetaAccess();
+  }, [profile]);
 
   const handleLike = async (postId: string) => {
     if (!user) {
@@ -222,14 +249,26 @@ const FeedContent = () => {
           {/* Create Post Button - Centered */}
           {user && (
             <div className="flex-1 flex justify-center">
-              <Button
-                onClick={() => setShowCreatePost(true)}
-                size="default"
-                className="bg-primary hover:bg-primary/90 text-black font-semibold"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Post
-              </Button>
+              {betaAccess ? (
+                <Button
+                  onClick={() => setShowCreatePost(true)}
+                  size="default"
+                  className="bg-primary hover:bg-primary/90 text-black font-semibold"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Post
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => navigate('/waitlist')}
+                  size="default"
+                  variant="outline"
+                  className="border-primary/50 text-primary hover:bg-primary/10"
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  Join Beta to Post
+                </Button>
+              )}
             </div>
           )}
 
@@ -358,15 +397,17 @@ const FeedContent = () => {
       )}
 
       {/* Create Post Modal */}
-      <CreatePostModal
-        isOpen={showCreatePost}
-        onClose={() => setShowCreatePost(false)}
-        onSuccess={() => {
-          setShowCreatePost(false);
-          loadMainFeed(filter); // Refresh feed after posting
-        }}
-      />
-
+      {/* Only show create post modal if user has beta access */}
+      {betaAccess && (
+        <CreatePostModal
+          isOpen={showCreatePost}
+          onClose={() => setShowCreatePost(false)}
+          onSuccess={() => {
+            setShowCreatePost(false);
+            loadMainFeed(filter); // Refresh feed after posting
+          }}
+        />
+      )}
     </div>
   );
 };

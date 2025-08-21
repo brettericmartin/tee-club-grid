@@ -1,10 +1,10 @@
 import React from 'react';
-import { Check, X } from 'lucide-react';
+import { Check, X, Trophy, CheckCircle } from 'lucide-react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { cn } from '@/lib/utils';
 
 export function GolfBallProgress() {
-  const { state, currentStepInfo, skipOnboarding, isStepCompleted } = useOnboarding();
+  const { state, currentStepInfo, skipOnboarding, finishTour, isStepCompleted } = useOnboarding();
   
   if (!state.enabled || state.skipped) {
     return null;
@@ -24,13 +24,23 @@ export function GolfBallProgress() {
               {currentStepInfo.description}
             </p>
           </div>
-          <button
-            onClick={skipOnboarding}
-            className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1"
-          >
-            <X className="w-3 h-3" />
-            Skip Tour
-          </button>
+          {state.completedSteps.length === 5 ? (
+            <button
+              onClick={finishTour}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 animate-pulse"
+            >
+              <Trophy className="w-4 h-4" />
+              Finish Tour
+            </button>
+          ) : (
+            <button
+              onClick={skipOnboarding}
+              className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1"
+            >
+              <X className="w-3 h-3" />
+              Skip Tour
+            </button>
+          )}
         </div>
         
         {/* Golf Course Progress Bar */}

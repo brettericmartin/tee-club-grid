@@ -10,6 +10,61 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.16.0",
+    date: "2025-08-21",
+    title: "Beta System, Admin Dashboard & Critical Fixes",
+    changes: [
+      {
+        category: "fix",
+        description: "Fixed infinite recursion in Row Level Security policies preventing forum, feed, and bags from loading"
+      },
+      {
+        category: "feature",
+        description: "Comprehensive beta/waitlist application system with scoring (0-15 points) based on user answers"
+      },
+      {
+        category: "feature",
+        description: "Admin dashboard with centralized control panel for all administrative functions"
+      },
+      {
+        category: "feature",
+        description: "Beta information page documenting the entire application and approval process"
+      },
+      {
+        category: "improvement",
+        description: "Admin users now automatically have beta access without separate approval"
+      },
+      {
+        category: "feature",
+        description: "CLI tools for managing beta access: grant-beta-access.js and check-user-access.js"
+      },
+      {
+        category: "improvement",
+        description: "Updated landing page CTA from 'Join as a Founder' to 'Apply for the Beta'"
+      },
+      {
+        category: "feature",
+        description: "Admin-only menu option in profile dropdown for quick dashboard access"
+      },
+      {
+        category: "fix",
+        description: "Fixed useAdminAuth hook to check profiles table instead of non-existent admins table"
+      },
+      {
+        category: "improvement",
+        description: "Added clear messaging that 'Build My Bag' requires beta approval"
+      },
+      {
+        category: "feature",
+        description: "Waitlist admin page for reviewing and approving beta applications with scoring breakdown"
+      },
+      {
+        category: "improvement",
+        description: "BetaGuard component now properly handles admin users and shows appropriate messaging"
+      }
+    ]
+  },
+  {
     version: "0.15.0",
     date: "2025-08-18",
     title: "Authentication Simplification & Enhanced UX",

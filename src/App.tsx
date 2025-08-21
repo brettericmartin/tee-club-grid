@@ -3,9 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense } from "react";
-import { AuthProvider } from "./contexts/AuthContext";
-import { AdminProvider } from "./contexts/AdminContext";
+import { Suspense, useEffect } from "react";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { AdminProvider } from "./contexts/AdminContext"; // TODO: Consider migrating forum components to useAdminAuth hook
 import { FeedProvider } from "./contexts/FeedContext";
 import { OnboardingProvider } from "./contexts/OnboardingContext";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -13,6 +13,9 @@ import Navigation from "./components/Navigation";
 import BottomNavigation from "./components/navigation/BottomNavigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Analytics } from "@vercel/analytics/react";
+import { initializeReferralCapture, redeemStoredCodes } from "./utils/referralCapture";
+import { BetaGuard } from "./components/auth/BetaGuard";
+import { AdminGuard } from "./components/auth/AdminGuard";
 
 // Direct imports for development to avoid dynamic import issues
 import IndexPage from "@/pages/Index";
@@ -37,10 +40,15 @@ import NotFoundPage from "@/pages/NotFound";
 import AIBagAnalyzerPage from "@/pages/AIBagAnalyzer";
 import PatchNotesPage from "@/pages/PatchNotes";
 import AuthCallbackPage from "@/pages/AuthCallback";
+import WaitlistPage from "@/pages/Waitlist";
+import BetaInfoPage from "@/pages/BetaInfo";
 import SeedEquipmentPage from "@/pages/admin/SeedEquipment";
 import EquipmentMigrationPage from "@/pages/admin/EquipmentMigration";
+import WaitlistAdminPage from "@/pages/admin/WaitlistAdmin";
+import AdminDashboardPage from "@/pages/admin/AdminDashboard";
 import DebugPage from "@/pages/Debug";
 import DebugFeedPage from "@/pages/DebugFeed";
+import { lazy } from "react";
 
 // Lazy load pages for code splitting with enhanced error handling and debugging
 const lazyImport = (importFn: () => Promise<any>, componentName?: string) => {
@@ -129,10 +137,14 @@ const NotFound = NotFoundPage;
 const AIBagAnalyzer = AIBagAnalyzerPage;
 const PatchNotes = PatchNotesPage;
 const AuthCallback = AuthCallbackPage;
+const Waitlist = WaitlistPage;
+const BetaInfo = BetaInfoPage;
 
 // Admin routes
 const SeedEquipment = SeedEquipmentPage;
 const EquipmentMigration = EquipmentMigrationPage;
+const WaitlistAdmin = WaitlistAdminPage;
+const AdminDashboard = AdminDashboardPage;
 
 // Debug routes
 const Debug = DebugPage;
@@ -162,6 +174,81 @@ const PageLoadingFallback = () => (
   </div>
 );
 
+// Inner app component that has access to auth context
+function AppRoutes() {
+  const { user } = useAuth();
+  
+  // Handle referral code redemption after auth
+  useEffect(() => {
+    if (user?.id) {
+      // Try to redeem stored codes when user authenticates
+      redeemStoredCodes(user.id).then(result => {
+        if (result.success) {
+          console.log('[App] Redeemed referral codes:', result.message);
+        }
+      });
+    }
+  }, [user?.id]);
+
+  return (
+    <div className="flex flex-col min-h-screen bg-black">
+      {/* Header navigation */}
+      <Navigation />
+      
+      {/* Main content area */}
+      <main className="flex-1 pt-16 pb-16 md:pb-0">
+        <Suspense fallback={<PageLoadingFallback />}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/old-index" element={<Index />} />
+            <Route path="/bags-browser" element={<BagsBrowser />} />
+            <Route path="/bags" element={<BagsBrowser />} />
+            <Route path="/bag/:bagId" element={<BagDisplay />} />
+            <Route path="/bag/:username/:bagname" element={<BagDisplay />} />
+            <Route path="/bag/:username" element={<UserBagPage />} />
+            <Route path="/my-bag" element={<BetaGuard requireAuth={true}><MyBag /></BetaGuard>} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/equipment" element={<Equipment />} />
+            <Route path="/equipment/:id" element={<EquipmentDetail />} />
+            <Route path="/test-supabase" element={<TestSupabase />} />
+            <Route path="/feed" element={<Feed />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/badges" element={<Badges />} />
+            <Route path="/badge/:badgeType" element={<BadgePreview />} />
+            <Route path="/forum/*" element={<ForumIndex />} />
+            <Route path="/ai-bag-analyzer" element={<AIBagAnalyzer />} />
+            <Route path="/patch-notes" element={<PatchNotes />} />
+            <Route path="/waitlist" element={<Waitlist />} />
+            <Route path="/beta-info" element={<BetaInfo />} />
+            
+            {/* Admin routes */}
+            <Route path="/admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
+            <Route path="/admin/waitlist" element={<AdminGuard><WaitlistAdmin /></AdminGuard>} />
+            <Route path="/admin/seed-equipment" element={<SeedEquipment />} />
+            <Route path="/admin/equipment-migration" element={<EquipmentMigration />} />
+            
+            {/* Debug routes - only in development */}
+            {import.meta.env.DEV && (
+              <>
+                <Route path="/debug" element={<Debug />} />
+                <Route path="/debug/feed" element={<DebugFeed />} />
+              </>
+            )}
+            
+            {/* 404 catch-all - must be last */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </main>
+      
+      {/* Bottom navigation - visible on mobile only */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+        <BottomNavigation />
+      </div>
+    </div>
+  );
+}
+
 function App() {
   console.log("[DEBUG] App component initializing...");
   console.log("[DEBUG] Environment:", {
@@ -174,6 +261,11 @@ function App() {
 
   // Using direct imports to avoid dynamic import issues
   console.log("[DEBUG] Using direct imports to avoid dynamic import issues");
+  
+  // Initialize referral capture on app mount
+  useEffect(() => {
+    initializeReferralCapture();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -187,58 +279,7 @@ function App() {
                     <Toaster />
                     <Sonner />
                     <Analytics />
-                
-                <div className="flex flex-col min-h-screen bg-black">
-                  {/* Header navigation */}
-                  <Navigation />
-                  
-                  {/* Main content area */}
-                  <main className="flex-1 pt-16 pb-16 md:pb-0">
-                    <Suspense fallback={<PageLoadingFallback />}>
-                      <Routes>
-                        <Route path="/" element={<Landing />} />
-                        <Route path="/old-index" element={<Index />} />
-                        <Route path="/bags-browser" element={<BagsBrowser />} />
-                        <Route path="/bags" element={<BagsBrowser />} />
-                        <Route path="/bag/:bagId" element={<BagDisplay />} />
-                        <Route path="/bag/:username/:bagname" element={<BagDisplay />} />
-                        <Route path="/bag/:username" element={<UserBagPage />} />
-                        <Route path="/my-bag" element={<MyBag />} />
-                        <Route path="/auth/callback" element={<AuthCallback />} />
-                        <Route path="/equipment" element={<Equipment />} />
-                        <Route path="/equipment/:id" element={<EquipmentDetail />} />
-                        <Route path="/test-supabase" element={<TestSupabase />} />
-                        <Route path="/feed" element={<Feed />} />
-                        <Route path="/wishlist" element={<Wishlist />} />
-                        <Route path="/badges" element={<Badges />} />
-                        <Route path="/badge/:badgeType" element={<BadgePreview />} />
-                        <Route path="/forum/*" element={<ForumIndex />} />
-                        <Route path="/ai-bag-analyzer" element={<AIBagAnalyzer />} />
-                        <Route path="/patch-notes" element={<PatchNotes />} />
-                        
-                        {/* Admin routes */}
-                        <Route path="/admin/seed-equipment" element={<SeedEquipment />} />
-                        <Route path="/admin/equipment-migration" element={<EquipmentMigration />} />
-                        
-                        {/* Debug routes - only in development */}
-                        {import.meta.env.DEV && (
-                          <>
-                            <Route path="/debug" element={<Debug />} />
-                            <Route path="/debug/feed" element={<DebugFeed />} />
-                          </>
-                        )}
-                        
-                        {/* 404 catch-all - must be last */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </Suspense>
-                  </main>
-                  
-                  {/* Bottom navigation - visible on mobile only */}
-                  <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-                    <BottomNavigation />
-                  </div>
-                </div>
+                    <AppRoutes />
                   </ErrorBoundary>
                 </FeedProvider>
               </AdminProvider>

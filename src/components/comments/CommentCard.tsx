@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
+import { getDisplayName, getDisplayInitials } from '@/utils/displayName';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -125,7 +126,7 @@ export default function CommentCard({ comment, onReply, onEdit, depth }: Comment
         <Avatar className="w-8 h-8 flex-shrink-0">
           <AvatarImage src={comment.profiles?.avatar_url || undefined} />
           <AvatarFallback className="bg-primary/20 text-white text-xs">
-            {comment.profiles?.display_name?.[0] || comment.profiles?.username?.[0] || '?'}
+            {getDisplayInitials(comment.profiles)}
           </AvatarFallback>
         </Avatar>
 
@@ -134,7 +135,7 @@ export default function CommentCard({ comment, onReply, onEdit, depth }: Comment
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium text-white text-sm">
-                  {comment.profiles?.display_name || comment.profiles?.username || 'Unknown'}
+                  {getDisplayName(comment.profiles)}
                 </span>
                 <span className="text-white/40 text-xs">
                   {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}

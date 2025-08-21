@@ -44,6 +44,7 @@ interface OnboardingContextType {
   advanceStep: () => void;
   completeStep: (step: number) => void;
   skipOnboarding: () => void;
+  finishTour: () => void;
   resetOnboarding: () => void;
   recordViewMode: (mode: string) => void;
   isStepCompleted: (step: number) => boolean;
@@ -108,46 +109,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
-  // Check if all steps completed and award badge
-  useEffect(() => {
-    const checkCompletion = async () => {
-      if (state.completedSteps.length === 5 && !state.celebrated && !state.badgeAwarded) {
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        
-        try {
-          // Award the Tour Champion badge
-          const { data, error } = await supabase.rpc('award_onboarding_badge', {
-            p_user_id: user.id
-          });
-          
-          if (!error && data?.success) {
-            console.log('🏌️ Tour Champion badge awarded!');
-            toast.success('Tour Champion badge earned! 🏆', {
-              description: 'You completed the welcome tour!',
-              duration: 5000
-            });
-            
-            // Update state
-            setState(prev => ({
-              ...prev,
-              badgeAwarded: true,
-              celebrated: true,
-              lastUpdated: new Date().toISOString()
-            }));
-            
-            // Show celebration animation
-            setShowCelebration(true);
-          }
-        } catch (error) {
-          console.error('Error awarding badge:', error);
-        }
-      }
-    };
-    
-    checkCompletion();
-  }, [state.completedSteps, state.celebrated, state.badgeAwarded]);
+  // No longer auto-trigger celebration - it's now triggered by the Finish Tour button
 
   const toggleTips = (enabled: boolean) => {
     setState(prev => ({
@@ -205,6 +167,53 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const finishTour = async () => {
+    // If all steps are completed, trigger the celebration
+    if (state.completedSteps.length === 5) {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        try {
+          // Award the Tour Champion badge
+          const { data, error } = await supabase.rpc('award_onboarding_badge', {
+            p_user_id: user.id
+          });
+          
+          if (!error && data?.success) {
+            console.log('🏌️ Tour Champion badge awarded!');
+            toast.success('Tour Champion badge earned! 🏆', {
+              description: 'You completed the welcome tour!',
+              duration: 5000
+            });
+            
+            // Update state
+            setState(prev => ({
+              ...prev,
+              badgeAwarded: true,
+              celebrated: true,
+              enabled: false,
+              skipped: true,
+              lastUpdated: new Date().toISOString()
+            }));
+          }
+        } catch (error) {
+          console.error('Error awarding badge:', error);
+        }
+      }
+      
+      // Show celebration animation regardless
+      setShowCelebration(true);
+    }
+    
+    // Disable the tour
+    setState(prev => ({
+      ...prev,
+      enabled: false,
+      skipped: true,
+      lastUpdated: new Date().toISOString()
+    }));
+  };
+
   const resetOnboarding = () => {
     setState({
       ...defaultState,
@@ -258,6 +267,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         advanceStep,
         completeStep,
         skipOnboarding,
+        finishTour,
         resetOnboarding,
         recordViewMode,
         isStepCompleted,

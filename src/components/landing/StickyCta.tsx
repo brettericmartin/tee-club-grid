@@ -55,7 +55,7 @@ export const StickyCta = ({ onBuildBag, onExploreBags }: StickyCtaProps) => {
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                     <Sparkles className="w-3 h-3 text-emerald-400" />
                     <span className="text-xs text-emerald-400 font-medium">
-                      Be a founding member • Get early access perks
+                      Limited beta access • Build My Bag for approved members
                     </span>
                   </div>
                 </motion.div>
@@ -73,7 +73,7 @@ export const StickyCta = ({ onBuildBag, onExploreBags }: StickyCtaProps) => {
                       size="lg"
                       className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-5 text-base font-semibold shadow-lg shadow-emerald-500/25 group"
                     >
-                      Build My Bag
+                      Apply for Beta
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </motion.div>

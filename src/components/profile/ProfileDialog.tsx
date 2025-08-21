@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { sanitizeDisplayName, validateDisplayName } from '@/utils/sanitization';
+import { getDisplayInitials } from '@/utils/displayName';
 import {
   Dialog,
   DialogContent,
@@ -169,7 +171,15 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
       // Always include display_name if it's empty in the original or has changed
       if (displayName !== originalValues.displayName || !originalValues.displayName) {
         // Ensure display_name is never null or empty
-        updates.display_name = displayName || user.email?.split('@')[0] || 'User';
+        // Sanitize and validate display name
+        const sanitizedName = sanitizeDisplayName(displayName || user.email?.split('@')[0] || 'User');
+        const validationError = validateDisplayName(sanitizedName);
+        if (validationError) {
+          toast.error(validationError);
+          setSaving(false);
+          return;
+        }
+        updates.display_name = sanitizedName;
       }
       
       if (username !== originalValues.username) {

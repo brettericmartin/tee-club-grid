@@ -14,15 +14,16 @@ import { Users, Trophy, Camera, MessageCircle, Star, TrendingUp } from "lucide-r
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
 
   const handleBuildBagClick = () => {
-    if (user) {
+    // Check if user has beta access or is admin
+    if (user && profile && (profile.beta_access || profile.is_admin)) {
       navigate('/my-bag');
     } else {
-      setShowSignIn(true);
+      navigate('/waitlist');
     }
   };
 
@@ -223,12 +224,21 @@ const Landing = () => {
               onClick={handleBuildBagClick}
               className="bg-emerald-500 hover:bg-emerald-600 text-white px-12 py-6 rounded-full text-xl font-bold shadow-2xl shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40"
             >
-              Join as a Founder
+              Apply for the Beta
             </button>
           </motion.div>
           
           <p className="mt-6 text-sm text-white/50">
             100% free • Early members get special founder badge
+          </p>
+          
+          <p className="mt-4">
+            <a 
+              href="/beta-info" 
+              className="text-emerald-400 hover:text-emerald-300 text-sm underline underline-offset-4 transition-colors"
+            >
+              How does the beta work?
+            </a>
           </p>
         </motion.div>
       </section>

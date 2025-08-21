@@ -104,7 +104,7 @@ export const Hero = ({ onBuildBag, onExploreBags }: HeroProps) => {
                 size="lg"
                 className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-6 text-lg font-semibold shadow-lg shadow-emerald-500/25 group"
               >
-                Build My Bag
+                Apply for the Beta
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
@@ -125,9 +125,19 @@ export const Hero = ({ onBuildBag, onExploreBags }: HeroProps) => {
             </motion.div>
           </div>
           
+          {/* Beta access note */}
+          <motion.p 
+            className="mt-8 text-sm text-white/50 italic"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+          >
+            Build My Bag feature available for approved beta participants
+          </motion.p>
+          
           {/* Trust indicators */}
           <motion.div 
-            className="mt-16 flex flex-wrap justify-center gap-8 text-white/60"
+            className="mt-12 flex flex-wrap justify-center gap-8 text-white/60"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}

@@ -7,23 +7,28 @@ import { supabase } from '@/lib/supabase';
 
 /**
  * Check if a user is an admin
+ * Uses the new admins table for consistency with other admin features
  */
 export async function isUserAdmin(userId?: string): Promise<boolean> {
   if (!userId) return false;
   
   try {
     const { data, error } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', userId)
+      .from('admins')
+      .select('user_id')
+      .eq('user_id', userId)
       .single();
     
     if (error) {
+      // PGRST116 means "not found" - user is not admin
+      if (error.code === 'PGRST116') {
+        return false;
+      }
       console.error('Error checking admin status:', error);
       return false;
     }
     
-    return data?.is_admin === true;
+    return !!data;
   } catch (error) {
     console.error('Error checking admin status:', error);
     return false;
@@ -163,20 +168,31 @@ export async function deleteForumThread(threadId: string): Promise<{ success: bo
 
 /**
  * Get list of all admin users
+ * Uses the new admins table with joined profile information
  */
 export async function getAdminUsers(): Promise<{ id: string; username: string; display_name?: string }[]> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
-      .select('id, username, display_name')
-      .eq('is_admin', true);
+      .from('admins')
+      .select(`
+        user_id,
+        profiles!inner(username, display_name)
+      `)
+      .order('created_at', { ascending: true });
     
     if (error) {
       console.error('Error fetching admin users:', error);
       return [];
     }
     
-    return data || [];
+    // Transform the joined data to match the expected format
+    const adminUsers = (data || []).map(admin => ({
+      id: admin.user_id,
+      username: (admin as any).profiles?.username || '',
+      display_name: (admin as any).profiles?.display_name
+    }));
+    
+    return adminUsers;
   } catch (error) {
     console.error('Error fetching admin users:', error);
     return [];
