@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { Star, Trophy } from 'lucide-react';
+import { Star, Trophy, Plus } from 'lucide-react';
 import type { UserBadgeWithDetails } from '@/services/badgeService';
 
 interface BadgeDisplayProps {
@@ -9,6 +9,7 @@ interface BadgeDisplayProps {
   showEmpty?: boolean;
   maxDisplay?: number;
   onBadgeClick?: (badge: UserBadgeWithDetails) => void;
+  expandable?: boolean;
 }
 
 // Helper function to get badge filename
@@ -38,9 +39,37 @@ const BadgeDisplay = ({
   size = 'md', 
   showEmpty = true,
   maxDisplay = 6,
-  onBadgeClick 
+  onBadgeClick,
+  expandable = true
 }: BadgeDisplayProps) => {
   const [hoveredBadge, setHoveredBadge] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [shouldCollapse, setShouldCollapse] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Calculate if badges would wrap to multiple rows
+  useEffect(() => {
+    if (!expandable || !containerRef.current) return;
+    
+    const checkOverflow = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      
+      // Get the first badge element to measure row height
+      const firstBadge = container.querySelector('[data-badge]');
+      if (!firstBadge) return;
+      
+      const badgeHeight = firstBadge.getBoundingClientRect().height;
+      const containerHeight = container.getBoundingClientRect().height;
+      
+      // If container height is more than 1.5x badge height, we have multiple rows
+      setShouldCollapse(containerHeight > badgeHeight * 1.5 && badges.length > maxDisplay);
+    };
+    
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [badges, maxDisplay, expandable]);
 
   const sizeClasses = {
     sm: 'w-8 h-8 sm:w-12 sm:h-12',
@@ -56,17 +85,22 @@ const BadgeDisplay = ({
     xl: 'w-7 h-7 sm:w-12 sm:h-12'
   };
 
-  const displayBadges = badges.slice(0, maxDisplay);
-  const remainingCount = badges.length - maxDisplay;
+  const displayBadges = expandable && shouldCollapse && !isExpanded 
+    ? badges.slice(0, Math.min(4, maxDisplay - 1)) // Show 4 badges + expand button on mobile
+    : badges.slice(0, maxDisplay);
+  const remainingCount = badges.length - displayBadges.length;
 
   // Fill empty slots if needed
   const emptySlots = showEmpty ? Math.max(0, maxDisplay - displayBadges.length) : 0;
 
   return (
-    <div className={cn(
-      "grid gap-3",
-      size === 'xl' ? "grid-cols-4 sm:grid-cols-8 gap-2" : "grid-cols-3 sm:grid-cols-6"
-    )}>
+    <div 
+      ref={containerRef}
+      className={cn(
+        "grid gap-3",
+        size === 'xl' ? "grid-cols-4 sm:grid-cols-8 gap-2" : "grid-cols-3 sm:grid-cols-6"
+      )}
+    >
       {displayBadges.map((userBadge) => {
         const rarity = userBadge.badge.rarity || 'common';
         const badgeIcon = userBadge.badge.icon;
@@ -80,6 +114,7 @@ const BadgeDisplay = ({
             onMouseLeave={() => setHoveredBadge(null)}
           >
             <div
+              data-badge="true"
               className={cn(
                 "relative flex items-center justify-center transition-all duration-300 cursor-pointer overflow-hidden",
                 sizeClasses[size],
@@ -118,8 +153,100 @@ const BadgeDisplay = ({
         );
       })}
 
+      {/* Expand button */}
+      {expandable && shouldCollapse && !isExpanded && remainingCount > 0 && (
+        <div
+          className="relative group"
+          onClick={() => setIsExpanded(true)}
+        >
+          <div
+            className={cn(
+              "relative flex items-center justify-center transition-all duration-300 cursor-pointer",
+              sizeClasses[size],
+              "bg-gray-800 border-2 border-gray-600 hover:scale-110 hover:border-primary"
+            )}
+          >
+            <div className="flex flex-col items-center justify-center">
+              <Plus className={cn(iconSizes[size], "text-primary")} />
+              <span className="text-xs text-primary mt-1">{remainingCount}</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Expanded badges */}
+      {expandable && isExpanded && badges.slice(displayBadges.length, badges.length).map((userBadge) => {
+        const rarity = userBadge.badge.rarity || 'common';
+        const badgeIcon = userBadge.badge.icon;
+        const isImageUrl = badgeIcon?.startsWith('/') || badgeIcon?.startsWith('http');
+        
+        return (
+          <div
+            key={userBadge.id}
+            className="relative group"
+            onMouseEnter={() => setHoveredBadge(userBadge.id)}
+            onMouseLeave={() => setHoveredBadge(null)}
+          >
+            <div
+              data-badge="true"
+              className={cn(
+                "relative flex items-center justify-center transition-all duration-300 cursor-pointer overflow-hidden",
+                sizeClasses[size],
+                "hover:scale-110",
+                onBadgeClick && "hover:brightness-125"
+              )}
+              onClick={() => onBadgeClick?.(userBadge)}
+            >
+              {isImageUrl ? (
+                <img 
+                  src={badgeIcon}
+                  alt={userBadge.badge.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-2xl">{badgeIcon || '🏅'}</span>
+              )}
+            </div>
+
+            {/* Tooltip */}
+            {hoveredBadge === userBadge.id && (
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50 pointer-events-none">
+                <div className="bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl whitespace-nowrap">
+                  <p className="font-semibold text-sm">{userBadge.badge.display_name}</p>
+                  <p className="text-xs text-gray-400">{userBadge.badge.description}</p>
+                  {userBadge.badge.category && (
+                    <p className="text-xs text-gray-500 mt-1">{userBadge.badge.category.display_name}</p>
+                  )}
+                </div>
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-2">
+                  <div className="border-8 border-transparent border-t-gray-900" />
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+      
+      {/* Collapse button */}
+      {expandable && isExpanded && (
+        <div
+          className="relative group"
+          onClick={() => setIsExpanded(false)}
+        >
+          <div
+            className={cn(
+              "relative flex items-center justify-center transition-all duration-300 cursor-pointer",
+              sizeClasses[size],
+              "bg-gray-800 border-2 border-gray-600 hover:scale-110 hover:border-red-500"
+            )}
+          >
+            <span className="text-sm text-red-500">−</span>
+          </div>
+        </div>
+      )}
+
       {/* Empty slots */}
-      {showEmpty && Array.from({ length: emptySlots }).map((_, index) => (
+      {showEmpty && !isExpanded && Array.from({ length: emptySlots }).map((_, index) => (
         <div
           key={`empty-${index}`}
           className={cn(

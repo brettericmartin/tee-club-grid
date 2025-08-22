@@ -1,6 +1,6 @@
 /* @refresh skip */
 import { useState, useEffect, Suspense } from "react";
-import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle, Share2, Camera, Video, Link2 } from "lucide-react";
+import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle, Share2, Camera, Video, Link2, Menu, MoreVertical } from "lucide-react";
 import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer, { bagBackgrounds } from "@/components/BackgroundLayer";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,13 @@ import { cn } from "@/lib/utils";
 import { sortBadgesByPriority } from "@/utils/badgeSorting";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { UserFeedView } from "@/components/feed/UserFeedView";
 import { aiFlowMetrics } from "@/utils/performanceMonitor";
 import { lazyWithRetry } from "@/utils/dynamicImport";
@@ -1073,12 +1080,11 @@ const MyBagSupabase = () => {
             )}
           </div>
           
-          <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end overflow-x-auto max-w-full">
+          <div className="flex items-center gap-2 justify-end">
             {!isEditing && (
               <>
-                {/* Mobile: Grouped buttons in rows */}
-                <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
-                  {/* Add Equipment Button - Always visible */}
+                {/* Mobile: Essential buttons + hamburger menu */}
+                <div className="flex gap-2 sm:hidden">
                   <Button
                     onClick={() => {
                       aiFlowMetrics.trackMethodDialogOpen();
@@ -1086,38 +1092,92 @@ const MyBagSupabase = () => {
                     }}
                     variant="outline"
                     size="sm"
-                    className="text-white hover:text-white hover:bg-white/20 flex-1 sm:flex-initial"
+                    className="text-white hover:text-white hover:bg-white/20"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    onClick={() => setShowShareModal(true)} 
+                    variant="outline"
+                    size="sm"
+                    className="text-white hover:text-white hover:bg-white/20"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-white hover:text-white hover:bg-white/20"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                        <Edit3 className="w-4 h-4 mr-2" />
+                        Edit Bag
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setShowBagSelector(true)}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Manage Bags
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setManageBadgesOpen(true)}>
+                        <Trophy className="w-4 h-4 mr-2" />
+                        Manage Badges
+                      </DropdownMenuItem>
+                      {viewMode === 'gallery' && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => setIsEditingLayout(!isEditingLayout)}>
+                            <Grid3x3 className="w-4 h-4 mr-2" />
+                            {isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                
+                {/* Desktop: All buttons visible */}
+                <div className="hidden sm:flex gap-2">
+                  <Button
+                    onClick={() => {
+                      aiFlowMetrics.trackMethodDialogOpen();
+                      setShowMethodDialog(true);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="text-white hover:text-white hover:bg-white/20"
                   >
                     <Plus className="w-4 h-4 mr-1" />
-                    <span className="sm:hidden">Add</span>
-                    <span className="hidden sm:inline">Add Equipment</span>
+                    Add Equipment
                   </Button>
                   <Button 
                     onClick={() => setShowBagSelector(true)} 
                     variant="outline"
                     size="sm"
-                    className="text-white hover:text-white hover:bg-white/20 flex-1 sm:flex-initial"
+                    className="text-white hover:text-white hover:bg-white/20"
                   >
                     <Settings className="w-4 h-4 mr-1" />
-                    <span className="sm:hidden">Bags</span>
-                    <span className="hidden sm:inline">Manage Bags</span>
+                    Manage Bags
                   </Button>
                   <Button
                     onClick={() => setManageBadgesOpen(true)}
                     variant="outline"
                     size="sm"
-                    className="text-white hover:text-white hover:bg-white/20 flex-1 sm:flex-initial"
+                    className="text-white hover:text-white hover:bg-white/20"
                   >
                     <Trophy className="w-4 h-4 mr-1" />
-                    <span className="sm:hidden">Badges</span>
-                    <span className="hidden sm:inline">Manage Badges</span>
+                    Manage Badges
                   </Button>
                 </div>
               </>
             )}
             {isEditing ? (
-              <div className="flex gap-2 w-full sm:w-auto justify-center">
-                <Button onClick={handleSave} variant="default" className="flex-1 sm:flex-initial">
+              <div className="flex gap-2">
+                <Button onClick={handleSave} variant="default">
                   <Save className="w-4 h-4 mr-2" />
                   Save
                 </Button>
@@ -1128,32 +1188,29 @@ const MyBagSupabase = () => {
                     setBagDescription(currentBag.description || '');
                     setSelectedBackground(currentBag.background_image || 'midwest-lush');
                   }
-                }} variant="outline" className="flex-1 sm:flex-initial">
+                }} variant="outline">
                   <X className="w-4 h-4 mr-2" />
                   Cancel
                 </Button>
               </div>
             ) : (
-              <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
+              <div className="hidden sm:flex gap-2">
                 {viewMode === 'gallery' && (
                   <Button
                     onClick={() => setIsEditingLayout(!isEditingLayout)}
                     variant={isEditingLayout ? 'destructive' : 'outline'}
                     size="sm"
-                    className="flex-1 sm:flex-initial"
                   >
-                    <span className="sm:hidden">{isEditingLayout ? 'Cancel' : 'Layout'}</span>
-                    <span className="hidden sm:inline">{isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}</span>
+                    {isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}
                   </Button>
                 )}
-                <Button onClick={() => setShowShareModal(true)} variant="outline" size="sm" className="flex-1 sm:flex-initial">
+                <Button onClick={() => setShowShareModal(true)} variant="outline" size="sm">
                   <Share2 className="w-4 h-4 mr-1" />
                   Share
                 </Button>
-                <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="flex-1 sm:flex-initial">
+                <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
                   <Edit3 className="w-4 h-4 mr-1" />
-                  <span className="sm:hidden">Edit</span>
-                  <span className="hidden sm:inline">Edit Bag</span>
+                  Edit Bag
                 </Button>
               </div>
             )}
@@ -1262,25 +1319,17 @@ const MyBagSupabase = () => {
         )}
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-5 gap-2 sm:gap-3 mb-8">
+        <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-8">
           <Card className="bg-[#1a1a1a] border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
-              <p className="text-xs sm:text-sm text-gray-200">Total Tees</p>
+              <p className="text-xs sm:text-sm text-gray-200">Tees</p>
               <p className="text-lg sm:text-2xl font-bold text-white">{formatCompactNumber(totalTees)}</p>
             </CardContent>
           </Card>
           <Card className="bg-[#1a1a1a] border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
-              <p className="text-xs sm:text-sm text-gray-200">Equipment</p>
+              <p className="text-xs sm:text-sm text-gray-200">Items</p>
               <p className="text-lg sm:text-2xl font-bold text-white">{bagItems.length}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-[#1a1a1a] border-white/10">
-            <CardContent className="p-2 sm:p-4 text-center">
-              <p className="text-xs sm:text-sm text-gray-200">Featured</p>
-              <p className="text-lg sm:text-2xl font-bold text-white">
-                {bagItems.filter(item => item.is_featured).length}
-              </p>
             </CardContent>
           </Card>
           <Card className="bg-[#1a1a1a] border-white/10">
@@ -1323,51 +1372,61 @@ const MyBagSupabase = () => {
         
         {/* View Mode Toggle - Centered Below Badges */}
         <div className="flex justify-center mb-6">
-          <div className="bg-white/10 rounded-lg p-1 flex">
+          <div className="bg-white/10 rounded-lg p-1 flex gap-1">
             <Button
               variant={viewMode === 'gallery' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('gallery')}
               className={viewMode === 'gallery' ? 'bg-primary hover:bg-primary/90' : 'text-white hover:text-white hover:bg-white/10'}
+              title="Gallery View"
             >
-              <Grid3x3 className="w-4 h-4 mr-2" />
-              Gallery
+              <Grid3x3 className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Gallery</span>
             </Button>
             <Button
               variant={viewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('list')}
               className={viewMode === 'list' ? 'bg-primary hover:bg-primary/90' : 'text-white hover:text-white hover:bg-white/10'}
+              title="List View"
             >
-              <List className="w-4 h-4 mr-2" />
-              List
+              <List className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">List</span>
             </Button>
             <Button
               variant={viewMode === 'card' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('card')}
               className={viewMode === 'card' ? 'bg-primary hover:bg-primary/90' : 'text-white hover:text-white hover:bg-white/10'}
+              title="Card View"
             >
-              <CreditCard className="w-4 h-4 mr-2" />
-              Card
+              <CreditCard className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Card</span>
             </Button>
             <Button
               variant={viewMode === 'feed' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('feed')}
               className={viewMode === 'feed' ? 'bg-primary hover:bg-primary/90' : 'text-white hover:text-white hover:bg-white/10'}
+              title="Feed View"
             >
-              <img src="/dog.png" alt="Feed" className="w-4 h-4 mr-2" />
-              Feed
+              <img 
+                src="/dog.png" 
+                alt="Feed" 
+                className="w-4 h-4 sm:mr-2" 
+                style={{ filter: viewMode === 'feed' ? 'none' : 'brightness(0) invert(1)' }}
+              />
+              <span className="hidden sm:inline">Feed</span>
             </Button>
             <Button
               variant={viewMode === 'videos' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('videos')}
               className={viewMode === 'videos' ? 'bg-primary hover:bg-primary/90' : 'text-white hover:text-white hover:bg-white/10'}
+              title="Videos View"
             >
-              <Video className="w-4 h-4 mr-2" />
-              Videos
+              <Video className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Videos</span>
             </Button>
           </div>
         </div>
