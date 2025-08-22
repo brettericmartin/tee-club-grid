@@ -48,6 +48,7 @@ import EquipmentMigration from "@/pages/admin/EquipmentMigration";
 import WaitlistAdmin from "@/pages/admin/WaitlistAdmin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import Debug from "@/pages/Debug";
+import VideoHub from "@/pages/VideoHub";
 import DebugFeed from "@/pages/DebugFeed";
 import { lazy } from "react";
 
@@ -190,6 +191,7 @@ function AppRoutes() {
             <Route path="/patch-notes" element={<PatchNotes />} />
             <Route path="/waitlist" element={<Waitlist />} />
             <Route path="/beta-info" element={<BetaInfo />} />
+            <Route path="/video-hub" element={<VideoHub />} />
             
             {/* Admin routes */}
             <Route path="/admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />

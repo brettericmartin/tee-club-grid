@@ -10,6 +10,45 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.18.0",
+    date: "2025-08-22",
+    title: "Enhanced Equipment Modal & Affiliate Links",
+    changes: [
+      {
+        category: "feature",
+        description: "Complete equipment management modal with affiliate links, videos, photos, reviews, and forums in one place"
+      },
+      {
+        category: "feature",
+        description: "Integrated affiliate link management directly in equipment modal for easy monetization"
+      },
+      {
+        category: "feature",
+        description: "Added comprehensive equipment editing: loft, shaft, grip, condition, notes, and custom photos"
+      },
+      {
+        category: "feature",
+        description: "Created Video Hub for discovering and sharing golf equipment videos"
+      },
+      {
+        category: "improvement",
+        description: "Mobile-optimized equipment modal with full-screen view and touch-friendly navigation"
+      },
+      {
+        category: "improvement",
+        description: "Featured equipment badge system for highlighting special items in your bag"
+      },
+      {
+        category: "fix",
+        description: "Fixed button overlap issues in modals and improved mobile responsiveness"
+      },
+      {
+        category: "fix",
+        description: "Implemented proper RLS (Row Level Security) policies for affiliate links and video features"
+      }
+    ]
+  },
+  {
     version: "0.17.0",
     date: "2025-08-21",
     title: "Deployment Optimizations & Share Feature Fix",

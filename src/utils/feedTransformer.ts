@@ -31,6 +31,13 @@ export interface FeedItemData {
     model: string;
     imageUrl?: string;
   };
+  videoData?: {
+    url: string;
+    provider: string;
+    videoId?: string;
+    title?: string;
+    thumbnailUrl?: string;
+  };
   mediaUrls?: string[];
   content?: any; // Add content for multi-equipment photos
 }
@@ -85,6 +92,22 @@ export function transformFeedPost(post: FeedPost & {
     };
   }
   
+  // Transform video data for bag_video posts
+  let videoData = undefined;
+  if (post.type === 'bag_video' && content) {
+    videoData = {
+      url: content.url,
+      provider: content.provider,
+      videoId: content.video_provider_id || content.video_id,
+      title: content.title,
+      thumbnailUrl: content.thumbnail_url
+    };
+    // For video posts, use thumbnail as the main image if available
+    if (content.thumbnail_url) {
+      imageUrl = content.thumbnail_url;
+    }
+  }
+  
   // Get likes count - prefer likes_count field which is kept in sync via triggers
   // feed_likes array contains actual like records, not a count
   const likesCount = post.likes_count ?? post.feed_likes?.length ?? 0;
@@ -108,6 +131,7 @@ export function transformFeedPost(post: FeedPost & {
     equipmentId: post.equipment_id || content.equipment_id,
     bagData,
     equipmentData,
+    videoData,
     mediaUrls,
     content // Pass through content for multi-equipment photos
   };
@@ -123,7 +147,8 @@ export function getPostTypeLabel(type: string): string {
     'milestone': 'Milestone',
     'playing': 'Playing',
     'bag_created': 'New Bag',
-    'bag_updated': 'Bag Update'
+    'bag_updated': 'Bag Update',
+    'bag_video': 'Bag Video'
   };
   return labels[type] || 'Post';
 }

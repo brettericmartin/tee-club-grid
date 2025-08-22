@@ -1,92 +1,102 @@
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+#!/usr/bin/env node
 
-dotenv.config();
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.VITE_SUPABASE_ANON_KEY
-);
+import { supabase } from './supabase-admin.js';
 
 async function checkCurrentRLS() {
-  console.log('🔍 Checking Current RLS State\n');
+  console.log('🔍 Checking current RLS status for affiliate and video tables...\n');
   
-  try {
-    // Test different operations
-    console.log('1. Testing SELECT (view likes)...');
-    const { data: viewTest, error: viewError } = await supabase
-      .from('feed_likes')
-      .select('*')
-      .limit(1);
+  const tables = [
+    'user_equipment_links',
+    'equipment_videos', 
+    'user_bag_videos',
+    'link_clicks'
+  ];
+  
+  for (const tableName of tables) {
+    console.log(`📊 TABLE: ${tableName}`);
+    console.log('='.repeat(50));
     
-    if (viewError) {
-      console.log('❌ Cannot VIEW likes:', viewError.message);
-    } else {
-      console.log('✅ Can VIEW likes');
-    }
-    
-    // Get a test user and post
-    const { data: user } = await supabase.from('profiles').select('id').limit(1).single();
-    const { data: post } = await supabase.from('feed_posts').select('id').limit(1).single();
-    
-    if (user && post) {
-      // Clean up any existing like first
-      await supabase.from('feed_likes').delete().eq('user_id', user.id).eq('post_id', post.id);
+    try {
+      // Test if we can access the table (this tells us if RLS is working)
+      const { data, error, count } = await supabase
+        .from(tableName)
+        .select('*', { count: 'exact' })
+        .limit(1);
       
-      console.log('\n2. Testing INSERT (add like)...');
-      const { error: insertError } = await supabase
-        .from('feed_likes')
-        .insert({ user_id: user.id, post_id: post.id });
-      
-      if (insertError) {
-        console.log('❌ Cannot INSERT likes:', insertError.message);
+      if (error) {
+        console.log(`❌ Access Error: ${error.message}`);
         
-        // Check if it's specifically an RLS issue
-        if (insertError.message.includes('row-level security')) {
-          console.log('   Problem: RLS policy is blocking authenticated inserts');
-          console.log('   The INSERT policy may be missing or incorrect');
+        if (error.message.includes('insufficient_privilege') || 
+            error.message.includes('policy')) {
+          console.log(`✅ RLS is ENABLED and blocking access (expected for anonymous)`);
+        } else {
+          console.log(`⚠️  Other error - may need investigation`);
         }
       } else {
-        console.log('✅ Can INSERT likes');
+        console.log(`✅ Table accessible: ${count || 0} rows`);
+        console.log(`ℹ️  RLS may be DISABLED or has permissive policies`);
         
-        console.log('\n3. Testing DELETE (remove like)...');
-        const { error: deleteError } = await supabase
-          .from('feed_likes')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('post_id', post.id);
-        
-        if (deleteError) {
-          console.log('❌ Cannot DELETE likes:', deleteError.message);
-        } else {
-          console.log('✅ Can DELETE likes');
+        if (data && data.length > 0) {
+          console.log(`   Sample columns: ${Object.keys(data[0]).join(', ')}`);
         }
       }
+      
+      // Test with an authenticated context by trying a specific operation
+      console.log('🔐 Testing with authenticated context...');
+      
+      // Try to insert with a fake user ID to see policy response
+      const testInsert = await supabase
+        .from(tableName)
+        .insert({ 
+          // Add minimal required fields based on table
+          ...(tableName === 'user_equipment_links' && {
+            user_id: '00000000-0000-0000-0000-000000000000',
+            bag_id: '00000000-0000-0000-0000-000000000000',
+            bag_equipment_id: '00000000-0000-0000-0000-000000000000',
+            label: 'test',
+            url: 'https://test.com'
+          }),
+          ...(tableName === 'equipment_videos' && {
+            equipment_id: '00000000-0000-0000-0000-000000000000',
+            provider: 'youtube',
+            url: 'https://youtube.com/test'
+          }),
+          ...(tableName === 'user_bag_videos' && {
+            user_id: '00000000-0000-0000-0000-000000000000',
+            bag_id: '00000000-0000-0000-0000-000000000000',
+            provider: 'youtube',
+            url: 'https://youtube.com/test'
+          }),
+          ...(tableName === 'link_clicks' && {
+            link_id: '00000000-0000-0000-0000-000000000000'
+          })
+        });
+      
+      if (testInsert.error) {
+        console.log(`   Insert test: ${testInsert.error.message}`);
+        
+        if (testInsert.error.message.includes('policy') || 
+            testInsert.error.message.includes('not permitted')) {
+          console.log(`   ✅ RLS policies are working (blocking unauthorized inserts)`);
+        } else if (testInsert.error.message.includes('foreign key') ||
+                   testInsert.error.message.includes('violates')) {
+          console.log(`   ✅ RLS passed, failed on data constraints (expected)`);
+        }
+      } else {
+        console.log(`   ⚠️  Insert succeeded - RLS may be too permissive`);
+      }
+      
+    } catch (err) {
+      console.log(`❌ Error testing ${tableName}: ${err.message}`);
     }
     
-    console.log('\n📊 Summary:');
-    console.log('The RLS policies are preventing INSERT operations.');
-    console.log('This means users cannot add new likes.\n');
-    
-    console.log('🔧 Required Fix:');
-    console.log('The INSERT policy needs to allow authenticated users');
-    console.log('where auth.uid() = user_id');
-    
-    // Try to get more info about the table
-    console.log('\n4. Checking table structure...');
-    const { data: sample } = await supabase
-      .from('feed_likes')
-      .select('*')
-      .limit(1)
-      .single();
-    
-    if (sample) {
-      console.log('Table columns:', Object.keys(sample).join(', '));
-    }
-    
-  } catch (error) {
-    console.error('Error:', error);
+    console.log('\n');
   }
+  
+  console.log('🎯 Summary:');
+  console.log('- Tables accessible without auth suggest RLS may need policies');
+  console.log('- Policy violations indicate RLS is working correctly');
+  console.log('- Manual SQL execution may be needed to set up policies\n');
 }
 
 checkCurrentRLS();

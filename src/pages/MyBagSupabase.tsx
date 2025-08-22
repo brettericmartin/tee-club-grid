@@ -1,6 +1,6 @@
 /* @refresh skip */
 import { useState, useEffect, Suspense } from "react";
-import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle, Share2, Camera } from "lucide-react";
+import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle, Share2, Camera, Video, Link2 } from "lucide-react";
 import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer, { bagBackgrounds } from "@/components/BackgroundLayer";
 import { Button } from "@/components/ui/button";
@@ -50,12 +50,14 @@ import { getDisplayName } from "@/utils/displayName";
 
 // Lazy load heavy components with retry logic for Vite HMR stability
 const BagGalleryDndKit = lazyWithRetry(() => import("@/components/bag/BagGalleryDndKit"));
-const EquipmentEditor = lazyWithRetry(() => import("@/components/bag/EquipmentEditor"));
+// EquipmentEditor removed - using BagEquipmentModal instead
 const AIEquipmentAnalyzer = lazyWithRetry(() => import("@/components/equipment/AIEquipmentAnalyzer"));
+const BagVideosTab = lazyWithRetry(() => import("@/components/bag/BagVideosTab"));
 
 // Import these directly to avoid dynamic import issues
 import EquipmentSelectorImproved from "@/components/equipment/EquipmentSelectorImproved";
 import AddEquipmentMethodDialog from "@/components/equipment/AddEquipmentMethodDialog";
+import BagEquipmentModal from "@/components/bag/BagEquipmentModal";
 const AIAnalysisResultsDialog = lazyWithRetry(() => import("@/components/equipment/AIAnalysisResultsDialog"));
 
 // Loading component for heavy components
@@ -123,14 +125,15 @@ const MyBagSupabase = () => {
   const [bagDescription, setBagDescription] = useState("");
   const [bagItems, setBagItems] = useState<BagEquipmentItem[]>([]);
   const [selectedBackground, setSelectedBackground] = useState('midwest-lush');
-  const [viewMode, setViewMode] = useState<'gallery' | 'list' | 'card' | 'feed'>('gallery');
+  const [viewMode, setViewMode] = useState<'gallery' | 'list' | 'card' | 'feed' | 'videos'>('gallery');
   const [layout, setLayout] = useState<BagLayout>({});
   const [isEditingLayout, setIsEditingLayout] = useState(false);
   const [showBagSelector, setShowBagSelector] = useState(false);
   const [showCreateBag, setShowCreateBag] = useState(false);
   const [equipmentSelectorOpen, setEquipmentSelectorOpen] = useState(false);
-  const [equipmentEditorOpen, setEquipmentEditorOpen] = useState(false);
+  const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
   const [selectedBagEquipment, setSelectedBagEquipment] = useState<BagEquipmentItem | null>(null);
+  // showBagEquipmentModal removed - using equipmentModalOpen instead
   const [totalTees, setTotalTees] = useState(0);
   const [userBadges, setUserBadges] = useState<UserBadgeWithDetails[]>([]);
   const [expandedBadges, setExpandedBadges] = useState(false);
@@ -892,7 +895,7 @@ const MyBagSupabase = () => {
 
   const handleEditEquipment = (item: BagEquipmentItem) => {
     setSelectedBagEquipment(item);
-    setEquipmentEditorOpen(true);
+    setEquipmentModalOpen(true);
   };
 
   const handleEditLoft = (item: BagEquipmentItem) => {
@@ -1357,6 +1360,15 @@ const MyBagSupabase = () => {
               <img src="/dog.png" alt="Feed" className="w-4 h-4 mr-2" />
               Feed
             </Button>
+            <Button
+              variant={viewMode === 'videos' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('videos')}
+              className={viewMode === 'videos' ? 'bg-primary hover:bg-primary/90' : 'text-white hover:text-white hover:bg-white/10'}
+            >
+              <Video className="w-4 h-4 mr-2" />
+              Videos
+            </Button>
           </div>
         </div>
 
@@ -1565,6 +1577,20 @@ const MyBagSupabase = () => {
           ) : (
             <div className="flex justify-center items-center h-64">
               <div className="text-white/50">Loading feed...</div>
+            </div>
+          )
+        ) : viewMode === 'videos' ? (
+          currentBag?.id ? (
+            <Suspense fallback={<ComponentLoadingFallback />}>
+              <BagVideosTab
+                bagId={currentBag.id}
+                bagName={currentBag.name}
+                isOwner={true}
+              />
+            </Suspense>
+          ) : (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-white/50">No bag selected</div>
             </div>
           )
         ) : (
@@ -1798,17 +1824,22 @@ const MyBagSupabase = () => {
 
       {selectedBagEquipment && (
         <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
-          <EquipmentEditor
-            isOpen={equipmentEditorOpen}
+          <BagEquipmentModal
+            isOpen={equipmentModalOpen}
             onClose={() => {
-              setEquipmentEditorOpen(false);
+              setEquipmentModalOpen(false);
               setSelectedBagEquipment(null);
             }}
-            equipment={selectedBagEquipment}
+            bagId={currentBag?.id || ''}
+            bagEquipmentId={selectedBagEquipment?.id || ''}
+            bagEquipment={selectedBagEquipment}
+            canEdit={true}
             onUpdate={() => loadBagEquipment(currentBag?.id || '')}
           />
         </Suspense>
       )}
+
+      {/* Remove duplicate BagEquipmentModal - now using single instance above */}
 
       {/* Badge Notification Toast */}
       {newBadges.length > 0 && (

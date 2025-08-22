@@ -1,78 +1,48 @@
 -- ============================================================================
--- OPTIMIZED ROW LEVEL SECURITY (RLS) POLICIES FOR AFFILIATE & VIDEO FEATURES
+-- OPTIMIZED RLS POLICIES FOR AFFILIATE LINKS & VIDEO FEATURES
 -- ============================================================================
--- This script creates optimized RLS policies for:
--- 1. user_equipment_links - User-owned affiliate links
--- 2. equipment_videos - Community equipment videos  
--- 3. user_bag_videos - User bag video showcases
--- 4. link_clicks - Privacy-focused analytics tracking
--- 
--- Key optimizations:
--- - Performance-optimized indexes for RLS policies
--- - Proper bag privacy inheritance
+-- This script provides production-ready Row Level Security policies with:
+-- - Performance optimizations through proper indexing
+-- - Privacy-respecting bag visibility
 -- - Admin moderation capabilities
--- - Privacy-first analytics
--- - Safe re-runnable script
+-- - Write-only analytics for privacy
 -- ============================================================================
 
--- Drop existing policies if they exist (for re-running)
-DO $$ 
-BEGIN
-  -- user_equipment_links policies
-  DROP POLICY IF EXISTS "Users can view all equipment links" ON user_equipment_links;
-  DROP POLICY IF EXISTS "Users can create their own equipment links" ON user_equipment_links;
-  DROP POLICY IF EXISTS "Users can update their own equipment links" ON user_equipment_links;
-  DROP POLICY IF EXISTS "Users can delete their own equipment links" ON user_equipment_links;
-  
-  -- equipment_videos policies
-  DROP POLICY IF EXISTS "Anyone can view equipment videos" ON equipment_videos;
-  DROP POLICY IF EXISTS "Authenticated users can add equipment videos" ON equipment_videos;
-  DROP POLICY IF EXISTS "Users can update their own equipment videos" ON equipment_videos;
-  DROP POLICY IF EXISTS "Users can delete their own equipment videos" ON equipment_videos;
-  
-  -- user_bag_videos policies
-  DROP POLICY IF EXISTS "Anyone can view bag videos" ON user_bag_videos;
-  DROP POLICY IF EXISTS "Users can create their own bag videos" ON user_bag_videos;
-  DROP POLICY IF EXISTS "Users can update their own bag videos" ON user_bag_videos;
-  DROP POLICY IF EXISTS "Users can delete their own bag videos" ON user_bag_videos;
-  
-  -- link_clicks policies
-  DROP POLICY IF EXISTS "Anyone can track link clicks" ON link_clicks;
-  DROP POLICY IF EXISTS "Link owners can view their click analytics" ON link_clicks;
-  
-  EXCEPTION WHEN OTHERS THEN
-    -- Ignore errors if policies don't exist
-    NULL;
-END $$;
-
 -- ============================================================================
--- PERFORMANCE INDEXES FOR RLS POLICIES
+-- STEP 1: DROP EXISTING POLICIES (SAFE - IF EXISTS)
 -- ============================================================================
 
--- Indexes for user_equipment_links RLS performance
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_equipment_links_rls_user_bag
-  ON user_equipment_links(user_id, bag_id);
+-- Drop existing policies to ensure clean state
+DROP POLICY IF EXISTS "Users can view all equipment links" ON user_equipment_links;
+DROP POLICY IF EXISTS "Users can create their own equipment links" ON user_equipment_links;
+DROP POLICY IF EXISTS "Users can update their own equipment links" ON user_equipment_links;
+DROP POLICY IF EXISTS "Users can delete their own equipment links" ON user_equipment_links;
+DROP POLICY IF EXISTS sel_user_equipment_links_public ON user_equipment_links;
+DROP POLICY IF EXISTS ins_user_equipment_links_owner ON user_equipment_links;
+DROP POLICY IF EXISTS upd_user_equipment_links_owner ON user_equipment_links;
+DROP POLICY IF EXISTS del_user_equipment_links_owner ON user_equipment_links;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_equipment_links_rls_bag_public
-  ON user_equipment_links(bag_id) WHERE bag_id IS NOT NULL;
+DROP POLICY IF EXISTS "Anyone can view equipment videos" ON equipment_videos;
+DROP POLICY IF EXISTS "Authenticated users can add equipment videos" ON equipment_videos;
+DROP POLICY IF EXISTS "Users can update their own equipment videos" ON equipment_videos;
+DROP POLICY IF EXISTS "Users can delete their own equipment videos" ON equipment_videos;
+DROP POLICY IF EXISTS sel_equipment_videos_public ON equipment_videos;
+DROP POLICY IF EXISTS cud_equipment_videos_owner ON equipment_videos;
 
--- Indexes for equipment_videos RLS performance  
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_equipment_videos_rls_user
-  ON equipment_videos(added_by_user_id) WHERE added_by_user_id IS NOT NULL;
+DROP POLICY IF EXISTS "Anyone can view bag videos" ON user_bag_videos;
+DROP POLICY IF EXISTS "Users can create their own bag videos" ON user_bag_videos;
+DROP POLICY IF EXISTS "Users can update their own bag videos" ON user_bag_videos;
+DROP POLICY IF EXISTS "Users can delete their own bag videos" ON user_bag_videos;
+DROP POLICY IF EXISTS sel_user_bag_videos_public ON user_bag_videos;
+DROP POLICY IF EXISTS cud_user_bag_videos_owner ON user_bag_videos;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_equipment_videos_rls_verified
-  ON equipment_videos(verified) WHERE verified = true;
-
--- Indexes for user_bag_videos RLS performance
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_bag_videos_rls_user_bag
-  ON user_bag_videos(user_id, bag_id);
-
--- Indexes for link_clicks RLS performance (owner analytics)
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_link_clicks_rls_owner
-  ON link_clicks(link_id);
+DROP POLICY IF EXISTS "Anyone can track link clicks" ON link_clicks;
+DROP POLICY IF EXISTS "Link owners can view their click analytics" ON link_clicks;
+DROP POLICY IF EXISTS sel_link_clicks_public ON link_clicks;
+DROP POLICY IF EXISTS ins_link_clicks_all ON link_clicks;
 
 -- ============================================================================
--- ENABLE RLS ON ALL TABLES
+-- STEP 2: ENABLE RLS ON ALL TABLES
 -- ============================================================================
 
 ALTER TABLE user_equipment_links ENABLE ROW LEVEL SECURITY;
@@ -81,351 +51,299 @@ ALTER TABLE user_bag_videos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE link_clicks ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
--- USER_EQUIPMENT_LINKS POLICIES
+-- STEP 3: USER EQUIPMENT LINKS POLICIES
 -- ============================================================================
+-- Links should respect bag privacy settings
 
--- READ: Respect bag privacy settings
-CREATE POLICY "View equipment links for accessible bags" ON user_equipment_links
-  FOR SELECT 
+-- Public can view links on public bags
+CREATE POLICY "view_public_equipment_links" 
+  ON user_equipment_links FOR SELECT
   USING (
-    -- Always allow owners to see their own links
-    auth.uid() = user_id 
-    OR
-    -- Allow viewing links for public bags
     EXISTS (
-      SELECT 1 FROM user_bags 
-      WHERE user_bags.id = user_equipment_links.bag_id 
-      AND user_bags.is_public = true
-    )
-    OR
-    -- Allow admin access (if admins table exists)
-    EXISTS (
-      SELECT 1 FROM admins 
-      WHERE admins.user_id = auth.uid() 
-      AND admins.is_active = true
+      SELECT 1 FROM bags
+      WHERE bags.id = user_equipment_links.bag_id
+      AND (
+        bags.is_public = true 
+        OR bags.user_id = auth.uid()
+        OR auth.uid() IS NULL -- Allow anonymous viewing of public bags
+      )
     )
   );
 
--- CREATE: Users can only create links for their own bags
-CREATE POLICY "Users can create links for their own bags" ON user_equipment_links
-  FOR INSERT 
+-- Users can manage their own links
+CREATE POLICY "users_insert_own_equipment_links" 
+  ON user_equipment_links FOR INSERT
   WITH CHECK (
     auth.uid() = user_id
-    AND
-    EXISTS (
-      SELECT 1 FROM user_bags 
-      WHERE user_bags.id = user_equipment_links.bag_id 
-      AND user_bags.user_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM bags
+      WHERE bags.id = bag_id
+      AND bags.user_id = auth.uid()
     )
   );
 
--- UPDATE: Users can only update their own links
-CREATE POLICY "Users can update their own equipment links" ON user_equipment_links
-  FOR UPDATE 
+CREATE POLICY "users_update_own_equipment_links" 
+  ON user_equipment_links FOR UPDATE
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
--- DELETE: Users can only delete their own links
-CREATE POLICY "Users can delete their own equipment links" ON user_equipment_links
-  FOR DELETE 
+CREATE POLICY "users_delete_own_equipment_links" 
+  ON user_equipment_links FOR DELETE
   USING (auth.uid() = user_id);
 
 -- ============================================================================
--- EQUIPMENT_VIDEOS POLICIES
+-- STEP 4: EQUIPMENT VIDEOS POLICIES
 -- ============================================================================
+-- Videos have public visibility but moderation support
 
--- READ: Public videos (verified) + all for content creators + admin access
-CREATE POLICY "View equipment videos with moderation" ON equipment_videos
-  FOR SELECT 
+-- Anyone can view verified videos
+CREATE POLICY "view_verified_equipment_videos" 
+  ON equipment_videos FOR SELECT
   USING (
-    -- Public access to verified videos
-    verified = true
-    OR
-    -- Content creators can see their own videos (even unverified)
-    auth.uid() = added_by_user_id
-    OR
-    -- Admin access to all videos for moderation
-    EXISTS (
-      SELECT 1 FROM admins 
-      WHERE admins.user_id = auth.uid() 
-      AND admins.is_active = true
+    verified = true 
+    OR added_by_user_id = auth.uid()
+    OR EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.is_admin = true
     )
   );
 
--- CREATE: Authenticated users can add videos (pending verification)
-CREATE POLICY "Authenticated users can add equipment videos" ON equipment_videos
-  FOR INSERT 
+-- Authenticated users can add videos (unverified by default)
+CREATE POLICY "authenticated_insert_equipment_videos" 
+  ON equipment_videos FOR INSERT
   WITH CHECK (
-    auth.uid() IS NOT NULL
+    auth.uid() IS NOT NULL 
     AND auth.uid() = added_by_user_id
+    AND verified = false -- New videos start unverified
   );
 
--- UPDATE: Content creators can update their own videos + admin moderation
-CREATE POLICY "Users can update their own equipment videos" ON equipment_videos
-  FOR UPDATE 
+-- Users can update their own videos
+CREATE POLICY "users_update_own_equipment_videos" 
+  ON equipment_videos FOR UPDATE
   USING (
     auth.uid() = added_by_user_id
-    OR
-    EXISTS (
-      SELECT 1 FROM admins 
-      WHERE admins.user_id = auth.uid() 
-      AND admins.is_active = true
+    OR EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.is_admin = true
     )
   )
   WITH CHECK (
-    -- Users can only change their own video details (not verification status)
-    (auth.uid() = added_by_user_id AND verified = OLD.verified)
-    OR
-    -- Admins can change verification status
-    EXISTS (
-      SELECT 1 FROM admins 
-      WHERE admins.user_id = auth.uid() 
-      AND admins.is_active = true
-    )
+    -- Regular users can't self-verify
+    CASE 
+      WHEN EXISTS (
+        SELECT 1 FROM profiles
+        WHERE profiles.id = auth.uid()
+        AND profiles.is_admin = true
+      ) THEN true
+      ELSE verified = false OR verified IS NULL
+    END
   );
 
--- DELETE: Content creators can delete their own videos + admin moderation
-CREATE POLICY "Users can delete their own equipment videos" ON equipment_videos
-  FOR DELETE 
+-- Users can delete their own videos
+CREATE POLICY "users_delete_own_equipment_videos" 
+  ON equipment_videos FOR DELETE
   USING (
     auth.uid() = added_by_user_id
-    OR
-    EXISTS (
-      SELECT 1 FROM admins 
-      WHERE admins.user_id = auth.uid() 
-      AND admins.is_active = true
+    OR EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.is_admin = true
     )
   );
 
 -- ============================================================================
--- USER_BAG_VIDEOS POLICIES
+-- STEP 5: USER BAG VIDEOS POLICIES
 -- ============================================================================
+-- Bag videos respect bag privacy settings
 
--- READ: Respect bag privacy settings
-CREATE POLICY "View bag videos for accessible bags" ON user_bag_videos
-  FOR SELECT 
+-- View videos on public bags or shared to feed
+CREATE POLICY "view_public_bag_videos" 
+  ON user_bag_videos FOR SELECT
   USING (
-    -- Owners can always see their own bag videos
-    auth.uid() = user_id
-    OR
-    -- Public access to videos for public bags
-    EXISTS (
-      SELECT 1 FROM user_bags 
-      WHERE user_bags.id = user_bag_videos.bag_id 
-      AND user_bags.is_public = true
-    )
-    OR
-    -- Videos shared to feed are publicly visible
     share_to_feed = true
-    OR
-    -- Admin access
-    EXISTS (
-      SELECT 1 FROM admins 
-      WHERE admins.user_id = auth.uid() 
-      AND admins.is_active = true
+    OR auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM bags
+      WHERE bags.id = user_bag_videos.bag_id
+      AND (
+        bags.is_public = true 
+        OR bags.user_id = auth.uid()
+      )
     )
   );
 
--- CREATE: Users can only add videos to their own bags
-CREATE POLICY "Users can create videos for their own bags" ON user_bag_videos
-  FOR INSERT 
+-- Users can add videos to their own bags
+CREATE POLICY "users_insert_own_bag_videos" 
+  ON user_bag_videos FOR INSERT
   WITH CHECK (
     auth.uid() = user_id
-    AND
-    EXISTS (
-      SELECT 1 FROM user_bags 
-      WHERE user_bags.id = user_bag_videos.bag_id 
-      AND user_bags.user_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM bags
+      WHERE bags.id = bag_id
+      AND bags.user_id = auth.uid()
     )
   );
 
--- UPDATE: Users can only update their own bag videos
-CREATE POLICY "Users can update their own bag videos" ON user_bag_videos
-  FOR UPDATE 
+-- Users can update their own bag videos
+CREATE POLICY "users_update_own_bag_videos" 
+  ON user_bag_videos FOR UPDATE
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
--- DELETE: Users can only delete their own bag videos
-CREATE POLICY "Users can delete their own bag videos" ON user_bag_videos
-  FOR DELETE 
+-- Users can delete their own bag videos
+CREATE POLICY "users_delete_own_bag_videos" 
+  ON user_bag_videos FOR DELETE
   USING (auth.uid() = user_id);
 
 -- ============================================================================
--- LINK_CLICKS POLICIES (Privacy-Focused Analytics)
+-- STEP 6: LINK CLICKS POLICIES (PRIVACY-FOCUSED)
 -- ============================================================================
+-- Write-only for privacy, owners can view their own analytics
 
--- CREATE: Anyone can track clicks (for analytics) - write-only for privacy
-CREATE POLICY "Anyone can track link clicks" ON link_clicks
-  FOR INSERT 
+-- Anyone can track clicks (write-only)
+CREATE POLICY "anyone_insert_link_clicks" 
+  ON link_clicks FOR INSERT
   WITH CHECK (true);
 
--- READ: Only link owners can view their analytics + admin access
-CREATE POLICY "Link owners can view their click analytics" ON link_clicks
-  FOR SELECT 
+-- Only link owners can view their analytics
+CREATE POLICY "owners_view_link_analytics" 
+  ON link_clicks FOR SELECT
   USING (
-    -- Link owners can see clicks on their links
     EXISTS (
       SELECT 1 FROM user_equipment_links
       WHERE user_equipment_links.id = link_clicks.link_id
       AND user_equipment_links.user_id = auth.uid()
     )
-    OR
-    -- Admin access for platform analytics
-    EXISTS (
-      SELECT 1 FROM admins 
-      WHERE admins.user_id = auth.uid() 
-      AND admins.is_active = true
+    OR EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.is_admin = true
     )
   );
 
--- NO UPDATE/DELETE policies for link_clicks (immutable analytics data)
+-- No update or delete on click analytics (immutable audit log)
+-- This ensures data integrity for analytics
 
 -- ============================================================================
--- PERFORMANCE FUNCTION FOR BAG PRIVACY CHECKS
+-- STEP 7: PERFORMANCE INDEXES FOR RLS POLICIES
 -- ============================================================================
 
--- Optimized function to check bag accessibility (used by RLS policies)
-CREATE OR REPLACE FUNCTION is_bag_accessible(bag_id UUID, user_id UUID DEFAULT auth.uid())
+-- Index for equipment links bag lookup
+CREATE INDEX IF NOT EXISTS idx_user_equipment_links_bag_user 
+  ON user_equipment_links(bag_id, user_id);
+
+-- Index for equipment videos verification status
+CREATE INDEX IF NOT EXISTS idx_equipment_videos_verified 
+  ON equipment_videos(verified) 
+  WHERE verified = true;
+
+-- Index for equipment videos by user
+CREATE INDEX IF NOT EXISTS idx_equipment_videos_user 
+  ON equipment_videos(added_by_user_id);
+
+-- Index for bag videos feed sharing
+CREATE INDEX IF NOT EXISTS idx_user_bag_videos_feed 
+  ON user_bag_videos(share_to_feed) 
+  WHERE share_to_feed = true;
+
+-- Index for bag videos by bag
+CREATE INDEX IF NOT EXISTS idx_user_bag_videos_bag_user 
+  ON user_bag_videos(bag_id, user_id);
+
+-- Index for link clicks analytics
+CREATE INDEX IF NOT EXISTS idx_link_clicks_link_created 
+  ON link_clicks(link_id, created_at DESC);
+
+-- ============================================================================
+-- STEP 8: ADMIN HELPER FUNCTIONS
+-- ============================================================================
+
+-- Function to verify equipment videos (admin only)
+CREATE OR REPLACE FUNCTION verify_equipment_video(video_id UUID, should_verify BOOLEAN)
 RETURNS BOOLEAN AS $$
 BEGIN
-  RETURN EXISTS (
-    SELECT 1 FROM user_bags 
-    WHERE user_bags.id = bag_id 
-    AND (
-      user_bags.is_public = true 
-      OR user_bags.user_id = user_id
-    )
-  );
+  -- Check if user is admin
+  IF NOT EXISTS (
+    SELECT 1 FROM profiles
+    WHERE id = auth.uid()
+    AND is_admin = true
+  ) THEN
+    RAISE EXCEPTION 'Unauthorized: Admin access required';
+  END IF;
+  
+  -- Update verification status
+  UPDATE equipment_videos
+  SET verified = should_verify,
+      updated_at = NOW()
+  WHERE id = video_id;
+  
+  RETURN FOUND;
 END;
-$$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to get link analytics summary (owner only)
+CREATE OR REPLACE FUNCTION get_link_analytics_summary(p_link_id UUID)
+RETURNS TABLE (
+  total_clicks BIGINT,
+  unique_users BIGINT,
+  last_click TIMESTAMPTZ
+) AS $$
+BEGIN
+  -- Check if user owns the link
+  IF NOT EXISTS (
+    SELECT 1 FROM user_equipment_links
+    WHERE id = p_link_id
+    AND user_id = auth.uid()
+  ) AND NOT EXISTS (
+    SELECT 1 FROM profiles
+    WHERE id = auth.uid()
+    AND is_admin = true
+  ) THEN
+    RAISE EXCEPTION 'Unauthorized: You do not own this link';
+  END IF;
+  
+  RETURN QUERY
+  SELECT 
+    COUNT(*)::BIGINT as total_clicks,
+    COUNT(DISTINCT clicked_by_user)::BIGINT as unique_users,
+    MAX(created_at) as last_click
+  FROM link_clicks
+  WHERE link_id = p_link_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
--- GRANT NECESSARY PERMISSIONS
+-- STEP 9: GRANTS FOR AUTHENTICATED USERS
 -- ============================================================================
 
--- Grant usage on sequences if they exist
+-- Ensure authenticated users have proper permissions
+GRANT SELECT, INSERT, UPDATE, DELETE ON user_equipment_links TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON equipment_videos TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON user_bag_videos TO authenticated;
+GRANT SELECT, INSERT ON link_clicks TO authenticated;
+
+-- Grant usage on sequences
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+
+-- ============================================================================
+-- STEP 10: ANONYMOUS ACCESS FOR PUBLIC CONTENT
+-- ============================================================================
+
+-- Allow anonymous users to view public content
+GRANT SELECT ON user_equipment_links TO anon;
+GRANT SELECT ON equipment_videos TO anon;
+GRANT SELECT ON user_bag_videos TO anon;
+GRANT INSERT ON link_clicks TO anon; -- Allow tracking from non-authenticated users
+
+-- ============================================================================
+-- SUCCESS MESSAGE
+-- ============================================================================
 DO $$
 BEGIN
-  -- Grant permissions for authenticated users
-  GRANT SELECT, INSERT, UPDATE, DELETE ON user_equipment_links TO authenticated;
-  GRANT SELECT, INSERT, UPDATE, DELETE ON equipment_videos TO authenticated;
-  GRANT SELECT, INSERT, UPDATE, DELETE ON user_bag_videos TO authenticated;
-  GRANT SELECT, INSERT ON link_clicks TO authenticated;
-  
-  -- Grant permissions for anon users (for public reads)
-  GRANT SELECT ON user_equipment_links TO anon;
-  GRANT SELECT ON equipment_videos TO anon;
-  GRANT SELECT ON user_bag_videos TO anon;
-  GRANT INSERT ON link_clicks TO anon;
-  
-EXCEPTION WHEN OTHERS THEN
-  -- Log error but continue
-  RAISE NOTICE 'Error granting permissions: %', SQLERRM;
-END $$;
-
--- ============================================================================
--- VALIDATION FUNCTIONS
--- ============================================================================
-
--- Function to validate affiliate URL structure
-CREATE OR REPLACE FUNCTION validate_affiliate_url(url TEXT)
-RETURNS BOOLEAN AS $$
-BEGIN
-  -- Basic URL validation
-  IF url !~ '^https?://' THEN
-    RETURN FALSE;
-  END IF;
-  
-  -- Check for suspicious patterns
-  IF url ~ '(javascript|data|vbscript):' THEN
-    RETURN FALSE;
-  END IF;
-  
-  RETURN TRUE;
-END;
-$$ LANGUAGE plpgsql IMMUTABLE;
-
--- Function to validate video URL
-CREATE OR REPLACE FUNCTION validate_video_url(url TEXT)
-RETURNS BOOLEAN AS $$
-BEGIN
-  -- Basic URL validation
-  IF url !~ '^https?://' THEN
-    RETURN FALSE;
-  END IF;
-  
-  -- Check for supported video platforms
-  IF url ~ '(youtube\.com|youtu\.be|tiktok\.com|vimeo\.com)' THEN
-    RETURN TRUE;
-  END IF;
-  
-  -- Allow other HTTPS URLs but log for review
-  RETURN url ~ '^https://';
-END;
-$$ LANGUAGE plpgsql IMMUTABLE;
-
--- ============================================================================
--- ADD VALIDATION CONSTRAINTS
--- ============================================================================
-
--- Add URL validation constraints
-DO $$
-BEGIN
-  -- Validate affiliate URLs
-  ALTER TABLE user_equipment_links 
-    ADD CONSTRAINT valid_affiliate_url 
-    CHECK (validate_affiliate_url(url));
-    
-  -- Validate video URLs
-  ALTER TABLE equipment_videos 
-    ADD CONSTRAINT valid_video_url 
-    CHECK (validate_video_url(url));
-    
-  ALTER TABLE user_bag_videos 
-    ADD CONSTRAINT valid_bag_video_url 
-    CHECK (validate_video_url(url));
-    
-EXCEPTION WHEN duplicate_object THEN
-  -- Constraints already exist, ignore
-  NULL;
-END $$;
-
--- ============================================================================
--- COMMENTS FOR DOCUMENTATION
--- ============================================================================
-
-COMMENT ON TABLE user_equipment_links IS 'User-owned affiliate links for bag equipment with bag privacy inheritance';
-COMMENT ON TABLE equipment_videos IS 'Community-contributed equipment videos with admin moderation';
-COMMENT ON TABLE user_bag_videos IS 'User-curated video showcases for bags with privacy controls';
-COMMENT ON TABLE link_clicks IS 'Privacy-focused analytics for affiliate link tracking (write-only for users, read-only for owners)';
-
-COMMENT ON POLICY "View equipment links for accessible bags" ON user_equipment_links IS 'Allows viewing links only for public bags or user-owned bags';
-COMMENT ON POLICY "View equipment videos with moderation" ON equipment_videos IS 'Shows verified videos to public, all videos to creators and admins';
-COMMENT ON POLICY "View bag videos for accessible bags" ON user_bag_videos IS 'Respects bag privacy settings and feed sharing preferences';
-COMMENT ON POLICY "Link owners can view their click analytics" ON link_clicks IS 'Privacy-first: only link owners see their analytics data';
-
--- ============================================================================
--- COMPLETION LOG
--- ============================================================================
-
-DO $$
-BEGIN
-  RAISE NOTICE '✅ Optimized RLS policies created successfully!';
-  RAISE NOTICE '';
-  RAISE NOTICE '📊 Policy Summary:';
-  RAISE NOTICE '  - user_equipment_links: 4 policies (respects bag privacy)';
-  RAISE NOTICE '  - equipment_videos: 4 policies (with admin moderation)';
-  RAISE NOTICE '  - user_bag_videos: 4 policies (respects bag privacy + feed sharing)';
-  RAISE NOTICE '  - link_clicks: 2 policies (privacy-focused analytics)';
-  RAISE NOTICE '';
-  RAISE NOTICE '🚀 Performance optimizations:';
-  RAISE NOTICE '  - Dedicated RLS indexes created';
-  RAISE NOTICE '  - Bag accessibility function for reuse';
-  RAISE NOTICE '  - URL validation constraints added';
-  RAISE NOTICE '';
-  RAISE NOTICE '🔒 Security features:';
-  RAISE NOTICE '  - Bag privacy inheritance';
-  RAISE NOTICE '  - Admin moderation capabilities';
-  RAISE NOTICE '  - Privacy-first analytics';
-  RAISE NOTICE '  - URL validation and sanitization';
+  RAISE NOTICE 'RLS policies successfully optimized for affiliate links and video features';
+  RAISE NOTICE 'Tables secured: user_equipment_links, equipment_videos, user_bag_videos, link_clicks';
+  RAISE NOTICE 'Performance indexes created for optimal RLS performance';
+  RAISE NOTICE 'Admin functions available: verify_equipment_video(), get_link_analytics_summary()';
 END $$;

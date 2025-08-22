@@ -7,7 +7,7 @@ import { executeWithRetry } from '@/lib/authHelpers';
 export interface FeedPost {
   id: string;
   user_id: string;
-  type: 'new_equipment' | 'bag_update' | 'milestone' | 'playing' | 'equipment_photo';
+  type: 'new_equipment' | 'bag_update' | 'milestone' | 'playing' | 'equipment_photo' | 'bag_video';
   content: any; // JSONB field
   equipment_id?: string | null;
   bag_id?: string | null;
@@ -644,4 +644,23 @@ export async function deleteFeedPost(postId: string, userId: string) {
     console.error('Error deleting feed post:', error);
     throw error;
   }
+}
+
+// Create a feed post for a bag video
+export async function createVideoFeedPost(args: {
+  user_id: string;
+  bag_id: string;
+  provider: 'youtube' | 'tiktok' | 'vimeo' | 'other';
+  video_id?: string;
+  url: string;
+  title?: string;
+  user_bag_video_id: string;
+}) {
+  return supabase.from('feed_posts').insert({
+    user_id: args.user_id,
+    type: 'bag_video',
+    bag_id: args.bag_id,
+    content: args, // JSONB
+    likes_count: 0
+  }).select().single();
 }

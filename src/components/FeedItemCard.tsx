@@ -15,6 +15,7 @@ import { toggleBagLike } from '@/services/bags';
 import { toast } from 'sonner';
 import { useScrollAnimation } from '@/utils/animations';
 import { processEquipmentPhotos } from '@/utils/equipmentPhotos';
+import VideoEmbed from '@/components/video/VideoEmbed';
 import {
   Carousel,
   CarouselContent,
@@ -165,6 +166,37 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
     const hasMultipleImages = post.mediaUrls && post.mediaUrls.length > 1;
     const isEquipmentPost = post.postType === 'equipment_photo' || post.postType === 'new_equipment';
     const isMultiEquipmentPost = post.postType === 'multi_equipment_photos';
+    const isVideoPost = post.postType === 'bag_video';
+    
+    // Handle bag video posts
+    if (isVideoPost && post.videoData) {
+      return (
+        <div className="relative">
+          <VideoEmbed
+            url={post.videoData.url}
+            provider={post.videoData.provider as any}
+            videoId={post.videoData.videoId}
+            title={post.videoData.title}
+            className="w-full aspect-video"
+          />
+          
+          {/* Post type badge */}
+          <div className="absolute top-3 left-3 bg-primary/90 text-black px-3 py-1 rounded-full">
+            <span className="text-xs font-semibold">{getPostTypeLabel(post.postType)}</span>
+          </div>
+          
+          {/* Video title overlay */}
+          {post.videoData.title && (
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+              <p className="text-white text-sm font-medium line-clamp-2">{post.videoData.title}</p>
+              {post.caption && post.caption !== post.videoData.title && (
+                <p className="text-white/70 text-xs mt-1">{post.caption}</p>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
     
     // Handle multi-equipment photo posts with carousel
     if (isMultiEquipmentPost && post.content?.photos) {

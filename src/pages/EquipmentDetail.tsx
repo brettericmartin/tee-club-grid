@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, ShoppingCart, Share2, Users } from 'lucide-react';
+import { ArrowLeft, Heart, ShoppingCart, Share2, Users, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,6 +20,7 @@ import { getTopBagsWithEquipment } from '@/services/equipmentBags';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TeedBallIcon } from '@/components/shared/TeedBallLike';
 import PriceComparison from '@/components/equipment/PriceComparison';
+import EquipmentVideosPanel from '@/components/equipment/EquipmentVideosPanel';
 
 export default function EquipmentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -273,7 +274,7 @@ export default function EquipmentDetail() {
 
         {/* Tabs Section */}
         <Tabs defaultValue="photos" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 lg:w-auto">
+          <TabsList className="grid w-full grid-cols-7 lg:w-auto">
             <TabsTrigger value="photos">Photos</TabsTrigger>
             <TabsTrigger value="specs">Specs</TabsTrigger>
             <TabsTrigger value="bags">
@@ -281,6 +282,10 @@ export default function EquipmentDetail() {
               Bags
             </TabsTrigger>
             <TabsTrigger value="forums">Forums</TabsTrigger>
+            <TabsTrigger value="videos">
+              <Video className="w-4 h-4 mr-2" />
+              Videos
+            </TabsTrigger>
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
             <TabsTrigger value="prices">Prices</TabsTrigger>
           </TabsList>
@@ -406,6 +411,14 @@ export default function EquipmentDetail() {
                 </ScrollArea>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="videos" className="mt-6">
+            <EquipmentVideosPanel
+              equipmentId={equipment.id}
+              equipmentName={`${equipment.brand} ${equipment.model}`}
+              canAdd={true}
+            />
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-6">
