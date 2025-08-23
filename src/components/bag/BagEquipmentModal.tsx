@@ -307,54 +307,52 @@ export function BagEquipmentModal({
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-full max-w-4xl h-[calc(100vh-1rem)] sm:h-auto max-h-[calc(100vh-1rem)] sm:max-h-[85vh] p-0 overflow-hidden flex flex-col">
-        {/* Header with Buy Button */}
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-2 sm:pb-4 border-b">
-          <div className="space-y-3">
-            {/* Title and Featured Badge */}
-            <div>
-              <DialogTitle className="text-lg sm:text-xl font-semibold pr-8">
-                My {equipment.brand} {equipment.model}
-              </DialogTitle>
-              {formData.is_featured && (
-                <Badge variant="default" className="bg-yellow-600 mt-2 inline-flex">
-                  <Star className="h-3 w-3 mr-1 fill-current" />
-                  Featured
-                </Badge>
-              )}
-            </div>
-            
-            {/* Category and MSRP */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
-              <span className="capitalize">
-                {equipment.category.replace(/_/g, ' ')}
-                {equipment.msrp && ` • MSRP $${equipment.msrp}`}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.open(`/equipment/${equipmentId}`, '_blank')}
-                className="text-xs self-start sm:self-auto min-h-[36px] px-2"
-              >
-                <ExternalLink className="h-3 w-3 mr-1" />
-                <span className="hidden sm:inline">View Equipment Page</span>
-                <span className="sm:hidden">View Page</span>
-              </Button>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex gap-2">
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-full max-w-4xl h-[calc(100vh-4rem)] sm:h-auto max-h-[calc(100vh-4rem)] sm:max-h-[85vh] p-0 overflow-hidden flex flex-col">
+        {/* Header - Simplified for mobile */}
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-6 pb-2 sm:pb-4 border-b">
+          <div className="space-y-2">
+            {/* Title and Edit Button Row */}
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1">
+                <DialogTitle className="text-base sm:text-xl font-semibold">
+                  My {equipment.brand} {equipment.model}
+                </DialogTitle>
+                {formData.is_featured && (
+                  <Badge variant="default" className="bg-yellow-600 mt-1 inline-flex text-xs">
+                    <Star className="h-3 w-3 mr-1 fill-current" />
+                    Featured
+                  </Badge>
+                )}
+              </div>
               {canEdit && !isEditing && activeTab === 'details' && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setIsEditing(true)}
-                  className="min-h-[44px] px-3 sm:px-4"
+                  className="min-h-[36px] px-2"
                 >
-                  <Edit3 className="w-4 h-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Edit</span>
+                  <Edit3 className="w-4 h-4" />
+                  <span className="ml-1 hidden sm:inline">Edit</span>
                 </Button>
               )}
+            </div>
+            
+            {/* Category and Links Row */}
+            <div className="flex items-center justify-between gap-2 text-xs sm:text-sm text-muted-foreground">
+              <span className="capitalize">
+                {equipment.category.replace(/_/g, ' ')}
+                {equipment.msrp && <span className="hidden sm:inline"> • MSRP ${equipment.msrp}</span>}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.open(`/equipment/${equipmentId}`, '_blank')}
+                className="text-xs min-h-[32px] px-2"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                <span className="hidden sm:inline">View Page</span>
+                <span className="sm:hidden">View</span>
+              </Button>
             </div>
           </div>
         </DialogHeader>
@@ -362,42 +360,42 @@ export function BagEquipmentModal({
         {/* Main Content */}
         <div className="flex-1 overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            {/* Sticky Tab Navigation - Always Visible */}
-            <div className="sticky top-0 z-20 bg-background border-b flex-shrink-0">
-              <TabsList className="w-full h-auto p-0 bg-transparent rounded-none flex sm:grid sm:grid-cols-5 overflow-x-auto sm:overflow-visible">
+            {/* Tab Navigation - Scrollable on mobile */}
+            <div className="sticky top-0 z-20 bg-background border-b flex-shrink-0 overflow-x-auto">
+              <TabsList className="w-full sm:w-auto h-auto p-0 bg-transparent rounded-none inline-flex sm:grid sm:grid-cols-5">
                 <TabsTrigger 
                   value="details" 
-                  className="flex-shrink-0 min-w-[80px] px-3 sm:px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-sm sm:text-base"
+                  className="flex-shrink-0 min-w-fit px-3 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
                 >
                   Details
                 </TabsTrigger>
                 <TabsTrigger 
                   value="photos" 
-                  className="flex-shrink-0 min-w-[80px] px-3 sm:px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-sm sm:text-base"
+                  className="flex-shrink-0 min-w-fit px-3 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
                 >
-                  <Image className="w-4 h-4 sm:mr-1" />
-                  <span className="ml-1 sm:ml-0">Photos</span>
+                  <Image className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
+                  Photos
                 </TabsTrigger>
                 <TabsTrigger 
                   value="videos" 
-                  className="flex-shrink-0 min-w-[80px] px-3 sm:px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-sm sm:text-base"
+                  className="flex-shrink-0 min-w-fit px-3 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
                 >
-                  <Video className="w-4 h-4 sm:mr-1" />
-                  <span className="ml-1 sm:ml-0">Videos</span>
+                  <Video className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
+                  Videos
                 </TabsTrigger>
                 <TabsTrigger 
                   value="reviews" 
-                  className="flex-shrink-0 min-w-[80px] px-3 sm:px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-sm sm:text-base"
+                  className="flex-shrink-0 min-w-fit px-3 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
                 >
-                  <MessageSquare className="w-4 h-4 sm:mr-1" />
-                  <span className="ml-1 sm:ml-0">Reviews</span>
+                  <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
+                  Reviews
                 </TabsTrigger>
                 <TabsTrigger 
                   value="forums" 
-                  className="flex-shrink-0 min-w-[80px] px-3 sm:px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-sm sm:text-base"
+                  className="flex-shrink-0 min-w-fit px-3 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
                 >
-                  <Users className="w-4 h-4 sm:mr-1" />
-                  <span className="ml-1 sm:ml-0">Forums</span>
+                  <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
+                  Forums
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -764,8 +762,8 @@ export function BagEquipmentModal({
                         />
                       </div>
 
-                      {/* Action Buttons - Sticky on mobile */}
-                      <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4 border-t sticky sm:static bottom-0 bg-background -mx-4 sm:mx-0 px-4 sm:px-0 pb-4 sm:pb-0">
+                      {/* Action Buttons - Fixed position on mobile */}
+                      <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4 border-t fixed sm:static bottom-0 left-0 right-0 sm:bottom-auto sm:left-auto sm:right-auto bg-background px-4 sm:px-0 pb-4 sm:pb-0 z-30">
                         <Button 
                           variant="destructive" 
                           onClick={handleRemove}
@@ -932,7 +930,7 @@ export function BagEquipmentModal({
                         
                         {/* Notes */}
                         {formData.notes && (
-                          <div>
+                          <div className="pb-16 sm:pb-0">
                             <h3 className="font-semibold mb-2 text-base sm:text-lg">Notes</h3>
                             <p className="text-sm sm:text-base text-muted-foreground whitespace-pre-wrap">
                               {formData.notes}
