@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShoppingCart, X, Image, MessageSquare, Users, ExternalLink, Video, Star, StarOff, Camera, Edit3, Images, Check, ChevronsUpDown, Crop, Trash2 } from 'lucide-react';
+import { ShoppingCart, X, Image, MessageSquare, Users, ExternalLink, Video, Star, StarOff, Camera, Edit3, Images, Check, ChevronsUpDown, Crop, Trash2, Info } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -836,7 +836,7 @@ export function BagEquipmentModal({
                               size="sm"
                               onClick={() => {
                                 // TODO: Open link management modal
-                                toast.info('Link management coming soon');
+                                toast.info('Add your favorite retailer or affiliate link for this item');
                               }}
                               className="h-auto py-1.5 px-2 text-sm"
                             >
@@ -852,14 +852,21 @@ export function BagEquipmentModal({
                             size="sm"
                             onClick={() => {
                               // TODO: Open link management modal
-                              toast.info('Add affiliate links to earn commissions');
+                              toast.info('Add your favorite retailer or affiliate link for this item');
                             }}
                             className="text-xs"
                           >
                             <Plus className="w-3.5 h-3.5 mr-1" />
                             Add Buy Links
                           </Button>
-                          <span className="text-xs text-muted-foreground">Earn commission on sales</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-1 h-auto"
+                            onClick={() => toast.info('Add your favorite retailer or affiliate link for this item')}
+                          >
+                            <Info className="w-3.5 h-3.5 text-muted-foreground" />
+                          </Button>
                         </div>
                       )}
 
