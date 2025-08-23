@@ -84,6 +84,12 @@ export async function addEquipmentVideo(input: unknown) {
   const payload = equipmentVideoSchema.parse(input);
   const parsed = parseVideoUrl(payload.url);
   
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    throw new Error('Authentication required to add videos');
+  }
+  
   return supabase
     .from('equipment_videos')
     .insert({
@@ -92,7 +98,10 @@ export async function addEquipmentVideo(input: unknown) {
       provider: parsed.provider,
       video_id: parsed.videoId || null,
       title: payload.title,
-      channel: payload.channel
+      channel: payload.channel,
+      added_by_user_id: user.id,
+      verified: false, // Start unverified
+      view_count: 0
     })
     .select()
     .single();

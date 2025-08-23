@@ -223,8 +223,75 @@ const FeedContent = () => {
     <div className="min-h-screen bg-black py-8">
       <div className="max-w-7xl mx-auto px-4 pb-24">
 
-        {/* Filter Section with Create Post Button */}
-        <div className="flex flex-wrap items-center gap-4 mb-6">
+        {/* Mobile Filter Bar */}
+        <div className="sm:hidden sticky top-16 z-40 -mx-4 px-4 py-2 bg-black/95 backdrop-blur border-b border-white/10 mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="inline-flex rounded-lg bg-[#1a1a1a] p-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFilter('all')}
+                  className={`px-4 py-1.5 rounded-md transition-all ${
+                    filter === 'all' 
+                      ? 'bg-primary text-black font-medium' 
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 mr-1.5" />
+                  All
+                </Button>
+                {user && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFilter('following')}
+                    className={`px-4 py-1.5 rounded-md transition-all ${
+                      filter === 'following' 
+                        ? 'bg-primary text-black font-medium' 
+                        : 'text-white/70 hover:text-white'
+                    }`}
+                  >
+                    <Users className="w-4 h-4 mr-1.5" />
+                    Following
+                  </Button>
+                )}
+              </div>
+            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Filter className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-[#1a1a1a] border-white/10">
+                <DropdownMenuLabel className="text-white">Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Equipment Photos
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
+                  Bag Updates
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
+                  New Equipment
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
+                  New Bags
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Desktop Filter Section with Create Post Button */}
+        <div className="hidden sm:flex flex-wrap items-center gap-4 mb-6">
           <div className="flex gap-2">
             <Button
               variant={filter === 'all' ? 'default' : 'outline'}
@@ -298,6 +365,31 @@ const FeedContent = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        
+        {/* Mobile Floating Action Button */}
+        {user && (
+          <div className="sm:hidden">
+            {betaAccess ? (
+              <button
+                onClick={() => setShowCreatePost(true)}
+                className="fixed bottom-20 right-4 z-50 w-14 h-14 bg-primary hover:bg-primary/90 text-black rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all flex items-center justify-center group"
+                aria-label="Create new post"
+              >
+                <Plus className="w-6 h-6" />
+                {/* New post indicator - show pulse when there could be new posts */}
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/waitlist')}
+                className="fixed bottom-20 right-4 z-50 w-14 h-14 bg-gray-800 hover:bg-gray-700 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all flex items-center justify-center"
+                aria-label="Join beta to post"
+              >
+                <Lock className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Feed Posts - Masonry Layout */}
         {displayedPosts.length > 0 ? (

@@ -1,10 +1,18 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users, Loader2, ShoppingBag } from "lucide-react";
+import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users, Loader2, ShoppingBag, ChevronDown } from "lucide-react";
 import { TeedBallIcon } from "@/components/shared/TeedBallLike";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { BagCard } from "@/components/bags/BagCard";
 import { getBags } from "@/services/bags";
 import { useAuth } from "@/contexts/AuthContext";
@@ -284,8 +292,151 @@ const BagsBrowser = () => {
           />
         </div>
 
-        {/* Filter Bar */}
-        <div className="flex flex-wrap gap-4 mb-8 p-4 bg-card rounded-lg border border-border">
+        {/* Mobile Filter Bar */}
+        <div className="sm:hidden mb-6">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+            {/* Sort Options as Pills */}
+            <div className="flex gap-2 flex-shrink-0">
+              <Button
+                variant={sortBy === "newest" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("newest")}
+                className={`flex items-center gap-1.5 whitespace-nowrap ${
+                  sortBy === "newest" ? "bg-primary" : "bg-card"
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                Newest
+              </Button>
+              <Button
+                variant={sortBy === "most-liked" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy("most-liked")}
+                className={`flex items-center gap-1.5 whitespace-nowrap ${
+                  sortBy === "most-liked" ? "bg-primary" : "bg-card"
+                }`}
+              >
+                <Heart className="w-3.5 h-3.5" />
+                Most Liked
+              </Button>
+              {user && (
+                <Button
+                  variant={sortBy === "following" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSortBy("following")}
+                  className={`flex items-center gap-1.5 whitespace-nowrap ${
+                    sortBy === "following" ? "bg-primary" : "bg-card"
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  Following
+                </Button>
+              )}
+              <Button
+                variant={sortBy === "price-high" || sortBy === "price-low" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortBy(sortBy === "price-high" ? "price-low" : "price-high")}
+                className={`flex items-center gap-1.5 whitespace-nowrap ${
+                  sortBy === "price-high" || sortBy === "price-low" ? "bg-primary" : "bg-card"
+                }`}
+              >
+                <DollarSign className="w-3.5 h-3.5" />
+                {sortBy === "price-high" ? "High→Low" : sortBy === "price-low" ? "Low→High" : "Price"}
+              </Button>
+            </div>
+            
+            {/* More Filters Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className={`flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
+                    (filterBy !== "all" || handicapRange !== "all" || priceRange !== "all") 
+                      ? "bg-primary text-primary-foreground" 
+                      : "bg-card"
+                  }`}
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  Filters
+                  {(filterBy !== "all" || handicapRange !== "all" || priceRange !== "all") && (
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
+                      {[filterBy !== "all", handicapRange !== "all", priceRange !== "all"].filter(Boolean).length}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {user && (
+                  <>
+                    <DropdownMenuLabel>Filter By</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => setFilterBy("all")}>
+                      <ShoppingBag className="w-4 h-4 mr-2" />
+                      All Bags {filterBy === "all" && "✓"}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setFilterBy("teed")}>
+                      <TeedBallIcon className="w-4 h-4 mr-2" />
+                      Teed Bags {filterBy === "teed" && "✓"}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setFilterBy("following")}>
+                      <Users className="w-4 h-4 mr-2" />
+                      Following {filterBy === "following" && "✓"}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                
+                <DropdownMenuLabel>Handicap Range</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setHandicapRange("all")}>
+                  All Handicaps {handicapRange === "all" && "✓"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setHandicapRange("0-5")}>
+                  0-5 (Pro/Low) {handicapRange === "0-5" && "✓"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setHandicapRange("6-15")}>
+                  6-15 (Mid) {handicapRange === "6-15" && "✓"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setHandicapRange("16+")}>
+                  16+ (High) {handicapRange === "16+" && "✓"}
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Price Range</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setPriceRange("all")}>
+                  All Prices {priceRange === "all" && "✓"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setPriceRange("under-2k")}>
+                  Under $2,000 {priceRange === "under-2k" && "✓"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setPriceRange("2k-5k")}>
+                  $2,000 - $5,000 {priceRange === "2k-5k" && "✓"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setPriceRange("5k+")}>
+                  Over $5,000 {priceRange === "5k+" && "✓"}
+                </DropdownMenuItem>
+                
+                {(filterBy !== "all" || handicapRange !== "all" || priceRange !== "all") && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setFilterBy("all");
+                        setHandicapRange("all");
+                        setPriceRange("all");
+                      }}
+                      className="text-destructive"
+                    >
+                      Clear All Filters
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Desktop Filter Bar */}
+        <div className="hidden sm:flex flex-wrap gap-4 mb-8 p-4 bg-card rounded-lg border border-border">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm font-medium text-foreground">Filters:</span>

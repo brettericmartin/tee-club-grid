@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShoppingCart, X, Image, MessageSquare, Users, Link2, ExternalLink, Video, Star, StarOff, Camera, Edit3, Images, Check, ChevronsUpDown, Plus, Crop, Trash2 } from 'lucide-react';
+import { ShoppingCart, X, Image, MessageSquare, Users, ExternalLink, Video, Star, StarOff, Camera, Edit3, Images, Check, ChevronsUpDown, Crop, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,8 +18,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { toast } from 'sonner';
+import { Plus } from 'lucide-react';
 import { listLinksForBagEquipment } from '@/services/userEquipmentLinks';
-import SimpleAffiliateLinks from './SimpleAffiliateLinks';
+// Removed SimpleAffiliateLinks import - using inline implementation
 import { EquipmentVideosPanel } from '@/components/equipment/EquipmentVideosPanel';
 import { CommunityPhotosGallery } from './CommunityPhotosGallery';
 import { ImageCropper } from '@/components/ImageCropper';
@@ -129,7 +130,6 @@ export function BagEquipmentModal({
   });
 
   const links = linksResponse?.data || [];
-  const primaryLink = links.find((l: any) => l.is_primary);
 
   // Load additional data when modal opens
   useEffect(() => {
@@ -165,7 +165,7 @@ export function BagEquipmentModal({
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!canEdit) return;
     
     setLoading(true);
@@ -238,9 +238,9 @@ export function BagEquipmentModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [canEdit, bagEquipment, isIron, formData, bagEquipmentId, equipmentId, equipment, queryClient, bagId, onUpdate]);
   
-  const handleRemove = async () => {
+  const handleRemove = useCallback(async () => {
     if (!confirm(`Are you sure you want to remove ${equipment.brand} ${equipment.model} from your bag?`)) {
       return;
     }
@@ -263,9 +263,9 @@ export function BagEquipmentModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [equipment, bagEquipmentId, onUpdate, onClose]);
 
-  const loadAdditionalData = async () => {
+  const loadAdditionalData = useCallback(async () => {
     if (!equipmentId) return;
 
     try {
@@ -300,7 +300,7 @@ export function BagEquipmentModal({
     } catch (error) {
       console.error('Error loading additional data:', error);
     }
-  };
+  }, [equipmentId, equipment]);
 
   if (!equipment) return null;
 
@@ -334,7 +334,7 @@ export function BagEquipmentModal({
                 variant="ghost"
                 size="sm"
                 onClick={() => window.open(`/equipment/${equipmentId}`, '_blank')}
-                className="text-xs self-start sm:self-auto"
+                className="text-xs self-start sm:self-auto min-h-[36px] px-2"
               >
                 <ExternalLink className="h-3 w-3 mr-1" />
                 <span className="hidden sm:inline">View Equipment Page</span>
@@ -344,23 +344,6 @@ export function BagEquipmentModal({
             
             {/* Action Buttons */}
             <div className="flex gap-2">
-              {primaryLink && (
-                <a 
-                  href={`/api/links/redirect?id=${primaryLink.id}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-xl px-3 sm:px-4 py-2",
-                    "bg-green-600 hover:bg-green-700 text-white",
-                    "transition-colors font-medium text-sm",
-                    "min-h-[44px]"
-                  )}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  Buy
-                </a>
-              )}
               {canEdit && !isEditing && activeTab === 'details' && (
                 <Button
                   variant="outline"
@@ -379,30 +362,42 @@ export function BagEquipmentModal({
         {/* Main Content */}
         <div className="flex-1 overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            {/* Mobile: Scrollable tabs, Desktop: Grid */}
-            <div className="flex-shrink-0 border-b">
-              <TabsList className="w-full h-auto p-0 bg-transparent rounded-none flex sm:grid sm:grid-cols-6 overflow-x-auto sm:overflow-visible">
-                <TabsTrigger value="details" className="flex-shrink-0 px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+            {/* Sticky Tab Navigation - Always Visible */}
+            <div className="sticky top-0 z-20 bg-background border-b flex-shrink-0">
+              <TabsList className="w-full h-auto p-0 bg-transparent rounded-none flex sm:grid sm:grid-cols-5 overflow-x-auto sm:overflow-visible">
+                <TabsTrigger 
+                  value="details" 
+                  className="flex-shrink-0 min-w-[80px] px-3 sm:px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-sm sm:text-base"
+                >
                   Details
                 </TabsTrigger>
-                <TabsTrigger value="photos" className="flex-shrink-0 px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                <TabsTrigger 
+                  value="photos" 
+                  className="flex-shrink-0 min-w-[80px] px-3 sm:px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-sm sm:text-base"
+                >
                   <Image className="w-4 h-4 sm:mr-1" />
                   <span className="ml-1 sm:ml-0">Photos</span>
                 </TabsTrigger>
-                <TabsTrigger value="videos" className="flex-shrink-0 px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                <TabsTrigger 
+                  value="videos" 
+                  className="flex-shrink-0 min-w-[80px] px-3 sm:px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-sm sm:text-base"
+                >
                   <Video className="w-4 h-4 sm:mr-1" />
                   <span className="ml-1 sm:ml-0">Videos</span>
                 </TabsTrigger>
-                <TabsTrigger value="reviews" className="flex-shrink-0 px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                <TabsTrigger 
+                  value="reviews" 
+                  className="flex-shrink-0 min-w-[80px] px-3 sm:px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-sm sm:text-base"
+                >
                   <MessageSquare className="w-4 h-4 sm:mr-1" />
                   <span className="ml-1 sm:ml-0">Reviews</span>
                 </TabsTrigger>
-                <TabsTrigger value="forums" className="flex-shrink-0 px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
-                  Forums
-                </TabsTrigger>
-                <TabsTrigger value="links" className="flex-shrink-0 px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
-                  <Link2 className="w-4 h-4 sm:mr-1" />
-                  <span className="ml-1 sm:ml-0">Links</span>
+                <TabsTrigger 
+                  value="forums" 
+                  className="flex-shrink-0 min-w-[80px] px-3 sm:px-4 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-sm sm:text-base"
+                >
+                  <Users className="w-4 h-4 sm:mr-1" />
+                  <span className="ml-1 sm:ml-0">Forums</span>
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -415,7 +410,7 @@ export function BagEquipmentModal({
                     <div className="space-y-6">
                       {/* Photo Section */}
                       <div className="space-y-4">
-                        <Label className="text-sm font-medium">Equipment Photo</Label>
+                        <Label className="text-sm sm:text-base font-medium">Equipment Photo</Label>
                         <div className="flex items-center gap-4">
                           <div className="w-24 h-24 bg-accent rounded-lg overflow-hidden flex-shrink-0">
                             <img
@@ -431,6 +426,7 @@ export function BagEquipmentModal({
                               size="sm"
                               onClick={() => setShowPhotoUpload(true)}
                               type="button"
+                              className="min-h-[44px] px-4"
                             >
                               <Camera className="w-4 h-4 mr-2" />
                               Upload Photo
@@ -446,6 +442,7 @@ export function BagEquipmentModal({
                                     setPendingCropFile(null);
                                   }}
                                   type="button"
+                                  className="min-h-[44px] px-3"
                                 >
                                   <Crop className="w-4 h-4 mr-2" />
                                   Crop
@@ -455,6 +452,7 @@ export function BagEquipmentModal({
                                   size="sm"
                                   onClick={() => setFormData({ ...formData, custom_photo_url: '' })}
                                   type="button"
+                                  className="min-h-[44px] px-3"
                                 >
                                   <X className="w-4 h-4 mr-2" />
                                   Remove
@@ -468,7 +466,7 @@ export function BagEquipmentModal({
                         <Button
                           variant="outline"
                           onClick={() => setShowPhotoGallery(true)}
-                          className="w-full"
+                          className="w-full min-h-[44px]"
                           type="button"
                         >
                           <Images className="w-4 h-4 mr-2" />
@@ -479,7 +477,7 @@ export function BagEquipmentModal({
                       {/* Featured Toggle */}
                       <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
                         <div>
-                          <Label className="text-base">Featured Equipment</Label>
+                          <Label className="text-sm sm:text-base">Featured Equipment</Label>
                           <p className="text-sm text-muted-foreground">
                             Featured equipment appears in your bag preview
                           </p>
@@ -489,6 +487,7 @@ export function BagEquipmentModal({
                           size="sm"
                           onClick={() => setFormData({ ...formData, is_featured: !formData.is_featured })}
                           type="button"
+                          className="min-h-[44px] px-4"
                         >
                           {formData.is_featured ? (
                             <><Star className="w-4 h-4 mr-2 fill-current" />Featured</>
@@ -503,13 +502,13 @@ export function BagEquipmentModal({
                         {/* Shaft Selection - Only for clubs */}
                         {isClub && (
                           <div>
-                            <Label>Shaft</Label>
+                            <Label className="text-sm sm:text-base">Shaft</Label>
                             <Popover open={shaftOpen} onOpenChange={setShaftOpen}>
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="outline"
                                   role="combobox"
-                                  className="w-full justify-between"
+                                  className="w-full justify-between min-h-[44px] text-sm sm:text-base"
                                   type="button"
                                 >
                                   {formData.shaft_id
@@ -554,13 +553,13 @@ export function BagEquipmentModal({
                         {/* Grip Selection - Only for clubs */}
                         {isClub && (
                           <div>
-                            <Label>Grip</Label>
+                            <Label className="text-sm sm:text-base">Grip</Label>
                             <Popover open={gripOpen} onOpenChange={setGripOpen}>
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="outline"
                                   role="combobox"
-                                  className="w-full justify-between"
+                                  className="w-full justify-between min-h-[44px] text-sm sm:text-base"
                                   type="button"
                                 >
                                   {formData.grip_id
@@ -605,7 +604,7 @@ export function BagEquipmentModal({
                         {/* Loft Selection */}
                         {isClub && LOFT_OPTIONS[equipment.category] && (
                           <div>
-                            <Label>Loft</Label>
+                            <Label className="text-sm sm:text-base">Loft</Label>
                             <Select
                               value={formData.loft || 'none'}
                               onValueChange={(value) => setFormData({ ...formData, loft: value === 'none' ? '' : value })}
@@ -627,7 +626,7 @@ export function BagEquipmentModal({
 
                         {/* Condition */}
                         <div>
-                          <Label>Condition</Label>
+                          <Label className="text-sm sm:text-base">Condition</Label>
                           <Select
                             value={formData.condition}
                             onValueChange={(value) => setFormData({ ...formData, condition: value })}
@@ -648,13 +647,13 @@ export function BagEquipmentModal({
                       {/* Iron Configuration */}
                       {isIron && (
                         <div className="space-y-3">
-                          <Label>Iron Configuration</Label>
+                          <Label className="text-sm sm:text-base">Iron Configuration</Label>
                           <div className="flex gap-2">
                             <Button
                               type="button"
                               variant={formData.iron_config_type === 'set' ? 'default' : 'outline'}
                               onClick={() => setFormData({ ...formData, iron_config_type: 'set' })}
-                              className="flex-1"
+                              className="flex-1 min-h-[44px]"
                               size="sm"
                             >
                               Iron Set
@@ -663,7 +662,7 @@ export function BagEquipmentModal({
                               type="button"
                               variant={formData.iron_config_type === 'single' ? 'default' : 'outline'}
                               onClick={() => setFormData({ ...formData, iron_config_type: 'single' })}
-                              className="flex-1"
+                              className="flex-1 min-h-[44px]"
                               size="sm"
                             >
                               Single Iron
@@ -735,7 +734,7 @@ export function BagEquipmentModal({
                       {/* Purchase Details */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div>
-                          <Label>Purchase Price</Label>
+                          <Label className="text-sm sm:text-base">Purchase Price</Label>
                           <Input
                             type="number"
                             placeholder="0.00"
@@ -744,7 +743,7 @@ export function BagEquipmentModal({
                           />
                         </div>
                         <div>
-                          <Label>Purchase Date</Label>
+                          <Label className="text-sm sm:text-base">Purchase Date</Label>
                           <Input
                             type="date"
                             value={formData.purchase_date}
@@ -755,12 +754,13 @@ export function BagEquipmentModal({
 
                       {/* Notes */}
                       <div>
-                        <Label>Notes</Label>
+                        <Label className="text-sm sm:text-base">Notes</Label>
                         <Textarea
                           placeholder="Any special notes about this equipment..."
                           value={formData.notes}
                           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                           rows={3}
+                          className="text-sm sm:text-base"
                         />
                       </div>
 
@@ -801,17 +801,75 @@ export function BagEquipmentModal({
                       {/* Main Image */}
                       <div className="aspect-square max-w-xs sm:max-w-sm mx-auto bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden">
                         <img
-                          src={formData.custom_photo_url || equipment.image_url || ''}
+                          src={bagEquipment?.custom_photo_url || equipment.most_liked_photo || equipment.image_url || ''}
                           alt={`${equipment.brand} ${equipment.model}`}
                           className="w-full h-full object-contain p-4"
+                          loading="lazy"
                         />
                       </div>
+
+                      {/* Compact Affiliate Links */}
+                      {links.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pb-3 border-b">
+                          {links.map((link: any) => (
+                            <a
+                              key={link.id}
+                              href={`/api/links/redirect?id=${link.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={cn(
+                                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm",
+                                "bg-green-600/10 hover:bg-green-600/20 text-green-600 border border-green-600/20",
+                                "transition-colors",
+                                link.is_primary && "bg-green-600 hover:bg-green-700 text-white border-green-600"
+                              )}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ShoppingCart className="w-3.5 h-3.5" />
+                              <span>{link.retailer_name || 'Buy'}</span>
+                              {link.price && (
+                                <span className="font-semibold">${link.price}</span>
+                              )}
+                            </a>
+                          ))}
+                          {canEdit && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                // TODO: Open link management modal
+                                toast.info('Link management coming soon');
+                              }}
+                              className="h-auto py-1.5 px-2 text-sm"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                      {canEdit && links.length === 0 && (
+                        <div className="flex items-center gap-2 pb-3 border-b">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              // TODO: Open link management modal
+                              toast.info('Add affiliate links to earn commissions');
+                            }}
+                            className="text-xs"
+                          >
+                            <Plus className="w-3.5 h-3.5 mr-1" />
+                            Add Buy Links
+                          </Button>
+                          <span className="text-xs text-muted-foreground">Earn commission on sales</span>
+                        </div>
+                      )}
 
                       {/* Equipment Info */}
                       <div className="space-y-4">
                         <div>
-                          <h3 className="font-semibold mb-2">Equipment Details</h3>
-                          <div className="space-y-2 text-sm">
+                          <h3 className="font-semibold mb-2 text-base sm:text-lg">Equipment Details</h3>
+                          <div className="space-y-2 text-sm sm:text-base">
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Brand</span>
                               <span className="font-medium">{equipment.brand}</span>
@@ -850,7 +908,7 @@ export function BagEquipmentModal({
                         {/* Build Configuration */}
                         {(bagEquipment.shaft || bagEquipment.grip) && (
                           <div>
-                            <h3 className="font-semibold mb-2">Build Configuration</h3>
+                            <h3 className="font-semibold mb-2 text-base sm:text-lg">Build Configuration</h3>
                             <div className="space-y-2">
                               {bagEquipment.shaft && (
                                 <div className="p-3 bg-muted rounded-lg">
@@ -875,8 +933,8 @@ export function BagEquipmentModal({
                         {/* Notes */}
                         {formData.notes && (
                           <div>
-                            <h3 className="font-semibold mb-2">Notes</h3>
-                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                            <h3 className="font-semibold mb-2 text-base sm:text-lg">Notes</h3>
+                            <p className="text-sm sm:text-base text-muted-foreground whitespace-pre-wrap">
                               {formData.notes}
                             </p>
                           </div>
@@ -987,27 +1045,6 @@ export function BagEquipmentModal({
                 </ScrollArea>
               </TabsContent>
 
-              {/* Links Tab */}
-              <TabsContent value="links" className="h-full mt-0">
-                <ScrollArea className="h-full px-4 sm:px-6 py-4">
-                  <div className="space-y-4">
-                    <div className="text-sm text-muted-foreground">
-                      {canEdit ? (
-                        <p>Add your affiliate or recommended buying link so your audience can support you.</p>
-                      ) : (
-                        <p>Purchase links and affiliate links for this equipment.</p>
-                      )}
-                    </div>
-                    
-                    <SimpleAffiliateLinks
-                      bagEquipmentId={bagEquipmentId}
-                      bagId={bagId}
-                      equipmentId={equipmentId}
-                      canEdit={canEdit}
-                    />
-                  </div>
-                </ScrollArea>
-              </TabsContent>
             </div>
           </Tabs>
         </div>
@@ -1063,4 +1100,4 @@ export function BagEquipmentModal({
   );
 }
 
-export default BagEquipmentModal;
+export default React.memo(BagEquipmentModal);

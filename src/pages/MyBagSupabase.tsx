@@ -1058,34 +1058,119 @@ const MyBagSupabase = () => {
       <GolfBallProgress />
       
       <div className="container mx-auto px-4 pt-20 pb-8 relative z-10">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            {isEditing ? (
-              <Input
-                value={bagName}
-                onChange={(e) => setBagName(e.target.value)}
-                className="text-2xl sm:text-3xl font-bold bg-transparent border-b border-white/20 text-white"
-                placeholder="Bag Name"
-              />
-            ) : (
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">{bagName}</h1>
-                {currentBag?.is_primary && (
-                  <span className="px-2 py-1 text-xs font-medium bg-primary/20 text-primary border border-primary/30 rounded-full">
-                    Primary
-                  </span>
+        {/* Header - Mobile Optimized */}
+        <div className="mb-6 sm:mb-8">
+          {/* Mobile Layout */}
+          <div className="sm:hidden">
+            <div className="flex items-start justify-between gap-2 mb-4">
+              <div className="flex-1">
+                {isEditing ? (
+                  <Input
+                    value={bagName}
+                    onChange={(e) => setBagName(e.target.value)}
+                    className="text-xl font-bold bg-transparent border-b border-white/20 text-white"
+                    placeholder="Bag Name"
+                  />
+                ) : (
+                  <div>
+                    <h1 className="text-xl font-bold text-white">{bagName}</h1>
+                    {currentBag?.is_primary && (
+                      <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-medium bg-primary/20 text-primary border border-primary/30 rounded-full">
+                        Primary
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
+              {!isEditing && (
+                <div className="flex gap-1 flex-shrink-0">
+                  <Button
+                    onClick={() => {
+                      aiFlowMetrics.trackMethodDialogOpen();
+                      setShowMethodDialog(true);
+                    }}
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-white hover:bg-white/20"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    onClick={() => setShowShareModal(true)} 
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-white hover:bg-white/20"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                        <Edit3 className="w-4 h-4 mr-2" />
+                        Edit Bag
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setShowBagSelector(true)}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Manage Bags
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setManageBadgesOpen(true)}>
+                        <Trophy className="w-4 h-4 mr-2" />
+                        Manage Badges
+                      </DropdownMenuItem>
+                      {viewMode === 'gallery' && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => setIsEditingLayout(!isEditingLayout)}>
+                            <Grid3x3 className="w-4 h-4 mr-2" />
+                            {isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
           </div>
           
-          <div className="flex items-center gap-2 justify-end">
-            {!isEditing && (
-              <>
-                {/* Mobile: Essential buttons + hamburger menu */}
-                <div className="flex gap-2 sm:hidden">
-                  <Button
+          {/* Desktop Layout */}
+          <div className="hidden sm:flex sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              {isEditing ? (
+                <Input
+                  value={bagName}
+                  onChange={(e) => setBagName(e.target.value)}
+                  className="text-2xl sm:text-3xl font-bold bg-transparent border-b border-white/20 text-white"
+                  placeholder="Bag Name"
+                />
+              ) : (
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-white">{bagName}</h1>
+                  {currentBag?.is_primary && (
+                    <span className="px-2 py-1 text-xs font-medium bg-primary/20 text-primary border border-primary/30 rounded-full">
+                      Primary
+                    </span>
+                  )}
+                </div>
+              )}
+            
+            {/* Desktop Actions */}
+            <div className="flex items-center gap-2 justify-end">
+              {!isEditing && (
+                <>
+                  {/* Remove duplicate mobile buttons - they're now in the mobile header */}
+                  {/* Desktop: All buttons visible */}
+                  <div className="hidden sm:flex gap-2">
+                    <Button
                     onClick={() => {
                       aiFlowMetrics.trackMethodDialogOpen();
                       setShowMethodDialog(true);
@@ -1139,9 +1224,7 @@ const MyBagSupabase = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                
-                {/* Desktop: All buttons visible */}
-                <div className="hidden sm:flex gap-2">
+                */}
                   <Button
                     onClick={() => {
                       aiFlowMetrics.trackMethodDialogOpen();
@@ -1175,46 +1258,29 @@ const MyBagSupabase = () => {
                 </div>
               </>
             )}
-            {isEditing ? (
-              <div className="flex gap-2">
-                <Button onClick={handleSave} variant="default">
-                  <Save className="w-4 h-4 mr-2" />
-                  Save
-                </Button>
-                <Button onClick={() => {
-                  setIsEditing(false);
-                  if (currentBag) {
-                    setBagName(currentBag.name);
-                    setBagDescription(currentBag.description || '');
-                    setSelectedBackground(currentBag.background_image || 'midwest-lush');
-                  }
-                }} variant="outline">
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-              </div>
-            ) : (
-              <div className="hidden sm:flex gap-2">
-                {viewMode === 'gallery' && (
-                  <Button
-                    onClick={() => setIsEditingLayout(!isEditingLayout)}
-                    variant={isEditingLayout ? 'destructive' : 'outline'}
-                    size="sm"
-                  >
-                    {isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}
-                  </Button>
-                )}
-                <Button onClick={() => setShowShareModal(true)} variant="outline" size="sm">
-                  <Share2 className="w-4 h-4 mr-1" />
-                  Share
-                </Button>
-                <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
-                  <Edit3 className="w-4 h-4 mr-1" />
-                  Edit Bag
-                </Button>
-              </div>
-            )}
+            </div>
           </div>
+          
+          {/* Edit Mode Actions - Both Mobile and Desktop */}
+          {isEditing && (
+            <div className="flex gap-2 justify-center mt-4">
+              <Button onClick={handleSave} variant="default" size="sm">
+                <Save className="w-4 h-4 mr-2" />
+                Save
+              </Button>
+              <Button onClick={() => {
+                setIsEditing(false);
+                if (currentBag) {
+                  setBagName(currentBag.name);
+                  setBagDescription(currentBag.description || '');
+                  setSelectedBackground(currentBag.background_image || 'midwest-lush');
+                }
+              }} variant="outline" size="sm">
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Background Picker in Edit Mode */}

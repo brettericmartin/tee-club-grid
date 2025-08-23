@@ -97,8 +97,8 @@ const BadgeDisplay = ({
     <div 
       ref={containerRef}
       className={cn(
-        "grid gap-3",
-        size === 'xl' ? "grid-cols-4 sm:grid-cols-8 gap-2" : "grid-cols-3 sm:grid-cols-6"
+        "flex flex-wrap gap-2 sm:grid sm:gap-3",
+        size === 'xl' ? "sm:grid-cols-8" : "sm:grid-cols-6"
       )}
     >
       {displayBadges.map((userBadge) => {
@@ -109,7 +109,7 @@ const BadgeDisplay = ({
         return (
           <div
             key={userBadge.id}
-            className="relative group"
+            className="relative group flex-shrink-0"
             onMouseEnter={() => setHoveredBadge(userBadge.id)}
             onMouseLeave={() => setHoveredBadge(null)}
           >
@@ -156,7 +156,7 @@ const BadgeDisplay = ({
       {/* Expand button */}
       {expandable && shouldCollapse && !isExpanded && remainingCount > 0 && (
         <div
-          className="relative group"
+          className="relative group flex-shrink-0"
           onClick={() => setIsExpanded(true)}
         >
           <div
@@ -183,7 +183,7 @@ const BadgeDisplay = ({
         return (
           <div
             key={userBadge.id}
-            className="relative group"
+            className="relative group flex-shrink-0"
             onMouseEnter={() => setHoveredBadge(userBadge.id)}
             onMouseLeave={() => setHoveredBadge(null)}
           >
@@ -230,7 +230,7 @@ const BadgeDisplay = ({
       {/* Collapse button */}
       {expandable && isExpanded && (
         <div
-          className="relative group"
+          className="relative group flex-shrink-0"
           onClick={() => setIsExpanded(false)}
         >
           <div
@@ -250,7 +250,7 @@ const BadgeDisplay = ({
         <div
           key={`empty-${index}`}
           className={cn(
-            "flex items-center justify-center",
+            "flex items-center justify-center flex-shrink-0",
             sizeClasses[size]
           )}
         >

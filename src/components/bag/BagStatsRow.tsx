@@ -44,16 +44,16 @@ const BagStatsRow: FC<BagStatsRowProps> = ({
   ];
 
   return (
-    <div className={`grid grid-cols-1 gap-3 ${className}`}>
+    <div className={`grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-3 ${className}`}>
       {stats.map((stat, index) => (
         <div 
           key={stat.label}
-          className="bg-gray-800/50 rounded-xl p-4 text-center"
+          className="bg-gray-800/50 rounded-lg sm:rounded-xl p-3 sm:p-4 text-center"
         >
-          <p className="text-2xl font-bold text-primary">
+          <p className="text-lg sm:text-2xl font-bold text-primary">
             {stat.format(stat.value)}
           </p>
-          <p className="text-white/70 text-sm mt-1">
+          <p className="text-white/70 text-xs sm:text-sm mt-0.5 sm:mt-1">
             {stat.label}
           </p>
         </div>
