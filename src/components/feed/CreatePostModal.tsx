@@ -117,7 +117,7 @@ export function CreatePostModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#1a1a1a] border-white/10 text-white max-w-2xl">
+      <DialogContent className="bg-[#1a1a1a] border-white/10 text-white w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-full max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Create Post</DialogTitle>
         </DialogHeader>

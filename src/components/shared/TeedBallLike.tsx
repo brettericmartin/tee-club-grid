@@ -97,9 +97,9 @@ export function TeedBallLike({
   };
 
   const buttonSizeClasses = {
-    sm: 'h-6 px-1.5 text-xs',
-    md: 'h-8 px-2 text-sm',
-    lg: 'h-10 px-3 text-base'
+    sm: 'min-h-[44px] px-2 text-xs',
+    md: 'min-h-[44px] px-3 text-sm',
+    lg: 'min-h-[44px] px-4 text-base'
   };
 
   const handleClick = () => {

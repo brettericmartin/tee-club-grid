@@ -142,7 +142,7 @@ export function CommunityPhotosGallery({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-full sm:max-w-4xl h-full sm:h-auto max-h-[100vh] sm:max-h-[90vh] p-0 sm:p-6">
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-full max-w-4xl h-[calc(100vh-1rem)] sm:h-auto max-h-[calc(100vh-1rem)] sm:max-h-[90vh] p-0 sm:p-6">
         <div className="flex flex-col h-full">
           <DialogHeader className="p-4 sm:p-0 pb-2 sm:pb-4">
             <DialogTitle>Community Photos</DialogTitle>

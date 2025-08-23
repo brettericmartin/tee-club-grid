@@ -174,7 +174,7 @@ const EquipmentSelectorModal = ({ open, onClose, onSelect, onSubmitNew, category
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-full sm:max-w-4xl h-full sm:h-auto max-h-[100vh] sm:max-h-[90vh] p-0 overflow-hidden">
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-full max-w-4xl h-[calc(100vh-1rem)] sm:h-auto max-h-[calc(100vh-1rem)] sm:max-h-[90vh] p-0 overflow-hidden">
         <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 flex-shrink-0">
           <DialogTitle className="text-2xl">Select Equipment</DialogTitle>
         </DialogHeader>

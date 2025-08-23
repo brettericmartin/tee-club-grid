@@ -177,7 +177,7 @@ const Navigation = () => {
                 {user ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="relative">
+                      <button className="relative min-w-[44px] min-h-[44px] flex items-center justify-center">
                         <Avatar className="w-10 h-10 hover:scale-110 transition-transform cursor-pointer">
                           <AvatarImage 
                             src={profileData?.avatar_url || user.user_metadata?.avatar_url}
@@ -229,7 +229,7 @@ const Navigation = () => {
                 ) : (
                   <button 
                     onClick={() => setShowSignIn(true)}
-                    className="relative w-10 h-10 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 hover:from-gray-500 hover:to-gray-700 hover:scale-110 transition-[colors,transform] flex items-center justify-center"
+                    className="relative min-w-[44px] min-h-[44px] rounded-full bg-gradient-to-br from-gray-600 to-gray-800 hover:from-gray-500 hover:to-gray-700 hover:scale-110 transition-[colors,transform] flex items-center justify-center"
                   >
                     <User className="w-5 h-5 text-white" />
                   </button>

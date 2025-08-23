@@ -214,7 +214,7 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#1a1a1a] border-white/20 text-white max-w-lg">
+      <DialogContent className="bg-[#1a1a1a] border-white/20 text-white w-[calc(100vw-2rem)] max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <Share2 className="w-5 h-5 text-primary" />

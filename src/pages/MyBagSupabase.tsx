@@ -1224,42 +1224,11 @@ const MyBagSupabase = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                */}
-                  <Button
-                    onClick={() => {
-                      aiFlowMetrics.trackMethodDialogOpen();
-                      setShowMethodDialog(true);
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="text-white hover:text-white hover:bg-white/20"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Equipment
-                  </Button>
-                  <Button 
-                    onClick={() => setShowBagSelector(true)} 
-                    variant="outline"
-                    size="sm"
-                    className="text-white hover:text-white hover:bg-white/20"
-                  >
-                    <Settings className="w-4 h-4 mr-1" />
-                    Manage Bags
-                  </Button>
-                  <Button
-                    onClick={() => setManageBadgesOpen(true)}
-                    variant="outline"
-                    size="sm"
-                    className="text-white hover:text-white hover:bg-white/20"
-                  >
-                    <Trophy className="w-4 h-4 mr-1" />
-                    Manage Badges
-                  </Button>
-                </div>
               </>
             )}
             </div>
           </div>
+        </div>
           
           {/* Edit Mode Actions - Both Mobile and Desktop */}
           {isEditing && (

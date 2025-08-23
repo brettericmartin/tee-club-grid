@@ -38,8 +38,8 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        // Base positioning and sizing
-        "fixed left-[50%] top-[50%] z-[101] grid w-[calc(100vw-2rem)] sm:w-full max-w-lg",
+        // Base positioning and sizing - improved mobile handling
+        "fixed left-[50%] top-[50%] z-[101] grid w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-full max-w-lg",
         "translate-x-[-50%] translate-y-[-50%] gap-4",
         // Background and border
         "bg-[#1a1a1a] border border-white/10",
@@ -55,9 +55,9 @@ const DialogContent = React.forwardRef<
         "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
         // Border radius
         "rounded-xl",
-        // Max height for scrolling
-        "max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)]",
-        "overflow-y-auto",
+        // Max height for scrolling - improved for mobile
+        "max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] md:max-h-[calc(100vh-4rem)]",
+        "overflow-y-auto overflow-x-hidden",
         className
       )}
       {...props}

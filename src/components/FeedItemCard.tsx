@@ -413,7 +413,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
               }
               setIsFlipped(!isFlipped);
             }}
-            className="absolute top-3 right-3 z-10 bg-primary/90 hover:bg-primary hover:scale-110 text-black p-3 rounded-full transition-all shadow-lg"
+            className="absolute top-3 right-3 z-10 bg-primary/90 hover:bg-primary hover:scale-110 text-black min-w-[44px] min-h-[44px] p-3 rounded-full transition-all shadow-lg flex items-center justify-center"
             aria-label="Toggle view"
           >
             <img src="/icons/teed-golf-bag-icon.svg" alt="View Bag" className="w-6 h-6" />
@@ -437,7 +437,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
             
             <button 
               onClick={() => setShowComments(true)}
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors min-w-[44px] min-h-[44px] p-2 -m-2"
             >
               <MessageCircle className="w-5 h-5" />
               <span className="text-sm">{commentCount}</span>

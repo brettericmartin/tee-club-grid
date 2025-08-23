@@ -232,7 +232,7 @@ const FeedContent = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setFilter('all')}
-                  className={`px-4 py-1.5 rounded-md transition-all ${
+                  className={`px-4 min-h-[44px] rounded-md transition-all ${
                     filter === 'all' 
                       ? 'bg-primary text-black font-medium' 
                       : 'text-white/70 hover:text-white'
@@ -246,7 +246,7 @@ const FeedContent = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => setFilter('following')}
-                    className={`px-4 py-1.5 rounded-md transition-all ${
+                    className={`px-4 min-h-[44px] rounded-md transition-all ${
                       filter === 'following' 
                         ? 'bg-primary text-black font-medium' 
                         : 'text-white/70 hover:text-white'
@@ -264,7 +264,7 @@ const FeedContent = () => {
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                  className="min-h-[44px] min-w-[44px] text-white/70 hover:text-white hover:bg-white/10"
                 >
                   <Filter className="w-4 h-4" />
                 </Button>
@@ -463,7 +463,7 @@ const FeedContent = () => {
             <DropdownMenuTrigger asChild>
               <Button
                 size="lg"
-                className="w-14 h-14 rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-[shadow,transform] duration-200 hover:scale-110"
+                className="min-w-[56px] min-h-[56px] rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-[shadow,transform] duration-200 hover:scale-110"
               >
                 <Plus className="w-6 h-6" />
               </Button>

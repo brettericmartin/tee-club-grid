@@ -307,7 +307,7 @@ export function BagEquipmentModal({
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-full sm:max-w-4xl h-[100vh] sm:h-auto max-h-[100vh] sm:max-h-[85vh] p-0 overflow-hidden flex flex-col">
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-full max-w-4xl h-[calc(100vh-1rem)] sm:h-auto max-h-[calc(100vh-1rem)] sm:max-h-[85vh] p-0 overflow-hidden flex flex-col">
         {/* Header with Buy Button */}
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-2 sm:pb-4 border-b">
           <div className="space-y-3">
