@@ -231,123 +231,97 @@ const FeedContent = () => {
 
         {/* Mobile Filter Bar */}
         <div className="sm:hidden sticky top-16 z-40 -mx-4 px-4 py-2 bg-black/95 backdrop-blur border-b border-white/10 mb-4">
-          {/* Sort Options Row */}
-          <div className="flex gap-2 mb-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleSortChange('new')}
-              className={`flex-1 min-h-[44px] rounded-md transition-all ${
-                sortBy === 'new' 
-                  ? 'bg-primary text-black font-medium' 
-                  : 'text-white/70 hover:text-white bg-[#1a1a1a]'
-              }`}
-            >
-              <Clock className="w-4 h-4 mr-1.5" />
-              New
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleSortChange('hot')}
-              className={`flex-1 min-h-[44px] rounded-md transition-all ${
-                sortBy === 'hot' 
-                  ? 'bg-primary text-black font-medium' 
-                  : 'text-white/70 hover:text-white bg-[#1a1a1a]'
-              }`}
-            >
-              <Flame className="w-4 h-4 mr-1.5" />
-              Hot
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleSortChange('top')}
-              className={`flex-1 min-h-[44px] rounded-md transition-all ${
-                sortBy === 'top' 
-                  ? 'bg-primary text-black font-medium' 
-                  : 'text-white/70 hover:text-white bg-[#1a1a1a]'
-              }`}
-            >
-              <Trophy className="w-4 h-4 mr-1.5" />
-              Top
-            </Button>
-          </div>
-          
-          {/* Filter Options Row */}
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-between min-h-[44px] bg-[#1a1a1a] text-white/70 hover:text-white"
-                  >
-                    <span className="flex items-center">
-                      {filter === 'all' && <><Sparkles className="w-4 h-4 mr-1.5" /> All</>}
-                      {filter === 'following' && <><Users className="w-4 h-4 mr-1.5" /> Following</>}
-                      {filter === 'in-my-bags' && <><Package className="w-4 h-4 mr-1.5" /> In My Bags</>}
-                    </span>
-                    <ChevronDown className="w-4 h-4 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-[#1a1a1a] border-white/10">
-                  <DropdownMenuItem
-                    onClick={() => setFilter('all')}
-                    className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
-                  >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    All Posts
-                  </DropdownMenuItem>
-                  {user && (
-                    <>
-                      <DropdownMenuItem
-                        onClick={() => setFilter('following')}
-                        className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
-                      >
-                        <Users className="w-4 h-4 mr-2" />
-                        Following
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setFilter('in-my-bags')}
-                        className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
-                      >
-                        <Package className="w-4 h-4 mr-2" />
-                        In My Bags
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            
+          <div className="flex gap-2">
+            {/* Sort Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="min-h-[44px] min-w-[44px] text-white/70 hover:text-white hover:bg-white/10"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1 justify-between min-h-[44px] bg-[#1a1a1a] text-white hover:text-white"
                 >
-                  <Filter className="w-4 h-4" />
+                  <span className="flex items-center">
+                    {sortBy === 'new' && <><Clock className="w-4 h-4 mr-1.5" /> New</>}
+                    {sortBy === 'hot' && <><Flame className="w-4 h-4 mr-1.5" /> Hot</>}
+                    {sortBy === 'top' && <><Trophy className="w-4 h-4 mr-1.5" /> Top</>}
+                  </span>
+                  <ChevronDown className="w-4 h-4 ml-2" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-[#1a1a1a] border-white/10">
-                <DropdownMenuLabel className="text-white">Filter by</DropdownMenuLabel>
+              <DropdownMenuContent className="w-56 bg-[#1a1a1a] border-white/10">
+                <DropdownMenuLabel className="text-white/70 text-xs">Sort by</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-white/10" />
-                <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
+                <DropdownMenuItem
+                  onClick={() => handleSortChange('new')}
+                  className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  New
+                  <span className="ml-auto text-xs text-white/50">Latest posts</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSortChange('hot')}
+                  className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                >
+                  <Flame className="w-4 h-4 mr-2" />
+                  Hot
+                  <span className="ml-auto text-xs text-white/50">Trending now</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSortChange('top')}
+                  className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                >
                   <Trophy className="w-4 h-4 mr-2" />
-                  Equipment Photos
+                  Top
+                  <span className="ml-auto text-xs text-white/50">Most popular</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
-                  Bag Updates
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            {/* Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1 justify-between min-h-[44px] bg-[#1a1a1a] text-white hover:text-white"
+                >
+                  <span className="flex items-center">
+                    {filter === 'all' && <><Sparkles className="w-4 h-4 mr-1.5" /> All</>}
+                    {filter === 'following' && <><Users className="w-4 h-4 mr-1.5" /> Following</>}
+                    {filter === 'in-my-bags' && <><Package className="w-4 h-4 mr-1.5" /> In My Bags</>}
+                  </span>
+                  <ChevronDown className="w-4 h-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-[#1a1a1a] border-white/10">
+                <DropdownMenuLabel className="text-white/70 text-xs">Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuItem
+                  onClick={() => setFilter('all')}
+                  className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  All Posts
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
-                  New Equipment
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-white/70 hover:text-white focus:bg-white/10">
-                  New Bags
-                </DropdownMenuItem>
+                {user && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => setFilter('following')}
+                      className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Following
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setFilter('in-my-bags')}
+                      className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      In My Bags
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -355,8 +329,51 @@ const FeedContent = () => {
 
         {/* Desktop Filter Section with Create Post Button */}
         <div className="hidden sm:flex flex-wrap items-center gap-4 mb-6">
-          {/* Sort Options */}
-          <div className="flex gap-2">
+          {/* For smaller desktops (sm-lg), use dropdowns. For large screens (lg+), use buttons */}
+          
+          {/* Sort Options - Dropdown on sm-md, Buttons on lg+ */}
+          <div className="block lg:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]">
+                  {sortBy === 'new' && <><Clock className="w-4 h-4 mr-2" /> New</>}
+                  {sortBy === 'hot' && <><Flame className="w-4 h-4 mr-2" /> Hot</>}
+                  {sortBy === 'top' && <><Trophy className="w-4 h-4 mr-2" /> Top</>}
+                  <ChevronDown className="w-4 h-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-[#1a1a1a] border-white/10">
+                <DropdownMenuLabel className="text-white/70">Sort by</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuItem
+                  onClick={() => handleSortChange('new')}
+                  className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  New
+                  <span className="ml-auto text-xs text-white/50">Latest posts</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSortChange('hot')}
+                  className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                >
+                  <Flame className="w-4 h-4 mr-2" />
+                  Hot
+                  <span className="ml-auto text-xs text-white/50">Trending now</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSortChange('top')}
+                  className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Top
+                  <span className="ml-auto text-xs text-white/50">Most popular</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          <div className="hidden lg:flex gap-2">
             <Button
               variant={sortBy === 'new' ? 'default' : 'outline'}
               onClick={() => handleSortChange('new')}
@@ -383,8 +400,50 @@ const FeedContent = () => {
             </Button>
           </div>
 
-          {/* Filter Options */}
-          <div className="flex gap-2">
+          {/* Filter Options - Dropdown on sm-md, Buttons on lg+ */}
+          <div className="block lg:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]">
+                  {filter === 'all' && <><Sparkles className="w-4 h-4 mr-2" /> All</>}
+                  {filter === 'following' && <><Users className="w-4 h-4 mr-2" /> Following</>}
+                  {filter === 'in-my-bags' && <><Package className="w-4 h-4 mr-2" /> In My Bags</>}
+                  <ChevronDown className="w-4 h-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-[#1a1a1a] border-white/10">
+                <DropdownMenuLabel className="text-white/70">Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuItem
+                  onClick={() => setFilter('all')}
+                  className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  All Posts
+                </DropdownMenuItem>
+                {user && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => setFilter('following')}
+                      className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Following
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setFilter('in-my-bags')}
+                      className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      In My Bags
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          <div className="hidden lg:flex gap-2">
             <Button
               variant={filter === 'all' ? 'default' : 'outline'}
               onClick={() => setFilter('all')}
