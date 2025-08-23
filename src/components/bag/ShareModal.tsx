@@ -214,7 +214,7 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#1a1a1a] border-white/20 text-white w-[calc(100vw-2rem)] max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-[#1a1a1a] border-white/20 text-white w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <Share2 className="w-5 h-5 text-primary" />
@@ -226,7 +226,7 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
           {/* URL Copy Section */}
           <div className="space-y-2">
             <label className="text-sm text-white/70">Bag URL</label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <div className="flex-1 bg-[#2a2a2a] border border-white/10 rounded-lg px-3 py-2 text-sm text-white/90 truncate">
                 {shareUrl}
               </div>
@@ -234,7 +234,7 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
                 onClick={copyLink}
                 variant="outline"
                 size="sm"
-                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] min-h-[44px] sm:min-h-0"
               >
                 {copied ? (
                   <Check className="w-4 h-4" />
@@ -248,52 +248,52 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
           {/* Social Share Buttons */}
           <div className="space-y-2">
             <label className="text-sm text-white/70">Share on Social Media</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               <Button
                 onClick={shareOnTwitter}
                 variant="outline"
-                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] min-h-[44px]"
               >
-                <Twitter className="w-4 h-4 mr-2" />
-                Twitter
+                <Twitter className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Twitter</span>
               </Button>
               <Button
                 onClick={shareOnFacebook}
                 variant="outline"
-                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] min-h-[44px]"
               >
-                <Facebook className="w-4 h-4 mr-2" />
-                Facebook
+                <Facebook className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Facebook</span>
               </Button>
               <Button
                 onClick={shareOnInstagram}
                 variant="outline"
-                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] min-h-[44px]"
               >
-                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-4 h-4 sm:mr-2" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1 1 12.324 0 6.162 6.162 0 0 1-12.324 0zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm4.965-10.405a1.44 1.44 0 1 1 2.881.001 1.44 1.44 0 0 1-2.881-.001z"/>
                 </svg>
-                Instagram
+                <span className="hidden sm:inline">Instagram</span>
               </Button>
               <Button
                 onClick={shareOnTikTok}
                 variant="outline"
-                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] min-h-[44px]"
               >
-                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-4 h-4 sm:mr-2" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.28 6.28 0 0 0-.88-.07 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34v-7.1a8.28 8.28 0 0 0 4.77 1.52v-3.4a4.83 4.83 0 0 1-1-0z"/>
                 </svg>
-                TikTok
+                <span className="hidden sm:inline">TikTok</span>
               </Button>
               <Button
                 onClick={shareOnReddit}
                 variant="outline"
-                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] col-span-2"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] min-h-[44px]"
               >
-                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-4 h-4 sm:mr-2" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
                 </svg>
-                Reddit
+                <span className="hidden sm:inline">Reddit</span>
               </Button>
             </div>
           </div>
@@ -301,15 +301,17 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
           {/* Advanced Options */}
           <div className="space-y-2">
             <label className="text-sm text-white/70">Advanced Options</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
               <Button
                 onClick={() => window.open(shareViewUrl, '_blank')}
                 variant="outline"
-                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] col-span-2"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] w-full min-h-[44px]"
               >
                 <Download className="w-4 h-4 mr-2" />
-                Open Screenshot-Friendly View
+                <span className="sm:hidden">Screenshot View</span>
+                <span className="hidden sm:inline">Open Screenshot-Friendly View</span>
               </Button>
+              <div className="grid grid-cols-3 gap-2">
               <Button
                 onClick={() => {
                   copyEquipmentList();
@@ -318,10 +320,10 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
                   setShowEmbedCode(false);
                 }}
                 variant="outline"
-                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] min-h-[44px]"
               >
-                <ClipboardList className="w-4 h-4 mr-2" />
-                List
+                <ClipboardList className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">List</span>
               </Button>
               <Button
                 onClick={() => {
@@ -329,10 +331,10 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
                   setShowEquipmentList(false);
                 }}
                 variant="outline"
-                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] min-h-[44px]"
               >
-                <QrCode className="w-4 h-4 mr-2" />
-                QR Code
+                <QrCode className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">QR Code</span>
               </Button>
               <Button
                 onClick={() => {
@@ -341,11 +343,12 @@ const ShareModal = ({ isOpen, onClose, bag }: ShareModalProps) => {
                   setShowEquipmentList(false);
                 }}
                 variant="outline"
-                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a]"
+                className="bg-[#2a2a2a] border-white/20 text-white hover:bg-[#3a3a3a] min-h-[44px]"
               >
-                <Code className="w-4 h-4 mr-2" />
-                Embed
+                <Code className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Embed</span>
               </Button>
+              </div>
             </div>
           </div>
 
