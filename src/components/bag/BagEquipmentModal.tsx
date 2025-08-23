@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShoppingCart, X, Image, MessageSquare, Users, ExternalLink, Video, Star, StarOff, Camera, Edit3, Images, Check, ChevronsUpDown, Crop, Trash2, Info } from 'lucide-react';
+import { ShoppingCart, X, Image, MessageSquare, Users, ExternalLink, Video, Star, StarOff, Camera, Edit3, Images, Check, ChevronsUpDown, Crop, Trash2, Info, Heart } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -269,7 +269,7 @@ export function BagEquipmentModal({
     if (!equipmentId) return;
 
     try {
-      // Load equipment photos
+      // Load equipment photos from equipment_photos table
       const { data: photos } = await supabase
         .from('equipment_photos')
         .select('*')
@@ -277,7 +277,36 @@ export function BagEquipmentModal({
         .order('likes_count', { ascending: false })
         .limit(10);
       
-      if (photos) setEquipmentPhotos(photos);
+      // Combine user photos with equipment's main photo
+      const allPhotos = [];
+      
+      // Add the custom photo if it exists
+      if (bagEquipment?.custom_photo_url) {
+        allPhotos.push({
+          id: 'custom-photo',
+          photo_url: bagEquipment.custom_photo_url,
+          equipment_id: equipmentId,
+          is_primary: true
+        });
+      }
+      
+      // Add the equipment's main photo if it exists and is different
+      const mainPhoto = equipment?.most_liked_photo || equipment?.image_url;
+      if (mainPhoto && mainPhoto !== bagEquipment?.custom_photo_url) {
+        allPhotos.push({
+          id: 'main-photo',
+          photo_url: mainPhoto,
+          equipment_id: equipmentId,
+          is_primary: !bagEquipment?.custom_photo_url
+        });
+      }
+      
+      // Add community photos
+      if (photos) {
+        allPhotos.push(...photos);
+      }
+      
+      setEquipmentPhotos(allPhotos);
 
       // Load reviews (placeholder - adjust based on your schema)
       const { data: reviewsData } = await supabase
@@ -300,7 +329,7 @@ export function BagEquipmentModal({
     } catch (error) {
       console.error('Error loading additional data:', error);
     }
-  }, [equipmentId, equipment]);
+  }, [equipmentId, equipment, bagEquipment]);
 
   if (!equipment) return null;
 
@@ -956,13 +985,29 @@ export function BagEquipmentModal({
                   {equipmentPhotos.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {equipmentPhotos.map((photo) => (
-                        <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900">
+                        <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900">
                           <img
                             src={photo.photo_url}
                             alt="Equipment photo"
                             className="w-full h-full object-cover"
                             loading="lazy"
                           />
+                          {photo.id === 'custom-photo' && (
+                            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                              Your Photo
+                            </div>
+                          )}
+                          {photo.id === 'main-photo' && (
+                            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                              Stock Photo
+                            </div>
+                          )}
+                          {photo.likes_count > 0 && (
+                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                              <Heart className="w-3 h-3" />
+                              {photo.likes_count}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
