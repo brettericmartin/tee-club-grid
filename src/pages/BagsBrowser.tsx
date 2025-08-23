@@ -294,71 +294,91 @@ const BagsBrowser = () => {
 
         {/* Mobile Filter Bar */}
         <div className="sm:hidden mb-6">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4">
-            {/* Sort Options as Pills */}
-            <div className="flex gap-2 flex-shrink-0">
-              <Button
-                variant={sortBy === "newest" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("newest")}
-                className={`flex items-center gap-1.5 whitespace-nowrap ${
-                  sortBy === "newest" ? "bg-primary" : "bg-card"
-                }`}
-              >
-                <Clock className="w-3.5 h-3.5" />
-                Newest
-              </Button>
-              <Button
-                variant={sortBy === "most-liked" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("most-liked")}
-                className={`flex items-center gap-1.5 whitespace-nowrap ${
-                  sortBy === "most-liked" ? "bg-primary" : "bg-card"
-                }`}
-              >
-                <Heart className="w-3.5 h-3.5" />
-                Most Liked
-              </Button>
-              {user && (
+          <div className="flex items-center gap-2">
+            {/* Sort By Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
-                  variant={sortBy === "following" ? "default" : "outline"}
+                  variant="outline"
                   size="sm"
-                  onClick={() => setSortBy("following")}
-                  className={`flex items-center gap-1.5 whitespace-nowrap ${
-                    sortBy === "following" ? "bg-primary" : "bg-card"
-                  }`}
+                  className="flex-1 justify-between bg-card border-border min-h-[44px]"
                 >
-                  <Users className="w-3.5 h-3.5" />
-                  Following
+                  <span className="flex items-center gap-2">
+                    {getSortIcon(sortBy)}
+                    <span>Sort: {
+                      sortBy === "newest" ? "Newest" :
+                      sortBy === "most-liked" ? "Most Liked" :
+                      sortBy === "following" ? "Following" :
+                      sortBy === "price-high" ? "Price ↓" :
+                      sortBy === "price-low" ? "Price ↑" : "Newest"
+                    }</span>
+                  </span>
+                  <ChevronDown className="w-4 h-4 ml-2" />
                 </Button>
-              )}
-              <Button
-                variant={sortBy === "price-high" || sortBy === "price-low" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy(sortBy === "price-high" ? "price-low" : "price-high")}
-                className={`flex items-center gap-1.5 whitespace-nowrap ${
-                  sortBy === "price-high" || sortBy === "price-low" ? "bg-primary" : "bg-card"
-                }`}
-              >
-                <DollarSign className="w-3.5 h-3.5" />
-                {sortBy === "price-high" ? "High→Low" : sortBy === "price-low" ? "Low→High" : "Price"}
-              </Button>
-            </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-[#1a1a1a] border-white/10">
+                <DropdownMenuLabel className="text-white">Sort By</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuItem 
+                  onClick={() => setSortBy("newest")}
+                  className="text-white/90 hover:text-white focus:bg-white/10"
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  Newest
+                  {sortBy === "newest" && <span className="ml-auto text-primary">✓</span>}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSortBy("most-liked")}
+                  className="text-white/90 hover:text-white focus:bg-white/10"
+                >
+                  <Heart className="w-4 h-4 mr-2" />
+                  Most Liked
+                  {sortBy === "most-liked" && <span className="ml-auto text-primary">✓</span>}
+                </DropdownMenuItem>
+                {user && (
+                  <DropdownMenuItem 
+                    onClick={() => setSortBy("following")}
+                    className="text-white/90 hover:text-white focus:bg-white/10"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Following
+                    {sortBy === "following" && <span className="ml-auto text-primary">✓</span>}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuItem 
+                  onClick={() => setSortBy("price-high")}
+                  className="text-white/90 hover:text-white focus:bg-white/10"
+                >
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Price: High to Low
+                  {sortBy === "price-high" && <span className="ml-auto text-primary">✓</span>}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSortBy("price-low")}
+                  className="text-white/90 hover:text-white focus:bg-white/10"
+                >
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Price: Low to High
+                  {sortBy === "price-low" && <span className="ml-auto text-primary">✓</span>}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
-            {/* More Filters Dropdown */}
+            {/* Filter Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className={`flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
+                  className={`flex items-center gap-1.5 whitespace-nowrap min-h-[44px] px-4 ${
                     (filterBy !== "all" || handicapRange !== "all" || priceRange !== "all") 
                       ? "bg-primary text-primary-foreground" 
-                      : "bg-card"
+                      : "bg-card border-border"
                   }`}
                 >
-                  <Filter className="w-3.5 h-3.5" />
-                  Filters
+                  <Filter className="w-4 h-4" />
+                  <span>Filters</span>
                   {(filterBy !== "all" || handicapRange !== "all" || priceRange !== "all") && (
                     <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
                       {[filterBy !== "all", handicapRange !== "all", priceRange !== "all"].filter(Boolean).length}

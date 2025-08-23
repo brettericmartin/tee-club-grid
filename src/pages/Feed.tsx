@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Trophy, TrendingUp, Users, Filter, Sparkles, Loader2, Plus, Camera, Lock } from 'lucide-react';
+import { Trophy, TrendingUp, Users, Filter, Sparkles, Loader2, Plus, Camera, Lock, Clock, Flame, ChevronDown, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFeed } from '@/contexts/FeedContext';
 import { useNavigate } from 'react-router-dom';
+import { type FeedSortOption } from '@/utils/feedSorting';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,16 +26,21 @@ import Masonry from 'react-masonry-css';
 const FeedContent = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const { allPosts, loading, error, loadMainFeed, updatePostLike, updateUserFollow } = useFeed();
-  const [filter, setFilter] = useState<'all' | 'following'>('all');
+  const { allPosts, loading, error, loadMainFeed, updatePostLike, updateUserFollow, sortBy, setSortBy } = useFeed();
+  const [filter, setFilter] = useState<'all' | 'following' | 'in-my-bags'>('all');
   const [displayCount, setDisplayCount] = useState(12);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [betaAccess, setBetaAccess] = useState<boolean | null>(null);
   const [publicBetaEnabled, setPublicBetaEnabled] = useState(false);
 
   useEffect(() => {
-    loadMainFeed(filter);
-  }, [filter, loadMainFeed]);
+    loadMainFeed(filter, sortBy);
+  }, [filter, sortBy, loadMainFeed]);
+
+  const handleSortChange = (newSort: FeedSortOption) => {
+    setSortBy(newSort);
+    loadMainFeed(filter, newSort);
+  };
 
   // Check beta access for posting
   useEffect(() => {
@@ -225,38 +231,95 @@ const FeedContent = () => {
 
         {/* Mobile Filter Bar */}
         <div className="sm:hidden sticky top-16 z-40 -mx-4 px-4 py-2 bg-black/95 backdrop-blur border-b border-white/10 mb-4">
+          {/* Sort Options Row */}
+          <div className="flex gap-2 mb-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleSortChange('new')}
+              className={`flex-1 min-h-[44px] rounded-md transition-all ${
+                sortBy === 'new' 
+                  ? 'bg-primary text-black font-medium' 
+                  : 'text-white/70 hover:text-white bg-[#1a1a1a]'
+              }`}
+            >
+              <Clock className="w-4 h-4 mr-1.5" />
+              New
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleSortChange('hot')}
+              className={`flex-1 min-h-[44px] rounded-md transition-all ${
+                sortBy === 'hot' 
+                  ? 'bg-primary text-black font-medium' 
+                  : 'text-white/70 hover:text-white bg-[#1a1a1a]'
+              }`}
+            >
+              <Flame className="w-4 h-4 mr-1.5" />
+              Hot
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleSortChange('top')}
+              className={`flex-1 min-h-[44px] rounded-md transition-all ${
+                sortBy === 'top' 
+                  ? 'bg-primary text-black font-medium' 
+                  : 'text-white/70 hover:text-white bg-[#1a1a1a]'
+              }`}
+            >
+              <Trophy className="w-4 h-4 mr-1.5" />
+              Top
+            </Button>
+          </div>
+          
+          {/* Filter Options Row */}
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <div className="inline-flex rounded-lg bg-[#1a1a1a] p-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setFilter('all')}
-                  className={`px-4 min-h-[44px] rounded-md transition-all ${
-                    filter === 'all' 
-                      ? 'bg-primary text-black font-medium' 
-                      : 'text-white/70 hover:text-white'
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4 mr-1.5" />
-                  All
-                </Button>
-                {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setFilter('following')}
-                    className={`px-4 min-h-[44px] rounded-md transition-all ${
-                      filter === 'following' 
-                        ? 'bg-primary text-black font-medium' 
-                        : 'text-white/70 hover:text-white'
-                    }`}
+                    className="w-full justify-between min-h-[44px] bg-[#1a1a1a] text-white/70 hover:text-white"
                   >
-                    <Users className="w-4 h-4 mr-1.5" />
-                    Following
+                    <span className="flex items-center">
+                      {filter === 'all' && <><Sparkles className="w-4 h-4 mr-1.5" /> All</>}
+                      {filter === 'following' && <><Users className="w-4 h-4 mr-1.5" /> Following</>}
+                      {filter === 'in-my-bags' && <><Package className="w-4 h-4 mr-1.5" /> In My Bags</>}
+                    </span>
+                    <ChevronDown className="w-4 h-4 ml-2" />
                   </Button>
-                )}
-              </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-[#1a1a1a] border-white/10">
+                  <DropdownMenuItem
+                    onClick={() => setFilter('all')}
+                    className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    All Posts
+                  </DropdownMenuItem>
+                  {user && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => setFilter('following')}
+                        className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                      >
+                        <Users className="w-4 h-4 mr-2" />
+                        Following
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setFilter('in-my-bags')}
+                        className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
+                      >
+                        <Package className="w-4 h-4 mr-2" />
+                        In My Bags
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             
             <DropdownMenu>
@@ -292,6 +355,35 @@ const FeedContent = () => {
 
         {/* Desktop Filter Section with Create Post Button */}
         <div className="hidden sm:flex flex-wrap items-center gap-4 mb-6">
+          {/* Sort Options */}
+          <div className="flex gap-2">
+            <Button
+              variant={sortBy === 'new' ? 'default' : 'outline'}
+              onClick={() => handleSortChange('new')}
+              className={sortBy === 'new' ? 'bg-primary hover:bg-primary/90' : 'bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]'}
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              New
+            </Button>
+            <Button
+              variant={sortBy === 'hot' ? 'default' : 'outline'}
+              onClick={() => handleSortChange('hot')}
+              className={sortBy === 'hot' ? 'bg-primary hover:bg-primary/90' : 'bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]'}
+            >
+              <Flame className="w-4 h-4 mr-2" />
+              Hot
+            </Button>
+            <Button
+              variant={sortBy === 'top' ? 'default' : 'outline'}
+              onClick={() => handleSortChange('top')}
+              className={sortBy === 'top' ? 'bg-primary hover:bg-primary/90' : 'bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]'}
+            >
+              <Trophy className="w-4 h-4 mr-2" />
+              Top
+            </Button>
+          </div>
+
+          {/* Filter Options */}
           <div className="flex gap-2">
             <Button
               variant={filter === 'all' ? 'default' : 'outline'}
@@ -302,14 +394,24 @@ const FeedContent = () => {
               All
             </Button>
             {user && (
-              <Button
-                variant={filter === 'following' ? 'default' : 'outline'}
-                onClick={() => setFilter('following')}
-                className={filter === 'following' ? 'bg-primary hover:bg-primary/90' : 'bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]'}
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Following
-              </Button>
+              <>
+                <Button
+                  variant={filter === 'following' ? 'default' : 'outline'}
+                  onClick={() => setFilter('following')}
+                  className={filter === 'following' ? 'bg-primary hover:bg-primary/90' : 'bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]'}
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Following
+                </Button>
+                <Button
+                  variant={filter === 'in-my-bags' ? 'default' : 'outline'}
+                  onClick={() => setFilter('in-my-bags')}
+                  className={filter === 'in-my-bags' ? 'bg-primary hover:bg-primary/90' : 'bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]'}
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  In My Bags
+                </Button>
+              </>
             )}
           </div>
 
@@ -367,22 +469,21 @@ const FeedContent = () => {
         </div>
         
         {/* Mobile Floating Action Button */}
+        {/* Mobile FAB - positioned above navigation */}
         {user && (
           <div className="sm:hidden">
             {betaAccess ? (
               <button
                 onClick={() => setShowCreatePost(true)}
-                className="fixed bottom-20 right-4 z-50 w-14 h-14 bg-primary hover:bg-primary/90 text-black rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all flex items-center justify-center group"
+                className="fixed bottom-24 right-4 z-[60] w-14 h-14 bg-primary hover:bg-primary/90 text-black rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all flex items-center justify-center group"
                 aria-label="Create new post"
               >
                 <Plus className="w-6 h-6" />
-                {/* New post indicator - show pulse when there could be new posts */}
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
               </button>
             ) : (
               <button
                 onClick={() => navigate('/waitlist')}
-                className="fixed bottom-20 right-4 z-50 w-14 h-14 bg-gray-800 hover:bg-gray-700 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all flex items-center justify-center"
+                className="fixed bottom-24 right-4 z-[60] w-14 h-14 bg-gray-800 hover:bg-gray-700 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all flex items-center justify-center"
                 aria-label="Join beta to post"
               >
                 <Lock className="w-5 h-5" />
@@ -441,6 +542,8 @@ const FeedContent = () => {
               <p className="text-white/70">
                 {filter === 'following' 
                   ? "Follow some golfers to see their updates!"
+                  : filter === 'in-my-bags'
+                  ? "Add equipment to your bag to see related posts!"
                   : "Be the first to share your golf journey!"}
               </p>
               {user && (

@@ -5,6 +5,7 @@ import { transformFeedPost, type FeedItemData } from '@/utils/feedTransformer';
 import { useAuth } from '@/contexts/AuthContext';
 import { executeWithRetry } from '@/lib/authHelpers';
 import { toast } from 'sonner';
+import { type FeedSortOption, sortFeedPosts } from '@/utils/feedSorting';
 
 interface FeedContextType {
   // Main feed data
@@ -13,8 +14,12 @@ interface FeedContextType {
   loading: boolean;
   error: string | null;
   
+  // Sorting
+  sortBy: FeedSortOption;
+  setSortBy: (sort: FeedSortOption) => void;
+  
   // Actions
-  loadMainFeed: (filter?: 'all' | 'following') => Promise<void>;
+  loadMainFeed: (filter?: 'all' | 'following' | 'in-my-bags', sort?: FeedSortOption) => Promise<void>;
   loadUserFeed: (userId: string, forceRefresh?: boolean) => Promise<void>;
   updatePost: (postId: string, updates: Partial<FeedPost>) => void;
   deletePost: (postId: string) => void;
@@ -47,8 +52,9 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
   const [userPosts, setUserPosts] = useState<Map<string, FeedItemData[]>>(new Map());
   const [loading, setLoading] = useState(false); // Don't start loading
   const [error, setError] = useState<string | null>(null);
-  const [currentFilter, setCurrentFilter] = useState<'all' | 'following'>('all');
+  const [currentFilter, setCurrentFilter] = useState<'all' | 'following' | 'in-my-bags'>('all');
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<FeedSortOption>('new');
 
 
   // Load followed users if authenticated (non-blocking)
@@ -83,8 +89,11 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
   };
 
   // Load main feed
-  const loadMainFeed = useCallback(async (filter: 'all' | 'following' = 'all') => {
-    console.log('[FeedContext.loadMainFeed] Called with filter:', filter, 'user:', user?.id);
+  const loadMainFeed = useCallback(async (
+    filter: 'all' | 'following' | 'in-my-bags' = 'all',
+    sort?: FeedSortOption
+  ) => {
+    console.log('[FeedContext.loadMainFeed] Called with filter:', filter, 'sort:', sort || sortBy, 'user:', user?.id);
     console.log('[FeedContext.loadMainFeed] Current auth state:', {
       hasUser: !!user,
       userId: user?.id,
@@ -96,9 +105,15 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       setError(null);
       setCurrentFilter(filter);
       
+      // Update sort if provided
+      const currentSort = sort || sortBy;
+      if (sort && sort !== sortBy) {
+        setSortBy(sort);
+      }
+      
       // Don't block on loading followed users - use what we have
       // If filter is 'following' and no user, just show all posts
-      const effectiveFilter = filter === 'following' && !user ? 'all' : filter;
+      const effectiveFilter = (filter === 'following' || filter === 'in-my-bags') && !user ? 'all' : filter;
       
       console.log('[FeedContext.loadMainFeed] Calling getFeedPosts with:', user?.id, effectiveFilter);
       const feedPosts = await getFeedPosts(user?.id, effectiveFilter);
@@ -110,7 +125,7 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       console.log('[FeedContext] Sample post:', feedPosts[0]);
       
       // Transform posts to UI format
-      const transformedPosts = feedPosts.map(post => {
+      let transformedPosts = feedPosts.map(post => {
         const isFollowed = followedUsers.has(post.user_id);
         const transformed = transformFeedPost({ ...post, isFollowed });
         
@@ -128,6 +143,9 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
         return transformed;
       });
       
+      // Apply sorting (use currentSort from above)
+      transformedPosts = sortFeedPosts(transformedPosts, currentSort);
+      
       setAllPosts(transformedPosts);
     } catch (error) {
       console.error('Error loading main feed:', error);
@@ -135,7 +153,7 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, followedUsers]); // Only depend on user.id, not the whole user object
+  }, [user?.id, followedUsers, sortBy]); // Only depend on user.id, not the whole user object
 
   // Load user-specific feed
   const loadUserFeed = useCallback(async (userId: string, forceRefresh = false) => {
@@ -451,6 +469,8 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
     userPosts,
     loading,
     error,
+    sortBy,
+    setSortBy,
     loadMainFeed,
     loadUserFeed,
     updatePost,

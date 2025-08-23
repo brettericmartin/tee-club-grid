@@ -293,7 +293,7 @@ export async function createEquipmentPhotoPost(
 }
 
 // Get feed posts with following prioritization
-export async function getFeedPosts(userId?: string, filter: 'all' | 'following' = 'all') {
+export async function getFeedPosts(userId?: string, filter: 'all' | 'following' | 'in-my-bags' = 'all') {
   try {
     console.log('Getting feed posts with filter:', filter, 'userId:', userId);
     
@@ -332,7 +332,7 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
       .order('created_at', { ascending: false })
       .limit(20); // Reduce initial load for better performance
 
-    // If filtering by following, join with follows table
+    // Filter based on type
     if (filter === 'following' && userId) {
       // First get the list of users the current user follows
       const { data: follows } = await supabase
@@ -345,6 +345,21 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
         query = query.in('user_id', followingIds);
       } else {
         // If not following anyone, return empty
+        return [];
+      }
+    } else if (filter === 'in-my-bags' && userId) {
+      // Get all equipment IDs from user's bags
+      const { data: bagEquipment } = await supabase
+        .from('bag_equipment')
+        .select('equipment_id, user_bags!inner(user_id)')
+        .eq('user_bags.user_id', userId);
+      
+      if (bagEquipment && bagEquipment.length > 0) {
+        const equipmentIds = [...new Set(bagEquipment.map(be => be.equipment_id))];
+        // Filter posts that reference equipment in user's bags
+        query = query.in('equipment_id', equipmentIds);
+      } else {
+        // If no equipment in bags, return empty
         return [];
       }
     }
