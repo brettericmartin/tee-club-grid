@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getBrandAbbreviation } from '@/utils/brandAbbreviations';
 import { cn } from '@/lib/utils';
-import { EquipmentShowcaseModal } from '@/components/EquipmentShowcaseModal';
+import { ViewerEquipmentModal } from '@/components/bag/ViewerEquipmentModal';
 import EquipmentTile from '@/components/shared/EquipmentTile';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import type { Database } from '@/lib/supabase';
@@ -414,15 +414,18 @@ const BagCardComponent = ({
       </div>
     </Card>
 
-    {/* Equipment Showcase Modal */}
-    <EquipmentShowcaseModal
-      bagEquipment={selectedBagEquipment}
-      isOpen={equipmentModalOpen}
-      onClose={() => {
-        setEquipmentModalOpen(false);
-        setSelectedBagEquipment(null);
-      }}
-    />
+    {/* Equipment Modal */}
+    {selectedBagEquipment && (
+      <ViewerEquipmentModal
+        equipment={selectedBagEquipment.equipment}
+        bagEquipment={selectedBagEquipment}
+        isOpen={equipmentModalOpen}
+        onClose={() => {
+          setEquipmentModalOpen(false);
+          setSelectedBagEquipment(null);
+        }}
+      />
+    )}
   </>
   );
 };

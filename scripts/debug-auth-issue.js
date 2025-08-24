@@ -1,177 +1,106 @@
+#!/usr/bin/env node
+
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
+// Load environment variables
 dotenv.config();
 
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.VITE_SUPABASE_ANON_KEY
-);
+const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://kgleorvvtrqlgolzdbbw.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnbGVvcnZ2dHJxbGdvbHpkYmJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDczNjk0MSwiZXhwIjoyMDY2MzEyOTQxfQ.4AT3NIctRyxWmHVSTFXHhxAx3Jz_5DtF9Kbzdg-gvRw';
 
-async function debugAuthIssue() {
-  console.log('🔍 Debugging Authentication/RLS Issue\n');
+console.log('🔍 Deep Debugging Auth Issue...\n');
 
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+async function debugAuth() {
   try {
-    // 1. Check if we can get the current user
-    console.log('1. Checking authentication status...');
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // 1. Check if we can manually insert into profiles
+    console.log('1️⃣ Testing manual profile insertion...');
+    const testId = crypto.randomUUID();
+    const testEmail = `manual-test${Date.now()}@example.com`;
     
-    if (authError) {
-      console.log('❌ Auth error:', authError.message);
-    } else if (user) {
-      console.log('✅ Authenticated as:', user.id);
-      console.log('   Email:', user.email);
-    } else {
-      console.log('⚠️ No authenticated user - using anonymous access');
-    }
-
-    // 2. Test with service role key if available
-    console.log('\n2. Testing with current credentials...');
-    const keyType = process.env.VITE_SUPABASE_ANON_KEY === process.env.VITE_SUPABASE_ANON_KEY ? 'ANON' : 'SERVICE';
-    console.log('   Using key type:', keyType);
-
-    // 3. Try a simple insert to a test table
-    console.log('\n3. Testing database operations...');
-    
-    // Get a test user from profiles
-    const { data: testProfile } = await supabase
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('id')
-      .limit(1)
+      .insert({
+        id: testId,
+        email: testEmail,
+        display_name: 'Manual Test',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
       .single();
 
-    if (testProfile) {
-      console.log('   Test user ID:', testProfile.id);
-      
-      // Try to insert a forum reaction
-      const { data: post } = await supabase
-        .from('forum_posts')
-        .select('id')
-        .limit(1)
-        .single();
+    if (profileError) {
+      console.error('❌ Cannot insert into profiles:', profileError.message);
+      console.log('Details:', profileError);
+    } else {
+      console.log('✅ Manual profile insert successful');
+      // Clean up
+      await supabase.from('profiles').delete().eq('id', testId);
+      console.log('🧹 Test profile cleaned up');
+    }
 
-      if (post) {
-        console.log('   Test post ID:', post.id);
-        
-        // Delete any existing reaction first
-        const { error: deleteError } = await supabase
-          .from('forum_reactions')
-          .delete()
-          .eq('user_id', testProfile.id)
-          .eq('post_id', post.id);
-        
-        console.log('   Delete existing:', deleteError ? '⚠️ ' + deleteError.message : '✅ Cleared');
-        
-        // Try to insert
-        console.log('\n   Attempting insert with:');
-        console.log('   - user_id:', testProfile.id);
-        console.log('   - post_id:', post.id);
-        console.log('   - reaction_type: Tee');
-        
-        const { data: inserted, error: insertError } = await supabase
-          .from('forum_reactions')
-          .insert({
-            user_id: testProfile.id,
-            post_id: post.id,
-            reaction_type: 'Tee'
-          })
-          .select()
-          .single();
-        
-        if (insertError) {
-          console.log('\n   ❌ Insert failed:', insertError.message);
-          console.log('   Error code:', insertError.code);
-          console.log('   Error details:', insertError.details);
-          
-          if (insertError.code === '42501') {
-            console.log('\n   🔒 This is definitely an RLS issue');
-            console.log('   The policies are not allowing inserts');
-          }
-        } else {
-          console.log('\n   ✅ Insert successful!');
-          console.log('   Created reaction:', inserted.id);
-          
-          // Clean up
-          await supabase
-            .from('forum_reactions')
-            .delete()
-            .eq('id', inserted.id);
-        }
+    // 2. Check profiles table columns
+    console.log('\n2️⃣ Checking profiles table structure...');
+    const { data: sample, error: sampleError } = await supabase
+      .from('profiles')
+      .select('*')
+      .limit(1);
+
+    if (sampleError) {
+      console.error('❌ Cannot read profiles table:', sampleError);
+    } else {
+      console.log('✅ Profiles table is accessible');
+      if (sample && sample.length > 0) {
+        console.log('Columns:', Object.keys(sample[0]));
+      } else {
+        console.log('Table exists but is empty or has no visible rows');
       }
     }
 
-    // 4. Check if RLS is even enabled
-    console.log('\n4. Checking RLS status...');
-    // We can't directly query this, but we can infer from behavior
-    const { count: totalReactions } = await supabase
-      .from('forum_reactions')
-      .select('*', { count: 'exact', head: true });
+    // 3. Try creating a user without any metadata
+    console.log('\n3️⃣ Testing minimal user creation...');
+    const minimalEmail = `minimal${Date.now()}@example.com`;
     
-    console.log('   Total reactions in table:', totalReactions);
-    
-    // 5. Try with auth context
-    console.log('\n5. Testing with auth context...');
-    if (user) {
-      console.log('   Current auth user:', user.id);
+    const { data: minimalUser, error: minimalError } = await supabase.auth.admin.createUser({
+      email: minimalEmail,
+      email_confirm: true
+    });
+
+    if (minimalError) {
+      console.error('❌ Even minimal user creation fails:', minimalError.message);
+      console.log('This suggests a database-level issue');
+    } else {
+      console.log('✅ Minimal user created!');
+      console.log('User ID:', minimalUser.user.id);
       
-      // Try insert as authenticated user
-      const { data: authPost } = await supabase
-        .from('forum_posts')
-        .select('id')
-        .limit(1)
+      // Check if profile exists
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', minimalUser.user.id)
         .single();
       
-      if (authPost) {
-        const { error: authInsertError } = await supabase
-          .from('forum_reactions')
-          .insert({
-            user_id: user.id,
-            post_id: authPost.id,
-            reaction_type: 'Helpful'
-          });
-        
-        if (authInsertError) {
-          console.log('   ❌ Authenticated insert failed:', authInsertError.message);
-        } else {
-          console.log('   ✅ Authenticated insert worked!');
-          
-          // Clean up
-          await supabase
-            .from('forum_reactions')
-            .delete()
-            .eq('user_id', user.id)
-            .eq('post_id', authPost.id);
-        }
+      if (profile) {
+        console.log('✅ Profile was auto-created by trigger');
+      } else {
+        console.log('❌ Profile was NOT created - trigger not working');
       }
-    } else {
-      console.log('   No authenticated user to test with');
-      console.log('   This might be the issue - the app expects an authenticated user');
-    }
-
-    // 6. Summary
-    console.log('\n📊 DIAGNOSIS:');
-    console.log('=====================================');
-    
-    if (!user) {
-      console.log('❌ NOT AUTHENTICATED');
-      console.log('   The frontend might not be sending auth headers');
-      console.log('   Or the user session might have expired');
-      console.log('\n🔧 SOLUTION:');
-      console.log('   1. Sign out and sign back in');
-      console.log('   2. Clear browser cache/cookies');
-      console.log('   3. Check if auth.uid() is null in RLS policies');
-    } else {
-      console.log('❌ RLS POLICIES STILL BLOCKING');
-      console.log('   Even with auth, inserts are blocked');
-      console.log('\n🔧 SOLUTION:');
-      console.log('   Try completely disabling RLS temporarily:');
-      console.log('   ALTER TABLE forum_reactions DISABLE ROW LEVEL SECURITY;');
-      console.log('   ALTER TABLE feed_likes DISABLE ROW LEVEL SECURITY;');
+      
+      // Clean up
+      await supabase.from('profiles').delete().eq('id', minimalUser.user.id);
+      await supabase.auth.admin.deleteUser(minimalUser.user.id);
+      console.log('🧹 Cleaned up test user');
     }
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('❌ Unexpected error:', error);
   }
 }
 
-debugAuthIssue();
+debugAuth().then(() => {
+  console.log('\n✅ Debug complete');
+  process.exit(0);
+});

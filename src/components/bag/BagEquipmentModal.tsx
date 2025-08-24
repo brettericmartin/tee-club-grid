@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShoppingCart, X, Image, MessageSquare, Users, ExternalLink, Video, Star, StarOff, Camera, Edit3, Images, Check, ChevronsUpDown, Crop, Trash2, Info, Heart } from 'lucide-react';
+import { ShoppingCart, X, Image, MessageSquare, Users, ExternalLink, Video, Star, StarOff, Camera, Edit3, Images, Check, ChevronsUpDown, Crop, Trash2, Info, Heart, Expand } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -25,9 +25,12 @@ import { EquipmentVideosPanel } from '@/components/equipment/EquipmentVideosPane
 import { CommunityPhotosGallery } from './CommunityPhotosGallery';
 import { ImageCropper } from '@/components/ImageCropper';
 import { UnifiedPhotoUploadDialog } from '@/components/shared/UnifiedPhotoUploadDialog';
+import { PhotoLightbox } from '@/components/shared/PhotoLightbox';
+import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { syncUserPhotoToEquipment } from '@/services/equipmentPhotoSync';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/lib/supabase';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
@@ -57,12 +60,17 @@ export function BagEquipmentModal({
   onUpdate
 }: BagEquipmentModalProps) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [equipmentPhotos, setEquipmentPhotos] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [forumThreads, setForumThreads] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Photo lightbox state
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   
   // Shaft and grip options
   const [shafts, setShafts] = useState<Equipment[]>([]);
@@ -275,35 +283,61 @@ export function BagEquipmentModal({
         .select('*')
         .eq('equipment_id', equipmentId)
         .order('likes_count', { ascending: false })
-        .limit(10);
+        .limit(20);
+      
+      // If user is logged in, check which photos they've liked
+      let photosWithLikes = photos || [];
+      if (user && photos) {
+        const { data: userLikes } = await supabase
+          .from('equipment_photo_likes')
+          .select('photo_id')
+          .eq('user_id', user.id)
+          .in('photo_id', photos.map(p => p.id));
+
+        const likedPhotoIds = new Set(userLikes?.map(l => l.photo_id) || []);
+        photosWithLikes = photos.map(photo => ({
+          ...photo,
+          is_liked_by_user: likedPhotoIds.has(photo.id)
+        }));
+      }
       
       // Combine user photos with equipment's main photo
       const allPhotos = [];
       
-      // Add the custom photo if it exists
-      if (bagEquipment?.custom_photo_url) {
+      // Add the custom photo if it exists (and it's not a placeholder)
+      if (bagEquipment?.custom_photo_url && 
+          !bagEquipment.custom_photo_url.includes('placehold')) {
         allPhotos.push({
           id: 'custom-photo',
           photo_url: bagEquipment.custom_photo_url,
           equipment_id: equipmentId,
-          is_primary: true
+          is_primary: true,
+          likes_count: 0,
+          is_liked_by_user: false
         });
       }
       
-      // Add the equipment's main photo if it exists and is different
-      const mainPhoto = equipment?.most_liked_photo || equipment?.image_url;
-      if (mainPhoto && mainPhoto !== bagEquipment?.custom_photo_url) {
+      // Add the equipment's main photo if it exists and is different (and not a placeholder)
+      const mainPhoto = equipment?.image_url;
+      if (mainPhoto && 
+          mainPhoto !== bagEquipment?.custom_photo_url && 
+          !mainPhoto.includes('placehold')) {
         allPhotos.push({
           id: 'main-photo',
           photo_url: mainPhoto,
           equipment_id: equipmentId,
-          is_primary: !bagEquipment?.custom_photo_url
+          is_primary: !bagEquipment?.custom_photo_url,
+          likes_count: 0,
+          is_liked_by_user: false
         });
       }
       
-      // Add community photos
-      if (photos) {
-        allPhotos.push(...photos);
+      // Add community photos (filter out placeholders)
+      if (photosWithLikes) {
+        const validPhotos = photosWithLikes.filter(photo => 
+          photo.photo_url && !photo.photo_url.includes('placehold')
+        );
+        allPhotos.push(...validPhotos);
       }
       
       setEquipmentPhotos(allPhotos);
@@ -329,7 +363,50 @@ export function BagEquipmentModal({
     } catch (error) {
       console.error('Error loading additional data:', error);
     }
-  }, [equipmentId, equipment, bagEquipment]);
+  }, [equipmentId, equipment, bagEquipment, user]);
+
+  const handlePhotoLike = useCallback(async (photoId: string, isLiked: boolean) => {
+    if (!user) {
+      toast.error('Please sign in to like photos');
+      return;
+    }
+
+    // Skip likes for custom/main photos
+    if (photoId === 'custom-photo' || photoId === 'main-photo') {
+      return;
+    }
+
+    try {
+      if (isLiked) {
+        await supabase
+          .from('equipment_photo_likes')
+          .delete()
+          .eq('photo_id', photoId)
+          .eq('user_id', user.id);
+      } else {
+        await supabase
+          .from('equipment_photo_likes')
+          .insert({
+            photo_id: photoId,
+            user_id: user.id
+          });
+      }
+
+      // Update local state
+      setEquipmentPhotos(equipmentPhotos.map(photo => 
+        photo.id === photoId 
+          ? { 
+              ...photo, 
+              is_liked_by_user: !isLiked,
+              likes_count: (photo.likes_count || 0) + (isLiked ? -1 : 1)
+            }
+          : photo
+      ));
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      toast.error('Failed to update like');
+    }
+  }, [user, equipmentPhotos]);
 
   if (!equipment) return null;
 
@@ -439,12 +516,19 @@ export function BagEquipmentModal({
                       <div className="space-y-4">
                         <Label className="text-sm sm:text-base font-medium">Equipment Photo</Label>
                         <div className="flex items-center gap-4">
-                          <div className="w-24 h-24 bg-accent rounded-lg overflow-hidden flex-shrink-0">
+                          <div className="w-24 h-24 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden flex-shrink-0">
                             <img
-                              src={formData.custom_photo_url || equipment.most_liked_photo || equipment.image_url}
+                              src={formData.custom_photo_url || equipment.image_url}
                               alt={`${equipment.brand} ${equipment.model}`}
                               className="w-full h-full object-cover"
                               loading="lazy"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                if (!target.src.includes('placehold')) {
+                                  target.style.objectFit = 'contain';
+                                  target.style.padding = '0.5rem';
+                                }
+                              }}
                             />
                           </div>
                           <div className="space-y-2">
@@ -825,14 +909,24 @@ export function BagEquipmentModal({
                     </div>
                   ) : (
                     <div className="space-y-6">
-                      {/* Main Image */}
-                      <div className="aspect-square max-w-xs sm:max-w-sm mx-auto bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden">
-                        <img
-                          src={bagEquipment?.custom_photo_url || equipment.most_liked_photo || equipment.image_url || ''}
-                          alt={`${equipment.brand} ${equipment.model}`}
-                          className="w-full h-full object-contain p-4"
-                          loading="lazy"
-                        />
+                      {/* Main Image - Responsive and no padding */}
+                      <div className="relative w-full px-4 sm:px-0">
+                        <div className="aspect-square max-w-[280px] sm:max-w-sm md:max-w-md mx-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden shadow-2xl">
+                          <img
+                            src={bagEquipment?.custom_photo_url || equipment.image_url || ''}
+                            alt={`${equipment.brand} ${equipment.model}`}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              // If image fails to load and it's not a placeholder, switch to contain mode
+                              if (!target.src.includes('placehold')) {
+                                target.style.objectFit = 'contain';
+                                target.style.padding = '1.5rem';
+                              }
+                            }}
+                          />
+                        </div>
                       </div>
 
                       {/* Compact Affiliate Links */}
@@ -983,37 +1077,99 @@ export function BagEquipmentModal({
               <TabsContent value="photos" className="h-full mt-0">
                 <ScrollArea className="h-full px-4 sm:px-6 py-4">
                   {equipmentPhotos.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {equipmentPhotos.map((photo) => (
-                        <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900">
-                          <img
-                            src={photo.photo_url}
-                            alt="Equipment photo"
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                          {photo.id === 'custom-photo' && (
-                            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                              Your Photo
-                            </div>
-                          )}
-                          {photo.id === 'main-photo' && (
-                            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                              Stock Photo
-                            </div>
-                          )}
-                          {photo.likes_count > 0 && (
-                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                              <Heart className="w-3 h-3" />
-                              {photo.likes_count}
-                            </div>
-                          )}
+                    <div className="space-y-4">
+                      {/* Action Bar */}
+                      {canEdit && (
+                        <div className="flex gap-2 pb-4 border-b">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowPhotoUpload(true)}
+                          >
+                            <Camera className="w-4 h-4 mr-2" />
+                            Upload Photo
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowPhotoGallery(true)}
+                          >
+                            <Images className="w-4 h-4 mr-2" />
+                            Browse Gallery
+                          </Button>
                         </div>
-                      ))}
+                      )}
+                      
+                      {/* Photo Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {equipmentPhotos.map((photo, index) => (
+                          <div 
+                            key={photo.id} 
+                            className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 group cursor-pointer"
+                            onClick={() => {
+                              setSelectedPhotoIndex(index);
+                              setShowLightbox(true);
+                            }}
+                          >
+                            <img
+                              src={photo.photo_url}
+                              alt="Equipment photo"
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                              loading="lazy"
+                            />
+                            
+                            {/* Hover Overlay */}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                              <Expand className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                            
+                            {/* Labels */}
+                            {photo.id === 'custom-photo' && (
+                              <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                Your Photo
+                              </div>
+                            )}
+                            {photo.id === 'main-photo' && (
+                              <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                Stock Photo
+                              </div>
+                            )}
+                            
+                            {/* Like Button */}
+                            {photo.id !== 'custom-photo' && photo.id !== 'main-photo' && (
+                              <div 
+                                className="absolute bottom-2 right-2 z-10"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                              >
+                                <TeedBallLike
+                                  isLiked={photo.is_liked_by_user || false}
+                                  likeCount={photo.likes_count || 0}
+                                  onLike={() => handlePhotoLike(photo.id, photo.is_liked_by_user || false)}
+                                  size="sm"
+                                  showCount={true}
+                                  className="bg-black/60 rounded-lg p-1"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No photos available yet
+                    <div className="text-center py-8">
+                      <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground mb-4">No photos available yet</p>
+                      {canEdit && (
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowPhotoUpload(true)}
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          Upload First Photo
+                        </Button>
+                      )}
                     </div>
                   )}
                 </ScrollArea>
@@ -1145,6 +1301,15 @@ export function BagEquipmentModal({
         bagName: bagEquipment?.bag?.name
       }}
       initialCaption={`Check out my ${equipment.brand} ${equipment.model}!`}
+    />
+    
+    <PhotoLightbox
+      isOpen={showLightbox}
+      onClose={() => setShowLightbox(false)}
+      photos={equipmentPhotos}
+      initialPhotoIndex={selectedPhotoIndex}
+      onLike={handlePhotoLike}
+      showLikes={true}
     />
     </>
   );

@@ -22,6 +22,7 @@ import BackgroundLayer from "@/components/BackgroundLayer";
 import { TeedBallLike } from "@/components/shared/TeedBallLike";
 import { toggleBagLike } from "@/services/bags";
 import ShareModal from "@/components/bag/ShareModal";
+import { ViewerEquipmentModal } from "@/components/bag/ViewerEquipmentModal";
 
 const BagDisplayStyled = () => {
   const { bagId, username, bagname } = useParams();
@@ -37,6 +38,8 @@ const BagDisplayStyled = () => {
   const [userBadges, setUserBadges] = useState<any[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [actualBagId, setActualBagId] = useState<string | null>(null);
+  const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
+  const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
 
   useEffect(() => {
     if (username && bagname) {
@@ -259,6 +262,11 @@ const BagDisplayStyled = () => {
       console.error('Error toggling bag like:', error);
       toast.error('Failed to update tee');
     }
+  };
+
+  const handleEquipmentClick = (item: any) => {
+    setSelectedEquipment(item);
+    setEquipmentModalOpen(true);
   };
 
   const handleLayoutChange = (newLayout: BagLayout) => {
@@ -548,7 +556,7 @@ const BagDisplayStyled = () => {
             {/* Equipment Gallery below card layout */}
             <BagEquipmentGallery
               bagEquipment={bagData.bag_equipment || []}
-              onEquipmentClick={(item) => navigate(`/equipment/${item.equipment.id}`)}
+              onEquipmentClick={(item) => handleEquipmentClick(item)}
             />
           </>
         ) : viewMode === 'gallery' ? (
@@ -559,6 +567,7 @@ const BagDisplayStyled = () => {
             isOwnBag={isOwnBag}
             onLayoutChange={handleLayoutChange}
             onSaveLayout={handleSaveLayout}
+            onEquipmentClick={handleEquipmentClick}
           />
         ) : (
           /* List View - Detailed equipment specifications */
@@ -569,7 +578,7 @@ const BagDisplayStyled = () => {
                   <div className="flex items-center gap-4">
                     <div 
                       className="w-20 h-20 rounded-lg overflow-hidden bg-white/10 cursor-pointer flex-shrink-0"
-                      onClick={() => navigate(`/equipment/${item.equipment.id}`)}
+                      onClick={() => handleEquipmentClick(item)}
                     >
                       <img
                         src={(item.equipment as any)?.primaryPhoto || item.custom_photo_url || item.equipment.image_url}
@@ -578,7 +587,7 @@ const BagDisplayStyled = () => {
                         loading="lazy"
                       />
                     </div>
-                    <div className="flex-1 cursor-pointer" onClick={() => navigate(`/equipment/${item.equipment.id}`)}>
+                    <div className="flex-1 cursor-pointer" onClick={() => handleEquipmentClick(item)}>
                       {/* Title and Category */}
                       <div className="flex items-start justify-between mb-2">
                         <div>
@@ -717,6 +726,19 @@ const BagDisplayStyled = () => {
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}
           bag={bagData}
+        />
+      )}
+
+      {/* Equipment Modal */}
+      {selectedEquipment && (
+        <ViewerEquipmentModal
+          isOpen={equipmentModalOpen}
+          onClose={() => {
+            setEquipmentModalOpen(false);
+            setSelectedEquipment(null);
+          }}
+          equipment={selectedEquipment.equipment}
+          bagEquipment={selectedEquipment}
         />
       )}
     </div>

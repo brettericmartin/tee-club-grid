@@ -1,6 +1,6 @@
 // Force cache invalidation - v3
 import { useState, useEffect } from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, Expand } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { Database } from '@/lib/supabase';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
+import { PhotoLightbox } from '@/components/shared/PhotoLightbox';
 
 type EquipmentPhoto = Database['public']['Tables']['equipment_photos']['Row'] & {
   profile?: Database['public']['Tables']['profiles']['Row'];
@@ -36,6 +37,8 @@ export function CommunityPhotosGallery({
   const [photos, setPhotos] = useState<EquipmentPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     if (isOpen && equipmentId) {
@@ -141,6 +144,7 @@ export function CommunityPhotosGallery({
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-full max-w-4xl h-[calc(100vh-1rem)] sm:h-auto max-h-[calc(100vh-1rem)] sm:max-h-[90vh] p-0 sm:p-6">
         <div className="flex flex-col h-full">
@@ -176,7 +180,7 @@ export function CommunityPhotosGallery({
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 pb-4">
-                  {photos.map((photo) => (
+                  {photos.map((photo, index) => (
                     <div
                       key={photo.id}
                       className={`relative group cursor-pointer rounded-lg overflow-hidden ${
@@ -197,6 +201,20 @@ export function CommunityPhotosGallery({
                       
                       {/* Overlay with info */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        {/* Expand button */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-2 right-2 text-white/80 hover:text-white hover:bg-white/20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLightboxIndex(index);
+                            setShowLightbox(true);
+                          }}
+                        >
+                          <Expand className="h-4 w-4" />
+                        </Button>
+                        
                         <div className="absolute bottom-0 left-0 right-0 p-2">
                           <div className="flex items-center justify-between text-white">
                             <span className="text-xs truncate">
@@ -244,5 +262,20 @@ export function CommunityPhotosGallery({
         </div>
       </DialogContent>
     </Dialog>
+    
+    <PhotoLightbox
+      isOpen={showLightbox}
+      onClose={() => setShowLightbox(false)}
+      photos={photos.map(p => ({
+        ...p,
+        user: p.profile
+      }))}
+      initialPhotoIndex={lightboxIndex}
+      onLike={async (photoId, isLiked) => {
+        await toggleLike(photoId, isLiked);
+      }}
+      showLikes={true}
+    />
+    </>
   );
 }

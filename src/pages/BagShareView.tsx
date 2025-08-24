@@ -7,10 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Download, List, Grid3x3, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { toPng } from 'html-to-image';
+import { ViewerEquipmentModal } from '@/components/bag/ViewerEquipmentModal';
 import type { Database } from '@/lib/supabase';
 
+type Equipment = Database['public']['Tables']['equipment']['Row'];
 type BagEquipmentItem = Database['public']['Tables']['bag_equipment']['Row'] & {
-  equipment: Database['public']['Tables']['equipment']['Row'];
+  equipment: Equipment;
+  shaft?: Equipment;
+  grip?: Equipment;
 };
 
 type Bag = Database['public']['Tables']['user_bags']['Row'] & {
@@ -23,6 +27,8 @@ export default function BagShareView() {
   const [bag, setBag] = useState<Bag | null>(null);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [selectedEquipment, setSelectedEquipment] = useState<BagEquipmentItem | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     if (bagId) {
@@ -45,7 +51,9 @@ export default function BagShareView() {
           ),
           bag_equipment (
             *,
-            equipment (*)
+            equipment:equipment_id (*),
+            shaft:shaft_id (*),
+            grip:grip_id (*)
           )
         `)
         .eq('id', bagId)
@@ -53,10 +61,18 @@ export default function BagShareView() {
 
       if (error) throw error;
       
+      // Map the data to match our types
+      const mappedBagEquipment = bagData.bag_equipment?.map((item: any) => ({
+        ...item,
+        equipment: item.equipment,
+        shaft: item.shaft,
+        grip: item.grip
+      }));
+      
       setBag({
         ...bagData,
         profile: bagData.profiles,
-        bag_equipment: bagData.bag_equipment
+        bag_equipment: mappedBagEquipment
       });
     } catch (error) {
       console.error('Error loading bag:', error);
@@ -96,6 +112,11 @@ export default function BagShareView() {
     } catch (error) {
       toast.error('Failed to copy link');
     }
+  };
+
+  const handleEquipmentClick = (item: BagEquipmentItem) => {
+    setSelectedEquipment(item);
+    setModalOpen(true);
   };
 
   if (loading) {
@@ -193,7 +214,11 @@ export default function BagShareView() {
                   <h3 className="text-lg font-semibold text-white mb-3">Clubs</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {clubs.map((item) => (
-                      <div key={item.id} className="bg-[#2a2a2a] rounded-lg p-4">
+                      <div 
+                        key={item.id} 
+                        className="bg-[#2a2a2a] rounded-lg p-4 cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+                        onClick={() => handleEquipmentClick(item)}
+                      >
                         <p className="font-medium text-white text-sm">{item.equipment.brand}</p>
                         <p className="text-xs text-white/70">{item.equipment.model}</p>
                         <p className="text-xs text-white/50 capitalize mt-1">
@@ -211,7 +236,11 @@ export default function BagShareView() {
                   <h3 className="text-lg font-semibold text-white mb-3">Accessories</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {accessories.map((item) => (
-                      <div key={item.id} className="bg-[#2a2a2a] rounded-lg p-4">
+                      <div 
+                        key={item.id} 
+                        className="bg-[#2a2a2a] rounded-lg p-4 cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+                        onClick={() => handleEquipmentClick(item)}
+                      >
                         <p className="font-medium text-white text-sm">{item.equipment.brand}</p>
                         <p className="text-xs text-white/70">{item.equipment.model}</p>
                         <p className="text-xs text-white/50 capitalize mt-1">
@@ -227,7 +256,11 @@ export default function BagShareView() {
             /* List View - Detailed List */
             <div className="space-y-2">
               {bag.bag_equipment?.map((item) => (
-                <div key={item.id} className="bg-[#2a2a2a] rounded-lg p-4 flex items-center justify-between">
+                <div 
+                  key={item.id} 
+                  className="bg-[#2a2a2a] rounded-lg p-4 flex items-center justify-between cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+                  onClick={() => handleEquipmentClick(item)}
+                >
                   <div>
                     <p className="font-medium text-white">
                       {item.equipment.brand} {item.equipment.model}
@@ -254,6 +287,19 @@ export default function BagShareView() {
           </div>
         </Card>
       </div>
+
+      {/* Equipment Modal */}
+      {selectedEquipment && (
+        <ViewerEquipmentModal
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setSelectedEquipment(null);
+          }}
+          equipment={selectedEquipment.equipment}
+          bagEquipment={selectedEquipment}
+        />
+      )}
     </div>
   );
 }
