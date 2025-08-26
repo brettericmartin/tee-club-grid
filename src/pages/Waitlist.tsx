@@ -90,41 +90,9 @@ const WaitlistPage = () => {
 
       let result: WaitlistResponse;
 
-      // In development, use local service instead of API endpoint
-      if (isDevelopment()) {
-        console.log('[Dev Mode] Using local waitlist service');
-        result = await submitWaitlistApplication(submitData);
-      } else {
-        // Production: use API endpoint
-        const res = await fetch('/api/waitlist/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(submitData),
-        });
-
-        // Check if response is ok and has content
-        if (!res.ok) {
-          // Try to get error message from response
-          let errorMessage = 'An error occurred. Please try again.';
-          try {
-            const errorData = await res.json();
-            errorMessage = errorData.message || errorMessage;
-          } catch {
-            errorMessage = 'Waitlist service not available. Please try again later.';
-          }
-          throw new Error(errorMessage);
-        }
-
-        // Check if response has content
-        const contentType = res.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Invalid response from server');
-        }
-
-        result = await res.json();
-      }
+      // Temporarily always use local service until API endpoints are fixed
+      console.log('[Waitlist] Using direct Supabase service');
+      result = await submitWaitlistApplication(submitData);
 
       setResponse(result);
 

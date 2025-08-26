@@ -12,11 +12,19 @@ interface WaitlistSubmission {
   email: string;
   display_name: string;
   city_region: string;
-  role: string;
-  handicap_range?: string;
-  rounds_per_month?: string;
+  role?: string;
+  share_channels?: string[];
+  learn_channels?: string[];
+  spend_bracket?: string;
+  uses?: string[];
+  buy_frequency?: string;
+  share_frequency?: string;
+  termsAccepted?: boolean;
   invite_code?: string;
   referral_code?: string;
+  // Legacy fields for backward compatibility
+  handicap_range?: string;
+  rounds_per_month?: string;
 }
 
 export async function submitWaitlistApplication(data: WaitlistSubmission) {
@@ -25,57 +33,85 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
   // Calculate score based on role and other factors
   let score = 0;
   
-  // Role scoring
+  // Role scoring (updated for new form values)
   switch (data.role) {
-    case 'pro':
-    case 'instructor':
+    case 'golfer':
+      score += 30;
+      break;
+    case 'fitter_builder':
       score += 40;
       break;
-    case 'low_handicap':
+    case 'creator':
       score += 35;
       break;
-    case 'enthusiast':
-      score += 25;
+    case 'league_captain':
+      score += 35;
       break;
-    case 'beginner':
-      score += 15;
+    case 'retailer_other':
+      score += 25;
       break;
     default:
       score += 20;
   }
   
-  // Handicap scoring
-  switch (data.handicap_range) {
-    case 'scratch':
-    case '1-5':
+  // Spend bracket scoring
+  switch (data.spend_bracket) {
+    case '5000_plus':
+      score += 30;
+      break;
+    case '3000_5000':
       score += 25;
       break;
-    case '6-10':
+    case '1500_3000':
       score += 20;
       break;
-    case '11-15':
+    case '750_1500':
       score += 15;
       break;
-    case '16-20':
+    case '300_750':
       score += 10;
+      break;
+    case '<300':
+      score += 5;
       break;
     default:
       score += 5;
   }
   
-  // Frequency scoring
-  switch (data.rounds_per_month) {
-    case '20+':
+  // Buy frequency scoring
+  switch (data.buy_frequency) {
+    case 'weekly_plus':
       score += 25;
       break;
-    case '10-20':
+    case 'monthly':
       score += 20;
       break;
-    case '5-10':
+    case 'few_per_year':
       score += 15;
       break;
-    case '1-5':
+    case 'yearly_1_2':
       score += 10;
+      break;
+    case 'never':
+      score += 5;
+      break;
+    default:
+      score += 5;
+  }
+  
+  // Share frequency scoring
+  switch (data.share_frequency) {
+    case 'weekly_plus':
+      score += 20;
+      break;
+    case 'monthly':
+      score += 15;
+      break;
+    case 'few_per_year':
+      score += 10;
+      break;
+    case 'yearly_1_2':
+      score += 5;
       break;
     default:
       score += 5;
@@ -114,12 +150,20 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       score,
       status,
       answers: {
-        role: data.role,
-        handicap_range: data.handicap_range,
-        rounds_per_month: data.rounds_per_month,
+        role: data.role || 'golfer',
+        share_channels: data.share_channels || [],
+        learn_channels: data.learn_channels || [],
+        spend_bracket: data.spend_bracket,
+        uses: data.uses || [],
+        buy_frequency: data.buy_frequency,
+        share_frequency: data.share_frequency,
+        termsAccepted: data.termsAccepted,
         // Store codes in answers until columns are added
         invite_code: data.invite_code,
-        referral_code: data.referral_code
+        referral_code: data.referral_code,
+        // Legacy fields for compatibility
+        handicap_range: data.handicap_range,
+        rounds_per_month: data.rounds_per_month
       },
       approved_at: status === 'approved' ? new Date().toISOString() : null
     };
