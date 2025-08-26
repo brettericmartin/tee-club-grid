@@ -879,7 +879,7 @@ export default function WaitlistAdminEnhanced() {
                         {application.city_region}
                       </TableCell>
                       <TableCell className="text-white/60 text-sm">
-                        {application.role?.replace('_', ' ')}
+                        {application.answers?.role ? application.answers.role.replace('_', ' ') : 'Not specified'}
                       </TableCell>
                       <TableCell>
                         <span className={`font-bold ${getScoreColor(application.score)}`}>
