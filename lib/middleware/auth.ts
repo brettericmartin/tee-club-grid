@@ -2,8 +2,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client with service key for server-side operations
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
+// Note: Vercel uses SUPABASE_SERVICE_KEY, not SUPABASE_SERVICE_ROLE_KEY
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 console.log('[Auth Middleware] Initializing with:', {
   hasSupabaseUrl: !!supabaseUrl,
@@ -14,7 +15,8 @@ console.log('[Auth Middleware] Initializing with:', {
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('Missing Supabase configuration:', {
     supabaseUrl: supabaseUrl || 'NOT SET',
-    supabaseServiceKey: supabaseServiceKey ? 'SET' : 'NOT SET'
+    supabaseServiceKey: supabaseServiceKey ? 'SET' : 'NOT SET',
+    hint: 'Ensure VITE_SUPABASE_URL and SUPABASE_SERVICE_KEY are set in Vercel'
   });
 }
 
