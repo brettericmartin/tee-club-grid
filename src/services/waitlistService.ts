@@ -209,4 +209,4 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
 export function isDevelopment() {
   return import.meta.env.DEV;
 }
-// Deployment trigger: Mon Aug 25 06:39:29 PM MST 2025
+// Deployment trigger: Mon Aug 25 06:41:15 PM MST 2025 - Updated environment variables
