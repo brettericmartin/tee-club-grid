@@ -17,7 +17,7 @@ import { RateLimiter, getClientIp } from '../../src/services/rateLimiter';
 
 // Initialize Supabase
 const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 interface WaitlistSubmitRequest extends WaitlistAnswers {
@@ -112,7 +112,7 @@ export default async function handler(
       const clientIp = getClientIp(req.headers as Record<string, string | string[] | undefined>);
       const rateLimiter = new RateLimiter(
         process.env.VITE_SUPABASE_URL || '',
-        process.env.SUPABASE_SERVICE_KEY || ''
+        process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
       );
       await rateLimiter.logAbuseMetric('honeypot_triggered', clientIp, '/api/waitlist/submit', {
         field_value_length: body.contact_phone.length

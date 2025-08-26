@@ -4,7 +4,7 @@ import { withAuth, type AuthenticatedRequest } from '../../lib/middleware/auth';
 
 // Initialize Supabase
 const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 interface IssueRequest {
