@@ -1,4 +1,4 @@
-import { User, Grid, Heart, Users, LogOut, MessageSquare, FileText, Shield } from "lucide-react";
+import { User, Grid, Heart, Users, LogOut, MessageSquare, FileText, Shield, Gift } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -202,6 +202,10 @@ const Navigation = () => {
                       <DropdownMenuItem onClick={() => setShowProfile(true)}>
                         <User className="mr-2 h-4 w-4" />
                         Edit Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/my-invites')}>
+                        <Gift className="mr-2 h-4 w-4" />
+                        My Invites
                       </DropdownMenuItem>
                       {profileData?.is_admin && (
                         <>

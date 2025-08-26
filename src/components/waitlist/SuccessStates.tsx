@@ -12,9 +12,12 @@ import {
   Copy,
   ArrowRight
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import type { WaitlistStatus } from "@/pages/Waitlist";
+import { WaitlistQueuePanel } from "./WaitlistQueuePanel";
+import { RecentApprovalsTicker } from "./RecentApprovalsTicker";
+import { getQueuePosition, pollQueuePosition, type QueuePosition } from "@/services/waitlistQueueService";
 
 interface SuccessStatesProps {
   status: WaitlistStatus;
@@ -31,9 +34,39 @@ export function SuccessStates({
 }: SuccessStatesProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [queuePosition, setQueuePosition] = useState<QueuePosition | null>(null);
+  const [loadingPosition, setLoadingPosition] = useState(true);
   
   // Generate referral link (in production, this would come from the API)
   const referralLink = `${window.location.origin}/waitlist?ref=${Math.random().toString(36).substring(7)}`;
+
+  useEffect(() => {
+    if (status === 'pending') {
+      // Fetch initial queue position
+      getQueuePosition()
+        .then(setQueuePosition)
+        .catch(console.error)
+        .finally(() => setLoadingPosition(false));
+      
+      // Poll for updates every 30 seconds
+      const cleanup = pollQueuePosition((position) => {
+        if (position) {
+          setQueuePosition(position);
+          
+          // Show toast if position improved
+          if (queuePosition && position.position < queuePosition.position) {
+            const improvement = queuePosition.position - position.position;
+            toast({
+              title: "Great news! 🎉",
+              description: `You moved up ${improvement} spot${improvement > 1 ? 's' : ''} in the queue!`,
+            });
+          }
+        }
+      }, 30000);
+      
+      return cleanup;
+    }
+  }, [status]);
 
   const copyReferralLink = () => {
     navigator.clipboard.writeText(referralLink);
@@ -123,34 +156,47 @@ export function SuccessStates({
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="text-center space-y-6"
+        className="space-y-6 max-w-4xl mx-auto"
       >
-        <div className="flex justify-center">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 10 }}
-          >
-            <div className="relative">
-              <div className="absolute inset-0 bg-yellow-500 blur-2xl opacity-20 animate-pulse" />
-              <Clock className="w-24 h-24 text-yellow-500 relative" />
-            </div>
-          </motion.div>
+        {/* Header Section */}
+        <div className="text-center space-y-4">
+          <div className="flex justify-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 10 }}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-yellow-500 blur-2xl opacity-20 animate-pulse" />
+                <Clock className="w-24 h-24 text-yellow-500 relative" />
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-4xl font-bold text-white">
+              You're on the Waitlist!
+            </h2>
+            <p className="text-xl text-white/60 max-w-2xl mx-auto">
+              {message || "Track your position and move up by referring friends."}
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-4">
-          <h2 className="text-4xl font-bold text-white">
-            You're on the Waitlist!
-          </h2>
-          <p className="text-xl text-white/60 max-w-2xl mx-auto">
-            {message || "We'll notify you as soon as a spot opens up."}
-          </p>
-          {spotsRemaining !== undefined && spotsRemaining > 0 && (
-            <Badge className="px-4 py-2 bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
-              {spotsRemaining} spots remaining
-            </Badge>
-          )}
-        </div>
+        {/* Queue Position Panel */}
+        {queuePosition && !loadingPosition && (
+          <WaitlistQueuePanel
+            position={queuePosition}
+            onShare={copyReferralLink}
+          />
+        )}
+
+        {/* Recent Approvals Ticker */}
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-6">
+            <RecentApprovalsTicker />
+          </CardContent>
+        </Card>
 
         <Card className="bg-[#1a1a1a] border-white/10">
           <CardHeader>

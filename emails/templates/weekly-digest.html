@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Weekly Waitlist Update</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333333;
+      background-color: #f5f5f5;
+    }
+    
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .header {
+      background: #1F2937;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      color: #ffffff;
+      font-size: 24px;
+      margin: 10px 0;
+    }
+    
+    .week-badge {
+      display: inline-block;
+      background: #10B981;
+      color: #ffffff;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    
+    .content {
+      padding: 30px;
+    }
+    
+    /* Summary card */
+    .summary-card {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+    }
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .summary-item {
+      text-align: center;
+    }
+    
+    .summary-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #10B981;
+    }
+    
+    .summary-label {
+      font-size: 14px;
+      color: #666666;
+    }
+    
+    .movement-indicator {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 10px 0;
+    }
+    
+    .moved-up {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+    
+    .no-change {
+      background: #F3F4F6;
+      color: #6B7280;
+    }
+    
+    .moved-down {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+    
+    /* Activity feed */
+    .activity-section {
+      margin: 30px 0;
+    }
+    
+    .activity-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-left: 3px solid #10B981;
+      background: #f9f9f9;
+      margin: 10px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      background: #10B981;
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+    
+    /* Leaderboard preview */
+    .leaderboard-preview {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    
+    .leaderboard-item:last-child {
+      border-bottom: none;
+    }
+    
+    .rank-badge {
+      width: 30px;
+      height: 30px;
+      background: #10B981;
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    /* Tips section */
+    .tips-card {
+      background: #FEF3C7;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .tip-item {
+      display: flex;
+      align-items: flex-start;
+      margin: 10px 0;
+    }
+    
+    .tip-number {
+      background: #F59E0B;
+      color: #ffffff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    /* CTAs */
+    .cta-section {
+      text-align: center;
+      margin: 30px 0;
+    }
+    
+    .primary-btn {
+      display: inline-block;
+      background: #10B981;
+      color: #ffffff;
+      padding: 14px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 10px;
+    }
+    
+    .secondary-btn {
+      display: inline-block;
+      background: #ffffff;
+      color: #10B981;
+      border: 2px solid #10B981;
+      padding: 12px 26px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 10px;
+    }
+    
+    /* Footer */
+    .footer {
+      background: #f9f9f9;
+      padding: 25px;
+      text-align: center;
+      font-size: 14px;
+      color: #666666;
+    }
+    
+    .footer a {
+      color: #10B981;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <!-- Header -->
+    <div class="header">
+      <h1>📊 Weekly Waitlist Update</h1>
+      <div class="week-badge">Week of {{weekDate}}</div>
+    </div>
+    
+    <!-- Content -->
+    <div class="content">
+      <p>Hi {{displayName}},</p>
+      
+      <p>Here's your weekly update on your Teed.club waitlist status:</p>
+      
+      <!-- Summary Card -->
+      <div class="summary-card">
+        <h2 style="color: #059669; margin-top: 0; text-align: center;">Your Current Status</h2>
+        
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-value">#{{currentPosition}}</div>
+            <div class="summary-label">Current Position</div>
+          </div>
+          
+          <div class="summary-item">
+            <div class="summary-value">{{weeklyChange}}</div>
+            <div class="summary-label">Change This Week</div>
+          </div>
+          
+          <div class="summary-item">
+            <div class="summary-value">{{totalReferrals}}</div>
+            <div class="summary-label">Total Referrals</div>
+          </div>
+          
+          <div class="summary-item">
+            <div class="summary-value">{{estimatedDays}}</div>
+            <div class="summary-label">Days to Access</div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+          {{#if movedUp}}
+          <div class="movement-indicator moved-up">↑ You moved up {{spotsGained}} spots!</div>
+          {{else if movedDown}}
+          <div class="movement-indicator moved-down">↓ You moved down {{spotsLost}} spots</div>
+          {{else}}
+          <div class="movement-indicator no-change">− No change this week</div>
+          {{/if}}
+        </div>
+      </div>
+      
+      <!-- Activity This Week -->
+      {{#if weeklyActivity}}
+      <div class="activity-section">
+        <h3 style="color: #111111;">This Week's Activity</h3>
+        
+        {{#each weeklyActivity}}
+        <div class="activity-item">
+          <div class="activity-icon">{{this.icon}}</div>
+          <div>
+            <strong>{{this.title}}</strong><br>
+            <span style="color: #666666; font-size: 14px;">{{this.description}}</span>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+      {{/if}}
+      
+      <!-- Leaderboard Preview -->
+      <div class="leaderboard-preview">
+        <h3 style="color: #111111; margin-top: 0;">Top Referrers This Week</h3>
+        
+        {{#each topReferrers}}
+        <div class="leaderboard-item">
+          <div style="display: flex; align-items: center;">
+            <div class="rank-badge">{{this.rank}}</div>
+            <span style="margin-left: 12px;">{{this.name}}</span>
+          </div>
+          <span style="font-weight: 600; color: #10B981;">{{this.referrals}} referrals</span>
+        </div>
+        {{/each}}
+        
+        {{#if userRank}}
+        <div style="border-top: 2px solid #10B981; margin-top: 15px; padding-top: 15px;">
+          <div class="leaderboard-item">
+            <div style="display: flex; align-items: center;">
+              <div class="rank-badge" style="background: #059669;">{{userRank}}</div>
+              <span style="margin-left: 12px; font-weight: 600;">You</span>
+            </div>
+            <span style="font-weight: 600; color: #10B981;">{{userReferrals}} referrals</span>
+          </div>
+        </div>
+        {{/if}}
+      </div>
+      
+      <!-- Tips to Move Up -->
+      {{#if noMovement}}
+      <div class="tips-card">
+        <h3 style="color: #92400E; margin-top: 0;">💡 How to Move Up Faster</h3>
+        
+        <div class="tip-item">
+          <div class="tip-number">1</div>
+          <div>Share your referral link on social media</div>
+        </div>
+        
+        <div class="tip-item">
+          <div class="tip-number">2</div>
+          <div>Tell your golf buddies about Teed.club</div>
+        </div>
+        
+        <div class="tip-item">
+          <div class="tip-number">3</div>
+          <div>Get an invite code from a current member</div>
+        </div>
+        
+        <div style="background: #ffffff; border-radius: 6px; padding: 12px; margin-top: 15px;">
+          <div style="font-size: 12px; color: #666666;">Your Referral Link:</div>
+          <div style="font-family: monospace; color: #F59E0B; font-size: 14px; word-break: break-all;">{{referralLink}}</div>
+        </div>
+      </div>
+      {{/if}}
+      
+      <!-- Progress Update -->
+      <div style="margin: 30px 0;">
+        <h3 style="color: #111111;">Beta Progress</h3>
+        <div style="background: #E5E7EB; border-radius: 10px; height: 20px; overflow: hidden;">
+          <div style="background: linear-gradient(90deg, #10B981 0%, #059669 100%); height: 100%; width: {{progressPercentage}}%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 14px; color: #666666;">
+          <span>{{approvedThisWeek}} approved this week</span>
+          <span>{{spotsRemaining}} spots remaining</span>
+        </div>
+      </div>
+      
+      <!-- CTAs -->
+      <div class="cta-section">
+        <a href="{{dashboardUrl}}" class="primary-btn">View Full Dashboard</a>
+        <a href="{{shareUrl}}" class="secondary-btn">Share & Earn</a>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+      <p>
+        <strong>Keep going!</strong><br>
+        At your current pace, you'll have access in approximately {{estimatedDays}} days.
+      </p>
+      
+      <p style="margin: 20px 0;">
+        <a href="{{helpUrl}}">Get Help</a> | 
+        <a href="{{leaderboardUrl}}">Full Leaderboard</a> | 
+        <a href="{{unsubscribeUrl}}">Update Preferences</a>
+      </p>
+      
+      <p style="font-size: 12px; color: #999999;">
+        You're receiving this weekly update because you're on the Teed.club waitlist.<br>
+        © 2024 Teed.club - Your golf bag IS your social profile
+      </p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+{
+  "email": {
+    "subjects": {
+      "confirmation": "🏌️ You're on the Teed.club Founders' List - #{position}",
+      "movement": "🚀 You moved up! Now #{newPosition} on the waitlist",
+      "approval": "🎉 Welcome to Teed.club Beta - Start Building Your Bag!",
+      "milestone": "🏆 Referral Milestone Achieved - {count} Friends Joined!",
+      "weeklyDigest": "📊 Your Teed.club Waitlist Update - Week of {date}"
+    },
+    "headings": {
+      "confirmation": "You're on the Founders' List!",
+      "movement": "Great News - You Moved Up!",
+      "approval": "Welcome to the Beta!",
+      "milestone": "Achievement Unlocked!",
+      "weeklyDigest": "Your Weekly Update",
+      "moveUpList": "How to Move Up Faster",
+      "getStarted": "Get Started in 3 Steps"
+    },
+    "body": {
+      "confirmationIntro": "Thanks for joining the Teed.club waitlist, {name}! You're now part of an exclusive group of golf enthusiasts who will shape the future of equipment discovery and sharing.",
+      "positionInfo": "You're currently #{position} in line with an estimated wait time of {waitTime}.",
+      "referralExplanation": "Every friend who joins using your referral link moves you up in the queue. Share your unique link to skip ahead!",
+      "movementCelebration": "Your referral was successful! {referredName} just joined Teed.club using your link.",
+      "newPosition": "You've moved from position #{oldPosition} to #{newPosition} - that's {spotsGained} spots closer to access!",
+      "approvalCongrats": "Congratulations {name}! You've been approved for Teed.club beta access. You're now part of an exclusive group of founding members.",
+      "milestoneMessage": "Amazing work! You've successfully referred {count} friends to Teed.club. As a reward, you've earned {reward}.",
+      "weeklyUpdate": "Here's how your waitlist position has changed this week.",
+      "noMovement": "Your position hasn't changed this week. Share your referral link to move up faster!"
+    },
+    "cta": {
+      "checkStatus": "Check Your Status",
+      "shareLink": "Share Your Link",
+      "buildBag": "Build Your Bag",
+      "viewLeaderboard": "View Leaderboard",
+      "getInviteCode": "Get an Invite Code",
+      "inviteFriends": "Invite Friends",
+      "completeProfile": "Complete Profile"
+    },
+    "benefits": {
+      "betaAccess": [
+        "Full platform access to all features",
+        "Founding Member badge on your profile forever",
+        "3 invite codes to share with friends",
+        "Direct line to the team for feedback",
+        "Early access to new features"
+      ],
+      "referralRewards": [
+        "Move up 5 spots for each successful referral",
+        "Earn bonus invites every 3 referrals",
+        "Unlock achievement badges",
+        "Get featured on the leaderboard"
+      ]
+    },
+    "tips": {
+      "moveUpFaster": [
+        "Share your referral link on social media",
+        "Tell your golf buddies about Teed.club",
+        "Get an invite code from a current member",
+        "Stay active - we prioritize engaged users"
+      ],
+      "getStarted": [
+        {
+          "title": "Build Your Bag",
+          "description": "Add your current golf equipment and showcase your setup"
+        },
+        {
+          "title": "Explore & Connect",
+          "description": "Discover equipment setups from other players"
+        },
+        {
+          "title": "Share & Earn",
+          "description": "Post your gear photos and earn rewards"
+        }
+      ]
+    },
+    "footer": {
+      "help": "Need help? Reply to this email or visit our Help Center",
+      "social": {
+        "twitter": "https://twitter.com/teedclub",
+        "instagram": "https://instagram.com/teedclub",
+        "reddit": "https://reddit.com/r/teedclub"
+      },
+      "unsubscribe": "You're receiving this because you joined our waitlist.",
+      "copyright": "© 2024 Teed.club - Your golf bag IS your social profile"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{{heading}}
+
+Hey {{displayName}},
+
+{{introText}}
+
+YOUR POSITION: #{{position}}
+Estimated wait: {{waitTime}}
+{{#if score}}Application Score: {{score}}/10{{/if}}
+
+================================================
+
+🚀 SKIP THE LINE!
+
+{{referralExplanation}}
+
+Your referral link:
+{{referralLink}}
+
+Share on social:
+- Twitter: https://twitter.com/intent/tweet?text={{tweetText}}&url={{referralLink}}
+- Facebook: https://www.facebook.com/sharer/sharer.php?u={{referralLink}}
+
+================================================
+
+HOW THE QUEUE WORKS:
+
+1. Daily Approvals: We approve new members every day based on engagement and fit
+
+2. Move Up Fast: Each friend who joins with your link moves you up 5 spots
+
+3. Instant Access: Get an invite code from a current member to skip the queue entirely
+
+Check your status: {{statusUrl}}
+
+================================================
+
+💡 PRO TIPS:
+{{#each tips}}
+- {{this}}
+{{/each}}
+
+================================================
+
+Need help? Reply to this email or visit our Help Center.
+
+Follow us:
+Twitter: {{twitterUrl}}
+Instagram: {{instagramUrl}}
+Reddit: {{redditUrl}}
+
+{{footerText}}
+
+{{unsubscribeText}}
+Unsubscribe: {{unsubscribeUrl}}

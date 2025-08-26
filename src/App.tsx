@@ -45,11 +45,12 @@ import Waitlist from "@/pages/Waitlist";
 import BetaInfo from "@/pages/BetaInfo";
 import SeedEquipment from "@/pages/admin/SeedEquipment";
 import EquipmentMigration from "@/pages/admin/EquipmentMigration";
-import WaitlistAdmin from "@/pages/admin/WaitlistAdmin";
+import WaitlistAdmin from "@/pages/admin/WaitlistAdminEnhanced";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import Debug from "@/pages/Debug";
 import VideoHub from "@/pages/VideoHub";
 import DebugFeed from "@/pages/DebugFeed";
+import MyInvites from "@/pages/MyInvites";
 import { lazy } from "react";
 
 // Lazy load pages for code splitting with enhanced error handling and debugging
@@ -178,6 +179,7 @@ function AppRoutes() {
             <Route path="/bag/:username/:bagname" element={<BagDisplay />} />
             <Route path="/bag/:username" element={<UserBagPage />} />
             <Route path="/my-bag" element={<BetaGuard requireAuth={true}><MyBag /></BetaGuard>} />
+            <Route path="/my-invites" element={<MyInvites />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/equipment" element={<Equipment />} />
             <Route path="/equipment/:id" element={<EquipmentDetail />} />

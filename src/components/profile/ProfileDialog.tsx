@@ -29,6 +29,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { getProfile, updateProfile, createProfile } from '@/services/profileService';
 import { AvatarUpload } from './AvatarUpload';
+import { ReferralCodeSection } from './ReferralCodeSection';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { golfTitles } from '@/lib/golf-titles';
@@ -52,6 +53,11 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [titleOpen, setTitleOpen] = useState(false);
+  
+  // Referral data
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [inviteQuota, setInviteQuota] = useState(3);
+  const [invitesUsed, setInvitesUsed] = useState(0);
   
   // Password change state
   const [showPasswordSection, setShowPasswordSection] = useState(false);
@@ -96,6 +102,11 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
         setHandicap(profile.handicap?.toString() || '');
         setAvatarUrl(profile.avatar_url || '/teed-icon.svg');
         setTitle(profile.title || 'Golfer');
+        
+        // Load referral data
+        setReferralCode(profile.referral_code || null);
+        setInviteQuota(profile.invite_quota || 3);
+        setInvitesUsed(profile.invites_used || 0);
         
         setOriginalValues({
           displayName: displayNameValue,
@@ -489,6 +500,14 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                 </div>
               )}
             </div>
+            
+            {/* Referral Code Section */}
+            <ReferralCodeSection
+              referralCode={referralCode}
+              inviteQuota={inviteQuota}
+              invitesUsed={invitesUsed}
+              className="mt-4"
+            />
             
             {/* Password Section */}
             <div className="space-y-4">

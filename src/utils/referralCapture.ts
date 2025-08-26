@@ -4,6 +4,7 @@
  */
 
 import { trackInviteRedeemed } from './analytics';
+import { trackReferralAttribution } from '@/services/referralService';
 
 const STORAGE_KEYS = {
   INVITE_CODE: 'pending_invite_code',
@@ -57,6 +58,7 @@ export function getStoredReferralCode(): string | null {
 export async function redeemStoredCodes(userId: string): Promise<{
   success: boolean;
   message?: string;
+  referrer?: any;
 }> {
   const inviteCode = getStoredInviteCode();
   const referralCode = getStoredReferralCode();
@@ -65,58 +67,78 @@ export async function redeemStoredCodes(userId: string): Promise<{
     return { success: false, message: 'No codes to redeem' };
   }
   
-  try {
-    // Prepare redemption data
-    const redeemData: any = {};
-    if (inviteCode) {
-      redeemData.invite_code = inviteCode;
+  let overallSuccess = false;
+  let messages: string[] = [];
+  let referrerInfo = null;
+  
+  // Handle referral code attribution (for user referrals)
+  if (referralCode) {
+    try {
+      console.log('[Referral] Attempting to attribute referral code:', referralCode);
+      const attributionResult = await trackReferralAttribution(userId, referralCode);
+      
+      if (attributionResult.success) {
+        overallSuccess = true;
+        referrerInfo = attributionResult.referrer;
+        messages.push(attributionResult.message);
+        console.log('[Referral] Successfully attributed referral');
+        
+        // Clear the referral code after successful attribution
+        localStorage.removeItem(STORAGE_KEYS.REFERRAL_CODE);
+      } else {
+        console.log('[Referral] Attribution failed:', attributionResult.message);
+        // Don't fail overall if referral attribution fails
+        // The user might have already been referred or code might be invalid
+      }
+    } catch (error) {
+      console.error('[Referral] Error attributing referral:', error);
     }
-    if (referralCode) {
-      redeemData.referral_code = referralCode;
-    }
-    
-    // Call redemption API
-    const response = await fetch('/api/beta/redeem', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(redeemData),
-    });
-    
-    const result = await response.json();
-    
-    if (response.ok && result.ok) {
-      // Clear stored codes on successful redemption
-      clearStoredCodes();
-      console.log('[Referral] Successfully redeemed codes');
-      
-      // Track successful redemption
-      trackInviteRedeemed(true);
-      
-      return { 
-        success: true, 
-        message: result.message || 'Codes redeemed successfully' 
-      };
-    } else {
-      console.error('[Referral] Redemption failed:', result.error);
-      
-      // Track failed redemption
-      trackInviteRedeemed(false);
-      
-      // Don't clear codes on failure - user might want to try again
-      return { 
-        success: false, 
-        message: result.error || 'Failed to redeem codes' 
-      };
-    }
-  } catch (error) {
-    console.error('[Referral] Error redeeming codes:', error);
-    return { 
-      success: false, 
-      message: 'Network error while redeeming codes' 
-    };
   }
+  
+  // Handle invite code redemption (for beta access)
+  if (inviteCode) {
+    try {
+      // Call redemption API for invite codes
+      const response = await fetch('/api/beta/redeem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: inviteCode }),
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.ok) {
+        overallSuccess = true;
+        messages.push(result.message || 'Invite code redeemed successfully');
+        console.log('[Referral] Successfully redeemed invite code');
+        
+        // Clear the invite code after successful redemption
+        localStorage.removeItem(STORAGE_KEYS.INVITE_CODE);
+        
+        // Track successful redemption
+        trackInviteRedeemed(true);
+      } else {
+        console.error('[Referral] Invite redemption failed:', result.error);
+        // Track failed redemption
+        trackInviteRedeemed(false);
+      }
+    } catch (error) {
+      console.error('[Referral] Error redeeming invite code:', error);
+    }
+  }
+  
+  // Clear timestamp if all codes processed
+  if (overallSuccess) {
+    localStorage.removeItem(STORAGE_KEYS.CAPTURED_AT);
+  }
+  
+  return { 
+    success: overallSuccess,
+    message: messages.join('. ') || 'Processing completed',
+    referrer: referrerInfo
+  };
 }
 
 /**

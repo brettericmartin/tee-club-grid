@@ -45,5 +45,17 @@ export const DOMAIN_CONFIG = {
   getProfileUrl: (username: string) => {
     const domain = DOMAIN_CONFIG.production;
     return `${domain}/@${username}`;
+  },
+  
+  // Get referral URL with code
+  getReferralUrl: (code: string) => {
+    const domain = DOMAIN_CONFIG.production;
+    return `${domain}/?ref=${code}`;
+  },
+  
+  // Get waitlist URL with referral code
+  getWaitlistReferralUrl: (code: string) => {
+    const domain = DOMAIN_CONFIG.production;
+    return `${domain}/waitlist?ref=${code}`;
   }
 };

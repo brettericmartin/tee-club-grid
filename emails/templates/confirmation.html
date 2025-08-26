@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Teed.club Waitlist</title>
+  <style>
+    /* Reset styles */
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    
+    /* Base styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333333;
+      background-color: #f5f5f5;
+    }
+    
+    /* Container styles */
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Header styles */
+    .header {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      padding: 40px 20px;
+      text-align: center;
+    }
+    
+    .logo {
+      font-size: 32px;
+      font-weight: bold;
+      color: #ffffff;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    
+    .header h1 {
+      color: #ffffff;
+      font-size: 28px;
+      margin: 10px 0;
+      font-weight: 600;
+    }
+    
+    /* Content styles */
+    .content {
+      padding: 40px 30px;
+    }
+    
+    .greeting {
+      font-size: 18px;
+      color: #111111;
+      margin-bottom: 20px;
+    }
+    
+    /* Position card */
+    .position-card {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border: 2px solid #10B981;
+      border-radius: 12px;
+      padding: 30px;
+      margin: 30px 0;
+      text-align: center;
+    }
+    
+    .position-number {
+      font-size: 48px;
+      font-weight: bold;
+      color: #059669;
+      margin: 10px 0;
+    }
+    
+    .position-label {
+      font-size: 14px;
+      color: #666666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .wait-time {
+      font-size: 18px;
+      color: #333333;
+      margin-top: 10px;
+    }
+    
+    /* Referral section */
+    .referral-section {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 25px;
+      margin: 30px 0;
+    }
+    
+    .referral-link {
+      background: #ffffff;
+      border: 2px dashed #10B981;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #059669;
+      word-break: break-all;
+      text-align: center;
+    }
+    
+    /* How it works */
+    .how-it-works {
+      margin: 30px 0;
+    }
+    
+    .step {
+      display: table;
+      width: 100%;
+      margin: 20px 0;
+    }
+    
+    .step-number {
+      display: table-cell;
+      width: 40px;
+      height: 40px;
+      background: #10B981;
+      color: #ffffff;
+      border-radius: 50%;
+      text-align: center;
+      vertical-align: middle;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+    .step-content {
+      display: table-cell;
+      padding-left: 20px;
+      vertical-align: middle;
+    }
+    
+    /* CTA button */
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: #ffffff;
+      padding: 16px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      margin: 20px 0;
+      box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    /* Social share buttons */
+    .social-share {
+      margin: 30px 0;
+      text-align: center;
+    }
+    
+    .share-button {
+      display: inline-block;
+      margin: 0 10px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .share-twitter {
+      background: #1DA1F2;
+      color: #ffffff;
+    }
+    
+    .share-facebook {
+      background: #4267B2;
+      color: #ffffff;
+    }
+    
+    .share-copy {
+      background: #6B7280;
+      color: #ffffff;
+    }
+    
+    /* Footer */
+    .footer {
+      background: #f9f9f9;
+      padding: 30px;
+      text-align: center;
+      font-size: 14px;
+      color: #666666;
+    }
+    
+    .footer a {
+      color: #10B981;
+      text-decoration: none;
+    }
+    
+    .social-links {
+      margin: 20px 0;
+    }
+    
+    .social-links a {
+      margin: 0 10px;
+      color: #10B981;
+      text-decoration: none;
+    }
+    
+    /* Responsive */
+    @media screen and (max-width: 600px) {
+      .content {
+        padding: 30px 20px;
+      }
+      
+      .position-number {
+        font-size: 36px;
+      }
+      
+      .share-button {
+        display: block;
+        margin: 10px auto;
+        max-width: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <!-- Header -->
+    <div class="header">
+      <a href="{{baseUrl}}" class="logo">⛳ Teed.club</a>
+      <h1>{{heading}}</h1>
+    </div>
+    
+    <!-- Content -->
+    <div class="content">
+      <p class="greeting">Hey {{displayName}},</p>
+      
+      <p>{{introText}}</p>
+      
+      <!-- Position Card -->
+      <div class="position-card">
+        <div class="position-label">Your Position</div>
+        <div class="position-number">#{{position}}</div>
+        <div class="wait-time">Estimated wait: {{waitTime}}</div>
+        {{#if score}}
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #10B981;">
+          <div style="font-size: 14px; color: #666;">Application Score</div>
+          <div style="font-size: 24px; font-weight: bold; color: #059669;">{{score}}/10</div>
+        </div>
+        {{/if}}
+      </div>
+      
+      <!-- Referral Section -->
+      <div class="referral-section">
+        <h2 style="color: #111; font-size: 20px; margin-top: 0;">🚀 Skip the Line!</h2>
+        <p>{{referralExplanation}}</p>
+        
+        <div class="referral-link">
+          {{referralLink}}
+        </div>
+        
+        <div class="social-share">
+          <a href="https://twitter.com/intent/tweet?text={{tweetText}}&url={{referralLink}}" class="share-button share-twitter">Share on Twitter</a>
+          <a href="https://www.facebook.com/sharer/sharer.php?u={{referralLink}}" class="share-button share-facebook">Share on Facebook</a>
+        </div>
+      </div>
+      
+      <!-- How It Works -->
+      <div class="how-it-works">
+        <h2 style="color: #111; font-size: 20px;">How the Queue Works</h2>
+        
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <strong>Daily Approvals:</strong> We approve new members every day based on engagement and fit
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <strong>Move Up Fast:</strong> Each friend who joins with your link moves you up 5 spots
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <strong>Instant Access:</strong> Get an invite code from a current member to skip the queue entirely
+          </div>
+        </div>
+      </div>
+      
+      <!-- CTA -->
+      <div class="text-center">
+        <a href="{{statusUrl}}" class="cta-button">Check Your Status</a>
+      </div>
+      
+      <!-- Pro Tips -->
+      <div style="background: #FEF3C7; padding: 20px; border-radius: 8px; margin: 30px 0;">
+        <h3 style="color: #92400E; margin-top: 0;">💡 Pro Tips</h3>
+        <ul style="color: #92400E; margin: 0; padding-left: 20px;">
+          {{#each tips}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+      <div class="social-links">
+        <a href="{{twitterUrl}}">Twitter</a>
+        <a href="{{instagramUrl}}">Instagram</a>
+        <a href="{{redditUrl}}">Reddit</a>
+      </div>
+      
+      <p>{{footerText}}</p>
+      
+      <p style="font-size: 12px; margin-top: 20px;">
+        {{unsubscribeText}}<br>
+        <a href="{{unsubscribeUrl}}" style="color: #666;">Unsubscribe</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

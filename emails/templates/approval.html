@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Teed.club Beta!</title>
+  <style>
+    /* Reset and base styles */
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333333;
+      background-color: #f5f5f5;
+    }
+    
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Celebration header */
+    .header {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      padding: 50px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255,255,255,0.05) 10px,
+        rgba(255,255,255,0.05) 20px
+      );
+      animation: slide 20s linear infinite;
+    }
+    
+    @keyframes slide {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+    
+    .confetti {
+      font-size: 64px;
+      animation: celebrate 2s ease-in-out infinite;
+    }
+    
+    @keyframes celebrate {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.1) rotate(-5deg); }
+      75% { transform: scale(1.1) rotate(5deg); }
+    }
+    
+    .header h1 {
+      color: #ffffff;
+      font-size: 32px;
+      margin: 15px 0;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .founder-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid #ffffff;
+      color: #ffffff;
+      padding: 10px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 16px;
+      margin: 15px 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Content */
+    .content {
+      padding: 40px 30px;
+    }
+    
+    .welcome-message {
+      font-size: 20px;
+      color: #111111;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    
+    /* Benefits card */
+    .benefits-card {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border: 2px solid #10B981;
+      border-radius: 12px;
+      padding: 30px;
+      margin: 30px 0;
+    }
+    
+    .benefit-item {
+      display: flex;
+      align-items: flex-start;
+      margin: 15px 0;
+    }
+    
+    .benefit-icon {
+      background: #10B981;
+      color: #ffffff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      flex-shrink: 0;
+      font-weight: bold;
+    }
+    
+    /* Getting started steps */
+    .steps-section {
+      margin: 40px 0;
+    }
+    
+    .step-card {
+      background: #f9f9f9;
+      border-left: 4px solid #10B981;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .step-number {
+      background: #10B981;
+      color: #ffffff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .step-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111111;
+      margin: 10px 0;
+    }
+    
+    /* Invite codes section */
+    .invite-codes-section {
+      background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+      border-radius: 12px;
+      padding: 25px;
+      margin: 30px 0;
+      text-align: center;
+    }
+    
+    .invite-code {
+      background: #ffffff;
+      border: 2px dashed #F59E0B;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 18px;
+      font-weight: bold;
+      color: #92400E;
+      letter-spacing: 2px;
+    }
+    
+    /* CTAs */
+    .primary-cta {
+      display: inline-block;
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: #ffffff;
+      padding: 18px 40px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 18px;
+      margin: 20px 0;
+      box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .secondary-cta {
+      display: inline-block;
+      background: #ffffff;
+      color: #10B981;
+      border: 2px solid #10B981;
+      padding: 14px 30px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      margin: 10px;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    /* Quick links */
+    .quick-links {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 25px;
+      margin: 30px 0;
+      text-align: center;
+    }
+    
+    .link-grid {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+    }
+    
+    .link-item {
+      text-align: center;
+      text-decoration: none;
+      color: #333333;
+      padding: 10px;
+    }
+    
+    .link-icon {
+      background: #10B981;
+      color: #ffffff;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    
+    /* Pro tip */
+    .pro-tip {
+      background: #EDE9FE;
+      border-left: 4px solid #7C3AED;
+      padding: 20px;
+      margin: 30px 0;
+      border-radius: 8px;
+    }
+    
+    .pro-tip-title {
+      color: #7C3AED;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    /* Footer */
+    .footer {
+      background: #1F2937;
+      color: #ffffff;
+      padding: 40px 30px;
+      text-align: center;
+    }
+    
+    .footer a {
+      color: #10B981;
+      text-decoration: none;
+    }
+    
+    .social-links {
+      margin: 20px 0;
+    }
+    
+    .social-links a {
+      display: inline-block;
+      margin: 0 15px;
+      color: #ffffff;
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 0.3s;
+    }
+    
+    .social-links a:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <!-- Celebration Header -->
+    <div class="header">
+      <div class="confetti">🎉</div>
+      <h1>Welcome to Teed.club Beta!</h1>
+      <div class="founder-badge">🏆 FOUNDING MEMBER</div>
+    </div>
+    
+    <!-- Content -->
+    <div class="content">
+      <p class="welcome-message">Congratulations {{displayName}}!</p>
+      
+      <p>{{approvalMessage}}</p>
+      
+      <!-- Benefits Card -->
+      <div class="benefits-card">
+        <h2 style="color: #059669; margin-top: 0;">Your Beta Access Includes:</h2>
+        
+        {{#each benefits}}
+        <div class="benefit-item">
+          <div class="benefit-icon">✓</div>
+          <div>{{this}}</div>
+        </div>
+        {{/each}}
+      </div>
+      
+      <!-- Invite Codes -->
+      {{#if inviteCodes}}
+      <div class="invite-codes-section">
+        <h3 style="color: #92400E; margin-top: 0;">🎁 Your Exclusive Invite Codes</h3>
+        <p style="color: #92400E;">Share these with your golf buddies for instant access:</p>
+        
+        {{#each inviteCodes}}
+        <div class="invite-code">{{this}}</div>
+        {{/each}}
+        
+        <p style="font-size: 14px; color: #92400E; margin-top: 15px;">
+          Each code can be used once. Earn more by referring friends!
+        </p>
+      </div>
+      {{/if}}
+      
+      <!-- Getting Started Steps -->
+      <div class="steps-section">
+        <h2 style="color: #111111;">Get Started in 3 Easy Steps:</h2>
+        
+        {{#each gettingStartedSteps}}
+        <div class="step-card">
+          <div class="step-number">{{@index}}</div>
+          <div class="step-title">{{this.title}}</div>
+          <p style="margin: 10px 0 0 0; color: #666666;">{{this.description}}</p>
+        </div>
+        {{/each}}
+      </div>
+      
+      <!-- Primary CTA -->
+      <div class="text-center">
+        <a href="{{buildBagUrl}}" class="primary-cta">Build Your Bag Now →</a>
+        
+        <p style="margin: 20px 0; color: #666666;">
+          Complete your bag in the next 24 hours to earn the "Early Bird" badge!
+        </p>
+      </div>
+      
+      <!-- Quick Links -->
+      <div class="quick-links">
+        <h3 style="color: #111111; margin-top: 0;">Quick Links</h3>
+        
+        <div class="link-grid">
+          <a href="{{exploreUrl}}" class="link-item">
+            <div class="link-icon">🔍</div>
+            <div>Explore Bags</div>
+          </a>
+          
+          <a href="{{forumUrl}}" class="link-item">
+            <div class="link-icon">💬</div>
+            <div>Join Forum</div>
+          </a>
+          
+          <a href="{{profileUrl}}" class="link-item">
+            <div class="link-icon">👤</div>
+            <div>Your Profile</div>
+          </a>
+        </div>
+      </div>
+      
+      <!-- Pro Tip -->
+      <div class="pro-tip">
+        <div class="pro-tip-title">💡 Pro Tip for New Members</div>
+        <p style="margin: 0;">
+          Start by adding your driver and putter - these are the clubs that get the most attention. 
+          You can always add more equipment later as you explore the platform!
+        </p>
+      </div>
+      
+      <!-- Community Message -->
+      <div style="background: #f9f9f9; border-radius: 8px; padding: 25px; margin: 30px 0; text-align: center;">
+        <h3 style="color: #111111; margin-top: 0;">You're Part of Something Special</h3>
+        <p>
+          As a Founding Member, your feedback and participation will directly shape how Teed.club evolves. 
+          We're building this platform together, one golf bag at a time.
+        </p>
+        
+        <a href="{{feedbackUrl}}" class="secondary-cta">Share Feedback</a>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+      <h3 style="margin-top: 0;">Welcome to the Community!</h3>
+      
+      <p style="opacity: 0.9;">
+        We're thrilled to have you as part of our founding members. 
+        If you need any help getting started, just reply to this email.
+      </p>
+      
+      <div class="social-links">
+        <a href="{{twitterUrl}}">Twitter</a>
+        <a href="{{instagramUrl}}">Instagram</a>
+        <a href="{{discordUrl}}">Discord</a>
+        <a href="{{redditUrl}}">Reddit</a>
+      </div>
+      
+      <p style="margin-top: 30px; opacity: 0.7; font-size: 14px;">
+        {{footerText}}<br>
+        <a href="{{helpUrl}}">Help Center</a> | 
+        <a href="{{privacyUrl}}">Privacy</a> | 
+        <a href="{{unsubscribeUrl}}">Preferences</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

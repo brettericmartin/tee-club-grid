@@ -6,6 +6,18 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+interface ReferralStats {
+  totalReferrals: number;
+  uniqueReferrers: number;
+  acceptanceRate: number;
+  averageChainDepth: number;
+  topReferrers: Array<{
+    username: string | null;
+    display_name: string | null;
+    count: number;
+  }>;
+}
+
 interface BetaSummaryResponse {
   cap: number;
   approved: number;          // Deprecated: use approvedActive instead
@@ -14,6 +26,7 @@ interface BetaSummaryResponse {
   remaining: number;
   publicBetaEnabled: boolean;
   waitlistCount?: number;
+  referralStats?: ReferralStats;
 }
 
 export default async function handler(
@@ -80,6 +93,58 @@ export default async function handler(
       .select('id', { count: 'exact', head: false })
       .eq('status', 'pending');
     
+    // Fetch referral statistics
+    let referralStats: ReferralStats | undefined;
+    try {
+      // Get total referrals
+      const { count: totalReferrals } = await supabase
+        .from('referral_chains')
+        .select('*', { count: 'exact', head: true });
+      
+      // Get unique referrers
+      const { data: referrerData } = await supabase
+        .from('referral_chains')
+        .select('referrer_profile_id')
+        .not('referrer_profile_id', 'is', null);
+      
+      const uniqueReferrers = new Set(
+        referrerData?.map(r => r.referrer_profile_id) || []
+      ).size;
+      
+      // Get top referrers
+      const { data: topReferrersData } = await supabase
+        .from('profiles')
+        .select('username, display_name, referrals_count')
+        .gt('referrals_count', 0)
+        .order('referrals_count', { ascending: false })
+        .limit(5);
+      
+      // Calculate acceptance rate
+      const acceptanceRate = approvedTotal > 0 && totalReferrals
+        ? Math.round((totalReferrals / approvedTotal) * 100)
+        : 0;
+      
+      // Calculate average chain depth (simplified)
+      const averageChainDepth = uniqueReferrers > 0 && totalReferrals
+        ? Math.round((totalReferrals / uniqueReferrers) * 10) / 10
+        : 0;
+      
+      referralStats = {
+        totalReferrals: totalReferrals || 0,
+        uniqueReferrers,
+        acceptanceRate,
+        averageChainDepth,
+        topReferrers: (topReferrersData || []).map(r => ({
+          username: r.username,
+          display_name: r.display_name,
+          count: r.referrals_count || 0
+        }))
+      };
+    } catch (error) {
+      console.error('[BetaSummary] Error fetching referral stats:', error);
+      // Don't fail the whole request if referral stats fail
+    }
+    
     const response: BetaSummaryResponse = {
       cap: betaCap,
       approved: approvedActive,     // Deprecated field - kept for backward compatibility
@@ -87,11 +152,13 @@ export default async function handler(
       approvedTotal,                // Total beta users (including soft-deleted)
       remaining,
       publicBetaEnabled,
-      waitlistCount: waitlistCount || 0
+      waitlistCount: waitlistCount || 0,
+      referralStats
     };
     
-    // Set cache headers for 1 minute
-    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60');
+    // Set cache headers for 1 minute with revalidation
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60, stale-while-revalidate=30');
+    res.setHeader('X-Cache-TTL', '60');
     
     return res.status(200).json(response);
     

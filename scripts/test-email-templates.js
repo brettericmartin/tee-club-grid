@@ -1,104 +1,214 @@
+#!/usr/bin/env node
+
 /**
  * Test email templates
- * Run with: node scripts/test-email-templates.js
- * 
- * This script demonstrates the email templates without actually sending them.
- * In production, you would integrate with your preferred email service.
+ * Sends test emails or saves them as HTML files for preview
  */
 
-import { EmailTemplates } from '../src/services/emailService.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+import {
+  sendConfirmationEmail,
+  sendMovementEmail,
+  sendApprovalEmail,
+  sendWeeklyDigest
+} from '../lib/email-templates.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load environment variables
+dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
+
 // Test data
 const testUser = {
-  email: 'golfer@example.com',
+  email: process.env.EMAIL_TEST_RECIPIENT || 'test@example.com',
   displayName: 'Tiger Woods',
-  score: 8,
-  position: 42,
-  inviteCode: 'GOLF2024'
+  referralCode: 'TIGER2024'
 };
 
-const testInviteCodes = ['ABC1-2345', 'DEF6-7890', 'GHI3-4567'];
+/**
+ * Test confirmation email
+ */
+async function testConfirmation() {
+  console.log('\n🔔 Testing Confirmation Email...');
+  
+  const data = {
+    ...testUser,
+    position: 42,
+    score: 8,
+    waitTime: '3-5 days'
+  };
+  
+  const result = await sendConfirmationEmail(data);
+  
+  if (result.success) {
+    console.log('✅ Confirmation email sent successfully');
+    console.log('   ID:', result.id);
+  } else {
+    console.error('❌ Failed to send confirmation email:', result.error);
+  }
+}
 
-console.log('🎨 Generating email templates...\n');
+/**
+ * Test movement notification
+ */
+async function testMovement() {
+  console.log('\n🚀 Testing Movement Email...');
+  
+  const data = {
+    ...testUser,
+    oldPosition: 50,
+    newPosition: 35,
+    referredName: 'Phil Mickelson',
+    totalReferrals: 5
+  };
+  
+  const result = await sendMovementEmail(data);
+  
+  if (result.success) {
+    console.log('✅ Movement email sent successfully');
+    console.log('   ID:', result.id);
+  } else {
+    console.error('❌ Failed to send movement email:', result.error);
+  }
+}
 
-// 1. Waitlist Pending Email
-console.log('1️⃣ Generating Waitlist Pending Email...');
-const pendingEmail = EmailTemplates.waitlistPending(testUser);
-const pendingPath = path.join(__dirname, '../email-previews/waitlist-pending.html');
-fs.mkdirSync(path.dirname(pendingPath), { recursive: true });
-fs.writeFileSync(pendingPath, pendingEmail.html);
-console.log(`   ✅ Saved to: email-previews/waitlist-pending.html`);
-console.log(`   Subject: You're on the Teed.club Founders' List 🏌️\n`);
+/**
+ * Test approval email
+ */
+async function testApproval() {
+  console.log('\n🎉 Testing Approval Email...');
+  
+  const data = {
+    ...testUser,
+    inviteCodes: ['GOLF-ABCD', 'GOLF-EFGH', 'GOLF-IJKL']
+  };
+  
+  const result = await sendApprovalEmail(data);
+  
+  if (result.success) {
+    console.log('✅ Approval email sent successfully');
+    console.log('   ID:', result.id);
+  } else {
+    console.error('❌ Failed to send approval email:', result.error);
+  }
+}
 
-// 2. Waitlist Approved Email
-console.log('2️⃣ Generating Waitlist Approved Email...');
-const approvedEmail = EmailTemplates.waitlistApproved(testUser);
-const approvedPath = path.join(__dirname, '../email-previews/waitlist-approved.html');
-fs.writeFileSync(approvedPath, approvedEmail.html);
-console.log(`   ✅ Saved to: email-previews/waitlist-approved.html`);
-console.log(`   Subject: 🎉 Welcome to Teed.club Beta - Start Building Your Bag!\n`);
+/**
+ * Test weekly digest
+ */
+async function testWeeklyDigest() {
+  console.log('\n📊 Testing Weekly Digest Email...');
+  
+  const data = {
+    ...testUser,
+    currentPosition: 25,
+    previousPosition: 30,
+    totalReferrals: 8,
+    weeklyActivity: [
+      { 
+        icon: '👥', 
+        title: '2 Successful Referrals', 
+        description: 'John Daly and Brooks Koepka joined using your link' 
+      },
+      { 
+        icon: '🚀', 
+        title: 'Moved Up 5 Spots', 
+        description: 'Your referrals helped you jump ahead!' 
+      }
+    ],
+    topReferrers: [
+      { rank: 1, name: 'Rory McIlroy', referrals: 15 },
+      { rank: 2, name: 'Jordan Spieth', referrals: 12 },
+      { rank: 3, name: 'Justin Thomas', referrals: 10 }
+    ],
+    userRank: 8,
+    approvedThisWeek: 20,
+    spotsRemaining: 75
+  };
+  
+  const result = await sendWeeklyDigest(data);
+  
+  if (result.success) {
+    console.log('✅ Weekly digest sent successfully');
+    console.log('   ID:', result.id);
+  } else {
+    console.error('❌ Failed to send weekly digest:', result.error);
+  }
+}
 
-// 3. Invite Pack Email
-console.log('3️⃣ Generating Invite Pack Email...');
-const inviteEmail = EmailTemplates.invitePack({
-  email: testUser.email,
-  displayName: testUser.displayName,
-  inviteCodes: testInviteCodes
-});
-const invitePath = path.join(__dirname, '../email-previews/invite-pack.html');
-fs.writeFileSync(invitePath, inviteEmail.html);
-console.log(`   ✅ Saved to: email-previews/invite-pack.html`);
-console.log(`   Subject: Your Teed.club Invite Codes Are Here ⛳\n`);
+/**
+ * Main test runner
+ */
+async function main() {
+  console.log('📧 Email Template Tester');
+  console.log('========================');
+  
+  const args = process.argv.slice(2);
+  const testType = args[0];
+  
+  if (!testType) {
+    console.log('\nUsage: node test-email-templates.js <type>');
+    console.log('\nTypes:');
+    console.log('  confirmation - Test confirmation email');
+    console.log('  movement     - Test movement notification');
+    console.log('  approval     - Test approval email');
+    console.log('  digest       - Test weekly digest');
+    console.log('  all          - Test all templates');
+    console.log('\nExample:');
+    console.log('  node test-email-templates.js all');
+    process.exit(1);
+  }
+  
+  // Check if email is configured
+  if (!process.env.RESEND_API_KEY) {
+    console.log('\n⚠️  Warning: RESEND_API_KEY not configured');
+    console.log('   Emails will be logged to console only');
+  }
+  
+  console.log(`\nRecipient: ${testUser.email}`);
+  console.log('');
+  
+  try {
+    switch (testType) {
+      case 'confirmation':
+        await testConfirmation();
+        break;
+      case 'movement':
+        await testMovement();
+        break;
+      case 'approval':
+        await testApproval();
+        break;
+      case 'digest':
+        await testWeeklyDigest();
+        break;
+      case 'all':
+        await testConfirmation();
+        await testMovement();
+        await testApproval();
+        await testWeeklyDigest();
+        break;
+      default:
+        console.error('❌ Unknown test type:', testType);
+        process.exit(1);
+    }
+    
+    console.log('\n✅ All tests completed!');
+    
+    if (process.env.RESEND_API_KEY) {
+      console.log('\n📬 Check your inbox at:', testUser.email);
+    }
+    
+  } catch (error) {
+    console.error('\n❌ Test failed:', error);
+    process.exit(1);
+  }
+}
 
-console.log('📧 Email templates generated successfully!');
-console.log('📂 Open the HTML files in email-previews/ to preview them.');
-
-// Integration instructions
-console.log('\n' + '='.repeat(60));
-console.log('📬 EMAIL SERVICE INTEGRATION GUIDE');
-console.log('='.repeat(60));
-console.log(`
-To integrate with your preferred email service, update the sendEmail 
-function in src/services/emailService.ts:
-
-1. SendGrid:
-   npm install @sendgrid/mail
-   
-   const sgMail = require('@sendgrid/mail');
-   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-   await sgMail.send(data);
-
-2. Resend:
-   npm install resend
-   
-   import { Resend } from 'resend';
-   const resend = new Resend(process.env.RESEND_API_KEY);
-   await resend.emails.send(data);
-
-3. AWS SES:
-   npm install @aws-sdk/client-ses
-   
-   import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-   const client = new SESClient({ region: "us-east-1" });
-   await client.send(new SendEmailCommand(params));
-
-4. Postmark:
-   npm install postmark
-   
-   const postmark = require("postmark");
-   const client = new postmark.ServerClient(process.env.POSTMARK_KEY);
-   await client.sendEmail(data);
-
-Environment variables needed:
-- Email service API key
-- From email address (e.g., hello@teed.club)
-- Reply-to address (optional)
-`);
-
-console.log('✨ Done!');
+// Run tests
+main().catch(console.error);

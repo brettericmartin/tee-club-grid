@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { WaitlistBanner } from "@/components/waitlist/WaitlistBanner";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { SuccessStates } from "@/components/waitlist/SuccessStates";
+import { ReferralLeaderboard } from "@/components/waitlist/ReferralLeaderboard";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
@@ -15,6 +16,8 @@ import {
   trackWaitlistPending,
   trackWaitlistAtCapacity
 } from "@/utils/analytics";
+import { isLeaderboardEnabled } from "@/services/leaderboardService";
+import { submitWaitlistApplication, isDevelopment } from "@/services/waitlistService";
 
 export type WaitlistStatus = 'approved' | 'pending' | 'at_capacity' | 'error';
 
@@ -32,13 +35,16 @@ const WaitlistPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [response, setResponse] = useState<WaitlistResponse | null>(null);
   const [inviteCode, setInviteCode] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-  // Capture invite code from URL params and track page view
+  // Capture both invite and referral codes from URL params and track page view
   useEffect(() => {
     // Track page view
     const source = searchParams.get('ref') || searchParams.get('source') || 'direct';
     trackWaitlistView(source);
 
+    // Check for invite code (grants instant access)
     const code = searchParams.get('code') || searchParams.get('invite');
     if (code) {
       setInviteCode(code);
@@ -51,69 +57,75 @@ const WaitlistPage = () => {
         setInviteCode(storedCode);
       }
     }
+    
+    // Check for referral code (tracks who referred them)
+    const ref = searchParams.get('ref') || searchParams.get('referral');
+    if (ref) {
+      setReferralCode(ref);
+      // Store in localStorage for attribution
+      localStorage.setItem('pending_referral_code', ref);
+    } else {
+      // Check if there's a stored referral code
+      const storedRef = localStorage.getItem('pending_referral_code');
+      if (storedRef) {
+        setReferralCode(storedRef);
+      }
+    }
   }, [searchParams]);
+
+  // Check if leaderboard is enabled
+  useEffect(() => {
+    isLeaderboardEnabled().then(setShowLeaderboard);
+  }, []);
 
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
-      // Add invite code if present
+      // Add both invite and referral codes if present
       const submitData = {
         ...data,
-        invite_code: inviteCode || undefined
+        invite_code: inviteCode || undefined,
+        referral_code: referralCode || undefined
       };
 
-      const res = await fetch('/api/waitlist/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
-      });
+      let result: WaitlistResponse;
 
-      // Check if response is ok and has content
-      if (!res.ok) {
-        // Try to get error message from response
-        let errorMessage = 'An error occurred. Please try again.';
-        try {
-          const errorData = await res.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch {
-          // If response is not JSON (like 404 HTML), use default message
-          if (res.status === 404) {
-            // In development, use mock response
-            if (import.meta.env.DEV) {
-              console.log('[Dev Mode] Using mock waitlist response');
-              const mockResult = {
-                status: 'pending' as const,
-                score: 75,
-                spotsRemaining: 50,
-                message: 'Thank you for your interest! (Development mode - not saved)'
-              };
-              setResponse(mockResult);
-              
-              // Track mock submission
-              trackWaitlistSubmit({
-                role: data.role,
-                cityRegion: data.city_region,
-                score: mockResult.score,
-                status: mockResult.status
-              });
-              trackWaitlistPending(mockResult.score);
-              return;
-            }
+      // In development, use local service instead of API endpoint
+      if (isDevelopment()) {
+        console.log('[Dev Mode] Using local waitlist service');
+        result = await submitWaitlistApplication(submitData);
+      } else {
+        // Production: use API endpoint
+        const res = await fetch('/api/waitlist/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submitData),
+        });
+
+        // Check if response is ok and has content
+        if (!res.ok) {
+          // Try to get error message from response
+          let errorMessage = 'An error occurred. Please try again.';
+          try {
+            const errorData = await res.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch {
             errorMessage = 'Waitlist service not available. Please try again later.';
           }
+          throw new Error(errorMessage);
         }
-        throw new Error(errorMessage);
+
+        // Check if response has content
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Invalid response from server');
+        }
+
+        result = await res.json();
       }
 
-      // Check if response has content
-      const contentType = res.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Invalid response from server');
-      }
-
-      const result = await res.json();
       setResponse(result);
 
       // Track submission event with outcome
@@ -171,7 +183,7 @@ const WaitlistPage = () => {
   if (response) {
     return (
       <div className="min-h-screen bg-black">
-        <WaitlistBanner />
+        <WaitlistBanner showApprovals variant="urgent" />
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <SuccessStates 
             status={response.status}
@@ -214,20 +226,45 @@ const WaitlistPage = () => {
           </p>
         </motion.div>
 
-        {/* Form section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <WaitlistForm 
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-            userEmail={user?.email}
-            inviteCode={inviteCode}
-            onInviteCodeChange={setInviteCode}
-          />
-        </motion.div>
+        {/* Two column layout */}
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* Form section - wider column */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="md:col-span-2"
+          >
+            <WaitlistForm 
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+              userEmail={user?.email}
+              inviteCode={inviteCode}
+              onInviteCodeChange={setInviteCode}
+              referralCode={referralCode}
+              onReferralCodeChange={setReferralCode}
+            />
+          </motion.div>
+
+          {/* Leaderboard section - narrow column */}
+          {showLeaderboard && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="md:col-span-1"
+            >
+              <div className="bg-gray-900/30 border border-gray-800 rounded-xl p-6">
+                <ReferralLeaderboard 
+                  variant="compact"
+                  maxEntries={5}
+                  showPeriodSelector={false}
+                  showTrends={true}
+                />
+              </div>
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   );
