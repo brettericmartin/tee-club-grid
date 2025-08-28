@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2025-08-28
+### Fixed
+- Critical RLS (Row Level Security) issues preventing anonymous waitlist submissions
+- Standardized admin system to use `profiles.is_admin` throughout the application
+- Removed dual admin system conflict between frontend and API middleware
+- Migrated legacy `admins` table users to `profiles.is_admin` column
+- Simplified overly complex RLS policies causing recursive issues
+
+### Changed
+- Admin authentication now consistently uses `profiles.is_admin` flag
+- API middleware updated to check `profiles` table instead of legacy `admins` table
+- Consolidated 40+ RLS fix attempts into single comprehensive solution
+
+### Added
+- Comprehensive database schema and beta system audit scripts
+- Admin system migration tool (`scripts/migrate-admin-system.js`)
+- RLS status checking utilities for debugging policy issues
+- Complete waitlist flow testing script
+- Documentation for applying critical RLS fixes (`APPLY_RLS_FIX_NOW.md`)
+
+### Technical Debt
+- Identified 45+ SQL fix files and 250+ test scripts requiring cleanup
+- Documented need to consolidate redundant migration files
+- Marked legacy `admins` table for removal after verification
+
 ## [0.17.0] - 2025-08-21
 ### Fixed
 - BagShareView component by replacing html2canvas with html-to-image library
