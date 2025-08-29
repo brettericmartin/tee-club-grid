@@ -914,7 +914,7 @@ export default function BetaInfo() {
                 Ready to Join the Founders?
               </h2>
               <p className="text-white/80 mb-6 max-w-2xl mx-auto">
-                Be part of building something special. Apply now for beta access and help shape 
+                Be part of building something special. Join the beta now and help shape 
                 the future of golf equipment discovery. Limited spots available.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -923,7 +923,7 @@ export default function BetaInfo() {
                   className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white"
                   onClick={() => navigate('/waitlist')}
                 >
-                  Apply for Beta Access
+                  Join the Beta
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button

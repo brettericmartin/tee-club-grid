@@ -231,7 +231,7 @@ const Landing = () => {
               onClick={handleBuildBagClick}
               className="bg-emerald-500 hover:bg-emerald-600 text-white px-12 py-6 rounded-full text-xl font-bold shadow-2xl shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40"
             >
-              Apply for the Beta
+              Join the Beta
             </button>
           </motion.div>
           

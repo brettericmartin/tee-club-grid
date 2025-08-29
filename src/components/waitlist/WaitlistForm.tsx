@@ -449,7 +449,7 @@ export function WaitlistForm({
                   Submitting...
                 </>
               ) : (
-                'Join the Waitlist'
+                'Join the Beta'
               )}
             </Button>
 

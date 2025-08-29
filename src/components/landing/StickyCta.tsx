@@ -73,7 +73,7 @@ export const StickyCta = ({ onBuildBag, onExploreBags }: StickyCtaProps) => {
                       size="lg"
                       className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-5 text-base font-semibold shadow-lg shadow-emerald-500/25 group"
                     >
-                      Apply for Beta
+                      Join the Beta
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </motion.div>

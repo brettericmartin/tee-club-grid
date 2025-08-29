@@ -104,7 +104,7 @@ export const Hero = ({ onBuildBag, onExploreBags }: HeroProps) => {
                 size="lg"
                 className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-6 text-lg font-semibold shadow-lg shadow-emerald-500/25 group"
               >
-                Apply for the Beta
+                Join the Beta
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
