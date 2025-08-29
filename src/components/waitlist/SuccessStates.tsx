@@ -25,7 +25,7 @@ interface SuccessStatesProps {
   status: WaitlistStatus;
   message?: string;
   spotsRemaining?: number;
-  onBuildBag: () => void;
+  onBuildBag?: () => void;
 }
 
 export function SuccessStates({ 
@@ -39,6 +39,17 @@ export function SuccessStates({
   const [copied, setCopied] = useState(false);
   const [queuePosition, setQueuePosition] = useState<QueuePosition | null>(null);
   const [loadingPosition, setLoadingPosition] = useState(true);
+  
+  // Auto-redirect for approved users
+  useEffect(() => {
+    if (status === 'approved') {
+      // Redirect after 3 seconds
+      const timer = setTimeout(() => {
+        navigate('/');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, navigate]);
   
   // Generate referral link (in production, this would come from the API)
   const referralLink = `${window.location.origin}/waitlist?ref=${Math.random().toString(36).substring(7)}`;
@@ -142,14 +153,19 @@ export function SuccessStates({
           </CardContent>
         </Card>
 
-        <Button
-          onClick={onBuildBag}
-          size="lg"
-          className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 py-6 text-lg"
-        >
-          Build My Bag
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
+        <div className="space-y-4">
+          <Button
+            onClick={() => navigate('/')}
+            size="lg"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 py-6 text-lg"
+          >
+            Continue to Teed.club
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+          <p className="text-sm text-white/40 text-center">
+            You're already signed in! Redirecting...
+          </p>
+        </div>
       </motion.div>
     );
   }

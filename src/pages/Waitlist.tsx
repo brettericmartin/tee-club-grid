@@ -161,10 +161,6 @@ const WaitlistPage = () => {
     }
   };
 
-  const handleBuildBag = () => {
-    navigate('/my-bag');
-  };
-
   // If already submitted, show success state
   if (response) {
     return (
@@ -175,7 +171,6 @@ const WaitlistPage = () => {
             status={response.status}
             message={response.message}
             spotsRemaining={response.spotsRemaining}
-            onBuildBag={handleBuildBag}
           />
         </div>
       </div>
