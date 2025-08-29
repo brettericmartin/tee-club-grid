@@ -43,9 +43,9 @@ export function SuccessStates({
   // Auto-redirect for approved users
   useEffect(() => {
     if (status === 'approved') {
-      // Redirect after 3 seconds
+      // Redirect to MyBag after 3 seconds
       const timer = setTimeout(() => {
-        navigate('/');
+        navigate('/my-bag');
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -155,15 +155,15 @@ export function SuccessStates({
 
         <div className="space-y-4">
           <Button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/my-bag')}
             size="lg"
             className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 py-6 text-lg"
           >
-            Continue to Teed.club
+            Build Your Bag
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           <p className="text-sm text-white/40 text-center">
-            You're already signed in! Redirecting...
+            Taking you to your bag...
           </p>
         </div>
       </motion.div>
