@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
 import confetti from "canvas-confetti";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   trackWaitlistView, 
   trackWaitlistSubmit, 
@@ -32,11 +33,13 @@ const WaitlistPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, profile } = useAuth();
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [response, setResponse] = useState<WaitlistResponse | null>(null);
   const [inviteCode, setInviteCode] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Capture both invite and referral codes from URL params and track page view
   useEffect(() => {
@@ -80,6 +83,7 @@ const WaitlistPage = () => {
 
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
+    setErrorMessage(null); // Clear any previous errors
     try {
       // Add both invite and referral codes if present
       const submitData = {
@@ -95,6 +99,16 @@ const WaitlistPage = () => {
       result = await submitWaitlistApplication(submitData);
 
       setResponse(result);
+      
+      // Show success toast
+      if (result.status !== 'error') {
+        toast({
+          title: result.status === 'approved' ? "🎉 Welcome to Teed.club!" : "📋 You're on the waitlist!",
+          description: result.status === 'approved' 
+            ? "You have been approved for beta access!" 
+            : "We'll notify you when a spot opens up.",
+        });
+      }
 
       // Track submission event with outcome
       trackWaitlistSubmit({
@@ -132,12 +146,16 @@ const WaitlistPage = () => {
           cap: undefined
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting waitlist form:', error);
+      // Show the actual error message to help debug
+      const errorMsg = error?.message || 'An error occurred. Please try again.';
+      setErrorMessage(errorMsg);
       setResponse({
         status: 'error',
-        message: 'An error occurred. Please try again.'
+        message: errorMsg
       });
+      // Don't use alert - we'll show it in the UI
     } finally {
       setIsSubmitting(false);
     }
@@ -203,6 +221,13 @@ const WaitlistPage = () => {
             transition={{ delay: 0.2 }}
             className="md:col-span-2"
           >
+            {/* Error message display */}
+            {errorMessage && (
+              <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <p className="text-red-400 text-sm">{errorMessage}</p>
+              </div>
+            )}
+            
             <WaitlistForm 
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
