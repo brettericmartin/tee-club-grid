@@ -54,6 +54,7 @@ import ShareModal from "@/components/bag/ShareModal";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { sanitizeDisplayName } from "@/utils/sanitization";
 import { getDisplayName } from "@/utils/displayName";
+import { WaitlistStatusView } from "@/components/waitlist/WaitlistStatusView";
 
 // Lazy load heavy components with retry logic for Vite HMR stability
 const BagGalleryDndKit = lazyWithRetry(() => import("@/components/bag/BagGalleryDndKit"));
@@ -196,7 +197,9 @@ const MyBagSupabase = () => {
   
   // Safely extract user and loading state
   const user = authContext.user || null;
+  const profile = authContext.profile || null;
   const authLoading = authContext.loading || false;
+  const profileLoading = authContext.profileLoading || false;
   
   // Check for Symbol properties that might cause conversion errors
   if (user && Object.getOwnPropertySymbols(user).length > 0) {
@@ -282,6 +285,16 @@ const MyBagSupabase = () => {
             setShowSignIn(true);
           }}
         />
+      </div>
+    );
+  }
+  
+  // Check for beta access - show waitlist view if not approved
+  if (!profileLoading && profile && !profile.beta_access) {
+    return (
+      <div className="min-h-screen bg-black">
+        <Navigation />
+        <WaitlistStatusView />
       </div>
     );
   }

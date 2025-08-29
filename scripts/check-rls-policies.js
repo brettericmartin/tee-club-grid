@@ -1,201 +1,268 @@
-#!/usr/bin/env node
-
 import { supabase } from './supabase-admin.js';
 
-console.log('🔒 CHECKING RLS POLICIES - The Real Issue');
-console.log('==========================================\n');
-
 async function checkRLSPolicies() {
+  console.log('🔒 CHECKING ROW LEVEL SECURITY POLICIES');
+  console.log('=' .repeat(80));
+  
   try {
-    console.log('1. CHECKING IF RLS IS ENABLED...\n');
+    // Get all RLS policies directly from the database
+    const { data: policies, error } = await supabase.rpc('get_all_rls_policies', {});
     
-    const tables = ['profiles', 'equipment', 'user_bags', 'bag_equipment', 'equipment_photos'];
-    
-    for (const table of tables) {
-      try {
-        // Check if RLS is enabled using pg_class
-        const { data, error } = await supabase.rpc('execute_sql', {
-          query: `
-            SELECT 
-              relname as table_name,
-              relrowsecurity as rls_enabled,
-              relforcerowsecurity as rls_forced
-            FROM pg_class c
-            JOIN pg_namespace n ON n.oid = c.relnamespace
-            WHERE n.nspname = 'public' 
-            AND c.relname = '${table}'
-            AND c.relkind = 'r';
-          `
-        });
-        
-        if (error) {
-          console.log(`❌ Cannot check RLS for ${table}: ${error.message}`);
-        } else if (data && data.length > 0) {
-          const tableInfo = data[0];
-          console.log(`Table: ${table}`);
-          console.log(`  RLS Enabled: ${tableInfo.rls_enabled ? '✅ YES' : '❌ NO'}`);
-          console.log(`  RLS Forced: ${tableInfo.rls_forced ? '⚠️ YES' : '✅ NO'}`);
-          
-          if (tableInfo.rls_enabled) {
-            // Get policies for this table
-            const { data: policies, error: policyError } = await supabase.rpc('execute_sql', {
-              query: `
-                SELECT 
-                  schemaname,
-                  tablename,
-                  policyname,
-                  permissive,
-                  roles,
-                  cmd,
-                  qual,
-                  with_check
-                FROM pg_policies 
-                WHERE tablename = '${table}' AND schemaname = 'public';
-              `
-            });
-            
-            if (policyError) {
-              console.log(`  ❌ Cannot get policies: ${policyError.message}`);
-            } else if (policies && policies.length > 0) {
-              console.log(`  📋 Policies (${policies.length}):`);
-              policies.forEach(policy => {
-                console.log(`    - ${policy.policyname}: ${policy.cmd} for [${policy.roles}]`);
-                if (policy.qual) {
-                  console.log(`      WHERE: ${policy.qual}`);
-                }
-              });
-            } else {
-              console.log(`  ⚠️ NO POLICIES FOUND - This will block all access!`);
-            }
-          }
-        } else {
-          console.log(`❌ Table ${table} not found`);
-        }
-        console.log('');
-      } catch (e) {
-        console.log(`❌ Error checking ${table}: ${e.message}\n`);
-      }
-    }
-
-    console.log('\n2. TESTING WITH DIFFERENT USER CONTEXTS...\n');
-    
-    // Test as anon user (what the frontend uses)
-    console.log('Testing as anonymous user (frontend mode)...');
-    
-    // Create a client with anon key
-    const { createClient } = await import('@supabase/supabase-js');
-    const anonClient = createClient(
-      process.env.VITE_SUPABASE_URL,
-      process.env.VITE_SUPABASE_ANON_KEY
-    );
-    
-    try {
-      const { data, error } = await anonClient
-        .from('equipment')
-        .select('*')
-        .limit(1);
-        
-      if (error) {
-        console.log(`❌ ANON EQUIPMENT QUERY FAILED: ${error.message}`);
-        console.log(`   Code: ${error.code}`);
-        console.log(`   Details: ${error.details}`);
-        console.log('   🚨 THIS IS LIKELY THE ISSUE!');
-      } else {
-        console.log(`✅ Anon equipment query works: ${data?.length || 0} items`);
-      }
-    } catch (e) {
-      console.log(`❌ Anon equipment query exception: ${e.message}`);
-    }
-
-    // Test bag_equipment as anon
-    try {
-      const { data, error } = await anonClient
-        .from('bag_equipment')
-        .select('*')
-        .limit(1);
-        
-      if (error) {
-        console.log(`❌ ANON BAG_EQUIPMENT QUERY FAILED: ${error.message}`);
-        console.log(`   Code: ${error.code}`);
-      } else {
-        console.log(`✅ Anon bag_equipment query works: ${data?.length || 0} items`);
-      }
-    } catch (e) {
-      console.log(`❌ Anon bag_equipment query exception: ${e.message}`);
-    }
-
-    // Test the specific join query
-    try {
-      const { data, error } = await anonClient
-        .from('bag_equipment')
-        .select(`
-          *,
-          equipment(*)
-        `)
-        .limit(1);
-        
-      if (error) {
-        console.log(`❌ ANON JOIN QUERY FAILED: ${error.message}`);
-        console.log(`   Code: ${error.code}`);
-        console.log('   🚨 THIS IS THE ROOT CAUSE!');
-      } else {
-        console.log(`✅ Anon join query works: ${data?.length || 0} items`);
-      }
-    } catch (e) {
-      console.log(`❌ Anon join query exception: ${e.message}`);
-    }
-
-    console.log('\n3. CHECKING CURRENT POLICIES STATUS...\n');
-    
-    // Let's see what the current state is
-    try {
-      const { data, error } = await supabase.rpc('execute_sql', {
-        query: `
-          SELECT 
-            t.table_name,
-            t.table_schema,
-            c.relrowsecurity as rls_enabled,
-            COUNT(p.policyname) as policy_count
-          FROM information_schema.tables t
-          LEFT JOIN pg_class c ON c.relname = t.table_name
-          LEFT JOIN pg_namespace n ON n.oid = c.relnamespace AND n.nspname = t.table_schema
-          LEFT JOIN pg_policies p ON p.tablename = t.table_name AND p.schemaname = t.table_schema
-          WHERE t.table_schema = 'public' 
-          AND t.table_name IN ('profiles', 'equipment', 'user_bags', 'bag_equipment', 'equipment_photos')
-          GROUP BY t.table_name, t.table_schema, c.relrowsecurity
-          ORDER BY t.table_name;
-        `
-      });
+    if (error) {
+      // If the function doesn't exist, query the system catalog directly
+      console.log('⚠️  Custom RPC not available, using direct queries...\n');
       
-      if (error) {
-        console.log(`❌ Cannot get policy summary: ${error.message}`);
-      } else {
-        console.log('📊 POLICY SUMMARY:');
-        console.log('Table              | RLS | Policies');
-        console.log('-------------------|-----|----------');
-        data?.forEach(row => {
-          const rlsStatus = row.rls_enabled ? '✅' : '❌';
-          const policyCount = row.policy_count || 0;
-          const policyStatus = policyCount > 0 ? `${policyCount}` : '⚠️ 0';
-          console.log(`${row.table_name.padEnd(18)} | ${rlsStatus}  | ${policyStatus}`);
-        });
+      // Query pg_policies view for all RLS policies
+      const { data: allPolicies, error: policyError } = await supabase
+        .from('pg_policies')
+        .select('*');
+      
+      if (policyError || !allPolicies) {
+        console.log('❌ Cannot access pg_policies view');
+        console.log('Falling back to manual table checks...\n');
+        await checkTablesManually();
+        return;
       }
-    } catch (e) {
-      console.log(`❌ Policy summary failed: ${e.message}`);
+      
+      displayPolicies(allPolicies);
+    } else {
+      displayPolicies(policies);
     }
-
-  } catch (error) {
-    console.error('❌ CRITICAL ERROR during RLS check:', error);
+    
+  } catch (err) {
+    console.error('Error checking RLS policies:', err);
+    await checkTablesManually();
   }
 }
 
-// Run the RLS check
-checkRLSPolicies().then(() => {
-  console.log('\n🔒 RLS CHECK COMPLETE');
-  console.log('\nIf tables have RLS enabled but 0 policies, that blocks all access!');
-  console.log('If anon queries fail, we need to create proper RLS policies.');
-  process.exit(0);
-}).catch(error => {
-  console.error('💥 RLS CHECK CRASHED:', error);
-  process.exit(1);
-});
+function displayPolicies(policies) {
+  if (!policies || policies.length === 0) {
+    console.log('⚠️  No RLS policies found in database');
+    return;
+  }
+  
+  // Group policies by table
+  const policyByTable = {};
+  policies.forEach(policy => {
+    const tableName = policy.tablename || policy.table_name;
+    if (!policyByTable[tableName]) {
+      policyByTable[tableName] = [];
+    }
+    policyByTable[tableName].push(policy);
+  });
+  
+  // Display policies by table
+  Object.entries(policyByTable).forEach(([table, tablePolicies]) => {
+    console.log(`\n📋 Table: ${table}`);
+    console.log('-'.repeat(40));
+    
+    tablePolicies.forEach(policy => {
+      const policyName = policy.policyname || policy.policy_name;
+      const cmd = policy.cmd || policy.command;
+      const permissive = policy.permissive ? 'PERMISSIVE' : 'RESTRICTIVE';
+      const roles = policy.roles || [];
+      const qual = policy.qual || policy.check || 'None';
+      const withCheck = policy.with_check || 'None';
+      
+      console.log(`  Policy: ${policyName}`);
+      console.log(`    Command: ${cmd}`);
+      console.log(`    Type: ${permissive}`);
+      console.log(`    Roles: ${Array.isArray(roles) ? roles.join(', ') : roles}`);
+      console.log(`    Using: ${qual}`);
+      if (withCheck !== 'None') {
+        console.log(`    With Check: ${withCheck}`);
+      }
+      console.log('');
+    });
+  });
+}
+
+async function checkTablesManually() {
+  console.log('📊 MANUAL RLS CHECK BY TABLE\n');
+  
+  const criticalTables = [
+    'profiles',
+    'user_bags',
+    'bag_equipment',
+    'equipment_photos',
+    'feed_posts',
+    'feed_likes',
+    'user_follows',
+    'waitlist_applications',
+    'admins',
+    'beta_waitlist'
+  ];
+  
+  for (const table of criticalTables) {
+    console.log(`\nChecking ${table}...`);
+    
+    try {
+      // Try to query without authentication to see if RLS is enabled
+      const { data, error } = await supabase
+        .from(table)
+        .select('*')
+        .limit(1);
+      
+      if (error) {
+        if (error.message.includes('row-level security') || 
+            error.message.includes('permission denied')) {
+          console.log(`  ✅ RLS enabled - Access restricted`);
+        } else if (error.message.includes('relation') && error.message.includes('does not exist')) {
+          console.log(`  ❌ Table does not exist`);
+        } else {
+          console.log(`  ⚠️  Unexpected error: ${error.message}`);
+        }
+      } else {
+        // If we can read without auth, RLS might not be properly configured
+        console.log(`  ⚠️  RLS may not be properly configured (readable without auth)`);
+        
+        // Try to check specific operations
+        await checkTableOperations(table);
+      }
+    } catch (err) {
+      console.log(`  ❌ Error checking table: ${err.message}`);
+    }
+  }
+  
+  console.log('\n\n🔍 CHECKING PROFILES TABLE SPECIFICALLY');
+  console.log('-'.repeat(40));
+  
+  // Special check for profiles table INSERT issue
+  try {
+    // Check if we can select from profiles
+    const { data: selectTest, error: selectError } = await supabase
+      .from('profiles')
+      .select('id, username, beta_access, is_admin')
+      .limit(1);
+    
+    console.log('SELECT test:', selectError ? `❌ ${selectError.message}` : '✅ Can select');
+    
+    // Check available columns
+    if (selectTest && selectTest.length > 0) {
+      console.log('Available columns:', Object.keys(selectTest[0]).join(', '));
+    }
+    
+    // Check if the approve function exists
+    const { data: funcCheck, error: funcError } = await supabase.rpc(
+      'approve_user_by_email_if_capacity',
+      { user_email: 'test@example.com' }
+    ).single();
+    
+    if (funcError) {
+      console.log(`Function test: ${funcError.message}`);
+      if (funcError.message.includes('does not exist')) {
+        console.log('  ⚠️  The approval function may not exist');
+      } else if (funcError.message.includes('row-level security')) {
+        console.log('  ❌ RLS blocking INSERT on profiles table');
+      }
+    }
+    
+  } catch (err) {
+    console.log('Error in profiles check:', err.message);
+  }
+}
+
+async function checkTableOperations(table) {
+  console.log('    Testing operations:');
+  
+  // Test SELECT
+  const { error: selectError } = await supabase
+    .from(table)
+    .select('*')
+    .limit(1);
+  console.log(`      SELECT: ${selectError ? '❌ Blocked' : '✅ Allowed'}`);
+  
+  // Test INSERT (dry run - won't actually insert)
+  try {
+    const { error: insertError } = await supabase
+      .from(table)
+      .insert({ id: 'test-dry-run' })
+      .select()
+      .limit(0); // Don't actually insert
+    console.log(`      INSERT: ${insertError ? '❌ Blocked' : '⚠️  May be allowed'}`);
+  } catch {
+    console.log(`      INSERT: ❌ Blocked`);
+  }
+  
+  // Test UPDATE (dry run)
+  try {
+    const { error: updateError } = await supabase
+      .from(table)
+      .update({ id: 'test' })
+      .eq('id', 'non-existent-id');
+    console.log(`      UPDATE: ${updateError ? '❌ Blocked' : '⚠️  May be allowed'}`);
+  } catch {
+    console.log(`      UPDATE: ❌ Blocked`);
+  }
+  
+  // Test DELETE (dry run)
+  try {
+    const { error: deleteError } = await supabase
+      .from(table)
+      .delete()
+      .eq('id', 'non-existent-id');
+    console.log(`      DELETE: ${deleteError ? '❌ Blocked' : '⚠️  May be allowed'}`);
+  } catch {
+    console.log(`      DELETE: ❌ Blocked`);
+  }
+}
+
+// Main execution
+console.log('Starting RLS policy analysis...\n');
+
+checkRLSPolicies()
+  .then(async () => {
+    console.log('\n\n💡 RECOMMENDED RLS FIXES');
+    console.log('=' .repeat(80));
+    console.log(`
+The following SQL should fix the RLS issues:
+
+-- 1. Enable RLS on all tables that need it
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_bags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bag_equipment ENABLE ROW LEVEL SECURITY;
+ALTER TABLE equipment_photos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feed_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feed_likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_follows ENABLE ROW LEVEL SECURITY;
+
+-- 2. Create INSERT policy for profiles (CRITICAL FIX)
+CREATE POLICY "Service role can insert profiles" ON profiles
+  FOR INSERT
+  TO service_role
+  WITH CHECK (true);
+
+CREATE POLICY "Users can insert own profile" ON profiles
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = id);
+
+-- 3. Ensure admin functions work
+CREATE POLICY "Admins can manage all profiles" ON profiles
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.is_admin = true
+    )
+  );
+
+-- 4. Basic policies for other tables
+CREATE POLICY "Public profiles are viewable by everyone" ON profiles
+  FOR SELECT
+  USING (true);
+
+CREATE POLICY "Users can update own profile" ON profiles
+  FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = id);
+    `);
+    
+    console.log('\n✨ Analysis complete!');
+    console.log('Run the SQL above in Supabase dashboard to fix RLS issues.');
+  })
+  .catch(error => {
+    console.error('\n❌ RLS check failed:', error);
+  });

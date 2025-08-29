@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import { v4 as uuidv4 } from 'uuid';
 
-// Service for handling waitlist operations
+// Simple service for beta signups - just creates profiles
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -9,7 +10,8 @@ const supabase = createClient(
 interface WaitlistSubmission {
   email: string;
   display_name: string;
-  city_region: string;
+  city_region?: string;
+  // Keep these for the form but we don't store them
   role?: string;
   share_channels?: string[];
   learn_channels?: string[];
@@ -18,214 +20,104 @@ interface WaitlistSubmission {
   buy_frequency?: string;
   share_frequency?: string;
   termsAccepted?: boolean;
-  invite_code?: string;
-  referral_code?: string;
-  // Legacy fields for backward compatibility
-  handicap_range?: string;
-  rounds_per_month?: string;
 }
 
 export async function submitWaitlistApplication(data: WaitlistSubmission) {
-  console.log('[Waitlist] Processing submission');
-  
-  // Calculate score based on role and other factors
-  let score = 0;
-  
-  // Role scoring (updated for new form values)
-  switch (data.role) {
-    case 'golfer':
-      score += 30;
-      break;
-    case 'fitter_builder':
-      score += 40;
-      break;
-    case 'creator':
-      score += 35;
-      break;
-    case 'league_captain':
-      score += 35;
-      break;
-    case 'retailer_other':
-      score += 25;
-      break;
-    default:
-      score += 20;
-  }
-  
-  // Spend bracket scoring
-  switch (data.spend_bracket) {
-    case '5000_plus':
-      score += 30;
-      break;
-    case '3000_5000':
-      score += 25;
-      break;
-    case '1500_3000':
-      score += 20;
-      break;
-    case '750_1500':
-      score += 15;
-      break;
-    case '300_750':
-      score += 10;
-      break;
-    case '<300':
-      score += 5;
-      break;
-    default:
-      score += 5;
-  }
-  
-  // Buy frequency scoring
-  switch (data.buy_frequency) {
-    case 'weekly_plus':
-      score += 25;
-      break;
-    case 'monthly':
-      score += 20;
-      break;
-    case 'few_per_year':
-      score += 15;
-      break;
-    case 'yearly_1_2':
-      score += 10;
-      break;
-    case 'never':
-      score += 5;
-      break;
-    default:
-      score += 5;
-  }
-  
-  // Share frequency scoring  
-  switch (data.share_frequency) {
-    case 'daily':
-      score += 15;
-      break;
-    case 'weekly':
-      score += 12;
-      break;
-    case 'monthly':
-      score += 8;
-      break;
-    case 'rarely':
-      score += 5;
-      break;
-    default:
-      score += 3;
-  }
-  
-  // Bonus for having both share and learn channels
-  if (data.share_channels && data.share_channels.length > 0) {
-    score += 5;
-  }
-  if (data.learn_channels && data.learn_channels.length > 0) {
-    score += 5;
-  }
-  
-  // Bonus for invite code (instant approval)
-  if (data.invite_code) {
-    score = 100; // Guaranteed approval
-  }
+  console.log('[Waitlist] Creating profile for:', data.email);
   
   try {
-    // SIMPLE DIRECT INSERT - NO FANCY RPC FUNCTIONS
-    const { data: submission, error: submitError } = await supabase
-      .from('waitlist_applications')
-      .insert({
-        email: data.email.toLowerCase(),
-        display_name: data.display_name,
-        city_region: data.city_region,
-        answers: {
-          role: data.role || 'golfer',
-          share_channels: data.share_channels || [],
-          learn_channels: data.learn_channels || [],
-          spend_bracket: data.spend_bracket,
-          uses: data.uses || [],
-          buy_frequency: data.buy_frequency,
-          share_frequency: data.share_frequency,
-          termsAccepted: data.termsAccepted,
-          invite_code: data.invite_code,
-          referral_code: data.referral_code,
-          handicap_range: data.handicap_range,
-          rounds_per_month: data.rounds_per_month
-        },
-        score: score,
-        status: 'pending',
-        invite_code: data.invite_code || null,
-        referral_code: data.referral_code || null
-      })
-      .select()
-      .single();
-    
-    if (submitError) {
-      console.error('[Waitlist] Submit error:', submitError);
-      
-      // Check if they already applied
-      if (submitError.code === '23505' || submitError.message?.includes('duplicate')) {
-        const { data: existing } = await supabase
-          .from('waitlist_applications')
-          .select('*')
-          .eq('email', data.email.toLowerCase())
-          .single();
-        
-        if (existing) {
-          return {
-            status: existing.status === 'approved' ? 'approved' : 'pending',
-            score: existing.score,
-            message: 'You have already applied for beta access.'
-          };
-        }
-      }
-      
-      throw submitError;
-    }
-    
-    console.log('[Waitlist] Application submitted successfully');
-    
-    // Check beta capacity
-    const { count: betaCount } = await supabase
+    // Step 1: Check how many beta users we have
+    const { count: betaCount, error: countError } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
       .eq('beta_access', true);
     
-    const spotsRemaining = 150 - (betaCount || 0);
+    if (countError) {
+      console.error('[Waitlist] Error counting beta users:', countError);
+      // Continue anyway, default to no beta access
+    }
     
-    // For high scores or invite codes, auto-approve if capacity
-    if (score >= 85 && spotsRemaining > 0) {
-      // Update to approved
-      await supabase
-        .from('waitlist_applications')
-        .update({ 
-          status: 'approved',
-          approved_at: new Date().toISOString()
-        })
-        .eq('id', submission.id);
-      
+    const currentBetaUsers = betaCount || 0;
+    const hasCapacity = currentBetaUsers < 150;
+    
+    // Step 2: Check if profile already exists
+    const { data: existingProfile, error: checkError } = await supabase
+      .from('profiles')
+      .select('id, email, beta_access')
+      .eq('email', data.email.toLowerCase())
+      .single();
+    
+    if (existingProfile) {
+      // Profile already exists
+      console.log('[Waitlist] Profile already exists for:', data.email);
       return {
-        status: 'approved',
-        score,
-        spotsRemaining,
-        message: 'Congratulations! You have been approved for beta access.'
+        status: existingProfile.beta_access ? 'approved' : 'pending',
+        spotsRemaining: Math.max(0, 150 - currentBetaUsers),
+        message: existingProfile.beta_access 
+          ? 'You already have beta access! Sign in to continue.'
+          : `You're already on the waitlist. ${150 - currentBetaUsers} spots remaining.`
       };
     }
     
-    return {
-      status: spotsRemaining > 0 ? 'pending' : 'at_capacity',
-      score,
-      spotsRemaining,
-      message: spotsRemaining > 0 
-        ? `Thank you for your interest! You're on the waitlist. Score: ${score}/100`
-        : 'We\'re at capacity! You\'re on the waitlist and will be notified when spots open.'
-    };
+    // Step 3: Create new profile with beta access based on capacity
+    const newProfileId = uuidv4();
+    const { data: newProfile, error: insertError } = await supabase
+      .from('profiles')
+      .insert({
+        id: newProfileId,
+        email: data.email.toLowerCase(),
+        display_name: data.display_name,
+        username: data.display_name.toLowerCase().replace(/[^a-z0-9]/g, '') + Math.floor(Math.random() * 1000),
+        beta_access: hasCapacity,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+    
+    if (insertError) {
+      console.error('[Waitlist] Error creating profile:', insertError);
+      
+      // If it's a unique constraint error, they probably already exist
+      if (insertError.code === '23505') {
+        return {
+          status: 'pending',
+          message: 'An account with this email already exists. Please sign in.'
+        };
+      }
+      
+      throw insertError;
+    }
+    
+    console.log('[Waitlist] Profile created successfully');
+    
+    // Step 4: Return appropriate response
+    if (hasCapacity) {
+      return {
+        status: 'approved' as const,
+        spotsRemaining: 150 - currentBetaUsers - 1,
+        message: `🎉 Congratulations! You're beta user #${currentBetaUsers + 1}. Check your email to set up your account!`
+      };
+    } else {
+      // Calculate their position in line
+      const { count: totalProfiles } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+      
+      const position = (totalProfiles || 151) - 150;
+      
+      return {
+        status: 'at_capacity' as const,
+        spotsRemaining: 0,
+        message: `You're #${position} on the waitlist. We'll email you when a spot opens up!`
+      };
+    }
     
   } catch (error: any) {
-    console.error('[Waitlist] Error:', error);
-    
-    // Return a user-friendly error
+    console.error('[Waitlist] Unexpected error:', error);
     return {
       status: 'error' as const,
-      message: error.message || 'An error occurred while processing your application. Please try again.'
+      message: 'Something went wrong. Please try again or contact support.'
     };
   }
 }
