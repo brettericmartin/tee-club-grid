@@ -15,6 +15,7 @@ import { HoneypotFieldRHF } from "@/components/security/HoneypotField";
 const formSchema = z.object({
   display_name: z.string().min(1, "Display name is required"),
   email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
   city_region: z.string().min(2, "City/region must be at least 2 characters"),
   role: z.enum(['golfer', 'fitter_builder', 'creator', 'league_captain', 'retailer_other']),
   share_channels: z.array(z.string()).default([]),
@@ -55,6 +56,7 @@ export function WaitlistForm({
     defaultValues: {
       display_name: "",
       email: userEmail || "",
+      password: "",
       city_region: "",
       role: "golfer",
       share_channels: [],
@@ -149,6 +151,29 @@ export function WaitlistForm({
                 )}
               />
             )}
+
+            {/* Password */}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Password *</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      type="password"
+                      placeholder="Choose a secure password"
+                      className="bg-black/50 border-white/20 text-white placeholder:text-white/40"
+                    />
+                  </FormControl>
+                  <FormDescription className="text-white/40">
+                    At least 8 characters
+                  </FormDescription>
+                  <FormMessage className="text-red-400" />
+                </FormItem>
+              )}
+            />
 
             {/* City/Region */}
             <FormField

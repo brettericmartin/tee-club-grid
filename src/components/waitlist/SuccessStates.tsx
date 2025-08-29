@@ -10,10 +10,12 @@ import {
   Trophy, 
   Share2, 
   Copy,
-  ArrowRight
+  ArrowRight,
+  LogIn
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 import type { WaitlistStatus } from "@/pages/Waitlist";
 import { WaitlistQueuePanel } from "./WaitlistQueuePanel";
 import { RecentApprovalsTicker } from "./RecentApprovalsTicker";
@@ -33,6 +35,7 @@ export function SuccessStates({
   onBuildBag 
 }: SuccessStatesProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [queuePosition, setQueuePosition] = useState<QueuePosition | null>(null);
   const [loadingPosition, setLoadingPosition] = useState(true);
@@ -139,14 +142,25 @@ export function SuccessStates({
           </CardContent>
         </Card>
 
-        <Button
-          onClick={onBuildBag}
-          size="lg"
-          className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 py-6 text-lg"
-        >
-          Build My Bag
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
+        <div className="flex gap-4 justify-center">
+          <Button
+            onClick={() => navigate('/signin')}
+            size="lg"
+            variant="outline"
+            className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 font-semibold px-8 py-6 text-lg"
+          >
+            <LogIn className="mr-2 h-5 w-5" />
+            Sign In
+          </Button>
+          <Button
+            onClick={onBuildBag}
+            size="lg"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 py-6 text-lg"
+          >
+            Build My Bag
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </div>
       </motion.div>
     );
   }

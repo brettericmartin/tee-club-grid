@@ -9,6 +9,7 @@ const supabase = createClient(
 interface WaitlistSubmission {
   email: string;
   display_name: string;  // This becomes their username!
+  password: string;  // User provides their own password
   city_region?: string;
   // Keep these for the form but we don't store them anywhere
   role?: string;
@@ -78,12 +79,10 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
     // Step 4: Create auth user with username in metadata
     console.log('[Waitlist] Creating user with username:', username);
     
-    // Generate a random password (they'll set it via email)
-    const tempPassword = Math.random().toString(36).slice(-8) + 'Aa1!';
-    
+    // Use the password provided by the user
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: data.email.toLowerCase(),
-      password: tempPassword,
+      password: data.password,  // Use user-provided password
       options: {
         data: {
           username: username,  // Pass username to trigger
@@ -134,7 +133,7 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       return {
         status: 'approved' as const,
         spotsRemaining: spotsRemaining - 1,
-        message: `🎉 Welcome @${username}! You're beta user #${currentBetaUsers + 1}. Check your email to set your password.`
+        message: `🎉 Welcome @${username}! You're beta user #${currentBetaUsers + 1}. You can now sign in with your email and password.`
       };
     } else {
       const { count: totalProfiles } = await supabase
@@ -146,7 +145,7 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       return {
         status: 'at_capacity' as const,
         spotsRemaining: 0,
-        message: `You're #${position} on the waitlist @${username}. Check your email to set your password.`
+        message: `You're #${position} on the waitlist @${username}. You can sign in with your email and password once approved.`
       };
     }
     
