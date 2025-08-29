@@ -13,20 +13,12 @@ import { motion } from "framer-motion";
 import { Users, Trophy, Camera, MessageCircle, Star, TrendingUp } from "lucide-react";
 import { WaitlistUrgencyWidget } from "@/components/waitlist/WaitlistUrgencyWidget";
 import { WaitlistBanner } from "@/components/waitlist/WaitlistBanner";
-import { ReferralLeaderboard } from "@/components/waitlist/ReferralLeaderboard";
-import { isLeaderboardEnabled } from "@/services/leaderboardService";
 
 const Landing = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
-
-  // Check if leaderboard is enabled
-  useEffect(() => {
-    isLeaderboardEnabled().then(setShowLeaderboard);
-  }, []);
 
   const handleBuildBagClick = () => {
     // Check if user has beta access or is admin
@@ -192,38 +184,6 @@ const Landing = () => {
           </div>
         </div>
       </section>
-      
-      {/* Referral Leaderboard Section */}
-      {showLeaderboard && (
-        <section className="py-20 relative">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="max-w-3xl mx-auto"
-            >
-              <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  Top Referrers
-                </h2>
-                <p className="text-white/60">
-                  Our community champions helping Teed.club grow
-                </p>
-              </div>
-              
-              <div className="bg-gray-900/30 border border-gray-800 rounded-xl p-6">
-                <ReferralLeaderboard 
-                  variant="minimal"
-                  maxEntries={3}
-                  showPeriodSelector={false}
-                  showTrends={false}
-                />
-              </div>
-            </motion.div>
-          </div>
-        </section>
-      )}
       
       {/* Final CTA Section */}
       <section className="py-32 relative overflow-hidden">
