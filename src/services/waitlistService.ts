@@ -80,10 +80,13 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
     console.log('[Waitlist] Creating user with username:', username);
     
     // Use the password provided by the user
+    // Note: If email confirmation is enabled in Supabase, users won't be able to sign in immediately
+    // Make sure to disable email confirmation in Supabase Dashboard > Authentication > Providers > Email
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: data.email.toLowerCase(),
       password: data.password,  // Use user-provided password
       options: {
+        emailRedirectTo: undefined,  // Don't send confirmation email
         data: {
           username: username,  // Pass username to trigger
           display_name: data.display_name,  // Keep original display name
@@ -130,10 +133,20 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
     
     // Step 6: Return response with username
     if (hasCapacity) {
+      // Auto sign them in since email confirmation is off
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email.toLowerCase(),
+        password: data.password
+      });
+      
+      if (signInError) {
+        console.log('[Waitlist] Auto sign-in failed:', signInError);
+      }
+      
       return {
         status: 'approved' as const,
         spotsRemaining: spotsRemaining - 1,
-        message: `🎉 Welcome @${username}! You're beta user #${currentBetaUsers + 1}. You can now sign in with your email and password.`
+        message: `🎉 Welcome @${username}! You're beta user #${currentBetaUsers + 1}. You're now signed in!`
       };
     } else {
       const { count: totalProfiles } = await supabase
@@ -142,10 +155,20 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       
       const position = (totalProfiles || 151) - 150;
       
+      // Still create their account but they're on waitlist
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email.toLowerCase(),
+        password: data.password
+      });
+      
+      if (signInError) {
+        console.log('[Waitlist] Auto sign-in failed:', signInError);
+      }
+      
       return {
         status: 'at_capacity' as const,
         spotsRemaining: 0,
-        message: `You're #${position} on the waitlist @${username}. You can sign in with your email and password once approved.`
+        message: `You're #${position} on the waitlist @${username}. Your account is ready - you'll get full access once approved!`
       };
     }
     
