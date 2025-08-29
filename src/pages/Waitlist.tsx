@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { WaitlistBanner } from "@/components/waitlist/WaitlistBanner";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { SuccessStates } from "@/components/waitlist/SuccessStates";
-import { ReferralLeaderboard } from "@/components/waitlist/ReferralLeaderboard";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
@@ -17,7 +16,6 @@ import {
   trackWaitlistPending,
   trackWaitlistAtCapacity
 } from "@/utils/analytics";
-import { isLeaderboardEnabled } from "@/services/leaderboardService";
 import { submitWaitlistApplication, isDevelopment } from "@/services/waitlistService";
 
 export type WaitlistStatus = 'approved' | 'pending' | 'at_capacity' | 'error';
@@ -38,7 +36,6 @@ const WaitlistPage = () => {
   const [response, setResponse] = useState<WaitlistResponse | null>(null);
   const [inviteCode, setInviteCode] = useState("");
   const [referralCode, setReferralCode] = useState("");
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Capture both invite and referral codes from URL params and track page view
@@ -75,11 +72,6 @@ const WaitlistPage = () => {
       }
     }
   }, [searchParams]);
-
-  // Check if leaderboard is enabled
-  useEffect(() => {
-    isLeaderboardEnabled().then(setShowLeaderboard);
-  }, []);
 
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
@@ -207,52 +199,30 @@ const WaitlistPage = () => {
           </p>
         </motion.div>
 
-        {/* Two column layout */}
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Form section - wider column */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="md:col-span-2"
-          >
-            {/* Error message display */}
-            {errorMessage && (
-              <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                <p className="text-red-400 text-sm">{errorMessage}</p>
-              </div>
-            )}
-            
-            <WaitlistForm 
-              onSubmit={handleSubmit}
-              isSubmitting={isSubmitting}
-              userEmail={user?.email}
-              inviteCode={inviteCode}
-              onInviteCodeChange={setInviteCode}
-              referralCode={referralCode}
-              onReferralCodeChange={setReferralCode}
-            />
-          </motion.div>
-
-          {/* Leaderboard section - narrow column */}
-          {showLeaderboard && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="md:col-span-1"
-            >
-              <div className="bg-gray-900/30 border border-gray-800 rounded-xl p-6">
-                <ReferralLeaderboard 
-                  variant="compact"
-                  maxEntries={5}
-                  showPeriodSelector={false}
-                  showTrends={true}
-                />
-              </div>
-            </motion.div>
+        {/* Form section - centered and focused */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="max-w-2xl mx-auto"
+        >
+          {/* Error message display */}
+          {errorMessage && (
+            <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-red-400 text-sm">{errorMessage}</p>
+            </div>
           )}
-        </div>
+          
+          <WaitlistForm 
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            userEmail={user?.email}
+            inviteCode={inviteCode}
+            onInviteCodeChange={setInviteCode}
+            referralCode={referralCode}
+            onReferralCodeChange={setReferralCode}
+          />
+        </motion.div>
       </div>
     </div>
   );
