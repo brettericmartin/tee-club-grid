@@ -9,6 +9,7 @@ const supabase = createClient(
 interface WaitlistSubmission {
   email: string;
   display_name: string;
+  username: string;  // User picks this!
   city_region?: string;
   // Keep these for the form but we don't store them anywhere
   role?: string;
@@ -39,26 +40,38 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
     const hasCapacity = currentBetaUsers < 150;
     const spotsRemaining = Math.max(0, 150 - currentBetaUsers);
     
-    // Step 2: Check if they already signed up
-    const { data: existingProfile } = await supabase
+    // Step 2: Check if they already signed up (by email or username)
+    const { data: existingByEmail } = await supabase
       .from('profiles')
       .select('email, beta_access')
       .eq('email', data.email.toLowerCase())
       .single();
     
-    if (existingProfile) {
-      console.log('[Waitlist] User already exists:', data.email);
+    if (existingByEmail) {
+      console.log('[Waitlist] Email already exists:', data.email);
       return {
-        status: existingProfile.beta_access ? 'approved' : 'pending',
-        spotsRemaining,
-        message: existingProfile.beta_access 
-          ? 'You already have beta access! Please sign in.'
-          : `You're already on the waitlist. ${spotsRemaining} spots remaining.`
+        status: 'error' as const,
+        message: 'This email is already registered. Please sign in.'
       };
     }
     
-    // Step 3: Create auth user AND profile in one go
-    console.log('[Waitlist] Creating new user...');
+    // Check if username is taken
+    const { data: existingByUsername } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', data.username.toLowerCase())
+      .single();
+    
+    if (existingByUsername) {
+      console.log('[Waitlist] Username already taken:', data.username);
+      return {
+        status: 'error' as const,
+        message: 'This username is already taken. Please choose another.'
+      };
+    }
+    
+    // Step 3: Create auth user AND profile with username
+    console.log('[Waitlist] Creating new user with username:', data.username);
     
     // Generate a random password for the user (they'll reset it via email)
     const tempPassword = Math.random().toString(36).slice(-8) + 'Aa1!';
@@ -69,6 +82,7 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       options: {
         data: {
           display_name: data.display_name,
+          username: data.username.toLowerCase(),
           beta_access: hasCapacity,
         }
       }
@@ -80,23 +94,32 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       // Check if it's because they already exist
       if (signUpError.message?.includes('already registered')) {
         return {
-          status: 'pending',
+          status: 'error' as const,
           message: 'This email is already registered. Please sign in or reset your password.'
+        };
+      }
+      
+      // If it's still the database error, show a more helpful message
+      if (signUpError.message?.includes('Database error')) {
+        return {
+          status: 'error' as const,
+          message: 'There was an issue creating your account. Please make sure all fields are filled correctly.'
         };
       }
       
       throw signUpError;
     }
     
-    // Step 4: Update the profile with beta access and display name
+    // Step 4: Update the profile with all the details
     if (authData.user) {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
           display_name: data.display_name,
+          username: data.username.toLowerCase(),
           beta_access: hasCapacity,
           email: data.email.toLowerCase(),
-          username: data.display_name.toLowerCase().replace(/[^a-z0-9]/g, '') + Math.floor(Math.random() * 1000)
+          city_region: data.city_region
         })
         .eq('id', authData.user.id);
       
@@ -113,7 +136,7 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       return {
         status: 'approved' as const,
         spotsRemaining: spotsRemaining - 1,
-        message: `🎉 Welcome! You're beta user #${currentBetaUsers + 1}. Check your email to verify your account and set your password.`
+        message: `🎉 Welcome @${data.username}! You're beta user #${currentBetaUsers + 1}. Check your email to set your password.`
       };
     } else {
       // Calculate position in line
@@ -126,7 +149,7 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       return {
         status: 'at_capacity' as const,
         spotsRemaining: 0,
-        message: `You're #${position} on the waitlist. Check your email to verify your account. We'll notify you when a spot opens!`
+        message: `You're #${position} on the waitlist @${data.username}. Check your email to set your password. We'll notify you when a spot opens!`
       };
     }
     
@@ -138,6 +161,13 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       return {
         status: 'error' as const,
         message: 'This email is already registered. Please sign in.'
+      };
+    }
+    
+    if (error.message?.includes('profiles_username_key')) {
+      return {
+        status: 'error' as const,
+        message: 'This username is already taken. Please choose another.'
       };
     }
     
