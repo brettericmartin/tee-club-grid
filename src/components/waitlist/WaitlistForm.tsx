@@ -38,8 +38,6 @@ interface WaitlistFormProps {
   userEmail?: string;
   inviteCode: string;
   onInviteCodeChange: (code: string) => void;
-  referralCode: string;
-  onReferralCodeChange: (code: string) => void;
 }
 
 export function WaitlistForm({ 
@@ -47,9 +45,7 @@ export function WaitlistForm({
   isSubmitting, 
   userEmail,
   inviteCode,
-  onInviteCodeChange,
-  referralCode,
-  onReferralCodeChange
+  onInviteCodeChange
 }: WaitlistFormProps) {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -457,52 +453,34 @@ export function WaitlistForm({
               )}
             </Button>
 
-            {/* Referral and Invite Code Fields */}
+            {/* Invite Code Field - Optional */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-[#1a1a1a] px-2 text-white/40">optional</span>
+                <span className="bg-[#1a1a1a] px-2 text-white/40">have an invite?</span>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* Referral Code Field */}
-              <div className="space-y-2">
-                <Label htmlFor="referral-code" className="text-white/60 text-sm flex items-center gap-2">
-                  <Users className="w-3 h-3" />
-                  Referred by someone?
-                </Label>
-                <Input
-                  id="referral-code"
-                  value={referralCode}
-                  onChange={(e) => onReferralCodeChange(e.target.value)}
-                  placeholder="Referral code"
-                  className="bg-black/50 border-white/20 text-white placeholder:text-white/40"
-                />
-                {referralCode && (
-                  <p className="text-xs text-emerald-400">✓ Referral tracked</p>
-                )}
-              </div>
-
-              {/* Invite Code Field */}
-              <div className="space-y-2">
-                <Label htmlFor="invite-code" className="text-white/60 text-sm flex items-center gap-2">
-                  <Lock className="w-3 h-3" />
-                  Have an invite code?
-                </Label>
-                <Input
-                  id="invite-code"
-                  value={inviteCode}
-                  onChange={(e) => onInviteCodeChange(e.target.value)}
-                  placeholder="Invite code"
-                  className="bg-black/50 border-white/20 text-white placeholder:text-white/40"
-                />
-                {inviteCode && (
-                  <p className="text-xs text-emerald-400">✓ Code applied</p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-code" className="text-white/60 text-sm flex items-center gap-2">
+                <Lock className="w-3 h-3" />
+                Invite Code
+              </Label>
+              <Input
+                id="invite-code"
+                value={inviteCode}
+                onChange={(e) => onInviteCodeChange(e.target.value)}
+                placeholder="Enter your invite code (optional)"
+                className="bg-black/50 border-white/20 text-white placeholder:text-white/40"
+              />
+              {inviteCode && (
+                <p className="text-xs text-emerald-400">✓ Invite code applied - skip the waitlist!</p>
+              )}
+              <p className="text-xs text-white/40">
+                Beta members can share invite codes with friends
+              </p>
             </div>
           </CardContent>
         </Card>

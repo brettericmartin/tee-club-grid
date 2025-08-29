@@ -219,8 +219,6 @@ const WaitlistPage = () => {
             userEmail={user?.email}
             inviteCode={inviteCode}
             onInviteCodeChange={setInviteCode}
-            referralCode={referralCode}
-            onReferralCodeChange={setReferralCode}
           />
         </motion.div>
       </div>

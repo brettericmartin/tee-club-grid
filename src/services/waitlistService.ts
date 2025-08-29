@@ -11,6 +11,7 @@ interface WaitlistSubmission {
   display_name: string;  // This becomes their username!
   password: string;  // User provides their own password
   city_region?: string;
+  invite_code?: string;  // Optional invite code for instant access
   // Keep these for the form but we don't store them anywhere
   role?: string;
   share_channels?: string[];
@@ -66,7 +67,20 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       };
     }
     
-    // Step 3: Check how many beta users we have
+    // Step 3: Check if they have a valid invite code
+    let grantBetaAccess = false;
+    let isInviteValid = false;
+    
+    if (data.invite_code) {
+      // TODO: Validate invite code against database
+      // For now, any non-empty invite code grants access
+      // In production, check against invite_codes table
+      console.log('[Waitlist] User provided invite code:', data.invite_code);
+      isInviteValid = data.invite_code.length > 0;
+      grantBetaAccess = isInviteValid;
+    }
+    
+    // Step 4: If no valid invite, check beta capacity
     const { count: betaCount } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -76,8 +90,14 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
     const hasCapacity = currentBetaUsers < 150;
     const spotsRemaining = Math.max(0, 150 - currentBetaUsers);
     
-    // Step 4: Create auth user with username in metadata
+    // Grant beta access if they have invite OR there's capacity
+    if (!grantBetaAccess) {
+      grantBetaAccess = hasCapacity;
+    }
+    
+    // Step 5: Create auth user with username in metadata
     console.log('[Waitlist] Creating user with username:', username);
+    console.log('[Waitlist] Beta access granted:', grantBetaAccess, isInviteValid ? '(via invite)' : '(capacity available)');
     
     // Use the password provided by the user
     // Note: If email confirmation is enabled in Supabase, users won't be able to sign in immediately
@@ -90,7 +110,8 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
         data: {
           username: username,  // Pass username to trigger
           display_name: data.display_name,  // Keep original display name
-          beta_access: hasCapacity,
+          beta_access: grantBetaAccess,  // True if invite code or capacity
+          invited_with_code: data.invite_code || null,
         }
       }
     });
@@ -115,14 +136,14 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
       throw signUpError;
     }
     
-    // Step 5: Update profile with additional info
+    // Step 6: Update profile with additional info
     if (authData.user) {
       await supabase
         .from('profiles')
         .update({
           display_name: data.display_name,
           username: username,
-          beta_access: hasCapacity,
+          beta_access: grantBetaAccess,
           email: data.email.toLowerCase(),
           city_region: data.city_region
         })
@@ -131,8 +152,8 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
     
     console.log('[Waitlist] User created successfully');
     
-    // Step 6: Return response with username
-    if (hasCapacity) {
+    // Step 7: Return response with username
+    if (grantBetaAccess) {
       // Auto sign them in since email confirmation is off
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email.toLowerCase(),
@@ -143,10 +164,14 @@ export async function submitWaitlistApplication(data: WaitlistSubmission) {
         console.log('[Waitlist] Auto sign-in failed:', signInError);
       }
       
+      const message = isInviteValid 
+        ? `🎉 Welcome @${username}! Your invite code worked - you're in!`
+        : `🎉 Welcome @${username}! You're beta user #${currentBetaUsers + 1}. You're now signed in!`;
+      
       return {
         status: 'approved' as const,
-        spotsRemaining: spotsRemaining - 1,
-        message: `🎉 Welcome @${username}! You're beta user #${currentBetaUsers + 1}. You're now signed in!`
+        spotsRemaining: isInviteValid ? spotsRemaining : spotsRemaining - 1,
+        message
       };
     } else {
       const { count: totalProfiles } = await supabase
