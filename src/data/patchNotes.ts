@@ -10,6 +10,92 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.20.0",
+    date: "2025-08-29",
+    title: "Critical Stability Fixes & Beta System Completion",
+    changes: [
+      {
+        category: "fix",
+        description: "Emergency fix for equipment null reference errors causing app crashes"
+      },
+      {
+        category: "fix",
+        description: "Identified and documented Row Level Security (RLS) issue blocking equipment table access"
+      },
+      {
+        category: "fix",
+        description: "Complete beta system overhaul - instant access after waitlist signup with password"
+      },
+      {
+        category: "fix",
+        description: "Removed all leaderboard references for cleaner, focused experience"
+      },
+      {
+        category: "improvement",
+        description: "Simplified invite system - removed complex referral tracking in favor of simple invite codes"
+      },
+      {
+        category: "improvement",
+        description: "Changed all CTAs from 'Apply for Beta' to 'Join the Beta' for better conversion"
+      },
+      {
+        category: "feature",
+        description: "Added Puppeteer testing suite for automated page validation"
+      },
+      {
+        category: "fix",
+        description: "Fixed authentication flow - proper redirects after signup and better error handling"
+      }
+    ]
+  },
+  {
+    version: "0.19.0",
+    date: "2025-08-25",
+    title: "Mobile Excellence & Feed System Enhancements",
+    changes: [
+      {
+        category: "feature",
+        description: "Feed sorting system with Popular, New, and Following filters"
+      },
+      {
+        category: "feature",
+        description: "Multi-photo equipment posts with beautiful masonry grid layout"
+      },
+      {
+        category: "feature",
+        description: "Comprehensive forum system with nested comments and reactions"
+      },
+      {
+        category: "improvement",
+        description: "Major mobile UX overhaul - optimized touch targets, modals, and navigation"
+      },
+      {
+        category: "improvement",
+        description: "Feed quality filter - automatically removes posts without images"
+      },
+      {
+        category: "fix",
+        description: "Critical auth system fixes - resolved tab switching issues and session handling"
+      },
+      {
+        category: "fix",
+        description: "Fixed likes/tees persistence - reactions now save properly after refresh"
+      },
+      {
+        category: "fix",
+        description: "ShareModal now generates correct /bag/username/bagname URLs"
+      },
+      {
+        category: "performance",
+        description: "Implemented server-side pagination for equipment browser"
+      },
+      {
+        category: "improvement",
+        description: "Enhanced BagEquipmentModal with all photos displayed in gallery tab"
+      }
+    ]
+  },
+  {
     version: "0.18.0",
     date: "2025-08-22",
     title: "Enhanced Equipment Modal & Affiliate Links",
