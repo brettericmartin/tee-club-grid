@@ -35,10 +35,10 @@ const Equipment = () => {
 
   useEffect(() => {
     // Load equipment immediately - page is public
-    console.log('[Equipment] useEffect running, calling loadEquipment with category:', category, 'sortBy:', sortBy, 'page:', currentPage);
+    console.log('[Equipment] useEffect running, calling loadEquipment with category:', category, 'sortBy:', sortBy, 'page:', currentPage, 'showSavedOnly:', showSavedOnly);
     loadEquipment();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, sortBy, currentPage, brand]); // Added currentPage and brand to dependencies
+  }, [category, sortBy, currentPage, brand, showSavedOnly]); // Added showSavedOnly to dependencies
 
   useEffect(() => {
     // Load all unique brands on mount
@@ -46,16 +46,12 @@ const Equipment = () => {
   }, []);
 
   useEffect(() => {
-    // Only load saved equipment if user is logged in
-    if (user && initialized) {
-      if (showSavedOnly) {
-        loadSavedEquipment();
-      } else {
-        // Load saved items in background if user is logged in
-        loadSavedEquipment();
-      }
+    // Only load saved equipment IDs if user is logged in and not showing saved only
+    // (when showing saved only, loadEquipment handles it)
+    if (user && initialized && !showSavedOnly) {
+      loadSavedEquipment();
     }
-  }, [user, showSavedOnly, initialized]);
+  }, [user, initialized]); // Removed showSavedOnly from deps since loadEquipment handles it
 
   // Removed filterEquipment useEffect - now handled by server-side pagination
 
@@ -82,10 +78,26 @@ const Equipment = () => {
   };
 
   const loadEquipment = async () => {
-    console.log('[Equipment] loadEquipment called with category:', category, 'sortBy:', sortBy, 'page:', currentPage);
+    console.log('[Equipment] loadEquipment called with category:', category, 'sortBy:', sortBy, 'page:', currentPage, 'showSavedOnly:', showSavedOnly);
     
     setLoading(true);
     try {
+      // If showing saved only, load saved equipment instead
+      if (showSavedOnly && user) {
+        const saved = await getUserSavedEquipment(user.id);
+        console.log('[Equipment] Showing saved only, got:', saved?.length || 0, 'items');
+        setEquipment(saved || []);
+        setAllEquipment(saved || []);
+        setTotalCount(saved?.length || 0);
+        
+        // Update saved items set
+        const savedIds = saved?.map(item => item.id).filter(Boolean) || [];
+        setSavedItems(new Set(savedIds));
+        
+        setLoading(false);
+        return;
+      }
+      
       // First, get the total count for pagination
       // IMPORTANT: Don't use head: true as it can cause queries to hang
       let countQuery = supabase
