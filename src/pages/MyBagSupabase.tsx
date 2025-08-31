@@ -473,28 +473,10 @@ const MyBagSupabase = () => {
         .eq('bag_id', bagId)
         .order('added_at');
 
-      // If that fails, try without the optional joins
+      // If that fails, log the error but continue
       if (error) {
-        
-        const result = await supabase
-          .from('bag_equipment')
-          .select(`
-            *,
-            equipment(
-              *,
-              equipment_photos (
-                id,
-                photo_url,
-                likes_count,
-                is_primary
-              )
-            )
-          `)
-          .eq('bag_id', bagId)
-          .order('added_at');
-        
-        data = result.data;
-        error = result.error;
+        console.warn('[MyBag] Query with photos failed, data might be incomplete:', error);
+        // Data might still be partially loaded
       }
 
       if (error) {
@@ -529,7 +511,13 @@ const MyBagSupabase = () => {
         return item;
       }) || [];
 
-      // Equipment loaded successfully
+      // Log if any items have null equipment for debugging
+      const nullEquipmentCount = processedData.filter(item => !item.equipment).length;
+      if (nullEquipmentCount > 0) {
+        console.warn(`[MyBag] ${nullEquipmentCount} items have null equipment, keeping them but with safe rendering`);
+      }
+      
+      // Equipment loaded successfully - keep all items, null checks are in render
       setBagItems(processedData);
       
       // Load layout data
@@ -539,7 +527,7 @@ const MyBagSupabase = () => {
       } else if (data && data.length > 0) {
         // Generate default layout if none exists
         const defaultLayout = bagLayoutsService.generateDefaultLayout(
-          data.map((item: any) => ({
+          data.filter((item: any) => item.equipment?.category).map((item: any) => ({
             id: item.equipment_id,
             category: item.equipment.category
           }))
@@ -854,7 +842,7 @@ const MyBagSupabase = () => {
     
     try {
       setLoading(true);
-      const existingCategories = new Set(bagItems.map(item => item.equipment.category));
+      const existingCategories = new Set(bagItems.map(item => item.equipment?.category).filter(Boolean));
       const missingCategories = categories.filter(cat => !existingCategories.has(cat));
       
       if (missingCategories.length === 0) {
@@ -983,8 +971,8 @@ const MyBagSupabase = () => {
 
       toast.success(
         newFeaturedStatus 
-          ? `${item.equipment.brand} ${item.equipment.model} added to featured`
-          : `${item.equipment.brand} ${item.equipment.model} removed from featured`
+          ? `${item.equipment?.brand || 'Item'} ${item.equipment?.model || ''} added to featured`
+          : `${item.equipment?.brand || 'Item'} ${item.equipment?.model || ''} removed from featured`
       );
     } catch (error) {
       console.error('Error toggling featured status:', error);
@@ -993,7 +981,7 @@ const MyBagSupabase = () => {
   };
 
   const totalValue = bagItems.reduce((sum, item) => 
-    sum + (item.purchase_price || item.equipment.msrp || 0), 0
+    sum + (item.purchase_price || item.equipment?.msrp || 0), 0
   );
 
   // Calculate featured items by category
@@ -1002,9 +990,9 @@ const MyBagSupabase = () => {
     const ACCESSORY_CATEGORIES = ['ball', 'glove', 'rangefinder', 'gps', 'tee', 'towel', 'ball_marker', 'divot_tool', 'accessories'];
     
     const featured = bagItems.filter(item => item.is_featured);
-    const featuredClubs = featured.filter(item => CLUB_CATEGORIES.includes(item.equipment.category));
-    const featuredAccessories = featured.filter(item => ACCESSORY_CATEGORIES.includes(item.equipment.category));
-    const featuredBag = featured.find(item => item.equipment.category === 'bag');
+    const featuredClubs = featured.filter(item => item.equipment?.category && CLUB_CATEGORIES.includes(item.equipment.category));
+    const featuredAccessories = featured.filter(item => item.equipment?.category && ACCESSORY_CATEGORIES.includes(item.equipment.category));
+    const featuredBag = featured.find(item => item.equipment?.category === 'bag');
     
     return {
       clubs: featuredClubs.length,
@@ -1515,8 +1503,8 @@ const MyBagSupabase = () => {
                       onClick={() => handleEditEquipment(item)}
                     >
                       <img
-                        src={(item.equipment as any)?.primaryPhoto || item.custom_photo_url || item.equipment.image_url}
-                        alt={`${item.equipment.brand} ${item.equipment.model}`}
+                        src={(item.equipment as any)?.primaryPhoto || item.custom_photo_url || item.equipment?.image_url}
+                        alt={`${item.equipment?.brand || ''} ${item.equipment?.model || ''}`}
                         className="w-full h-full object-cover"
                         loading="lazy"
                       />
@@ -1526,11 +1514,11 @@ const MyBagSupabase = () => {
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <h3 className="font-semibold text-white hover:text-primary transition-colors text-lg">
-                            {item.equipment.brand} {item.equipment.model}
+                            {item.equipment?.brand || 'Unknown'} {item.equipment?.model || ''}
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs px-2 py-0.5 bg-white/10 rounded-full text-white/80 capitalize">
-                              {item.equipment.category?.replace('_', ' ')}
+                              {item.equipment?.category?.replace('_', ' ') || 'equipment'}
                             </span>
                             {item.is_featured && (
                               <span className="text-xs px-2 py-0.5 bg-primary/20 rounded-full text-primary">
@@ -1559,7 +1547,7 @@ const MyBagSupabase = () => {
                       {/* Equipment Specs Grid */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
                         {/* Loft */}
-                        {(item.custom_specs?.loft || item.equipment.category && ['driver', 'fairway_wood', 'hybrid', 'wedge', 'putter'].includes(item.equipment.category)) && (
+                        {(item.custom_specs?.loft || item.equipment?.category && ['driver', 'fairway_wood', 'hybrid', 'wedge', 'putter'].includes(item.equipment.category)) && (
                           <div className="flex items-center gap-2">
                             <span className="text-white/50">Loft:</span>
                             {item.custom_specs?.loft ? (
@@ -1590,7 +1578,7 @@ const MyBagSupabase = () => {
                         )}
                         
                         {/* Shaft - Only show for clubs */}
-                        {item.equipment.category && ['driver', 'fairway_wood', 'hybrid', 'iron', 'irons', 'wedge', 'wedges', 'putter'].includes(item.equipment.category) && (
+                        {item.equipment?.category && ['driver', 'fairway_wood', 'hybrid', 'iron', 'irons', 'wedge', 'wedges', 'putter'].includes(item.equipment.category) && (
                           <div className="flex items-center gap-2">
                             <span className="text-white/50">Shaft:</span>
                             {item.shaft ? (
@@ -1604,7 +1592,7 @@ const MyBagSupabase = () => {
                         )}
                         
                         {/* Grip - Only show for clubs */}
-                        {item.equipment.category && ['driver', 'fairway_wood', 'hybrid', 'iron', 'irons', 'wedge', 'wedges', 'putter'].includes(item.equipment.category) && (
+                        {item.equipment?.category && ['driver', 'fairway_wood', 'hybrid', 'iron', 'irons', 'wedge', 'wedges', 'putter'].includes(item.equipment.category) && (
                           <div className="flex items-center gap-2">
                             <span className="text-white/50">Grip:</span>
                             {item.grip ? (
