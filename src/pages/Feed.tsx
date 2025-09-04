@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Trophy, TrendingUp, Users, Filter, Sparkles, Loader2, Plus, Camera, Lock, Clock, Flame, ChevronDown, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -32,6 +32,9 @@ const FeedContent = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [betaAccess, setBetaAccess] = useState<boolean | null>(null);
   const [publicBetaEnabled, setPublicBetaEnabled] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     loadMainFeed(filter, sortBy);
@@ -206,6 +209,55 @@ const FeedContent = () => {
 
   const displayedPosts = allPosts.slice(0, displayCount);
   const hasMore = displayCount < allPosts.length;
+
+  // Load more callback
+  const handleLoadMore = useCallback(() => {
+    if (!hasMore || isLoadingMore) return;
+    
+    setIsLoadingMore(true);
+    // Simulate loading delay for smooth UX
+    setTimeout(() => {
+      setDisplayCount(prev => Math.min(prev + 12, allPosts.length));
+      setIsLoadingMore(false);
+    }, 300);
+  }, [hasMore, isLoadingMore, allPosts.length]);
+
+  // Setup intersection observer for infinite scroll
+  useEffect(() => {
+    if (!hasMore) return;
+
+    // Cleanup previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    // Create new observer
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting) {
+          handleLoadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: '200px', // Trigger 200px before reaching the element
+        threshold: 0.1,
+      }
+    );
+
+    // Observe the load more element
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMore, handleLoadMore]);
 
   if (loading) {
     return (
@@ -578,17 +630,29 @@ const FeedContent = () => {
           !loading && <div className="text-center py-8 text-white/60">No posts to display</div>
         )}
 
-        {/* Load More */}
+        {/* Infinite Scroll Trigger */}
         {hasMore && (
-          <div className="mt-12 text-center">
-            <Button
-              onClick={() => setDisplayCount(prev => prev + 12)}
-              variant="outline"
-              size="lg"
-              className="bg-[#2a2a2a] text-white border-white/10 hover:bg-[#3a3a3a]"
-            >
-              Load More
-            </Button>
+          <div 
+            ref={loadMoreRef}
+            className="mt-12 flex justify-center items-center py-8"
+          >
+            {isLoadingMore ? (
+              <div className="flex items-center gap-3 text-white/60">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Loading more posts...</span>
+              </div>
+            ) : (
+              // Fallback manual button (only shows if scroll doesn't trigger)
+              <Button
+                onClick={handleLoadMore}
+                variant="ghost"
+                size="sm"
+                className="text-white/50 hover:text-white/70"
+              >
+                <ChevronDown className="w-5 h-5 mr-2" />
+                Load More
+              </Button>
+            )}
           </div>
         )}
 

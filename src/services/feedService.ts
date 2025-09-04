@@ -330,7 +330,7 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
       .from('feed_posts')
       .select(selectQuery)
       .order('created_at', { ascending: false })
-      .limit(20); // Reduce initial load for better performance
+      .limit(50); // Increased limit to show more posts
 
     // Filter based on type
     if (filter === 'following' && userId) {
@@ -403,14 +403,18 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
       user_liked: userLikes.includes(post.id) ? [{ id: 'liked' }] : []
     })) || [];
     
-    // Filter out ALL posts that don't have pictures (checking both media_urls and content.photo_url)
-    const filteredPosts = posts.filter(post => {
-      const hasMediaUrls = post.media_urls && post.media_urls.length > 0;
-      const hasContentPhoto = post.content?.photo_url || (post.content?.photos && post.content.photos.length > 0);
-      return hasMediaUrls || hasContentPhoto;
-    });
+    // Optional: Filter out posts without pictures for certain types
+    // For now, show all posts to not restrict content
+    const filteredPosts = posts;
     
-    console.log(`Filtered ${posts.length} posts to ${filteredPosts.length} (removed posts without any pictures)`);
+    // If you want to filter, uncomment this:
+    // const filteredPosts = posts.filter(post => {
+    //   const hasMediaUrls = post.media_urls && post.media_urls.length > 0;
+    //   const hasContentPhoto = post.content?.photo_url || (post.content?.photos && post.content.photos.length > 0);
+    //   return hasMediaUrls || hasContentPhoto;
+    // });
+    
+    console.log(`Showing ${filteredPosts.length} posts`);
     
     return filteredPosts;
   } catch (error) {

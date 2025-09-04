@@ -12,10 +12,18 @@ export async function getEquipment(options?: {
   sortBy?: 'popular' | 'newest' | 'price-low' | 'price-high';
   search?: string;
 }) {
-  // Simplified query - don't join photos initially
+  // Include equipment_photos in the query for proper photo display
   let query = supabase
     .from('equipment')
-    .select('*');
+    .select(`
+      *,
+      equipment_photos (
+        id,
+        photo_url,
+        likes_count,
+        is_primary
+      )
+    `);
 
   // Apply filters
   if (options?.category && options.category !== 'all') {
@@ -61,7 +69,15 @@ export async function getEquipment(options?: {
         // Try without auth context for public data
         const anonymousQuery = supabase
           .from('equipment')
-          .select('*');
+          .select(`
+            *,
+            equipment_photos (
+              id,
+              photo_url,
+              likes_count,
+              is_primary
+            )
+          `);
         
         // Reapply filters
         if (options?.category && options.category !== 'all') {
@@ -92,14 +108,25 @@ export async function getEquipment(options?: {
         
         const { data: anonymousData, error: anonymousError } = await anonymousQuery;
         if (!anonymousError && anonymousData) {
-          return anonymousData.map(equipment => ({
-            ...equipment,
-            averageRating: null,
-            primaryPhoto: equipment.image_url,
-            most_liked_photo: equipment.image_url,
-            savesCount: 0,
-            totalLikes: 0
-          }));
+          return anonymousData.map(equipment => {
+            const photos = equipment.equipment_photos || [];
+            const mostLikedPhoto = photos.length > 0 
+              ? photos.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0))[0].photo_url
+              : null;
+            
+            const primaryMarkedPhoto = photos.find(p => p.is_primary)?.photo_url;
+            const anyPhoto = photos.length > 0 ? photos[0].photo_url : null;
+            const bestPhoto = primaryMarkedPhoto || mostLikedPhoto || anyPhoto || equipment.image_url;
+            
+            return {
+              ...equipment,
+              averageRating: null,
+              primaryPhoto: bestPhoto,
+              most_liked_photo: mostLikedPhoto || anyPhoto,
+              savesCount: 0,
+              totalLikes: 0
+            };
+          });
         }
       }
       
@@ -107,29 +134,55 @@ export async function getEquipment(options?: {
         // Retry the query
         const retryResult = await query;
         if (!retryResult.error) {
-          return retryResult.data?.map(equipment => ({
-            ...equipment,
-            averageRating: null,
-            primaryPhoto: equipment.image_url,
-            most_liked_photo: equipment.image_url,
-            savesCount: 0,
-            totalLikes: 0
-          }));
+          return retryResult.data?.map(equipment => {
+            const photos = equipment.equipment_photos || [];
+            const mostLikedPhoto = photos.length > 0 
+              ? photos.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0))[0].photo_url
+              : null;
+            
+            const primaryMarkedPhoto = photos.find(p => p.is_primary)?.photo_url;
+            const anyPhoto = photos.length > 0 ? photos[0].photo_url : null;
+            const bestPhoto = primaryMarkedPhoto || mostLikedPhoto || anyPhoto || equipment.image_url;
+            
+            return {
+              ...equipment,
+              averageRating: null,
+              primaryPhoto: bestPhoto,
+              most_liked_photo: mostLikedPhoto || anyPhoto,
+              savesCount: 0,
+              totalLikes: 0
+            };
+          });
         }
       }
     }
     throw error;
   }
   
-  // Return simplified data - use image_url directly
-  return data?.map(equipment => ({
-    ...equipment,
-    averageRating: null,
-    primaryPhoto: equipment.image_url,
-    most_liked_photo: equipment.image_url,
-    savesCount: 0,
-    totalLikes: 0
-  }));
+  // Process equipment photos to set primaryPhoto and most_liked_photo
+  return data?.map(equipment => {
+    // Get photos from equipment_photos
+    const photos = equipment.equipment_photos || [];
+    
+    // Find primary photo first, then most liked, then any photo
+    const primaryMarkedPhoto = photos.find(p => p.is_primary)?.photo_url;
+    const mostLikedPhoto = photos.length > 0 
+      ? photos.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0))[0].photo_url
+      : null;
+    const anyPhoto = photos.length > 0 ? photos[0].photo_url : null;
+    
+    // Use the best available photo: primary marked -> most liked -> any photo -> equipment.image_url
+    const bestPhoto = primaryMarkedPhoto || mostLikedPhoto || anyPhoto || equipment.image_url;
+    
+    return {
+      ...equipment,
+      averageRating: null,
+      primaryPhoto: bestPhoto,
+      most_liked_photo: mostLikedPhoto || anyPhoto, // Ensure we always have a photo if available
+      savesCount: 0,
+      totalLikes: 0
+    };
+  });
 }
 
 // Get single equipment details
@@ -155,6 +208,7 @@ export async function getEquipmentDetails(equipmentId: string) {
   let photos: any = { data: [] };
   
   try {
+    // First try normal query
     [reviews, photos] = await Promise.all([
       supabase
         .from('equipment_reviews')
@@ -164,16 +218,71 @@ export async function getEquipmentDetails(equipmentId: string) {
         .from('equipment_photos')
         .select('*')
         .eq('equipment_id', equipmentId)
+        .not('user_id', 'is', null)  // Only user photos
         .order('likes_count', { ascending: false })
     ]);
+    
+    console.log('[getEquipmentDetails] Photos query result:', {
+      hasData: !!photos.data,
+      dataLength: photos.data?.length || 0,
+      error: photos.error
+    });
+    
+    // If photos query failed or returned empty due to RLS, try a workaround
+    if (!photos.data || photos.data.length === 0) {
+      console.log('[getEquipmentDetails] No photos found, checking if RLS issue...');
+      
+      // Try fetching directly without RLS by using a different approach
+      // This is a temporary workaround until RLS is fixed
+      const { data: equipmentWithPhotos } = await supabase
+        .from('equipment')
+        .select(`
+          id,
+          equipment_photos!inner (
+            id,
+            photo_url,
+            caption,
+            is_primary,
+            likes_count,
+            created_at,
+            user_id
+          )
+        `)
+        .eq('id', equipmentId)
+        .not('equipment_photos.user_id', 'is', null)
+        .single();
+        
+      if (equipmentWithPhotos?.equipment_photos) {
+        console.log('[getEquipmentDetails] Found photos via join query:', equipmentWithPhotos.equipment_photos.length);
+        photos.data = equipmentWithPhotos.equipment_photos;
+      }
+    }
+    
+    if (photos.error) {
+      console.error('[getEquipmentDetails] Error fetching photos:', photos.error);
+    }
   } catch (err) {
     console.warn('Error fetching related data:', err);
   }
 
-  // Get the most liked photo as primaryPhoto
-  const mostLikedPhoto = photos.data && photos.data.length > 0 
-    ? photos.data[0].photo_url 
-    : null;
+  // Get the best photo: most liked user photo -> any user photo
+  // Filter to only user photos (not scraper/system photos)
+  const userPhotos = photos.data?.filter((p: any) => p.user_id) || [];
+  console.log('[getEquipmentDetails] User photos:', userPhotos.length, 'of', photos.data?.length || 0, 'total');
+  
+  // Sort by likes_count descending (already sorted from query, but filter might have changed order)
+  const sortedUserPhotos = [...userPhotos].sort((a: any, b: any) => (b.likes_count || 0) - (a.likes_count || 0));
+  const mostLikedPhoto = sortedUserPhotos[0]?.photo_url;
+  const anyPhoto = userPhotos[0]?.photo_url; // Get any user photo as fallback
+  const bestPhoto = mostLikedPhoto || anyPhoto;
+  
+  console.log('[getEquipmentDetails] Photo resolution:', {
+    totalPhotos: photos.data?.length || 0,
+    userPhotos: userPhotos.length,
+    mostLikedPhoto: !!mostLikedPhoto,
+    bestPhoto: bestPhoto || 'NONE',
+    equipmentImageUrl: equipment.image_url || 'NONE'
+  });
 
   // Combine the data
   const data = {
@@ -182,8 +291,8 @@ export async function getEquipmentDetails(equipmentId: string) {
     equipment_photos: photos.data || [],
     equipment_prices: [],
     equipment_discussions: [],
-    primaryPhoto: mostLikedPhoto, // Set most liked photo as primary
-    most_liked_photo: mostLikedPhoto // Also add for consistency
+    primaryPhoto: bestPhoto || equipment.image_url, // Use best available photo
+    most_liked_photo: mostLikedPhoto || anyPhoto // Ensure we have a photo if available
   };
   
   // Calculate aggregate data
@@ -198,15 +307,26 @@ export async function getEquipmentDetails(equipmentId: string) {
   // Get top bags using this equipment
   const topBags = await getTopBagsWithEquipment(equipmentId);
   
-  return {
+  const result = {
     ...data,
     averageRating,
     lowestPrice,
     reviewCount: data.equipment_reviews?.length || 0,
     photoCount: data.equipment_photos?.length || 0,
     topBags,
-    primaryPhoto: mostLikedPhoto || equipment.image_url
+    primaryPhoto: bestPhoto || equipment.image_url
   };
+  
+  console.log('[getEquipmentDetails] Returning data with:', {
+    id: result.id,
+    brand: result.brand,
+    model: result.model,
+    primaryPhoto: result.primaryPhoto || 'MISSING',
+    most_liked_photo: result.most_liked_photo || 'MISSING',
+    image_url: result.image_url || 'MISSING'
+  });
+  
+  return result;
 }
 
 // Search equipment

@@ -25,6 +25,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { UnifiedPhotoUploadDialog } from '@/components/shared/UnifiedPhotoUploadDialog';
+import { EquipmentImage } from '@/components/shared/EquipmentImage';
 
 interface EquipmentPhoto {
   id: string;
@@ -58,6 +59,7 @@ export function EquipmentPhotoRepository({
   brand,
   model
 }: EquipmentPhotoRepositoryProps) {
+  
   const { user } = useAuth();
   const [photos, setPhotos] = useState<EquipmentPhoto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +69,9 @@ export function EquipmentPhotoRepository({
   const [showUploadDialog, setShowUploadDialog] = useState(false);
 
   useEffect(() => {
-    loadPhotos();
+    if (equipmentId) {
+      loadPhotos();
+    }
   }, [equipmentId, sortBy]);
 
   const loadPhotos = async () => {
@@ -76,16 +80,10 @@ export function EquipmentPhotoRepository({
         .from('equipment_photos')
         .select(`
           *,
-          user:profiles!equipment_photos_user_id_fkey (
-            username,
-            display_name,
-            avatar_url
-          ),
-          user_liked:equipment_photo_likes!left (
-            id
-          )
+          user_id
         `)
-        .eq('equipment_id', equipmentId);
+        .eq('equipment_id', equipmentId)
+        .not('user_id', 'is', null); // Only show user-uploaded photos
 
       // Apply sorting
       switch (sortBy) {
@@ -102,15 +100,14 @@ export function EquipmentPhotoRepository({
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('[EquipmentPhotoRepository] Query error:', error);
+        throw error;
+      }
       
-      // Process data to include user_liked boolean
-      const processedPhotos = (data || []).map(photo => ({
-        ...photo,
-        user_liked: user ? photo.user_liked?.length > 0 : false
-      }));
-      
-      setPhotos(processedPhotos);
+      // Filter to only user-uploaded photos
+      const userPhotos = (data || []).filter(photo => photo.user_id);
+      setPhotos(userPhotos);
     } catch (error) {
       console.error('Error loading photos:', error);
       toast.error('Failed to load photos');
@@ -126,31 +123,31 @@ export function EquipmentPhotoRepository({
     }
 
     try {
-      const photo = photos.find(p => p.id === photoId);
-      if (!photo) return;
-
-      if (photo.user_liked) {
-        // Unlike: Remove like
-        await supabase
-          .from('equipment_photo_likes')
-          .delete()
-          .eq('photo_id', photoId)
-          .eq('user_id', user.id);
-      } else {
-        // Like: Add like
-        await supabase
-          .from('equipment_photo_likes')
-          .insert({
-            photo_id: photoId,
-            user_id: user.id
-          });
-      }
+      // For now, just reload photos after attempting to like
+      // Since we can't track user_liked state without the join
+      await supabase
+        .from('equipment_photo_likes')
+        .insert({
+          photo_id: photoId,
+          user_id: user.id
+        });
 
       // Reload photos to get updated like counts
       await loadPhotos();
     } catch (error) {
       console.error('Error toggling like:', error);
-      throw error; // Let TeedBallLike component handle the error display
+      // If error is duplicate key, that means user already liked it
+      if (error.message?.includes('duplicate')) {
+        // Try to unlike
+        await supabase
+          .from('equipment_photo_likes')
+          .delete()
+          .eq('photo_id', photoId)
+          .eq('user_id', user.id);
+        await loadPhotos();
+      } else {
+        throw error;
+      }
     }
   };
 
@@ -169,11 +166,11 @@ export function EquipmentPhotoRepository({
           className="cursor-pointer"
           onClick={() => setSelectedPhoto(photo)}
         >
-          <img
+          <EquipmentImage
             src={photo.photo_url}
             alt={photo.caption || 'Equipment photo'}
             className="w-full h-64 object-cover"
-            loading="lazy"
+            fallbackText={brand?.substring(0, 2).toUpperCase() || 'EQ'}
           />
           
           {photo.is_primary && (
@@ -185,7 +182,7 @@ export function EquipmentPhotoRepository({
 
           {photo.metadata?.source && (
             <Badge variant="secondary" className="absolute top-2 right-2">
-              {photo.metadata.source}
+              {photo.metadata.source === 'system' ? 'Default' : photo.metadata.source}
             </Badge>
           )}
         </div>
@@ -193,7 +190,7 @@ export function EquipmentPhotoRepository({
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
             <TeedBallLike
-              isLiked={photo.user_liked || false}
+              isLiked={false}
               likeCount={photo.likes_count || 0}
               onLike={() => handleLike(photo.id)}
               size="md"
@@ -208,7 +205,6 @@ export function EquipmentPhotoRepository({
           )}
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>by {photo.user?.display_name || photo.user?.username || 'Unknown'}</span>
             <span>{new Date(photo.created_at).toLocaleDateString()}</span>
           </div>
         </CardContent>
@@ -269,15 +265,17 @@ export function EquipmentPhotoRepository({
           ))}
         </div>
       ) : (
-        <div className={
-          viewMode === 'grid' 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-            : "space-y-4"
-        }>
-          {photos.map((photo) => (
-            <PhotoCard key={photo.id} photo={photo} />
-          ))}
-        </div>
+        <>
+          <div className={
+            viewMode === 'grid' 
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+              : "space-y-4"
+          }>
+            {photos.map((photo) => (
+              <PhotoCard key={photo.id} photo={photo} />
+            ))}
+          </div>
+        </>
       )}
 
       {/* Empty State */}
@@ -301,18 +299,18 @@ export function EquipmentPhotoRepository({
       {selectedPhoto && (
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
           <DialogContent className="max-w-4xl">
-            <img
+            <EquipmentImage
               src={selectedPhoto.photo_url}
               alt={selectedPhoto.caption || 'Equipment photo'}
               className="w-full max-h-[70vh] object-contain"
+              fallbackText={brand?.substring(0, 2).toUpperCase() || 'EQ'}
             />
             <div className="mt-4 space-y-2">
               {selectedPhoto.caption && (
                 <p className="text-lg">{selectedPhoto.caption}</p>
               )}
               <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>Uploaded by {selectedPhoto.user?.username}</span>
-                <span>{new Date(selectedPhoto.created_at).toLocaleDateString()}</span>
+                <span>Uploaded on {new Date(selectedPhoto.created_at).toLocaleDateString()}</span>
               </div>
             </div>
           </DialogContent>

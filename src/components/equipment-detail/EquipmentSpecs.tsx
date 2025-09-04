@@ -76,30 +76,25 @@ export default function EquipmentSpecs({ equipment, loading = false }: Equipment
       {/* Overview Section */}
       <SpecsOverview 
         specs={{ ...universalSpecs, ...specs }}
-        imageUrl={equipment.image_url}
       />
 
-      {/* Technical Specifications */}
-      <Card className="bg-[#1a1a1a] border-white/10 p-6">
-        <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-          <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Technical Specifications
-        </h3>
-        <TechnicalSpecsGrid 
-          category={category}
-          specs={specs}
-        />
-      </Card>
+      {/* Technical Specifications - Only show if we have specs */}
+      {Object.keys(specs).length > 0 && (
+        <Card className="bg-[#1a1a1a] border-white/10 p-4 sm:p-6">
+          <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">
+            Technical Specifications
+          </h3>
+          <TechnicalSpecsGrid 
+            category={category}
+            specs={specs}
+          />
+        </Card>
+      )}
 
       {/* Key Features (if available) */}
       {keyFeatures.length > 0 && (
-        <Card className="bg-[#1a1a1a] border-white/10 p-6">
-          <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+        <Card className="bg-[#1a1a1a] border-white/10 p-4 sm:p-6">
+          <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">
             Key Features
           </h3>
           <KeyFeaturesList features={keyFeatures} />
@@ -108,11 +103,8 @@ export default function EquipmentSpecs({ equipment, loading = false }: Equipment
 
       {/* Tour Usage (if available) */}
       {tourUsage.length > 0 && (
-        <Card className="bg-[#1a1a1a] border-white/10 p-6">
-          <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
+        <Card className="bg-[#1a1a1a] border-white/10 p-4 sm:p-6">
+          <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">
             Tour Usage
           </h3>
           <TourUsageSection players={tourUsage} />
@@ -121,8 +113,8 @@ export default function EquipmentSpecs({ equipment, loading = false }: Equipment
 
       {/* Additional Info */}
       {(specs.technology || specs.material || specs.adjustability) && (
-        <Card className="bg-[#2a2a2a] border-white/10 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Additional Information</h3>
+        <Card className="bg-[#2a2a2a] border-white/10 p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Additional Information</h3>
           <div className="space-y-3 text-white/80">
             {specs.technology && (
               <div>

@@ -320,19 +320,16 @@ export default function TechnicalSpecsGrid({ category, specs }: TechnicalSpecsGr
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {categorySpecs.map((spec, index) => (
         <div 
           key={index} 
-          className="flex items-start gap-3 p-3 rounded-lg bg-[#2a2a2a]/50 hover:bg-[#2a2a2a] transition-colors"
+          className="flex items-start gap-2 p-3 rounded-lg bg-[#2a2a2a]/50"
         >
-          <div className="p-2 rounded-lg bg-primary/10 text-primary mt-0.5">
-            {spec.icon}
-          </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-white/60 mb-0.5">{spec.label}</p>
-            <p className="text-white font-medium break-words">
-              {Array.isArray(spec.value) ? spec.value.join(', ') : spec.value || 'N/A'}
+            <p className="text-xs text-white/60 mb-1">{spec.label}</p>
+            <p className="text-sm text-white font-medium break-words">
+              {Array.isArray(spec.value) ? spec.value.join(', ') : spec.value}
             </p>
           </div>
         </div>

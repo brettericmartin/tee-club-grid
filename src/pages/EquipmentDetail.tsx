@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TeedBallIcon } from '@/components/shared/TeedBallLike';
 import PriceComparison from '@/components/equipment/PriceComparison';
 import EquipmentVideosPanel from '@/components/equipment/EquipmentVideosPanel';
+import { EquipmentImage } from '@/components/shared/EquipmentImage';
 
 export default function EquipmentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -52,7 +53,19 @@ export default function EquipmentDetail() {
 
     try {
       setLoading(true);
+      console.log('[EquipmentDetail] Loading equipment with ID:', id);
       const data = await getEquipmentDetails(id);
+      console.log('[EquipmentDetail] Equipment data received:', {
+        brand: data.brand,
+        model: data.model,
+        primaryPhoto: data.primaryPhoto || 'MISSING',
+        most_liked_photo: data.most_liked_photo || 'MISSING',
+        image_url: data.image_url || 'MISSING',
+        equipment_photos_count: data.equipment_photos?.length || 0,
+        photoCount: data.photoCount
+      });
+      console.log('[EquipmentDetail] Full equipment_photos array:', data.equipment_photos);
+      console.log('[EquipmentDetail] About to set equipment state with primaryPhoto:', data.primaryPhoto);
       setEquipment(data);
       
       // Check if user has saved this equipment (non-blocking)
@@ -172,33 +185,12 @@ export default function EquipmentDetail() {
           <div>
             <Card>
               <CardContent className="p-0">
-                {equipment.most_liked_photo || equipment.primaryPhoto || equipment.image_url ? (
-                  <img
-                    src={equipment.most_liked_photo || equipment.primaryPhoto || equipment.image_url}
-                    alt={`${equipment.brand} ${equipment.model}`}
-                    className="w-full h-96 object-cover rounded-lg"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      const parent = e.currentTarget.parentElement;
-                      if (parent) {
-                        // Create React elements instead of using innerHTML
-                        const fallbackDiv = document.createElement('div');
-                        fallbackDiv.className = 'w-full h-96 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40 rounded-lg';
-                        const fallbackSpan = document.createElement('span');
-                        fallbackSpan.className = 'text-white font-bold text-4xl';
-                        fallbackSpan.textContent = equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'NA';
-                        fallbackDiv.appendChild(fallbackSpan);
-                        parent.appendChild(fallbackDiv);
-                      }
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-96 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40 rounded-lg">
-                    <span className="text-white font-bold text-4xl">
-                      {equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-                    </span>
-                  </div>
-                )}
+                <EquipmentImage
+                  src={equipment.primaryPhoto || equipment.most_liked_photo || equipment.image_url}
+                  alt={`${equipment.brand} ${equipment.model}`}
+                  className="w-full h-96 object-cover rounded-lg"
+                  fallbackText={equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                />
               </CardContent>
             </Card>
           </div>
@@ -291,12 +283,16 @@ export default function EquipmentDetail() {
           </TabsList>
 
           <TabsContent value="photos" className="mt-6">
-            <EquipmentPhotoRepository
-              equipmentId={equipment.id}
-              equipmentName={`${equipment.brand} ${equipment.model}`}
-              brand={equipment.brand}
-              model={equipment.model}
-            />
+            {equipment && equipment.id ? (
+              <EquipmentPhotoRepository
+                equipmentId={equipment.id}
+                equipmentName={`${equipment.brand} ${equipment.model}`}
+                brand={equipment.brand}
+                model={equipment.model}
+              />
+            ) : (
+              <div>Loading equipment data...</div>
+            )}
           </TabsContent>
 
           <TabsContent value="specs" className="mt-6">

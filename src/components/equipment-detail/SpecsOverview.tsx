@@ -12,55 +12,19 @@ interface SpecsOverviewProps {
     release_year?: number;
     description?: string;
   };
-  imageUrl?: string;
 }
 
-export default function SpecsOverview({ specs, imageUrl }: SpecsOverviewProps) {
+export default function SpecsOverview({ specs }: SpecsOverviewProps) {
+  // Only show the overview card if we have meaningful data
+  const hasData = specs.msrp || specs.release_year || specs.description;
+  
+  if (!hasData) return null;
+  
   return (
-    <Card className="bg-[#1a1a1a] border-white/10 p-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left: Image */}
-        {imageUrl && (
-          <div className="md:col-span-1">
-            <div className="relative aspect-square rounded-lg overflow-hidden bg-[#2a2a2a]">
-              <img
-                src={imageUrl}
-                alt={`${specs.brand} ${specs.model}`}
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  const parent = e.currentTarget.parentElement;
-                  if (parent) {
-                    const fallback = document.createElement('div');
-                    fallback.className = 'w-full h-full flex items-center justify-center';
-                    const text = document.createElement('span');
-                    text.className = 'text-white/50 text-2xl font-bold';
-                    text.textContent = specs.brand.substring(0, 2).toUpperCase();
-                    fallback.appendChild(text);
-                    parent.appendChild(fallback);
-                  }
-                }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Right: Info */}
-        <div className={`${imageUrl ? 'md:col-span-2' : 'md:col-span-3'} space-y-4`}>
-          {/* Header */}
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-2xl font-bold text-white">
-                {specs.brand} {specs.model}
-              </h2>
-              <Badge className="bg-primary/20 text-primary border-primary/30">
-                {specs.category}
-              </Badge>
-            </div>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <Card className="bg-[#1a1a1a] border-white/10 p-4 sm:p-6">
+      <div className="space-y-4">
+          {/* Quick Stats - Mobile optimized */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {specs.msrp && (
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-[#2a2a2a]">
@@ -89,17 +53,6 @@ export default function SpecsOverview({ specs, imageUrl }: SpecsOverviewProps) {
               </div>
             )}
 
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-[#2a2a2a]">
-                <Info className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-xs text-white/60">Category</p>
-                <p className="text-lg font-semibold text-white capitalize">
-                  {specs.category}
-                </p>
-              </div>
-            </div>
           </div>
 
           {/* Description */}
@@ -110,7 +63,6 @@ export default function SpecsOverview({ specs, imageUrl }: SpecsOverviewProps) {
               </p>
             </div>
           )}
-        </div>
       </div>
     </Card>
   );
