@@ -98,77 +98,28 @@ const Equipment = () => {
         return;
       }
       
-      // First, get the total count for pagination
-      // IMPORTANT: Don't use head: true as it can cause queries to hang
-      let countQuery = supabase
-        .from('equipment')
-        .select('id', { count: 'exact' });  // Select minimal field for count
+      // Use the enhanced getEquipment service that includes equipment_photos
+      const equipmentData = await getEquipment({
+        category: category === 'all' ? undefined : category,
+        sortBy: sortBy,
+        search: undefined // Add search support later if needed
+      });
       
-      // Apply filters to count query
-      if (category && category !== 'all') {
-        countQuery = countQuery.eq('category', category);
-      }
+      // Apply brand filter locally (since service doesn't support it yet)
+      let filteredData = equipmentData || [];
       if (brand && brand !== 'all') {
-        countQuery = countQuery.eq('brand', brand);
+        filteredData = filteredData.filter(item => item.brand === brand);
       }
       
-      const { data: countData, count, error: countError } = await countQuery;
-      
-      if (countError) {
-        console.error('[Equipment] Count query error:', countError);
-        throw countError;
-      }
-      
-      console.log('[Equipment] Count result:', count);
-      setTotalCount(count || 0);
-      
-      // Now get the actual data for the current page
-      console.log('[Equipment] Starting data query...');
+      // Apply pagination locally for now
       const from = (currentPage - 1) * itemsPerPage;
-      const to = from + itemsPerPage - 1;
+      const to = from + itemsPerPage;
+      const paginatedData = filteredData.slice(from, to);
       
-      let query = supabase
-        .from('equipment')
-        .select('*')
-        .range(from, to); // Server-side pagination
-      
-      // Apply category filter
-      if (category && category !== 'all') {
-        query = query.eq('category', category);
-      }
-      
-      // Apply brand filter
-      if (brand && brand !== 'all') {
-        query = query.eq('brand', brand);
-      }
-      
-      // Apply sorting
-      if (sortBy === 'newest') {
-        query = query.order('created_at', { ascending: false });
-      } else if (sortBy === 'price-low') {
-        query = query.order('msrp', { ascending: true, nullsFirst: true }); // Handle nulls properly
-      } else if (sortBy === 'price-high') {
-        query = query.order('msrp', { ascending: false, nullsFirst: false }); // Handle nulls properly
-      } else {
-        query = query.order('created_at', { ascending: false });
-      }
-      
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error('[Equipment] Error loading equipment:', error);
-        setAllEquipment([]);
-        toast({
-          title: "Error",
-          description: "Failed to load equipment. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      console.log('[Equipment] Equipment data received:', data?.length || 0, 'items');
-      setEquipment(data || []); // Set equipment directly - this is just the current page
-      setAllEquipment(data || []); // Keep for backward compatibility
+      console.log('[Equipment] Equipment data received:', paginatedData.length, 'items');
+      setEquipment(paginatedData);
+      setAllEquipment(filteredData); // Keep full filtered data for pagination
+      setTotalCount(filteredData.length);
       
       // Load saved items in background if user is logged in (non-blocking)
       if (user) {

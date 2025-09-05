@@ -33,7 +33,6 @@ import BadgePreview from "@/pages/BadgePreview";
 import Forum from "@/pages/Forum";
 import BagProfilePage from "@/pages/BagProfilePage";
 import UserBagPage from "@/pages/UserBagPage";
-import BagShareView from "@/pages/BagShareView";
 import ForumIndex from "@/pages/ForumIndex";
 import ForumCategory from "@/pages/ForumCategory";
 import ForumThread from "@/pages/ForumThread";
@@ -51,75 +50,8 @@ import Debug from "@/pages/Debug";
 import VideoHub from "@/pages/VideoHub";
 import DebugFeed from "@/pages/DebugFeed";
 import MyInvites from "@/pages/MyInvites";
-import { lazy } from "react";
 
-// Lazy load pages for code splitting with enhanced error handling and debugging
-const lazyImport = (importFn: () => Promise<any>, componentName?: string) => {
-  console.log(`[DEBUG] Attempting to lazy load: ${componentName || 'unknown module'}`);
-  
-  return lazy(() =>
-    importFn()
-      .then((module) => {
-        console.log(`[DEBUG] Successfully loaded: ${componentName || 'module'}`);
-        return module;
-      })
-      .catch((error) => {
-        console.error(`[DEBUG] Failed to load ${componentName || 'module'}:`, error);
-        console.error(`[DEBUG] Error details:`, {
-          message: error.message,
-          stack: error.stack,
-          componentName,
-          timestamp: new Date().toISOString()
-        });
-        
-        // Return a simple fallback component without hooks
-        return {
-          default: () => (
-            <div className="min-h-screen flex items-center justify-center p-4">
-              <div className="text-center max-w-md">
-                <h2 className="text-2xl font-bold mb-2 text-white">Unable to Load Page</h2>
-                <p className="text-white/70 mb-6">
-                  {componentName ? `The ${componentName} page` : 'This page'} failed to load.
-                </p>
-                <div className="space-y-3">
-                  <button 
-                    onClick={() => window.location.reload()}
-                    className="w-full px-6 py-3 bg-primary text-black font-medium rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    Reload Page
-                  </button>
-                  <button 
-                    onClick={() => window.location.href = '/'}
-                    className="w-full px-6 py-3 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors"
-                  >
-                    Go to Home
-                  </button>
-                </div>
-                <p className="text-white/50 text-sm mt-6">
-                  If this problem persists, try clearing your browser cache.
-                </p>
-                {/* Debug info in development */}
-                {import.meta.env.DEV && (
-                  <details className="mt-4 text-left">
-                    <summary className="cursor-pointer text-white/50 text-xs">Debug Info</summary>
-                    <pre className="mt-2 p-2 bg-black/50 rounded text-xs text-white/70 overflow-auto">
-                      {JSON.stringify({ 
-                        error: error.message, 
-                        component: componentName,
-                        time: new Date().toISOString()
-                      }, null, 2)}
-                    </pre>
-                  </details>
-                )}
-              </div>
-            </div>
-          ),
-        };
-      })
-  );
-};
-
-// Page imports are defined above as direct imports to avoid dynamic import issues
+// All page imports are defined above as direct imports to avoid dynamic import issues
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -175,7 +107,6 @@ function AppRoutes() {
             <Route path="/bags-browser" element={<BagsBrowser />} />
             <Route path="/bags" element={<BagsBrowser />} />
             <Route path="/bag/:bagId" element={<BagDisplay />} />
-            <Route path="/bag/:bagId/share" element={<BagShareView />} />
             <Route path="/bag/:username/:bagname" element={<BagDisplay />} />
             <Route path="/bag/:username" element={<UserBagPage />} />
             <Route path="/my-bag" element={<BetaGuard requireAuth={true}><MyBag /></BetaGuard>} />
@@ -224,17 +155,6 @@ function AppRoutes() {
 }
 
 function App() {
-  console.log("[DEBUG] App component initializing...");
-  console.log("[DEBUG] Environment:", {
-    mode: import.meta.env.MODE,
-    dev: import.meta.env.DEV,
-    prod: import.meta.env.PROD,
-    supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? "Set" : "Not set",
-    supabaseKey: import.meta.env.VITE_SUPABASE_ANON_KEY ? "Set" : "Not set",
-  });
-
-  // Using direct imports to avoid dynamic import issues
-  console.log("[DEBUG] Using direct imports to avoid dynamic import issues");
   
   // Initialize referral capture on app mount
   useEffect(() => {

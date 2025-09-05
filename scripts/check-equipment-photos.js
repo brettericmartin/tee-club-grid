@@ -1,15 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-import './supabase-admin.js';
-
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing environment variables');
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from './supabase-admin.js';
 
 async function checkEquipmentPhotos() {
   console.log('=== CHECKING EQUIPMENT_PHOTOS TABLE ===\n');
@@ -168,6 +157,43 @@ async function checkEquipmentPhotos() {
     }
   } else {
     console.log('No bag equipment found with custom photos');
+  }
+  
+  // Check for Odyssey equipment specifically
+  console.log('\n=== CHECKING ODYSSEY EQUIPMENT ===\n');
+  
+  const { data: odysseyEquipment } = await supabase
+    .from('equipment')
+    .select('*')
+    .eq('brand', 'Odyssey')
+    .limit(10);
+    
+  if (odysseyEquipment && odysseyEquipment.length > 0) {
+    console.log(`Found ${odysseyEquipment.length} Odyssey equipment items:\n`);
+    
+    for (const item of odysseyEquipment) {
+      console.log(`${item.brand} ${item.model}`);
+      console.log(`  ID: ${item.id}`);
+      console.log(`  Category: ${item.category}`);
+      console.log(`  Image URL: ${item.image_url ? 'Yes' : 'No'}`);
+      console.log(`  Most Liked Photo: ${item.most_liked_photo ? 'Yes' : 'No'}`);
+      
+      // Check for photos in equipment_photos table
+      const { data: photos } = await supabase
+        .from('equipment_photos')
+        .select('*')
+        .eq('equipment_id', item.id);
+        
+      console.log(`  Equipment Photos: ${photos?.length || 0}`);
+      if (photos && photos.length > 0) {
+        photos.forEach(p => {
+          console.log(`    - ${p.photo_url?.substring(0, 60)}... ${p.is_primary ? '(PRIMARY)' : ''}`);
+        });
+      }
+      console.log('');
+    }
+  } else {
+    console.log('No Odyssey equipment found');
   }
 }
 

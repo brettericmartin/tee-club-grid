@@ -1,5 +1,5 @@
 /* @refresh skip */
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Edit3, Save, X, Settings, Trash2, Grid3x3, List, Zap, AlertTriangle, Trophy, CreditCard, ChevronDown, ChevronUp, CheckCircle, Share2, Camera, Video, Link2, Menu, MoreVertical } from "lucide-react";
 import { Navigate, Link } from "react-router-dom";
 import BackgroundLayer, { bagBackgrounds } from "@/components/BackgroundLayer";
@@ -49,24 +49,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserFeedView } from "@/components/feed/UserFeedView";
 import { aiFlowMetrics } from "@/utils/performanceMonitor";
-import { lazyWithRetry } from "@/utils/dynamicImport";
+
 import ShareModal from "@/components/bag/ShareModal";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { sanitizeDisplayName } from "@/utils/sanitization";
 import { getDisplayName } from "@/utils/displayName";
 import { WaitlistStatusView } from "@/components/waitlist/WaitlistStatusView";
 
-// Lazy load heavy components with retry logic for Vite HMR stability
-const BagGalleryDndKit = lazyWithRetry(() => import("@/components/bag/BagGalleryDndKit"));
-// EquipmentEditor removed - using BagEquipmentModal instead
-const AIEquipmentAnalyzer = lazyWithRetry(() => import("@/components/equipment/AIEquipmentAnalyzer"));
-const BagVideosTab = lazyWithRetry(() => import("@/components/bag/BagVideosTab"));
-
-// Import these directly to avoid dynamic import issues
+// Import all components directly to avoid dynamic import issues
+import BagGalleryDndKit from "@/components/bag/BagGalleryDndKit";
+import AIEquipmentAnalyzer from "@/components/equipment/AIEquipmentAnalyzer";
+import BagVideosTab from "@/components/bag/BagVideosTab";
 import EquipmentSelectorImproved from "@/components/equipment/EquipmentSelectorImproved";
 import AddEquipmentMethodDialog from "@/components/equipment/AddEquipmentMethodDialog";
 import BagEquipmentModal from "@/components/bag/BagEquipmentModal";
-const AIAnalysisResultsDialog = lazyWithRetry(() => import("@/components/equipment/AIAnalysisResultsDialog"));
+import AIAnalysisResultsDialog from "@/components/equipment/AIAnalysisResultsDialog";
 
 // Loading component for heavy components
 const ComponentLoadingFallback = () => {
@@ -1471,8 +1468,7 @@ const MyBagSupabase = () => {
         {bagItems.length === 0 ? (
           <EmptyState />
         ) : viewMode === 'gallery' ? (
-          <Suspense fallback={<ComponentLoadingFallback />}>
-            <BagGalleryDndKit
+          <BagGalleryDndKit
               bagEquipment={bagItems}
               layout={layout}
               isEditing={isEditingLayout}
@@ -1491,7 +1487,7 @@ const MyBagSupabase = () => {
               onEquipmentClick={handleEditEquipment}
               onToggleFeatured={handleToggleFeatured}
             />
-          </Suspense>
+          
         ) : viewMode === 'list' ? (
           <div className="space-y-4">
             {bagItems.map((item) => (
@@ -1676,13 +1672,11 @@ const MyBagSupabase = () => {
           )
         ) : viewMode === 'videos' ? (
           currentBag?.id ? (
-            <Suspense fallback={<ComponentLoadingFallback />}>
-              <BagVideosTab
-                bagId={currentBag.id}
-                bagName={currentBag.name}
-                isOwner={true}
-              />
-            </Suspense>
+            <BagVideosTab
+              bagId={currentBag.id}
+              bagName={currentBag.name}
+              isOwner={true}
+            />
           ) : (
             <div className="flex justify-center items-center h-64">
               <div className="text-white/50">No bag selected</div>
@@ -1859,27 +1853,24 @@ const MyBagSupabase = () => {
       />
 
       {/* Equipment Addition Method Dialog */}
-      <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
-        <AddEquipmentMethodDialog
+      <AddEquipmentMethodDialog
           isOpen={showMethodDialog}
           onClose={() => setShowMethodDialog(false)}
           onSelectMethod={handleMethodSelect}
         />
-      </Suspense>
+      
 
       {/* AI Equipment Analyzer */}
-      <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
-        <AIEquipmentAnalyzer
+      <AIEquipmentAnalyzer
           isOpen={showAIAnalyzer}
           onClose={() => setShowAIAnalyzer(false)}
           onAnalysisComplete={handleAIAnalysisComplete}
         />
-      </Suspense>
+      
 
       {/* AI Analysis Results */}
       {aiAnalysisResult && (
-        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
-          <AIAnalysisResultsDialog
+        <AIAnalysisResultsDialog
             isOpen={showAIResults}
             onClose={() => {
               setShowAIResults(false);
@@ -1888,38 +1879,23 @@ const MyBagSupabase = () => {
             analysisResult={aiAnalysisResult}
             onAddEquipment={addEquipment}
           />
-        </Suspense>
+        
       )}
 
       {/* Manual Equipment Selector */}
       <ErrorBoundary>
-        <Suspense 
-          fallback={
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-              <div className="bg-[#1a1a1a] p-6 rounded-xl border border-white/20 text-center space-y-4">
-                <Skeleton className="h-8 w-64 mx-auto" />
-                <Skeleton className="h-4 w-48 mx-auto" />
-                <div className="flex gap-2 justify-center">
-                  <Skeleton className="h-10 w-24" />
-                  <Skeleton className="h-10 w-24" />
-                </div>
-              </div>
-            </div>
-          }
-        >
-          {equipmentSelectorOpen && (
+        {equipmentSelectorOpen && (
             <EquipmentSelectorImproved
               isOpen={equipmentSelectorOpen}
               onClose={() => setEquipmentSelectorOpen(false)}
               onSelectEquipment={addEquipment}
             />
           )}
-        </Suspense>
+        
       </ErrorBoundary>
 
       {selectedBagEquipment && (
-        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><Skeleton className="h-96 w-96" /></div>}>
-          <BagEquipmentModal
+        <BagEquipmentModal
             isOpen={equipmentModalOpen}
             onClose={() => {
               setEquipmentModalOpen(false);
@@ -1931,7 +1907,7 @@ const MyBagSupabase = () => {
             canEdit={true}
             onUpdate={() => loadBagEquipment(currentBag?.id || '')}
           />
-        </Suspense>
+        
       )}
 
       {/* Remove duplicate BagEquipmentModal - now using single instance above */}
@@ -1985,6 +1961,7 @@ const MyBagSupabase = () => {
           onClose={() => setShowShareModal(false)}
           bag={{
             ...currentBag,
+            bag_equipment: bagItems, // Pass the full equipment data with photos
             profiles: currentBag.profiles || {
               username: user?.user_metadata?.username || user?.email?.split('@')[0],
               display_name: sanitizeDisplayName(user?.user_metadata?.display_name || user?.user_metadata?.full_name)

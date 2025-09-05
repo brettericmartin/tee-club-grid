@@ -52,7 +52,6 @@ export default function SpecsOverview({ specs }: SpecsOverviewProps) {
                 </div>
               </div>
             )}
-
           </div>
 
           {/* Description */}
