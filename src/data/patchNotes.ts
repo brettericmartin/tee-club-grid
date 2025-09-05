@@ -10,6 +10,45 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.21.0",
+    date: "2025-09-05",
+    title: "Major Stability Update - Core Features Restored",
+    changes: [
+      {
+        category: "fix",
+        description: "🔥 CRITICAL: Fixed app-breaking dynamic import errors that prevented My Bag page from loading"
+      },
+      {
+        category: "fix",
+        description: "Fixed 'Tee' system (likes) - users can now properly like bags and posts again"
+      },
+      {
+        category: "fix",
+        description: "Restored equipment photos - fixed database permissions blocking photo display"
+      },
+      {
+        category: "fix",
+        description: "Share modal now properly displays bag contents with photos in both card and list views"
+      },
+      {
+        category: "performance",
+        description: "Removed all lazy loading to eliminate Suspense-related crashes and improve stability"
+      },
+      {
+        category: "fix",
+        description: "Fixed Equipment page 'Saved items only' filter not working correctly"
+      },
+      {
+        category: "improvement",
+        description: "Enhanced error handling throughout the app to prevent cascading failures"
+      },
+      {
+        category: "fix",
+        description: "Resolved Row Level Security (RLS) policies blocking critical database operations"
+      }
+    ]
+  },
+  {
     version: "0.20.0",
     date: "2025-08-29",
     title: "Critical Stability Fixes & Beta System Completion",

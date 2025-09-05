@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.0] - 2025-09-05
+### Fixed
+- **CRITICAL**: Resolved app-breaking dynamic import errors in App.tsx and MyBagSupabase.tsx
+  - Removed all lazy loading and React.Suspense usage causing "Failed to fetch dynamically imported module" errors
+  - Fixed syntax errors from incomplete Suspense removal (stray `}>` fragments)
+  - My Bag page now loads without crashing
+- **Tee System (Likes)**: Complete restoration of like functionality
+  - Fixed RLS policies blocking bag_likes and likes table operations
+  - Added proper INSERT policies for authenticated users
+  - Fixed trigger functions for automatic count updates
+- **Equipment Photos**: Restored photo display throughout the application
+  - Fixed RLS policies on equipment_photos table blocking SELECT operations
+  - Resolved photo URL access issues in equipment details and bag views
+  - Fixed photo priority logic (custom → most liked → default)
+- **Share Modal**: Fixed screenshot functionality
+  - Card view now properly receives and displays equipment photos
+  - List view correctly handles empty equipment arrays with fallback
+  - Removed broken separate route approach in favor of integrated modal
+- **Equipment Page**: Fixed "Saved items only" filter not triggering data reload
+
+### Changed
+- Completely removed dynamic imports and code splitting for stability
+- Simplified component imports to direct imports instead of lazy loading
+- Enhanced error boundaries and error handling throughout
+
+### Technical Details
+- Created migration: `20250904_fix_equipment_photos_rls.sql`
+- Added comprehensive testing scripts for photo display and tee system
+- Implemented Puppeteer tests for automated page validation
+
+## [0.20.0] - 2025-08-29
+### Fixed
+- Emergency fix for equipment null reference errors causing app crashes
+- Identified and documented Row Level Security (RLS) issue blocking equipment table access
+- Complete beta system overhaul - instant access after waitlist signup with password
+- Removed all leaderboard references for cleaner, focused experience
+- Fixed authentication flow - proper redirects after signup and better error handling
+
+### Changed
+- Simplified invite system - removed complex referral tracking in favor of simple invite codes
+- Changed all CTAs from 'Apply for Beta' to 'Join the Beta' for better conversion
+
+### Added
+- Puppeteer testing suite for automated page validation
+
+## [0.19.0] - 2025-08-28
+[Previous version content...]
+
 ## [0.18.0] - 2025-08-28
 ### Fixed
 - Critical RLS (Row Level Security) issues preventing anonymous waitlist submissions
