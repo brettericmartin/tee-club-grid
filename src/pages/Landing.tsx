@@ -11,7 +11,6 @@ import { GearGrid } from "@/components/landing/GearGrid";
 import { StickyCta } from "@/components/landing/StickyCta";
 import { motion } from "framer-motion";
 import { Users, Trophy, Camera, MessageCircle, Star, TrendingUp } from "lucide-react";
-import { WaitlistUrgencyWidget } from "@/components/waitlist/WaitlistUrgencyWidget";
 import { WaitlistBanner } from "@/components/waitlist/WaitlistBanner";
 
 const Landing = () => {
@@ -21,8 +20,8 @@ const Landing = () => {
   const [showSignUp, setShowSignUp] = useState(false);
 
   const handleBuildBagClick = () => {
-    // Check if user has beta access or is admin
-    if (user && profile && (profile.beta_access || profile.is_admin)) {
+    // If user is logged in, go to my-bag, otherwise go to waitlist
+    if (user) {
       navigate('/my-bag');
     } else {
       navigate('/waitlist');
@@ -57,8 +56,8 @@ const Landing = () => {
     <div className="min-h-screen bg-black">
       <Navigation />
       
-      {/* Waitlist Banner for non-beta users */}
-      {(!user || (!profile?.beta_access && !profile?.is_admin)) && (
+      {/* Waitlist Banner for non-logged in users */}
+      {!user && (
         <WaitlistBanner showApprovals variant="urgent" />
       )}
       
@@ -278,10 +277,6 @@ const Landing = () => {
         }}
       />
       
-      {/* Urgency Widget for non-beta users */}
-      {(!user || (!profile?.beta_access && !profile?.is_admin)) && (
-        <WaitlistUrgencyWidget position="bottom-right" />
-      )}
     </div>
   );
 };

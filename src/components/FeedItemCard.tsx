@@ -170,27 +170,50 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
     
     // Handle bag video posts
     if (isVideoPost && post.videoData) {
+      // Use thumbnail as the preview image
+      const thumbnailUrl = post.videoData.thumbnailUrl || post.imageUrl || '/placeholder.svg';
+      
       return (
         <div className="relative">
-          <VideoEmbed
-            url={post.videoData.url}
-            provider={post.videoData.provider as any}
-            videoId={post.videoData.videoId}
-            title={post.videoData.title}
-            className="w-full aspect-video"
-          />
-          
-          {/* Post type badge */}
-          <div className="absolute top-3 left-3 bg-primary/90 text-black px-3 py-1 rounded-full">
-            <span className="text-xs font-semibold">{getPostTypeLabel(post.postType)}</span>
+          {/* Video thumbnail with play button overlay */}
+          <div className="relative aspect-video bg-black overflow-hidden">
+            <img 
+              src={thumbnailUrl}
+              alt={post.videoData.title || 'Video thumbnail'}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.svg';
+              }}
+            />
+            
+            {/* Play button overlay - smaller on mobile */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors cursor-pointer">
+              <div className="bg-white/95 rounded-full p-3 sm:p-4 shadow-xl transform hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            </div>
+            
+            {/* YouTube/Video provider badge - adjusted for mobile */}
+            {post.videoData.provider && (
+              <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-red-600 text-white px-2 py-1 rounded text-[10px] sm:text-xs font-medium">
+                {post.videoData.provider === 'youtube' ? 'YouTube' : post.videoData.provider.toUpperCase()}
+              </div>
+            )}
           </div>
           
-          {/* Video title overlay */}
+          {/* Video title below thumbnail - consistent with other post types */}
           {post.videoData.title && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-              <p className="text-white text-sm font-medium line-clamp-2">{post.videoData.title}</p>
+            <div className="px-3 py-2 bg-[#1a1a1a]">
+              <p className="text-white text-sm font-medium line-clamp-3">
+                {post.videoData.title}
+              </p>
               {post.caption && post.caption !== post.videoData.title && (
-                <p className="text-white/70 text-xs mt-1">{post.caption}</p>
+                <p className="text-white/60 text-xs mt-1 line-clamp-2">
+                  {post.caption}
+                </p>
               )}
             </div>
           )}
@@ -201,51 +224,57 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
     // Handle multi-equipment photo posts with carousel
     if (isMultiEquipmentPost && post.content?.photos) {
       return (
-        <div className="relative bg-black">
-          <Carousel className="w-full">
-            <CarouselContent>
-              {post.content.photos.map((photo: any, index: number) => (
-                <CarouselItem key={index}>
-                  <div className="relative h-full">
-                    <img 
-                      src={photo.url} 
-                      alt={photo.equipment_name}
-                      className="w-full h-full object-cover"
-                      loading={index === 0 ? "eager" : "lazy"}
-                    />
-                    {/* Equipment tag overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/equipment/${photo.equipment_id}`);
-                        }}
-                        className="inline-flex items-center gap-2 bg-[#1a1a1a] px-3 py-1.5 rounded-full hover:bg-[#2a2a2a] transition-colors"
-                      >
-                        <span className="text-white text-sm font-medium">{photo.equipment_name}</span>
-                      </button>
-                      {photo.caption && (
-                        <p className="text-white/90 text-sm mt-2">{photo.caption}</p>
-                      )}
+        <div>
+          {/* Carousel Container */}
+          <div className="relative bg-black">
+            <Carousel className="w-full">
+              <CarouselContent>
+                {post.content.photos.map((photo: any, index: number) => (
+                  <CarouselItem key={index}>
+                    <div className="relative h-full">
+                      <img 
+                        src={photo.url} 
+                        alt={photo.equipment_name}
+                        className="w-full h-full object-cover"
+                        loading={index === 0 ? "eager" : "lazy"}
+                      />
+                      
+                      {/* Equipment name badge on image */}
+                      <div className="absolute bottom-3 left-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/equipment/${photo.equipment_id}`);
+                          }}
+                          className="inline-flex items-center gap-2 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full hover:bg-black/80 transition-colors"
+                        >
+                          <span className="text-white text-xs font-medium">{photo.equipment_name}</span>
+                        </button>
+                      </div>
+                      
+                      {/* Photo counter */}
+                      <div className="absolute top-3 left-3 bg-black/70 px-2 py-1 rounded-full">
+                        <span className="text-white text-xs font-medium">
+                          {index + 1} / {post.content.photos.length}
+                        </span>
+                      </div>
                     </div>
-                    {/* Photo counter */}
-                    <div className="absolute top-3 left-3 bg-[#1a1a1a] px-2 py-1 rounded-full">
-                      <span className="text-white text-xs font-medium">
-                        {index + 1} / {post.content.photos.length}
-                      </span>
-                    </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-2" />
-            <CarouselNext className="right-2" />
-          </Carousel>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-2" />
+              <CarouselNext className="right-2" />
+            </Carousel>
+          </div>
           
-          {/* Overall caption overlay */}
-          {post.content.overall_caption && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 pointer-events-none">
-              <p className="text-white text-sm">{post.content.overall_caption}</p>
+          {/* Text Section - Below carousel */}
+          {(post.content.overall_caption || post.content.equipment_count) && (
+            <div className="px-3 py-2 bg-[#1a1a1a]">
+              {post.content.overall_caption && (
+                <p className="text-white text-sm font-medium line-clamp-3">
+                  {post.content.overall_caption}
+                </p>
+              )}
               <p className="text-white/60 text-xs mt-1">
                 {post.content.equipment_count} items • {post.content.photo_count} photos
               </p>
@@ -255,47 +284,53 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
       );
     }
     
-    // Original single image rendering
+    // Original single image rendering - let height vary for masonry
     return (
-      <div className="relative">
-        {/* Main Image */}
-        <img 
-          src={post.imageUrl} 
-          alt={post.caption}
-          className="w-full object-cover"
-        />
-        
-        {/* Multiple images indicator */}
-        {hasMultipleImages && (
-          <div className="absolute top-3 right-3 bg-[#1a1a1a] px-2 py-1 rounded-full">
-            <span className="text-white text-xs font-medium">
-              1/{post.mediaUrls.length}
-            </span>
-          </div>
-        )}
-        
-        {/* Post type badge */}
-        <div className="absolute top-3 left-3 bg-primary/90 text-black px-3 py-1 rounded-full">
-          <span className="text-xs font-semibold">{getPostTypeLabel(post.postType)}</span>
-        </div>
-        
-        {/* Bottom gradient overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-          <p className="text-white text-sm font-medium line-clamp-2">{post.caption}</p>
+      <div>
+        {/* Image Container */}
+        <div className="relative">
+          {/* Main Image - h-auto allows variable height for masonry effect */}
+          <img 
+            src={post.imageUrl} 
+            alt={post.caption}
+            className="w-full h-auto"
+            loading="lazy"
+          />
           
-          {/* Equipment info for equipment posts */}
-          {isEquipmentPost && post.equipmentData && (
-            <div 
-              className="mt-2 inline-flex items-center gap-2 bg-[#1a1a1a] px-3 py-1 rounded-full cursor-pointer hover:bg-[#2a2a2a] transition-colors"
-              onClick={handleEquipmentClick}
-            >
-              <span className="text-white text-xs">
-                {post.equipmentData.brand} {post.equipmentData.model}
+          {/* Multiple images indicator */}
+          {hasMultipleImages && (
+            <div className="absolute top-3 right-3 bg-black/70 px-2 py-1 rounded-full">
+              <span className="text-white text-xs font-medium">
+                1/{post.mediaUrls.length}
               </span>
-              <Eye className="w-3 h-3 text-white/70" />
             </div>
           )}
         </div>
+        
+        {/* Text Section - Below image, above footer */}
+        {(post.caption || (isEquipmentPost && post.equipmentData)) && (
+          <div className="px-3 py-1.5 bg-[#1a1a1a]">
+            {/* Caption */}
+            {post.caption && (
+              <p className="text-white text-sm font-medium line-clamp-3">
+                {post.caption}
+              </p>
+            )}
+            
+            {/* Equipment info for equipment posts */}
+            {isEquipmentPost && post.equipmentData && (
+              <div 
+                className="mt-1.5 inline-flex items-center gap-2 bg-black/50 px-2.5 py-1 rounded-full cursor-pointer hover:bg-black/70 transition-colors"
+                onClick={handleEquipmentClick}
+              >
+                <span className="text-white/90 text-xs font-medium">
+                  {post.equipmentData.brand} {post.equipmentData.model}
+                </span>
+                <Eye className="w-3 h-3 text-white/60" />
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   };
@@ -386,46 +421,66 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
             </div>
           </Link>
           
-          {currentUserId && currentUserId !== post.userId && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleFollowToggle}
-              className={`transition-colors ${
-                isFollowing 
-                  ? 'text-green-500 hover:text-green-400' 
-                  : 'text-white hover:text-primary'
-              }`}
-            >
-              {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Bag flip button */}
+            {(post.bagId || post.userId) && (
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  try {
+                    // Load bag data on first flip
+                    if (!isFlipped && !bagDataLoaded) {
+                      await loadUserBagData();
+                    }
+                    setIsFlipped(!isFlipped);
+                  } catch (error) {
+                    console.error('Error flipping card:', error);
+                    toast.error('Unable to load bag data');
+                  }
+                }}
+                className="bg-primary/90 hover:bg-primary hover:scale-110 text-black w-9 h-9 p-2 rounded-full transition-all shadow-lg flex items-center justify-center"
+                aria-label="Toggle view"
+              >
+                <img 
+                  src="/icons/teed-golf-bag-icon.svg" 
+                  alt="View Bag" 
+                  className="w-5 h-5"
+                  onError={(e) => {
+                    // Fallback if icon doesn't load
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    (e.target as HTMLImageElement).parentElement!.innerHTML = '🏌️';
+                  }}
+                />
+              </button>
+            )}
+            
+            {/* Follow button */}
+            {currentUserId && currentUserId !== post.userId && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleFollowToggle}
+                className={`transition-colors ${
+                  isFollowing 
+                    ? 'text-green-500 hover:text-green-400' 
+                    : 'text-white hover:text-primary'
+                }`}
+              >
+                {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+              </Button>
+            )}
+          </div>
         </div>
         
         {/* Card Content - Toggleable */}
         <div className="relative overflow-hidden">
-          {/* Toggle Button - Made larger and more prominent */}
-          <button
-            onClick={async () => {
-              // Load bag data on first flip
-              if (!isFlipped && !bagDataLoaded) {
-                await loadUserBagData();
-              }
-              setIsFlipped(!isFlipped);
-            }}
-            className="absolute top-3 right-3 z-10 bg-primary/90 hover:bg-primary hover:scale-110 text-black min-w-[44px] min-h-[44px] p-3 rounded-full transition-all shadow-lg flex items-center justify-center"
-            aria-label="Toggle view"
-          >
-            <img src="/icons/teed-golf-bag-icon.svg" alt="View Bag" className="w-6 h-6" />
-          </button>
-          
           {/* Content */}
           {isFlipped ? renderBackContent() : renderFrontContent()}
         </div>
         
-        {/* Card Footer */}
-        <div className="flex items-center justify-between p-4 bg-[#1a1a1a]">
-          <div className="flex items-center gap-4">
+        {/* Card Footer - Minimal padding */}
+        <div className="flex items-center justify-between px-3 py-1 bg-[#1a1a1a]">
+          <div className="flex items-center gap-3">
             <TeedBallLike
               isLiked={isLiked}
               likeCount={post.likes}
@@ -437,14 +492,14 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
             
             <button 
               onClick={() => setShowComments(true)}
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors min-w-[44px] min-h-[44px] p-2 -m-2"
+              className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors min-w-[40px] min-h-[40px] p-2 -m-2"
             >
-              <MessageCircle className="w-5 h-5" />
+              <MessageCircle className="w-4 h-4" />
               <span className="text-sm">{commentCount}</span>
             </button>
           </div>
           
-          <p className="text-gray-400 text-xs">
+          <p className="text-gray-400 text-[11px]">
             {formatTimestamp(post.timestamp)}
           </p>
         </div>

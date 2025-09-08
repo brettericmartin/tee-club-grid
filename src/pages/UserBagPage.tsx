@@ -68,10 +68,10 @@ const UserBagPage = () => {
   // Loading states
   if (profileLoading || bagLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-400 mx-auto mb-4" />
-          <p className="text-emerald-200">Loading @{username}'s bag...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-[#10B981] mx-auto mb-4" />
+          <p className="text-[#FAFAFA]/60">Loading @{username}'s bag...</p>
         </div>
       </div>
     );
@@ -80,13 +80,13 @@ const UserBagPage = () => {
   // Error states
   if (profileError || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-center elevation-1 p-8 rounded-lg">
           <h2 className="text-2xl font-bold text-white mb-4">User Not Found</h2>
-          <p className="text-emerald-100/60 mb-6">
+          <p className="text-[#FAFAFA]/60 mb-6">
             No user found at @{username}
           </p>
-          <a href="/bags" className="text-emerald-400 hover:text-emerald-300">
+          <a href="/bags" className="text-[#10B981] hover:text-[#0D9668]">
             Browse all bags →
           </a>
         </div>
@@ -96,13 +96,13 @@ const UserBagPage = () => {
 
   if (bagError || !userBags || userBags.length === 0) {
     return (
-      <div className="min-h-screen bg-[#111111] flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-center elevation-1 p-8 rounded-lg">
           <h2 className="text-2xl font-bold text-white mb-4">No Bags Found</h2>
-          <p className="text-white/60 mb-6">
+          <p className="text-[#FAFAFA]/60 mb-6">
             {profile.display_name || profile.username} hasn't created any bags yet.
           </p>
-          <Link to="/bags" className="text-primary hover:text-primary/80">
+          <Link to="/bags" className="text-[#10B981] hover:text-[#0D9668]">
             Browse other bags →
           </Link>
         </div>
@@ -118,7 +118,7 @@ const UserBagPage = () => {
 
   // Show all bags for this user
   return (
-    <div className="min-h-screen bg-[#111111] py-8">
+    <div className="min-h-screen bg-[#0A0A0A] py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
           <Link to="/bags">
@@ -130,7 +130,7 @@ const UserBagPage = () => {
           <h1 className="text-3xl font-bold text-white mb-2">
             {profile.display_name || profile.username}'s Bags
           </h1>
-          <p className="text-white/60">
+          <p className="text-[#FAFAFA]/60">
             {userBags.length} bag{userBags.length !== 1 ? 's' : ''}
           </p>
         </div>

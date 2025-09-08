@@ -57,7 +57,7 @@ const BagHero = ({ bag, isOwner, isLiked, onLike }: BagHeroProps) => {
               className="w-full h-full object-cover"
               onLoad={() => setImageLoaded(true)}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-emerald-950/60 via-emerald-900/80 to-emerald-950" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-[#0A0A0A]" />
           </motion.div>
         )}
 
@@ -76,9 +76,9 @@ const BagHero = ({ bag, isOwner, isLiked, onLike }: BagHeroProps) => {
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
               >
-                <Avatar className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 border-4 border-emerald-500 shadow-2xl">
+                <Avatar className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 border-4 border-[#10B981] shadow-2xl">
                   <AvatarImage src={bag.profiles.avatar_url} />
-                  <AvatarFallback className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white text-xl sm:text-2xl md:text-3xl">
+                  <AvatarFallback className="bg-gradient-to-br from-[#10B981] to-[#0D9668] text-white text-xl sm:text-2xl md:text-3xl">
                     {(bag.profiles.display_name || bag.profiles.username)?.[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -87,24 +87,24 @@ const BagHero = ({ bag, isOwner, isLiked, onLike }: BagHeroProps) => {
               <div className="flex-1 space-y-3 sm:space-y-4">
                 {/* Name and Title */}
                 <div>
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-emerald-50/90 mb-1">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-[#FAFAFA] mb-1">
                     {bag.profiles.display_name || bag.profiles.username}
                   </h2>
                   {bag.profiles.title && (
-                    <p className="text-sm sm:text-base text-emerald-200/70">{bag.profiles.title}</p>
+                    <p className="text-sm sm:text-base text-[#FAFAFA]/60">{bag.profiles.title}</p>
                   )}
                 </div>
 
                 {/* Location and Handicap */}
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm sm:text-base text-emerald-100/80">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm sm:text-base text-[#FAFAFA]/70">
                   {bag.profiles.location && (
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-emerald-400" />
+                      <MapPin className="w-4 h-4 text-[#10B981]" />
                       <span>{bag.profiles.location}</span>
                     </div>
                   )}
                   {bag.profiles.handicap !== null && bag.profiles.handicap !== undefined && (
-                    <Badge className="bg-[#3a3a3a] text-emerald-100 border-white/10">
+                    <Badge className="bg-[#2A2A2A] text-[#FAFAFA] border-white/10">
                       <Target className="w-3 h-3 mr-1" />
                       {bag.profiles.handicap} HCP
                     </Badge>
@@ -122,7 +122,7 @@ const BagHero = ({ bag, isOwner, isLiked, onLike }: BagHeroProps) => {
                 </motion.h1>
 
                 {/* Updated Time - Mobile */}
-                <div className="flex items-center gap-2 text-emerald-200/60 text-xs sm:text-sm">
+                <div className="flex items-center gap-2 text-[#FAFAFA]/50 text-xs sm:text-sm">
                   <Calendar className="w-4 h-4" />
                   <span>Updated {updatedTime}</span>
                 </div>
@@ -132,19 +132,19 @@ const BagHero = ({ bag, isOwner, isLiked, onLike }: BagHeroProps) => {
             {/* Stats - Moved above buttons on mobile */}
             <div className="flex items-center gap-4 sm:gap-6 text-sm sm:text-base">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
-                <span className="text-emerald-50 font-semibold">
+                <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-[#10B981]" />
+                <span className="text-[#FAFAFA] font-semibold">
                   {bag.likes_count || 0}
                 </span>
-                <span className="text-emerald-200/60">likes</span>
+                <span className="text-[#FAFAFA]/50">likes</span>
               </div>
               {bag.views_count !== undefined && (
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
-                  <span className="text-emerald-50 font-semibold">
+                  <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-[#10B981]" />
+                  <span className="text-[#FAFAFA] font-semibold">
                     {bag.views_count || 0}
                   </span>
-                  <span className="text-emerald-200/60">views</span>
+                  <span className="text-[#FAFAFA]/50">views</span>
                 </div>
               )}
             </div>
@@ -154,7 +154,7 @@ const BagHero = ({ bag, isOwner, isLiked, onLike }: BagHeroProps) => {
               {isOwner ? (
                 <Button
                   variant="outline"
-                  className="w-full sm:w-auto bg-[#2a2a2a] border-white/10 text-emerald-100 hover:bg-[#3a3a3a] min-h-[44px]"
+                  className="w-full sm:w-auto bg-[#2A2A2A] border-white/10 text-[#FAFAFA] hover:bg-[#3A3A3A] min-h-[44px]"
                 >
                   <Edit3 className="w-4 h-4 mr-2" />
                   Edit Bag
@@ -167,8 +167,8 @@ const BagHero = ({ bag, isOwner, isLiked, onLike }: BagHeroProps) => {
                     className={cn(
                       "w-full sm:w-auto min-h-[44px] transition-all",
                       isLiked
-                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                        : "bg-[#2a2a2a] border-white/10 text-emerald-100 hover:bg-[#3a3a3a]"
+                        ? "bg-[#10B981] hover:bg-[#0D9668] text-white"
+                        : "bg-[#2A2A2A] border-white/10 text-[#FAFAFA] hover:bg-[#3A3A3A]"
                     )}
                   >
                     <Heart
@@ -182,7 +182,7 @@ const BagHero = ({ bag, isOwner, isLiked, onLike }: BagHeroProps) => {
                   <Button
                     onClick={() => setShowShareModal(true)}
                     variant="outline"
-                    className="w-full sm:w-auto bg-[#2a2a2a] border-white/10 text-emerald-100 hover:bg-[#3a3a3a] min-h-[44px]"
+                    className="w-full sm:w-auto bg-[#2A2A2A] border-white/10 text-[#FAFAFA] hover:bg-[#3A3A3A] min-h-[44px]"
                   >
                     <Share2 className="w-4 h-4 mr-2" />
                     Share

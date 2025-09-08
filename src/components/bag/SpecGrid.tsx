@@ -2,9 +2,196 @@ import { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { DollarSign, Package, Zap, TrendingUp, Award, BarChart3 } from "lucide-react";
 import { formatCompactCurrency } from "@/lib/formatters";
-import { cn } from "@/lib/utils"; interface SpecGridProps { totalValue: number; clubCount: number; accessoryCount: number; bagData: { bag_equipment?: Array<{ equipment: { brand: string; category: string; }; }>; };
-} interface SpecCardProps { icon: React.ReactNode; label: string; value: string | number; subValue?: string; color: string; delay?: number;
-} const AnimatedNumber = ({ value, format }: { value: number; format?: (n: number) => string }) => { const [displayValue, setDisplayValue] = useState(0); useEffect(() => { const duration = 1000; const steps = 30; const stepDuration = duration / steps; const increment = value / steps; let current = 0; const timer = setInterval(() => { current += increment; if (current >= value) { setDisplayValue(value); clearInterval(timer); } else { setDisplayValue(Math.floor(current)); } }, stepDuration); return () => clearInterval(timer); }, [value]); return <span>{format ? format(displayValue) : displayValue}</span>;
-}; const SpecCard = ({ icon, label, value, subValue, color, delay = 0 }: SpecCardProps) => { const controls = useAnimation(); useEffect(() => { controls.start({ opacity: 1, y: 0, transition: { delay, duration: 0.5, type: "spring" }, }); }, [controls, delay]); return ( <motion.div initial={{ opacity: 0, y: 20 }} animate={controls} whileHover={{ scale: 1.02, y: -2 }} className={cn( "relative overflow-hidden rounded-2xl p-6", "bg-gradient-to-br from-[#2a2a2a] to-[#2a2a2a]", "border border-white/10", " shadow-xl", "hover:border-emerald-400/30 transition-all duration-300" )} > {/* Glow effect */} <div className={cn( "absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-20", color )} /> <div className="relative z-10 space-y-3"> <div className={cn("inline-flex p-3 rounded-xl", `${color}/10`)}> {icon} </div> <div> <p className="text-emerald-200/70 text-sm font-medium">{label}</p> <p className="text-2xl md:text-3xl font-bold text-white mt-1"> {typeof value === "number" ? <AnimatedNumber value={value} /> : value} </p> {subValue && ( <p className="text-emerald-300/60 text-sm mt-1">{subValue}</p> )} </div> </div> </motion.div> );
-}; const SpecGrid = ({ totalValue, clubCount, accessoryCount, bagData }: SpecGridProps) => { // Calculate brand diversity const brands = new Set( bagData.bag_equipment?.map(item => item.equipment.brand) || [] ); const brandCount = brands.size; // Calculate most common brand const brandFrequency: Record<string, number> = {}; bagData.bag_equipment?.forEach(item => { brandFrequency[item.equipment.brand] = (brandFrequency[item.equipment.brand] || 0) + 1; }); const topBrand = Object.entries(brandFrequency) .sort(([, a], [, b]) => b - a)[0]?.[0] || "N/A"; // Calculate category completeness const categories = new Set( bagData.bag_equipment?.map(item => item.equipment.category) || [] ); const completeness = Math.round((categories.size / 14) * 100); // 14 main categories return ( <div className="space-y-6"> <motion.h3 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="text-2xl font-bold text-white mb-6"> Bag Overview </motion.h3> {/* Desktop: 3 columns, Mobile: horizontal scroll */} <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"> <SpecCard icon={<DollarSign className="w-6 h-6 text-emerald-400" />} label="Total Value" value={formatCompactCurrency(totalValue)} subValue="Current market value" color="bg-emerald-500" delay={0} /> <SpecCard icon={<Package className="w-6 h-6 text-blue-400" />} label="Equipment Count" value={clubCount + accessoryCount} subValue={`${clubCount} clubs, ${accessoryCount} accessories`} color="bg-blue-500" delay={0.1} /> <SpecCard icon={<Award className="w-6 h-6 text-purple-400" />} label="Brand Diversity" value={brandCount} subValue={`Top: ${topBrand}`} color="bg-purple-500" delay={0.2} /> </div> {/* Mobile scroll container for additional specs */} <div className="flex gap-4 overflow-x-auto pb-2 md:hidden snap-x snap-mandatory"> <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="min-w-[280px] snap-center"> <SpecCard icon={<BarChart3 className="w-6 h-6 text-yellow-400" />} label="Completeness" value={`${completeness}%`} subValue="Equipment categories" color="bg-yellow-500" /> </motion.div> <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }} className="min-w-[280px] snap-center"> <SpecCard icon={<TrendingUp className="w-6 h-6 text-rose-400" />} label="Avg Item Value" value={formatCompactCurrency(totalValue / (clubCount + accessoryCount || 1))} subValue="Per equipment" color="bg-rose-500" /> </motion.div> </div> </div> );
-}; export default SpecGrid;
+import { cn } from "@/lib/utils";
+
+interface SpecGridProps {
+  totalValue: number;
+  clubCount: number;
+  accessoryCount: number;
+  bagData: {
+    bag_equipment?: Array<{
+      equipment: {
+        brand: string;
+        category: string;
+      };
+    }>;
+  };
+}
+
+interface SpecCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  subValue?: string;
+  color: string;
+  delay?: number;
+}const AnimatedNumber = ({ value, format }: { value: number; format?: (n: number) => string }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  
+  useEffect(() => {
+    const duration = 1000;
+    const steps = 30;
+    const stepDuration = duration / steps;
+    const increment = value / steps;
+    let current = 0;
+    
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= value) {
+        setDisplayValue(value);
+        clearInterval(timer);
+      } else {
+        setDisplayValue(Math.floor(current));
+      }
+    }, stepDuration);
+    
+    return () => clearInterval(timer);
+  }, [value]);
+  
+  return <span>{format ? format(displayValue) : displayValue}</span>;
+};const SpecCard = ({ icon, label, value, subValue, color, delay = 0 }: SpecCardProps) => {
+  const controls = useAnimation();
+  
+  useEffect(() => {
+    controls.start({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay,
+        duration: 0.5,
+        type: "spring",
+      },
+    });
+  }, [controls, delay]);
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={controls}
+      whileHover={{ scale: 1.02, y: -2 }}
+      className={cn(
+        "relative overflow-hidden rounded-2xl p-6",
+        "bg-[#1A1A1A]",
+        "border border-white/10",
+        "shadow-lg",
+        "hover:border-[#10B981]/30 transition-all duration-300"
+      )}
+    >
+      {/* Glow effect */}
+      <div
+        className={cn(
+          "absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-20",
+          color
+        )}
+      />
+      <div className="relative z-10 space-y-3">
+        <div className={cn("inline-flex p-3 rounded-xl", `${color}/10`)}>
+          {icon}
+        </div>
+        <div>
+          <p className="text-[#FAFAFA]/60 text-sm font-medium">{label}</p>
+          <p className="text-2xl md:text-3xl font-bold text-white mt-1">
+            {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
+          </p>
+          {subValue && (
+            <p className="text-[#FAFAFA]/50 text-sm mt-1">{subValue}</p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};const SpecGrid = ({ totalValue, clubCount, accessoryCount, bagData }: SpecGridProps) => {
+  // Calculate brand diversity
+  const brands = new Set(
+    bagData.bag_equipment?.map(item => item.equipment.brand) || []
+  );
+  const brandCount = brands.size;
+  
+  // Calculate most common brand
+  const brandFrequency: Record<string, number> = {};
+  bagData.bag_equipment?.forEach(item => {
+    brandFrequency[item.equipment.brand] = (brandFrequency[item.equipment.brand] || 0) + 1;
+  });
+  const topBrand = Object.entries(brandFrequency)
+    .sort(([, a], [, b]) => b - a)[0]?.[0] || "N/A";
+  
+  // Calculate category completeness
+  const categories = new Set(
+    bagData.bag_equipment?.map(item => item.equipment.category) || []
+  );
+  const completeness = Math.round((categories.size / 14) * 100); // 14 main categories
+  
+  return (
+    <div className="space-y-6">
+      <motion.h3
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="text-2xl font-bold text-white mb-6"
+      >
+        Bag Overview
+      </motion.h3>
+      
+      {/* Desktop: 3 columns, Mobile: horizontal scroll */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <SpecCard
+          icon={<DollarSign className="w-6 h-6 text-[#10B981]" />}
+          label="Total Value"
+          value={formatCompactCurrency(totalValue)}
+          subValue="Current market value"
+          color="bg-[#10B981]"
+          delay={0}
+        />
+        <SpecCard
+          icon={<Package className="w-6 h-6 text-blue-400" />}
+          label="Equipment Count"
+          value={clubCount + accessoryCount}
+          subValue={`${clubCount} clubs, ${accessoryCount} accessories`}
+          color="bg-blue-500"
+          delay={0.1}
+        />
+        <SpecCard
+          icon={<Award className="w-6 h-6 text-purple-400" />}
+          label="Brand Diversity"
+          value={brandCount}
+          subValue={`Top: ${topBrand}`}
+          color="bg-purple-500"
+          delay={0.2}
+        />
+      </div>
+      
+      {/* Mobile scroll container for additional specs */}
+      <div className="flex gap-4 overflow-x-auto pb-2 md:hidden snap-x snap-mandatory">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3 }}
+          className="min-w-[280px] snap-center"
+        >
+          <SpecCard
+            icon={<BarChart3 className="w-6 h-6 text-yellow-400" />}
+            label="Completeness"
+            value={`${completeness}%`}
+            subValue="Equipment categories"
+            color="bg-yellow-500"
+          />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+          className="min-w-[280px] snap-center"
+        >
+          <SpecCard
+            icon={<TrendingUp className="w-6 h-6 text-rose-400" />}
+            label="Avg Item Value"
+            value={formatCompactCurrency(totalValue / (clubCount + accessoryCount || 1))}
+            subValue="Per equipment"
+            color="bg-rose-500"
+          />
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default SpecGrid;

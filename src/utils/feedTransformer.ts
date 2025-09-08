@@ -53,11 +53,20 @@ export function transformFeedPost(post: FeedPost & {
   
   // Extract data from content JSONB
   const caption = content.caption || content.bag_name || content.equipment_name || '';
-  const photoUrl = content.photo_url || '';
-  const mediaUrls = post.media_urls || (photoUrl ? [photoUrl] : []);
+  const photoUrl = content.photo_url || content.image_url || '';
   
-  // Get primary image URL
-  let imageUrl = mediaUrls[0] || photoUrl || '/placeholder.svg';
+  // Handle media URLs - check both media_urls and content
+  let mediaUrls = post.media_urls || [];
+  if (mediaUrls.length === 0 && photoUrl) {
+    mediaUrls = [photoUrl];
+  }
+  // Also check for photos array in content (for multi-equipment posts)
+  if (content.photos && Array.isArray(content.photos)) {
+    mediaUrls = content.photos.map((p: any) => p.url || p.photo_url).filter(Boolean);
+  }
+  
+  // Get primary image URL - fallback through various sources
+  let imageUrl = mediaUrls[0] || photoUrl || content.image_url || '/placeholder.svg';
   
   // If we have bag data with equipment, use the first equipment image
   if (post.bag?.bag_equipment?.[0]?.equipment?.image_url) {
@@ -88,7 +97,7 @@ export function transformFeedPost(post: FeedPost & {
       name: content.equipment_name,
       brand: content.equipment_name.split(' ')[0] || '',
       model: content.equipment_name.split(' ').slice(1).join(' ') || '',
-      imageUrl: photoUrl
+      imageUrl: photoUrl || content.image_url || imageUrl
     };
   }
   

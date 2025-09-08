@@ -132,7 +132,6 @@ const MyBagSupabase = () => {
   const [selectedBackground, setSelectedBackground] = useState('midwest-lush');
   const [viewMode, setViewMode] = useState<'gallery' | 'list' | 'card' | 'feed' | 'videos'>('gallery');
   const [layout, setLayout] = useState<BagLayout>({});
-  const [isEditingLayout, setIsEditingLayout] = useState(false);
   const [showBagSelector, setShowBagSelector] = useState(false);
   const [showCreateBag, setShowCreateBag] = useState(false);
   const [equipmentSelectorOpen, setEquipmentSelectorOpen] = useState(false);
@@ -1049,6 +1048,7 @@ const MyBagSupabase = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-primary/10">
+      {/* Background Layer */}
       <BackgroundLayer backgroundId={selectedBackground} />
       <Navigation />
       
@@ -1124,15 +1124,6 @@ const MyBagSupabase = () => {
                         <Trophy className="w-4 h-4 mr-2" />
                         Manage Badges
                       </DropdownMenuItem>
-                      {viewMode === 'gallery' && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => setIsEditingLayout(!isEditingLayout)}>
-                            <Grid3x3 className="w-4 h-4 mr-2" />
-                            {isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}
-                          </DropdownMenuItem>
-                        </>
-                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -1210,15 +1201,6 @@ const MyBagSupabase = () => {
                         <Trophy className="w-4 h-4 mr-2" />
                         Manage Badges
                       </DropdownMenuItem>
-                      {viewMode === 'gallery' && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => setIsEditingLayout(!isEditingLayout)}>
-                            <Grid3x3 className="w-4 h-4 mr-2" />
-                            {isEditingLayout ? 'Cancel Layout Edit' : 'Edit Layout'}
-                          </DropdownMenuItem>
-                        </>
-                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -1353,19 +1335,19 @@ const MyBagSupabase = () => {
 
         {/* Stats Bar */}
         <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-8">
-          <Card className="bg-[#1a1a1a] border-white/10">
+          <Card className="user-themed-card border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
               <p className="text-xs sm:text-sm text-gray-200">Tees</p>
               <p className="text-lg sm:text-2xl font-bold text-white">{formatCompactNumber(totalTees)}</p>
             </CardContent>
           </Card>
-          <Card className="bg-[#1a1a1a] border-white/10">
+          <Card className="user-themed-card border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
               <p className="text-xs sm:text-sm text-gray-200">Items</p>
               <p className="text-lg sm:text-2xl font-bold text-white">{bagItems.length}</p>
             </CardContent>
           </Card>
-          <Card className="bg-[#1a1a1a] border-white/10">
+          <Card className="user-themed-card border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
               <p className="text-xs sm:text-sm text-gray-200">Badges</p>
               <p className="text-lg sm:text-2xl font-bold text-white">
@@ -1373,7 +1355,7 @@ const MyBagSupabase = () => {
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-[#1a1a1a] border-white/10">
+          <Card className="user-themed-card border-white/10">
             <CardContent className="p-2 sm:p-4 text-center">
               <p className="text-[10px] sm:text-xs text-gray-300">Est. Value</p>
               <p className="text-sm sm:text-lg font-medium text-white">{formatCompactCurrency(totalValue)}</p>
@@ -1468,10 +1450,11 @@ const MyBagSupabase = () => {
         {bagItems.length === 0 ? (
           <EmptyState />
         ) : viewMode === 'gallery' ? (
-          <BagGalleryDndKit
+          <div>
+            <BagGalleryDndKit
               bagEquipment={bagItems}
               layout={layout}
-              isEditing={isEditingLayout}
+              isEditing={false}
               isOwnBag={true}
               onLayoutChange={setLayout}
               onSaveLayout={async () => {
@@ -1487,11 +1470,11 @@ const MyBagSupabase = () => {
               onEquipmentClick={handleEditEquipment}
               onToggleFeatured={handleToggleFeatured}
             />
-          
+          </div>
         ) : viewMode === 'list' ? (
           <div className="space-y-4">
             {bagItems.map((item) => (
-              <Card key={item.id} className="bg-[#1a1a1a] border-white/10">
+              <Card key={item.id} className="user-themed-card border-white/10">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
                     <div 
@@ -1871,43 +1854,40 @@ const MyBagSupabase = () => {
       {/* AI Analysis Results */}
       {aiAnalysisResult && (
         <AIAnalysisResultsDialog
-            isOpen={showAIResults}
-            onClose={() => {
-              setShowAIResults(false);
-              setAiAnalysisResult(null);
-            }}
-            analysisResult={aiAnalysisResult}
-            onAddEquipment={addEquipment}
-          />
-        
+          isOpen={showAIResults}
+          onClose={() => {
+            setShowAIResults(false);
+            setAiAnalysisResult(null);
+          }}
+          analysisResult={aiAnalysisResult}
+          onAddEquipment={addEquipment}
+        />
       )}
 
       {/* Manual Equipment Selector */}
       <ErrorBoundary>
         {equipmentSelectorOpen && (
-            <EquipmentSelectorImproved
-              isOpen={equipmentSelectorOpen}
-              onClose={() => setEquipmentSelectorOpen(false)}
-              onSelectEquipment={addEquipment}
-            />
-          )}
-        
+          <EquipmentSelectorImproved
+            isOpen={equipmentSelectorOpen}
+            onClose={() => setEquipmentSelectorOpen(false)}
+            onSelectEquipment={addEquipment}
+          />
+        )}
       </ErrorBoundary>
 
       {selectedBagEquipment && (
         <BagEquipmentModal
-            isOpen={equipmentModalOpen}
-            onClose={() => {
-              setEquipmentModalOpen(false);
-              setSelectedBagEquipment(null);
-            }}
-            bagId={currentBag?.id || ''}
-            bagEquipmentId={selectedBagEquipment?.id || ''}
-            bagEquipment={selectedBagEquipment}
-            canEdit={true}
-            onUpdate={() => loadBagEquipment(currentBag?.id || '')}
-          />
-        
+          isOpen={equipmentModalOpen}
+          onClose={() => {
+            setEquipmentModalOpen(false);
+            setSelectedBagEquipment(null);
+          }}
+          bagId={currentBag?.id || ''}
+          bagEquipmentId={selectedBagEquipment?.id || ''}
+          bagEquipment={selectedBagEquipment}
+          canEdit={true}
+          onUpdate={() => loadBagEquipment(currentBag?.id || '')}
+        />
       )}
 
       {/* Remove duplicate BagEquipmentModal - now using single instance above */}

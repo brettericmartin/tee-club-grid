@@ -171,7 +171,7 @@ export default function BagShareView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#111111] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
     );
@@ -179,7 +179,7 @@ export default function BagShareView() {
 
   if (!bag) {
     return (
-      <div className="min-h-screen bg-[#111111] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-white">Bag not found</div>
       </div>
     );
@@ -206,10 +206,10 @@ export default function BagShareView() {
   });
 
   return (
-    <div className="min-h-screen bg-[#111111] p-4 sm:p-8">
+    <div className="min-h-screen bg-[#0A0A0A] p-4 sm:p-8">
       {/* Controls Bar */}
       <div className="max-w-6xl mx-auto mb-6">
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-lg p-4">
+        <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-4">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Aspect Ratio Selector */}
             <div className="flex items-center gap-2 flex-wrap">
@@ -251,7 +251,7 @@ export default function BagShareView() {
                 variant="default" 
                 size="sm"
                 disabled={isCapturing}
-                className="min-h-[44px] bg-primary hover:bg-primary/90"
+                className="min-h-[44px] bg-[#10B981] hover:bg-[#0D9668]"
               >
                 <Download className="w-4 h-4 mr-2" />
                 {isCapturing ? 'Capturing...' : 'Download'}
@@ -274,7 +274,7 @@ export default function BagShareView() {
           {/* Shareable Content */}
           <div 
             id="bag-share-content" 
-            className="w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] p-6 sm:p-8 lg:p-12 flex flex-col"
+            className="w-full h-full bg-gradient-to-br from-[#1A1A1A] to-[#0A0A0A] p-6 sm:p-8 lg:p-12 flex flex-col"
           >
             {/* Header with Profile */}
             <div className="flex items-center justify-between mb-6">
@@ -283,7 +283,7 @@ export default function BagShareView() {
                   <img 
                     src={bag.profile.avatar_url} 
                     alt={bag.profile?.username}
-                    className="w-12 h-12 rounded-full border-2 border-primary/50"
+                    className="w-12 h-12 rounded-full border-2 border-[#10B981]/50"
                   />
                 )}
                 <div>
@@ -305,7 +305,7 @@ export default function BagShareView() {
                   <p className="text-xs text-white/70">Items</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-primary">{formatCompactCurrency(totalValue)}</p>
+                  <p className="text-2xl font-bold text-[#10B981]">{formatCompactCurrency(totalValue)}</p>
                   <p className="text-xs text-white/70">Value</p>
                 </div>
               </div>
@@ -323,7 +323,7 @@ export default function BagShareView() {
                   {[...clubs, ...accessories].slice(0, 9).map((item) => (
                     <div 
                       key={item.id}
-                      className="relative bg-[#2a2a2a] rounded-lg overflow-hidden aspect-square group"
+                      className="relative bg-[#2A2A2A] rounded-lg overflow-hidden aspect-square group"
                       onClick={() => handleEquipmentClick(item)}
                     >
                       {item.equipment.primaryPhoto ? (
@@ -353,12 +353,12 @@ export default function BagShareView() {
                   {/* Clubs Section */}
                   {clubs.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-semibold text-primary mb-2">CLUBS</h3>
+                      <h3 className="text-sm font-semibold text-[#10B981] mb-2">CLUBS</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {clubs.slice(0, 6).map((item) => (
                           <div 
                             key={item.id}
-                            className="bg-[#2a2a2a] rounded-lg overflow-hidden aspect-square"
+                            className="bg-[#2A2A2A] rounded-lg overflow-hidden aspect-square">
                           >
                             {item.equipment.primaryPhoto ? (
                               <img 
@@ -381,12 +381,12 @@ export default function BagShareView() {
                   {/* Accessories Section */}
                   {accessories.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-semibold text-primary mb-2">ACCESSORIES</h3>
+                      <h3 className="text-sm font-semibold text-[#10B981] mb-2">ACCESSORIES</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {accessories.slice(0, 4).map((item) => (
                           <div 
                             key={item.id}
-                            className="bg-[#2a2a2a] rounded-lg overflow-hidden aspect-square"
+                            className="bg-[#2A2A2A] rounded-lg overflow-hidden aspect-square">
                           >
                             {item.equipment.primaryPhoto ? (
                               <img 
@@ -412,7 +412,7 @@ export default function BagShareView() {
                 <div className="grid grid-cols-2 gap-4 h-full">
                   {/* Clubs Column */}
                   <div>
-                    <h3 className="text-lg font-semibold text-primary mb-3">CLUBS</h3>
+                    <h3 className="text-lg font-semibold text-[#10B981] mb-3">CLUBS</h3>
                     <div className="grid grid-cols-3 gap-2">
                       {clubs.map((item) => (
                         <div 
@@ -438,7 +438,7 @@ export default function BagShareView() {
 
                   {/* Accessories Column */}
                   <div>
-                    <h3 className="text-lg font-semibold text-primary mb-3">ACCESSORIES</h3>
+                    <h3 className="text-lg font-semibold text-[#10B981] mb-3">ACCESSORIES</h3>
                     <div className="grid grid-cols-3 gap-2">
                       {accessories.map((item) => (
                         <div 
@@ -469,7 +469,7 @@ export default function BagShareView() {
             {showWatermark && (
               <div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-[#10B981] flex items-center justify-center">
                     <Camera className="w-4 h-4 text-black" />
                   </div>
                   <span className="text-white font-bold text-lg">teed.club</span>
@@ -483,7 +483,7 @@ export default function BagShareView() {
 
       {/* Instructions */}
       <div className="max-w-6xl mx-auto mt-6">
-        <Card className="bg-[#1a1a1a] border-white/10 p-4">
+        <Card className="bg-[#1A1A1A] border-white/10 p-4">
           <p className="text-white/70 text-sm text-center">
             Choose your format, then click "Download" to save the image. Perfect for sharing on social media!
           </p>

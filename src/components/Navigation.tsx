@@ -32,9 +32,13 @@ const NavLink = ({ to, children }: NavLinkProps) => {
       to={to}
       className={`relative font-medium transition-colors px-3 py-2 rounded-lg ${
         isActive 
-          ? 'text-white bg-white/10' 
-          : 'text-white/70 hover:text-white hover:bg-white/5'
+          ? 'text-white' 
+          : 'text-white/70 hover:text-white'
       }`}
+      style={{
+        backgroundColor: isActive ? 'var(--user-bg-elevated)' : 'transparent',
+        ':hover': { backgroundColor: 'var(--user-bg-hover)' }
+      }}
     >
       {children}
       {isActive && (
@@ -92,7 +96,7 @@ const Navigation = () => {
     <>
       <nav className="fixed top-0 w-full z-50">
         {/* Glass Navigation Bar */}
-        <div className="bg-white/10 backdrop-blur-[10px] border-b border-white/20">
+        <div className="user-themed-nav">
           <div className="max-w-7xl mx-auto px-4 h-16 flex items-center">
             
             {/* Left Side - Logo & Main Nav */}
@@ -159,7 +163,8 @@ const Navigation = () => {
             <div className="flex items-center gap-3">
               <Link
                 to="/forum"
-                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                style={{ backgroundColor: 'var(--user-bg-elevated)', ':hover': { backgroundColor: 'var(--user-bg-hover)' } }}
               >
                 <MessageSquare className="w-5 h-5" />
                 <span className="font-medium">Forum</span>
@@ -167,7 +172,8 @@ const Navigation = () => {
               
               <Link
                 to="/patch-notes"
-                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                style={{ backgroundColor: 'var(--user-bg-elevated)', ':hover': { backgroundColor: 'var(--user-bg-hover)' } }}
               >
                 <FileText className="w-5 h-5" />
                 <span className="font-medium">Updates</span>

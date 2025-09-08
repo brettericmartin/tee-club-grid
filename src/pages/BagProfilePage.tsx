@@ -186,23 +186,23 @@ const BagProfilePage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#10B981]" />
       </div>
     );
   }
 
   if (error || !bagData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">Bag not found</h2>
-          <p className="text-emerald-100/60 mb-6">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-center elevation-1 p-8 rounded-lg">
+          <h2 className="text-2xl font-bold text-[#FAFAFA] mb-4">Bag not found</h2>
+          <p className="text-[#FAFAFA]/60 mb-6">
             This bag doesn't exist or has been removed.
           </p>
           <Button
             onClick={() => navigate("/bags")}
-            className="bg-emerald-600 hover:bg-emerald-700"
+            className="btn-primary"
           >
             Browse Bags
           </Button>
@@ -225,19 +225,19 @@ const BagProfilePage = () => {
   const accessoryCount = bagData.bag_equipment?.length - clubCount || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950">
-      {/* Back Navigation */}
-      <div className="sticky top-0 z-40 bg-[#1a1a1a] border-b border-white/10">
+    <div className="min-h-screen bg-[#0A0A0A]">
+      {/* Back Navigation with Glassmorphism */}
+      <div className="sticky top-0 z-40 user-themed-nav">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            className="text-white hover:text-white hover:bg-[#2a2a2a]"
+            className="text-[#FAFAFA] hover:text-[#FAFAFA] hover:bg-[#1C1C1C]"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <span className="text-emerald-100 font-medium">
+          <span className="text-[#FAFAFA] font-medium">
             {bagData.profiles.display_name || bagData.profiles.username}'s Bag
           </span>
         </div>

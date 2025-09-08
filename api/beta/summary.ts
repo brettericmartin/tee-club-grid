@@ -20,9 +20,7 @@ interface ReferralStats {
 
 interface BetaSummaryResponse {
   cap: number;
-  approved: number;          // Deprecated: use approvedActive instead
-  approvedActive: number;    // Active beta users (not soft-deleted)
-  approvedTotal: number;     // Total beta users (including soft-deleted)
+  totalUsers: number;        // Total registered users
   remaining: number;
   publicBetaEnabled: boolean;
   waitlistCount?: number;
@@ -66,36 +64,21 @@ export default async function handler(
     const betaCap = featureFlags?.beta_cap || 150;
     const publicBetaEnabled = featureFlags?.public_beta_enabled || false;
     
-    // Count ACTIVE approved beta users (not soft-deleted)
-    const { count: activeCount, error: activeError } = await supabase
+    // Count total users (everyone who signed up)
+    const { count: userCount, error: countError } = await supabase
       .from('profiles')
       .select('id', { count: 'exact', head: false })
-      .eq('beta_access', true)
       .is('deleted_at', null);
     
-    if (activeError) {
-      console.error('[BetaSummary] Error counting active approved users:', activeError);
+    if (countError) {
+      console.error('[BetaSummary] Error counting users:', countError);
       return res.status(500).json({ 
-        error: 'Unable to count active approved users' 
+        error: 'Unable to count users' 
       });
     }
     
-    // Count TOTAL approved beta users (including soft-deleted)
-    const { count: totalCount, error: totalError } = await supabase
-      .from('profiles')
-      .select('id', { count: 'exact', head: false })
-      .eq('beta_access', true);
-    
-    if (totalError) {
-      console.error('[BetaSummary] Error counting total approved users:', totalError);
-      return res.status(500).json({ 
-        error: 'Unable to count total approved users' 
-      });
-    }
-    
-    const approvedActive = activeCount || 0;
-    const approvedTotal = totalCount || 0;
-    const remaining = Math.max(0, betaCap - approvedActive);
+    const totalUsers = userCount || 0;
+    const remaining = Math.max(0, betaCap - totalUsers);
     
     // Optionally count waitlist size
     const { count: waitlistCount } = await supabase
@@ -130,8 +113,8 @@ export default async function handler(
         .limit(5);
       
       // Calculate acceptance rate
-      const acceptanceRate = approvedTotal > 0 && totalReferrals
-        ? Math.round((totalReferrals / approvedTotal) * 100)
+      const acceptanceRate = totalUsers > 0 && totalReferrals
+        ? Math.round((totalReferrals / totalUsers) * 100)
         : 0;
       
       // Calculate average chain depth (simplified)
@@ -157,9 +140,7 @@ export default async function handler(
     
     const response: BetaSummaryResponse = {
       cap: betaCap,
-      approved: approvedActive,     // Deprecated field - kept for backward compatibility
-      approvedActive,               // Active beta users
-      approvedTotal,                // Total beta users (including soft-deleted)
+      totalUsers,                   // Total registered users
       remaining,
       publicBetaEnabled,
       waitlistCount: waitlistCount || 0,

@@ -145,26 +145,44 @@ export async function checkRecentVideoInFeed(
  * Add bag video with validation and duplicate checking
  */
 export async function addBagVideo(input: unknown) {
-  const payload = userBagVideoSchema.parse(input);
-  const parsed = parseVideoUrl(payload.url);
-  
-  // Check for duplicate if sharing to feed
-  if (payload.share_to_feed) {
-    const duplicate = await checkRecentVideoInFeed(payload.url);
-    if (duplicate.exists) {
-      // Return a special response indicating duplicate found
+  try {
+    console.log('[addBagVideo] Input:', input);
+    const payload = userBagVideoSchema.parse(input);
+    const parsed = parseVideoUrl(payload.url);
+    
+    console.log('[addBagVideo] Parsed payload:', payload);
+    console.log('[addBagVideo] Parsed video URL:', parsed);
+    
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('[addBagVideo] No authenticated user');
       return {
         data: null,
-        error: null,
-        duplicate: duplicate.post
+        error: { message: 'You must be logged in to add videos' },
+        duplicate: null
       };
     }
-  }
-  
-  // Insert the video
-  const { data, error } = await supabase
-    .from('user_bag_videos')
-    .insert({
+    
+    console.log('[addBagVideo] Current user:', user.id);
+    
+    // Check for duplicate if sharing to feed
+    if (payload.share_to_feed) {
+      const duplicate = await checkRecentVideoInFeed(payload.url);
+      if (duplicate.exists) {
+        console.log('[addBagVideo] Duplicate found:', duplicate);
+        // Return a special response indicating duplicate found
+        return {
+          data: null,
+          error: null,
+          duplicate: duplicate.post
+        };
+      }
+    }
+    
+    // Insert the video with user_id
+    const insertData = {
+      user_id: user.id,  // Add the missing user_id field
       bag_id: payload.bag_id,
       url: parsed.url,
       provider: parsed.provider,
@@ -172,24 +190,43 @@ export async function addBagVideo(input: unknown) {
       title: payload.title,
       notes: payload.notes,
       share_to_feed: payload.share_to_feed ?? false
-    })
-    .select()
-    .single();
+    };
+    
+    console.log('[addBagVideo] Inserting video:', insertData);
+    
+    const { data, error } = await supabase
+      .from('user_bag_videos')
+      .insert(insertData)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('[addBagVideo] Database error:', error);
+      return { data: null, error, duplicate: null };
+    }
+    
+    console.log('[addBagVideo] Video inserted successfully:', data);
 
-  // Create feed post if sharing to feed
-  if (data && payload.share_to_feed) {
-    const { user } = await supabase.auth.getUser();
-    if (user?.user) {
+    // Create feed post if sharing to feed
+    if (data && payload.share_to_feed) {
       await createBagVideoFeedPost({
-        user_id: user.user.id,
+        user_id: user.id,
         bag_id: payload.bag_id,
         video: data,
         title: payload.title
       });
+      console.log('[addBagVideo] Feed post created');
     }
-  }
 
-  return { data, error, duplicate: null };
+    return { data, error: null, duplicate: null };
+  } catch (error) {
+    console.error('[addBagVideo] Unexpected error:', error);
+    return {
+      data: null,
+      error: { message: error instanceof Error ? error.message : 'Failed to add video' },
+      duplicate: null
+    };
+  }
 }
 
 /**

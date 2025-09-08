@@ -29,30 +29,41 @@ export function sanitizeUrl(raw: string): string {
 export function extractYouTubeVideoId(url: string): string | null {
   try {
     const urlObj = new URL(url);
+    console.log('[extractYouTubeVideoId] Parsing:', url, 'hostname:', urlObj.hostname, 'pathname:', urlObj.pathname);
     
     // Handle youtu.be URLs
     if (urlObj.hostname === 'youtu.be' || urlObj.hostname === 'www.youtu.be') {
-      return urlObj.pathname.slice(1).split('?')[0];
+      const videoId = urlObj.pathname.slice(1).split('?')[0];
+      console.log('[extractYouTubeVideoId] youtu.be video ID:', videoId);
+      return videoId;
     }
     
     // Handle youtube.com URLs
-    if (urlObj.hostname === 'youtube.com' || urlObj.hostname === 'www.youtube.com') {
+    if (urlObj.hostname === 'youtube.com' || urlObj.hostname === 'www.youtube.com' || urlObj.hostname === 'm.youtube.com') {
       // Watch URLs
       if (urlObj.pathname === '/watch') {
-        return urlObj.searchParams.get('v');
+        const videoId = urlObj.searchParams.get('v');
+        console.log('[extractYouTubeVideoId] youtube.com watch video ID:', videoId);
+        return videoId;
       }
       // Embed URLs
       if (urlObj.pathname.startsWith('/embed/')) {
-        return urlObj.pathname.split('/embed/')[1].split('?')[0];
+        const videoId = urlObj.pathname.split('/embed/')[1].split('?')[0];
+        console.log('[extractYouTubeVideoId] youtube.com embed video ID:', videoId);
+        return videoId;
       }
       // Shorts URLs
       if (urlObj.pathname.startsWith('/shorts/')) {
-        return urlObj.pathname.split('/shorts/')[1].split('?')[0];
+        const videoId = urlObj.pathname.split('/shorts/')[1].split('?')[0];
+        console.log('[extractYouTubeVideoId] youtube.com shorts video ID:', videoId);
+        return videoId;
       }
     }
     
+    console.log('[extractYouTubeVideoId] No video ID found');
     return null;
-  } catch {
+  } catch (error) {
+    console.error('[extractYouTubeVideoId] Error parsing URL:', error);
     return null;
   }
 }
@@ -176,18 +187,24 @@ export function generateThumbnailUrl(provider: VideoProvider, videoId: string): 
  */
 export function parseVideoUrl(url: string): ParsedVideo {
   const sanitizedUrl = sanitizeUrl(url);
+  console.log('[parseVideoUrl] Input URL:', url, 'Sanitized:', sanitizedUrl);
+  
   try {
     const u = new URL(sanitizedUrl);
     const host = u.hostname.toLowerCase();
+    console.log('[parseVideoUrl] Hostname:', host);
 
     // YouTube
     if (
       host === "youtu.be" ||
       host.endsWith(".youtube.com") ||
-      host === "youtube.com"
+      host === "youtube.com" ||
+      host === "m.youtube.com"
     ) {
       const videoId = extractYouTubeVideoId(sanitizedUrl);
-      return { provider: "youtube", videoId: videoId || undefined, url: sanitizedUrl };
+      const result = { provider: "youtube" as VideoProvider, videoId: videoId || undefined, url: sanitizedUrl };
+      console.log('[parseVideoUrl] YouTube result:', result);
+      return result;
     }
 
     // TikTok

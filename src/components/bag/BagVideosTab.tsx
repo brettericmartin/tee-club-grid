@@ -42,17 +42,54 @@ export function BagVideosTab({
   const [pendingVideoData, setPendingVideoData] = useState<any>(null);
 
   // Fetch bag videos
-  const { data: videosResponse, isLoading } = useQuery({
+  const { data: videosResponse, isLoading, error: fetchError } = useQuery({
     queryKey: ['bag_videos', bagId],
     queryFn: () => listBagVideos(bagId)
   });
 
   const videos = videosResponse?.data || [];
+  
+  // Handle query state changes
+  useEffect(() => {
+    if (fetchError) {
+      console.error('[BagVideosTab] Error fetching videos:', fetchError);
+      toast.error('Failed to load videos');
+    }
+  }, [fetchError]);
+  
+  useEffect(() => {
+    if (videosResponse) {
+      console.log('[BagVideosTab] Videos loaded:', videosResponse);
+    }
+  }, [videosResponse]);
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('[BagVideosTab] Component mounted with bagId:', bagId);
+    console.log('[BagVideosTab] Videos state:', videos);
+  }, [bagId, videos]);
 
   // Add video mutation
   const addMutation = useMutation({
-    mutationFn: (input: any) => addBagVideo(input),
-    onSuccess: (response: any) => {
+    mutationFn: async (input: any) => {
+      console.log('[BagVideosTab] Calling addBagVideo with:', input);
+      const result = await addBagVideo(input);
+      console.log('[BagVideosTab] addBagVideo result:', result);
+      
+      // Check for errors in the result
+      if (result.error) {
+        throw new Error(result.error.message || 'Failed to add video');
+      }
+      
+      return result;
+    }
+  });
+  
+  // Handle mutation results
+  useEffect(() => {
+    if (addMutation.isSuccess && addMutation.data) {
+      const response = addMutation.data;
+      
       // Check if duplicate was found
       if (response.duplicate) {
         setDuplicatePost(response.duplicate);
@@ -66,6 +103,7 @@ export function BagVideosTab({
         setShowDuplicateDialog(true);
       } else if (response.data) {
         // Successfully added
+        console.log('[BagVideosTab] Video added successfully:', response.data);
         setUrl('');
         setTitle('');
         setAutoTitle('');
@@ -80,11 +118,17 @@ export function BagVideosTab({
           toast.success('Video added to your bag!');
         }
       }
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to add video');
+      // Reset mutation state after handling
+      addMutation.reset();
     }
-  });
+  }, [addMutation.isSuccess, addMutation.data, bagId, queryClient, shareToFeed, title, autoTitle, url]);
+  
+  useEffect(() => {
+    if (addMutation.isError) {
+      console.error('[BagVideosTab] Mutation error:', addMutation.error);
+      toast.error((addMutation.error as any)?.message || 'Failed to add video');
+    }
+  }, [addMutation.isError, addMutation.error]);
 
   // Auto-fetch video metadata when URL changes
   useEffect(() => {
@@ -121,6 +165,8 @@ export function BagVideosTab({
   }, [url]);
 
   const handleAddVideo = async () => {
+    console.log('[BagVideosTab] Adding video:', { url, title, shareToFeed });
+    
     if (!url.trim()) {
       toast.error('Please enter a video URL');
       return;
@@ -128,6 +174,8 @@ export function BagVideosTab({
 
     // Validate URL
     const parsed = parseVideoUrl(url);
+    console.log('[BagVideosTab] Parsed video URL:', parsed);
+    
     if (parsed.provider === 'other') {
       toast.error('Please enter a valid YouTube, TikTok, or Vimeo URL');
       return;
@@ -150,13 +198,15 @@ export function BagVideosTab({
       }
     }
 
-    addMutation.mutate({
+    const payload = {
       bag_id: bagId,
       url: url.trim(),
       title: videoTitle,
       channel: undefined,
       share_to_feed: shareToFeed
-    });
+    };
+    console.log('[BagVideosTab] Submitting video:', payload);
+    addMutation.mutate(payload);
   };
 
   const handleAddToBagOnly = () => {
@@ -198,6 +248,16 @@ export function BagVideosTab({
     return (
       <div className={cn("flex items-center justify-center py-12", className)}>
         <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <p className="ml-2 text-gray-400">Loading videos...</p>
+      </div>
+    );
+  }
+  
+  if (fetchError) {
+    console.error('[BagVideosTab] Fetch error:', fetchError);
+    return (
+      <div className={cn("flex items-center justify-center py-12", className)}>
+        <p className="text-red-500">Error loading videos. Please try again.</p>
       </div>
     );
   }
@@ -315,11 +375,17 @@ export function BagVideosTab({
               onClick={handleAddVideo}
               disabled={!url.trim() || addMutation.isPending || fetchingMetadata}
               className="flex-1"
+              type="button"
             >
               {addMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Adding...
+                </>
+              ) : fetchingMetadata ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Fetching metadata...
                 </>
               ) : (
                 'Add Video'

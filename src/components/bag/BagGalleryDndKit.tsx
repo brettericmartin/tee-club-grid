@@ -124,10 +124,10 @@ function SortableItem({
       <div
         className={cn(
           "relative h-full min-h-[120px] rounded-lg overflow-hidden",
-          "bg-white/10 border border-white/20",
+          "user-themed-gallery-card",
           "transition-transform duration-200",
           isEditing && "cursor-move",
-          !isEditing && "cursor-pointer hover:bg-white/[0.15] hover:scale-105",
+          !isEditing && "cursor-pointer hover:scale-105",
           itemIsDragging && "opacity-0"
         )}
         onClick={() => {
@@ -172,7 +172,7 @@ function SortableItem({
             {...listeners}
             className="absolute inset-0 z-10"
           >
-            <div className="absolute top-2 right-2 p-2 rounded-md bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-2 right-2 p-2 rounded-md backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: 'var(--user-bg-elevated)' }}>
               <Grip className="h-4 w-4 text-white" />
             </div>
           </div>
@@ -372,7 +372,7 @@ export function BagGalleryDndKit({
     <div className="space-y-4">
       {/* Controls */}
       {isEditing && (
-        <div className="flex flex-wrap gap-2 p-4 bg-black/20 backdrop-blur-sm rounded-lg">
+        <div className="flex flex-wrap gap-2 p-4 backdrop-blur-sm rounded-lg" style={{ backgroundColor: 'var(--user-nav-bg)' }}>
           <Button
             variant="outline"
             size="sm"
@@ -421,7 +421,7 @@ export function BagGalleryDndKit({
               "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4",
               "bg-gradient-to-b from-black/10 to-black/20 rounded-xl",
               "transition-colors duration-200",
-              activeId && "ring-2 ring-primary/50 bg-black/30"
+              activeId && "ring-2 ring-primary/50"
             )}
           >
             {items.map((item) => (
@@ -445,7 +445,7 @@ export function BagGalleryDndKit({
             <div
               className={cn(
                 "relative min-h-[120px] rounded-lg overflow-hidden",
-                "bg-white/10 border border-white/20 shadow-2xl",
+                "user-themed-gallery-card shadow-2xl",
                 "cursor-move"
               )}
               style={{

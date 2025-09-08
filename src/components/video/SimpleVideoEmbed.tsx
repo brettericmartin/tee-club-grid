@@ -22,17 +22,23 @@ export default function SimpleVideoEmbed({
   title,
   className = ''
 }: Props) {
+  // Debug logging
+  console.log('[SimpleVideoEmbed] Rendering:', { provider, url, videoId, title });
+  
   // YouTube embed with privacy-enhanced mode
   if (provider === 'youtube' && videoId) {
+    const embedUrl = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`;
+    console.log('[SimpleVideoEmbed] YouTube embed URL:', embedUrl);
     return (
       <div className={`aspect-video w-full overflow-hidden rounded-2xl shadow ${className}`}>
         <iframe
           className="h-full w-full"
-          src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`}
+          src={embedUrl}
           title={title ?? 'YouTube video'}
           loading="lazy"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
+          onError={(e) => console.error('[SimpleVideoEmbed] YouTube iframe error:', e)}
         />
       </div>
     );
@@ -95,10 +101,11 @@ export default function SimpleVideoEmbed({
   }
 
   // Fallback for unsupported providers or missing video ID
+  console.warn('[SimpleVideoEmbed] Falling back to link display:', { provider, videoId });
   return (
     <div className={`p-4 border rounded-lg bg-gray-50 dark:bg-gray-900 ${className}`}>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-        External video:
+        External video: (Provider: {provider}, Has ID: {!!videoId})
       </p>
       <a 
         className="text-blue-600 dark:text-blue-400 underline hover:no-underline" 

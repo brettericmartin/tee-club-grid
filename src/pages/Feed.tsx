@@ -37,6 +37,8 @@ const FeedContent = () => {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    // Reset display count when filter or sort changes
+    setDisplayCount(12);
     loadMainFeed(filter, sortBy);
   }, [filter, sortBy, loadMainFeed]);
 
@@ -207,8 +209,18 @@ const FeedContent = () => {
     }
   };
 
-  const displayedPosts = allPosts.slice(0, displayCount);
-  const hasMore = displayCount < allPosts.length;
+  // Filter out posts without valid images (excluding videos which have their own rendering)
+  const postsWithImages = allPosts.filter(post => {
+    // Allow video posts (they have their own rendering)
+    if (post.postType === 'bag_video' && post.videoData) {
+      return true;
+    }
+    // Filter out posts without images or with placeholder images
+    return post.imageUrl && post.imageUrl !== '/placeholder.svg';
+  });
+  
+  const displayedPosts = postsWithImages.slice(0, displayCount);
+  const hasMore = displayCount < postsWithImages.length;
 
   // Load more callback
   const handleLoadMore = useCallback(() => {
@@ -217,10 +229,10 @@ const FeedContent = () => {
     setIsLoadingMore(true);
     // Simulate loading delay for smooth UX
     setTimeout(() => {
-      setDisplayCount(prev => Math.min(prev + 12, allPosts.length));
+      setDisplayCount(prev => Math.min(prev + 12, postsWithImages.length));
       setIsLoadingMore(false);
     }, 300);
-  }, [hasMore, isLoadingMore, allPosts.length]);
+  }, [hasMore, isLoadingMore, postsWithImages.length]);
 
   // Setup intersection observer for infinite scroll
   useEffect(() => {
@@ -657,7 +669,7 @@ const FeedContent = () => {
         )}
 
         {/* Empty State */}
-        {!loading && allPosts.length === 0 && (
+        {!loading && postsWithImages.length === 0 && (
           <div className="text-center py-20">
             <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-12 max-w-md mx-auto">
               <Trophy className="w-16 h-16 text-white/50 mx-auto mb-4" />

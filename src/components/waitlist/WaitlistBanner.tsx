@@ -8,9 +8,7 @@ import { RecentApprovalsTicker } from "./RecentApprovalsTicker";
 
 interface BetaSummary {
   cap: number;
-  approved: number;          // Deprecated
-  approvedActive: number;    // Active beta users
-  approvedTotal: number;     // Total beta users (including soft-deleted)
+  totalUsers: number;        // Total registered users
   remaining: number;
   publicBetaEnabled: boolean;
   waitlistCount?: number;
@@ -58,9 +56,9 @@ export function WaitlistBanner({ showApprovals = false, variant = 'default' }: W
         const data = await response.json();
         setSummary(data);
         
-        // Track beta summary view (use approvedActive for accurate count)
+        // Track beta summary view
         trackBetaSummaryView({
-          approved: data.approvedActive || data.approved,
+          approved: data.totalUsers,
           cap: data.cap,
           remaining: data.remaining
         });
@@ -142,7 +140,7 @@ export function WaitlistBanner({ showApprovals = false, variant = 'default' }: W
                 ) : (
                   <div className="flex items-center gap-2">
                     <span className="text-sm">
-                      <span className="font-bold">{summary.approvedActive || summary.approved}/{summary.cap}</span> filled
+                      <span className="font-bold">{summary.totalUsers}/{summary.cap}</span> filled
                     </span>
                     {summary.remaining > 0 && (
                       <>
