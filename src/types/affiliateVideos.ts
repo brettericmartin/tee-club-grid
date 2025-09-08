@@ -51,6 +51,7 @@ export interface UserBagVideo {
   url: string;
   title?: string | null;
   thumbnail_url?: string | null;
+  channel_name?: string | null;  // YouTube channel or video creator name
   notes?: string | null;       // User's description/notes
   share_to_feed: boolean;      // Share to activity feed
   sort_order: number;

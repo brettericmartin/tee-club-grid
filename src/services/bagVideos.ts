@@ -520,7 +520,8 @@ export async function createBagVideoFeedPost(args: {
           title: args.title || args.video.title,
           notes: args.video.notes,
           thumbnail_url: args.video.thumbnail_url,
-          user_bag_video_id: args.video.id
+          user_bag_video_id: args.video.id,
+          channel_name: args.video.channel_name || null
         },
         likes_count: 0
       });

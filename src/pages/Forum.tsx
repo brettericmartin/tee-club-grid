@@ -52,8 +52,7 @@ export default function Forum() {
         .select(`
           *,
           category:forum_categories(name, icon),
-          user:profiles(username, avatar_url),
-          posts:forum_posts(count)
+          user:profiles(username, avatar_url)
         `)
         .order('created_at', { ascending: false })
         .limit(5);
@@ -221,7 +220,6 @@ export default function Forum() {
                       <h3 className="font-medium mb-1 line-clamp-1">{thread.title}</h3>
                       <div className="flex items-center gap-4 text-sm text-gray-400">
                         <span>by {thread.user?.username}</span>
-                        <span>{thread.posts?.length || 0} replies</span>
                       </div>
                     </div>
                     {thread.is_pinned && (

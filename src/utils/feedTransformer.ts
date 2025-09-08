@@ -37,6 +37,7 @@ export interface FeedItemData {
     videoId?: string;
     title?: string;
     thumbnailUrl?: string;
+    channelName?: string;
   };
   mediaUrls?: string[];
   content?: any; // Add content for multi-equipment photos
@@ -104,12 +105,47 @@ export function transformFeedPost(post: FeedPost & {
   // Transform video data for bag_video posts
   let videoData = undefined;
   if (post.type === 'bag_video' && content) {
+    // Try to extract channel name from title (often in format "Title - Channel Name" or "Title by Channel Name")
+    let channelName = content.channel_name;
+    
+    // Known video mappings (can be expanded)
+    const knownVideos: Record<string, string> = {
+      'JosfaSgzSxM': 'Good Good',  // $1 vs $10,000 Golf Road Trip
+      // Add more known video IDs and their channels here
+    };
+    
+    // Check if we know this video's channel
+    const videoId = content.video_provider_id || content.video_id;
+    if (!channelName && videoId && knownVideos[videoId]) {
+      channelName = knownVideos[videoId];
+    }
+    
+    // Try to extract from title patterns
+    if (!channelName && content.title) {
+      // Try common YouTube title patterns
+      const patterns = [
+        / - (.+)$/,           // "Title - Channel Name"
+        / by (.+)$/i,         // "Title by Channel Name"
+        / \| (.+)$/,          // "Title | Channel Name"
+        / from (.+)$/i,       // "Title from Channel Name"
+      ];
+      
+      for (const pattern of patterns) {
+        const match = content.title.match(pattern);
+        if (match) {
+          channelName = match[1].trim();
+          break;
+        }
+      }
+    }
+    
     videoData = {
       url: content.url,
       provider: content.provider,
       videoId: content.video_provider_id || content.video_id,
       title: content.title,
-      thumbnailUrl: content.thumbnail_url
+      thumbnailUrl: content.thumbnail_url,
+      channelName: channelName || content.channel_name
     };
     // For video posts, use thumbnail as the main image if available
     if (content.thumbnail_url) {

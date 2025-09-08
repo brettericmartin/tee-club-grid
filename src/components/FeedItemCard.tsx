@@ -196,10 +196,14 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
               </div>
             </div>
             
-            {/* YouTube/Video provider badge - adjusted for mobile */}
+            {/* YouTube/Video provider badge with channel name - adjusted for mobile */}
             {post.videoData.provider && (
               <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-red-600 text-white px-2 py-1 rounded text-[10px] sm:text-xs font-medium">
-                {post.videoData.provider === 'youtube' ? 'YouTube' : post.videoData.provider.toUpperCase()}
+                {post.videoData.provider === 'youtube' ? (
+                  post.videoData.channelName ? 
+                    `YouTube • ${post.videoData.channelName}` : 
+                    'YouTube'
+                ) : post.videoData.provider.toUpperCase()}
               </div>
             )}
           </div>
@@ -414,10 +418,25 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-white font-medium">{post.userName}</p>
-              <p className="text-gray-400 text-xs">
-                {post.userTitle || (post.userHandicap ? `${post.userHandicap} HCP` : 'Golfer')}
-              </p>
+              {/* For video posts, show channel name prominently with "shared by" attribution */}
+              {post.postType === 'bag_video' && post.videoData ? (
+                <>
+                  <p className="text-white font-medium">
+                    {post.videoData.channelName || 
+                     (post.videoData.provider === 'youtube' ? 'YouTube Video' : 'Video')}
+                  </p>
+                  <p className="text-gray-400 text-xs">
+                    Shared by {post.userName}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-white font-medium">{post.userName}</p>
+                  <p className="text-gray-400 text-xs">
+                    {post.userTitle || (post.userHandicap ? `${post.userHandicap} HCP` : 'Golfer')}
+                  </p>
+                </>
+              )}
             </div>
           </Link>
           

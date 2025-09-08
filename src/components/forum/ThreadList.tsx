@@ -100,8 +100,8 @@ export default function ThreadList({ categorySlug, sortBy: propSortBy }: ThreadL
         .from('forum_threads')
         .select(`
           *,
-          category:forum_categories!inner(id, name, slug, icon),
-          user:profiles!inner(id, username, display_name, avatar_url)
+          category:forum_categories(id, name, slug, icon),
+          user:profiles(id, username, display_name, avatar_url)
         `, { count: 'exact' });
 
       // Filter by category if provided
