@@ -10,6 +10,45 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.22.0",
+    date: "2025-09-07",
+    title: "Feed Experience Improvements",
+    changes: [
+      {
+        category: "feature",
+        description: "Added video support to feed - videos from bags now display with thumbnails and play buttons"
+      },
+      {
+        category: "improvement",
+        description: "Moved bag flip button to card header for better accessibility and cleaner image display"
+      },
+      {
+        category: "improvement",
+        description: "Improved text readability by moving captions below images with dedicated background sections"
+      },
+      {
+        category: "improvement",
+        description: "Removed post type badges for cleaner visual presentation"
+      },
+      {
+        category: "improvement",
+        description: "Optimized feed card padding for tighter, more efficient layout"
+      },
+      {
+        category: "fix",
+        description: "Fixed crashes when flipping video feed cards"
+      },
+      {
+        category: "fix",
+        description: "Restored masonry/mosaic layout with natural height variation for photos"
+      },
+      {
+        category: "performance",
+        description: "Improved mobile performance by displaying video thumbnails instead of embedded players"
+      }
+    ]
+  },
+  {
     version: "0.21.0",
     date: "2025-09-05",
     title: "Major Stability Update - Core Features Restored",
