@@ -72,11 +72,12 @@ export async function toggleFollow(followerId: string, followingId: string) {
 
     if (existing) {
       console.log('Unfollowing user...');
-      // Unfollow
+      // Unfollow - use both follower_id and following_id for better RLS compatibility
       const { error } = await supabase
         .from('user_follows')
         .delete()
-        .eq('id', existing.id);
+        .eq('follower_id', followerId)
+        .eq('following_id', followingId);
       
       if (error) {
         console.error('Error unfollowing:', error);

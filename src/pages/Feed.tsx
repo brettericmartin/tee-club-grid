@@ -694,37 +694,7 @@ const FeedContent = () => {
         )}
       </div>
 
-      {/* Floating Action Button */}
-      {user && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="lg"
-                className="min-w-[56px] min-h-[56px] rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-[shadow,transform] duration-200 hover:scale-110"
-              >
-                <Plus className="w-6 h-6" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="top" className="bg-[#1a1a1a] border-white/10 mb-2">
-              <DropdownMenuItem 
-                onClick={() => window.location.href = '/equipment'}
-                className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
-              >
-                <Camera className="w-4 h-4 mr-2" />
-                Browse Equipment
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => window.location.href = '/my-bag'}
-                className="text-white/90 hover:text-white cursor-pointer focus:bg-white/10"
-              >
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Update My Bag
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
+      {/* Floating Action Button - Removed */}
 
       {/* Create Post Modal */}
       {/* Only show create post modal if user has beta access */}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 // Declare global flag for TikTok script loading
 declare global {
@@ -25,12 +25,13 @@ export default function SimpleVideoEmbed({
   // Debug logging
   console.log('[SimpleVideoEmbed] Rendering:', { provider, url, videoId, title });
   
-  // YouTube embed with privacy-enhanced mode
+  // YouTube embed with privacy-enhanced mode and link overlay
   if (provider === 'youtube' && videoId) {
     const embedUrl = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`;
+    const youtubeUrl = url || `https://youtube.com/watch?v=${videoId}`;
     console.log('[SimpleVideoEmbed] YouTube embed URL:', embedUrl);
     return (
-      <div className={`aspect-video w-full overflow-hidden rounded-2xl shadow ${className}`}>
+      <div className={`relative aspect-video w-full overflow-hidden rounded-2xl shadow group ${className}`}>
         <iframe
           className="h-full w-full"
           src={embedUrl}
@@ -40,6 +41,20 @@ export default function SimpleVideoEmbed({
           allowFullScreen
           onError={(e) => console.error('[SimpleVideoEmbed] YouTube iframe error:', e)}
         />
+        {/* Link overlay - appears on hover */}
+        <a
+          href={youtubeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1 hover:bg-black/90"
+          title="Open in YouTube"
+        >
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+            <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+          </svg>
+          YouTube
+        </a>
       </div>
     );
   }

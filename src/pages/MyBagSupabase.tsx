@@ -61,7 +61,6 @@ import BagGalleryDndKit from "@/components/bag/BagGalleryDndKit";
 import AIEquipmentAnalyzer from "@/components/equipment/AIEquipmentAnalyzer";
 import BagVideosTab from "@/components/bag/BagVideosTab";
 import EquipmentSelectorImproved from "@/components/equipment/EquipmentSelectorImproved";
-import AddEquipmentMethodDialog from "@/components/equipment/AddEquipmentMethodDialog";
 import BagEquipmentModal from "@/components/bag/BagEquipmentModal";
 import AIAnalysisResultsDialog from "@/components/equipment/AIAnalysisResultsDialog";
 
@@ -150,7 +149,6 @@ const MyBagSupabase = () => {
   const [editingLoftValue, setEditingLoftValue] = useState<string>('');
   
   // AI Equipment flow states
-  const [showMethodDialog, setShowMethodDialog] = useState(false);
   const [showAIAnalyzer, setShowAIAnalyzer] = useState(false);
   const [showAIResults, setShowAIResults] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
@@ -782,17 +780,7 @@ const MyBagSupabase = () => {
     }
   };
 
-  // AI Equipment flow handlers
-  const handleMethodSelect = (method: 'ai' | 'manual') => {
-    aiFlowMetrics.trackMethodSelected(method);
-    setShowMethodDialog(false);
-    if (method === 'ai') {
-      aiFlowMetrics.trackAIAnalyzerOpen();
-      setShowAIAnalyzer(true);
-    } else {
-      setEquipmentSelectorOpen(true);
-    }
-  };
+  // AI Equipment flow handlers - handleMethodSelect removed since we go straight to selector
 
   const handleAIAnalysisComplete = (result: any) => {
     console.log('[MyBag] AI Analysis complete:', { 
@@ -1037,7 +1025,7 @@ const MyBagSupabase = () => {
       <div className="flex flex-wrap gap-3 justify-center">
         <Button onClick={() => {
           aiFlowMetrics.trackMethodDialogOpen();
-          setShowMethodDialog(true);
+          setEquipmentSelectorOpen(true);
         }} variant="default">
           <Plus className="w-4 h-4 mr-2" />
           Add Equipment
@@ -1085,7 +1073,7 @@ const MyBagSupabase = () => {
                   <Button
                     onClick={() => {
                       aiFlowMetrics.trackMethodDialogOpen();
-                      setShowMethodDialog(true);
+                      setEquipmentSelectorOpen(true);
                     }}
                     variant="ghost"
                     size="icon"
@@ -1162,7 +1150,7 @@ const MyBagSupabase = () => {
                     <Button
                     onClick={() => {
                       aiFlowMetrics.trackMethodDialogOpen();
-                      setShowMethodDialog(true);
+                      setEquipmentSelectorOpen(true);
                     }}
                     variant="outline"
                     size="sm"
@@ -1758,7 +1746,7 @@ const MyBagSupabase = () => {
           <div className="mt-8 flex flex-wrap gap-4 justify-center">
             <Button onClick={() => {
               aiFlowMetrics.trackMethodDialogOpen();
-              setShowMethodDialog(true);
+              setEquipmentSelectorOpen(true);
             }} size="lg">
               <Plus className="w-5 h-5 mr-2" />
               Add Equipment
@@ -1835,12 +1823,7 @@ const MyBagSupabase = () => {
         hasExistingBags={bags.length > 0}
       />
 
-      {/* Equipment Addition Method Dialog */}
-      <AddEquipmentMethodDialog
-          isOpen={showMethodDialog}
-          onClose={() => setShowMethodDialog(false)}
-          onSelectMethod={handleMethodSelect}
-        />
+      {/* Equipment Addition Method Dialog - Removed, going straight to selector */}
       
 
       {/* AI Equipment Analyzer */}
@@ -2030,7 +2013,7 @@ const MyBagSupabase = () => {
         onCreatePost={() => setShowCreatePost(true)}
         onAddEquipment={() => {
           aiFlowMetrics.trackMethodDialogOpen();
-          setShowMethodDialog(true);
+          setEquipmentSelectorOpen(true);
         }}
         onShareBag={() => setShowShareModal(true)}
       />

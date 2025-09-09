@@ -107,12 +107,18 @@ export default function PostCard({
       
       if (hasReaction) {
         // Remove reaction
-        await supabase
+        const { error } = await supabase
           .from('forum_reactions')
           .delete()
           .eq('post_id', post.id)
           .eq('user_id', user.id)
           .eq('reaction_type', type);
+
+        if (error) {
+          console.error('Error removing reaction:', error);
+          toast.error('Failed to remove reaction');
+          return;
+        }
 
         setReactions((prev) => ({
           ...prev,
@@ -121,13 +127,19 @@ export default function PostCard({
         }));
       } else {
         // Add reaction (allow multiple)
-        await supabase
+        const { error } = await supabase
           .from('forum_reactions')
           .insert({
             post_id: post.id,
             user_id: user.id,
             reaction_type: type
           });
+
+        if (error) {
+          console.error('Error adding reaction:', error);
+          toast.error('Failed to add reaction');
+          return;
+        }
 
         setReactions((prev) => ({
           ...prev,
@@ -137,6 +149,7 @@ export default function PostCard({
       }
     } catch (error) {
       console.error('Error handling reaction:', error);
+      toast.error('Failed to update reaction');
     } finally {
       setIsReacting(false);
     }

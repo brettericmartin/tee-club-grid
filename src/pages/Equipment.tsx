@@ -16,7 +16,7 @@ import SubmitEquipmentModal from "@/components/SubmitEquipmentModal";
 
 const Equipment = () => {
   const [category, setCategory] = useState('all');
-  const [sortBy, setSortBy] = useState<'popular' | 'newest' | 'price-low' | 'price-high'>('popular');
+  const [sortBy, setSortBy] = useState<'popular' | 'newest'>('popular');
   const [brand, setBrand] = useState('all');
   const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [equipment, setEquipment] = useState<any[]>([]);
@@ -296,8 +296,6 @@ const Equipment = () => {
               >
                 <option value="popular">Most Liked</option>
                 <option value="newest">Newest</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
               </select>
 
               {/* Brand Filter */}

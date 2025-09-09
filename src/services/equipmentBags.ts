@@ -2,40 +2,50 @@ import { supabase } from '@/lib/supabase';
 
 export async function getTopBagsWithEquipment(equipmentId: string, limit: number = 10) {
   try {
-    // Get bags that contain this equipment, ordered by likes
-    const { data, error } = await supabase
+    // Step 1: Get all bag_equipment entries for this equipment
+    const { data: bagEquipment, error: bagError } = await supabase
       .from('bag_equipment')
+      .select('bag_id')
+      .eq('equipment_id', equipmentId);
+    
+    if (bagError) throw bagError;
+    
+    // Step 2: Get unique bag IDs (handles duplicates if equipment appears multiple times in same bag)
+    const uniqueBagIds = [...new Set(bagEquipment?.map(item => item.bag_id) || [])];
+    
+    if (uniqueBagIds.length === 0) return [];
+    
+    // Step 3: Fetch the bags with their details
+    const { data: bags, error: bagsError } = await supabase
+      .from('user_bags')
       .select(`
-        bag_id,
-        user_bags!inner (
-          id,
-          name,
-          likes_count,
-          user_id,
-          profiles (
-            username,
-            display_name,
-            avatar_url,
-            handicap
-          )
+        id,
+        name,
+        likes_count,
+        user_id,
+        profiles (
+          username,
+          display_name,
+          avatar_url,
+          handicap
         )
       `)
-      .eq('equipment_id', equipmentId)
-      .order('likes_count', { ascending: false, referencedTable: 'user_bags' })
+      .in('id', uniqueBagIds)
+      .order('likes_count', { ascending: false })
       .limit(limit);
-
-    if (error) throw error;
-
+    
+    if (bagsError) throw bagsError;
+    
     // Transform the data to a cleaner format
-    return data?.map(item => ({
-      bagId: item.user_bags.id,
-      bagName: item.user_bags.name,
-      likesCount: item.user_bags.likes_count || 0,
+    return bags?.map(item => ({
+      bagId: item.id,
+      bagName: item.name,
+      likesCount: item.likes_count || 0,
       user: {
-        username: item.user_bags.profiles?.username,
-        displayName: item.user_bags.profiles?.display_name,
-        avatar: item.user_bags.profiles?.avatar_url,
-        handicap: item.user_bags.profiles?.handicap
+        username: item.profiles?.username,
+        displayName: item.profiles?.display_name,
+        avatar: item.profiles?.avatar_url,
+        handicap: item.profiles?.handicap
       }
     })) || [];
   } catch (error) {

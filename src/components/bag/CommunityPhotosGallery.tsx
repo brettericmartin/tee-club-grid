@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import type { Database } from '@/lib/supabase';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { PhotoLightbox } from '@/components/shared/PhotoLightbox';
+import { togglePhotoTee } from '@/services/teeService';
 
 type EquipmentPhoto = Database['public']['Tables']['equipment_photos']['Row'] & {
   profile?: Database['public']['Tables']['profiles']['Row'];
@@ -106,31 +107,22 @@ export function CommunityPhotosGallery({
     }
 
     try {
-      if (isLiked) {
-        await supabase
-          .from('equipment_photo_likes')
-          .delete()
-          .eq('photo_id', photoId)
-          .eq('user_id', user.id);
+      const result = await togglePhotoTee(photoId, user.id);
+      
+      if (result.success) {
+        // Update local state
+        setPhotos(photos.map(photo => 
+          photo.id === photoId 
+            ? { 
+                ...photo, 
+                is_liked_by_user: result.isLiked,
+                likes_count: (photo.likes_count || 0) + (result.isLiked ? 1 : -1)
+              }
+            : photo
+        ));
       } else {
-        await supabase
-          .from('equipment_photo_likes')
-          .insert({
-            photo_id: photoId,
-            user_id: user.id
-          });
+        toast.error(result.error || 'Failed to update like');
       }
-
-      // Update local state
-      setPhotos(photos.map(photo => 
-        photo.id === photoId 
-          ? { 
-              ...photo, 
-              is_liked_by_user: !isLiked,
-              likes_count: (photo.likes_count || 0) + (isLiked ? -1 : 1)
-            }
-          : photo
-      ));
     } catch (error) {
       console.error('Error toggling like:', error);
       toast.error('Failed to update like');
@@ -224,8 +216,8 @@ export function CommunityPhotosGallery({
                               <TeedBallLike
                                 isLiked={photo.is_liked_by_user || false}
                                 likeCount={photo.likes_count || 0}
-                                onLike={async () => {
-                                  await toggleLike(photo.id, photo.is_liked_by_user || false);
+                                onToggle={() => {
+                                  toggleLike(photo.id, photo.is_liked_by_user || false);
                                 }}
                                 size="sm"
                                 showCount={true}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Eye, UserPlus, UserCheck, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
+import { toggleFeedTee } from '@/services/teeService';
 import { formatCompactCurrency } from '@/lib/formatters';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -175,8 +176,13 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
       
       return (
         <div className="relative">
-          {/* Video thumbnail with play button overlay */}
-          <div className="relative aspect-video bg-black overflow-hidden">
+          {/* Video thumbnail with play button overlay - clickable to open YouTube */}
+          <a 
+            href={post.videoData.url || `https://youtube.com/watch?v=${post.videoData.videoId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block relative aspect-video bg-black overflow-hidden group"
+          >
             <img 
               src={thumbnailUrl}
               alt={post.videoData.title || 'Video thumbnail'}
@@ -188,8 +194,8 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
             />
             
             {/* Play button overlay - smaller on mobile */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors cursor-pointer">
-              <div className="bg-white/95 rounded-full p-3 sm:p-4 shadow-xl transform hover:scale-110 transition-transform">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+              <div className="bg-white/95 rounded-full p-3 sm:p-4 shadow-xl transform group-hover:scale-110 transition-transform">
                 <svg className="w-6 h-6 sm:w-8 sm:h-8 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
@@ -206,7 +212,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
                 ) : post.videoData.provider.toUpperCase()}
               </div>
             )}
-          </div>
+          </a>
           
           {/* Video title below thumbnail - consistent with other post types */}
           {post.videoData.title && (
@@ -503,9 +509,12 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
             <TeedBallLike
               isLiked={isLiked}
               likeCount={post.likes}
-              onToggle={() => {
-                setIsLiked(!isLiked);
-                if (onLike) onLike(post.postId);
+              onToggle={async () => {
+                const result = await toggleFeedTee(post.postId);
+                if (result.success) {
+                  setIsLiked(result.isLiked);
+                  if (onLike) onLike(post.postId);
+                }
               }}
             />
             

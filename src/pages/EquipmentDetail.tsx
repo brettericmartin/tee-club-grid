@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, ShoppingCart, Share2, Users, Video } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Users, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,7 +19,6 @@ import ReviewList from '@/components/equipment/ReviewList';
 import { getTopBagsWithEquipment } from '@/services/equipmentBags';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TeedBallIcon } from '@/components/shared/TeedBallLike';
-import PriceComparison from '@/components/equipment/PriceComparison';
 import EquipmentVideosPanel from '@/components/equipment/EquipmentVideosPanel';
 import { EquipmentImage } from '@/components/shared/EquipmentImage';
 
@@ -37,16 +36,23 @@ export default function EquipmentDetail() {
 
   useEffect(() => {
     if (id) {
+      // Clear previous state when ID changes
+      setEquipment(null);
+      setTopBags([]);
+      setForumThreads([]);
+      setIsSaved(false);
+      
       loadEquipment();
     }
   }, [id]);
 
   useEffect(() => {
-    if (id) {
+    // Only load related data if equipment exists and has loaded
+    if (id && equipment) {
       loadForumThreads();
       loadTopBags();
     }
-  }, [id]);
+  }, [id, equipment]);
 
   const loadEquipment = async () => {
     if (!id) return;
@@ -55,6 +61,15 @@ export default function EquipmentDetail() {
       setLoading(true);
       console.log('[EquipmentDetail] Loading equipment with ID:', id);
       const data = await getEquipmentDetails(id);
+      
+      // Check if equipment exists
+      if (!data || !data.id) {
+        console.warn('[EquipmentDetail] Equipment not found with ID:', id);
+        toast.error('Equipment not found');
+        navigate('/equipment');
+        return;
+      }
+      
       console.log('[EquipmentDetail] Equipment data received:', {
         brand: data.brand,
         model: data.model,
@@ -80,6 +95,7 @@ export default function EquipmentDetail() {
     } catch (error) {
       console.error('Error loading equipment:', error);
       toast.error('Failed to load equipment details');
+      setEquipment(null); // Clear equipment on error
     } finally {
       setLoading(false);
     }
@@ -100,14 +116,15 @@ export default function EquipmentDetail() {
   };
 
   const loadTopBags = async () => {
-    if (!id) return;
+    if (!id || !equipment) return;
     
     setLoadingBags(true);
     try {
       const bags = await getTopBagsWithEquipment(id);
-      setTopBags(bags);
+      setTopBags(bags || []);
     } catch (error) {
       console.error('Error loading top bags:', error);
+      setTopBags([]); // Clear on error
     } finally {
       setLoadingBags(false);
     }
@@ -209,18 +226,6 @@ export default function EquipmentDetail() {
               )}
             </div>
 
-            {/* Price */}
-            <div>
-              <p className="text-3xl font-bold">
-                ${equipment.msrp || equipment.lowestPrice || 'N/A'}
-              </p>
-              {equipment.lowestPrice && equipment.lowestPrice < equipment.msrp && (
-                <p className="text-sm text-green-600">
-                  Lowest price found: ${equipment.lowestPrice}
-                </p>
-              )}
-            </div>
-
             {/* Ratings */}
             {equipment.averageRating && (
               <div className="flex items-center gap-2">
@@ -252,10 +257,6 @@ export default function EquipmentDetail() {
                 {isSaved ? 'Saved' : 'Save'}
               </Button>
               <Button variant="outline">
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Find Prices
-              </Button>
-              <Button variant="outline">
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
               </Button>
@@ -266,21 +267,22 @@ export default function EquipmentDetail() {
 
         {/* Tabs Section */}
         <Tabs defaultValue="photos" className="w-full">
-          <TabsList className="grid w-full grid-cols-7 lg:w-auto">
-            <TabsTrigger value="photos">Photos</TabsTrigger>
-            <TabsTrigger value="specs">Specs</TabsTrigger>
-            <TabsTrigger value="bags">
-              <Users className="w-4 h-4 mr-2" />
-              Bags
-            </TabsTrigger>
-            <TabsTrigger value="forums">Forums</TabsTrigger>
-            <TabsTrigger value="videos">
-              <Video className="w-4 h-4 mr-2" />
-              Videos
-            </TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
-            <TabsTrigger value="prices">Prices</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto">
+            <TabsList className="flex w-max min-w-full lg:w-auto">
+              <TabsTrigger value="photos">Photos</TabsTrigger>
+              <TabsTrigger value="specs">Specs</TabsTrigger>
+              <TabsTrigger value="bags">
+                <Users className="w-4 h-4 mr-2" />
+                Bags
+              </TabsTrigger>
+              <TabsTrigger value="forums">Forums</TabsTrigger>
+              <TabsTrigger value="videos">
+                <Video className="w-4 h-4 mr-2" />
+                Videos
+              </TabsTrigger>
+              <TabsTrigger value="reviews">Reviews</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="photos" className="mt-6">
             {equipment && equipment.id ? (
@@ -316,26 +318,26 @@ export default function EquipmentDetail() {
                       {topBags.map((bag) => (
                         <div
                           key={bag.bagId}
-                          className="flex items-center justify-between p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors cursor-pointer"
+                          className="flex items-center justify-between p-4 bg-[#1a1a1a] border border-white/10 rounded-lg hover:bg-[#2a2a2a] hover:border-white/20 transition-all cursor-pointer"
                           onClick={() => navigate(`/bag/${bag.bagId}`)}
                         >
                           <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
+                            <Avatar className="h-10 w-10 border border-white/10">
                               <AvatarImage src={bag.user.avatar} />
-                              <AvatarFallback>
+                              <AvatarFallback className="bg-[#2a2a2a] text-white">
                                 {bag.user.displayName?.charAt(0) || bag.user.username?.charAt(0)?.toUpperCase() || 'U'}
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium text-foreground">{bag.bagName}</p>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="font-medium text-white">{bag.bagName}</p>
+                              <p className="text-sm text-gray-400">
                                 @{bag.user.username} • Handicap {bag.user.handicap ?? 'N/A'}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 text-muted-foreground">
+                          <div className="flex items-center gap-1.5 text-gray-400">
                             <TeedBallIcon className="w-4 h-4" filled={false} />
-                            <span className="text-sm">{bag.likesCount}</span>
+                            <span className="text-sm font-medium">{bag.likesCount}</span>
                           </div>
                         </div>
                       ))}
@@ -419,13 +421,6 @@ export default function EquipmentDetail() {
 
           <TabsContent value="reviews" className="mt-6">
             <ReviewList equipmentId={id} />
-          </TabsContent>
-
-          <TabsContent value="prices" className="mt-6">
-            <PriceComparison 
-              equipmentId={equipment.id}
-              equipmentName={`${equipment.brand} ${equipment.model}`}
-            />
           </TabsContent>
         </Tabs>
       </div>

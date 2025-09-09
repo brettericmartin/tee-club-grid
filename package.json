@@ -22,6 +22,7 @@
     "scrape:all": "npm run scrape:golf && npm run scrape:images && npm run scrape:import",
     "scrape:shafts": "node scripts/scrape-shaft-grip-equipment.js",
     "add:shafts": "node scripts/add-comprehensive-shafts.js",
+    "update:top-equipment": "node scripts/generate-top-teed-equipment.js",
     "add:grips": "node scripts/add-comprehensive-grips.js",
     "collect:screenshots": "node scripts/collect-equipment-screenshots.js",
     "collect:2ndswing": "node scripts/collect-2ndswing-images.js",

@@ -29,6 +29,7 @@ import { PhotoLightbox } from '@/components/shared/PhotoLightbox';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { syncUserPhotoToEquipment } from '@/services/equipmentPhotoSync';
 import { supabase } from '@/lib/supabase';
+import { togglePhotoTee } from '@/services/teeService';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/lib/supabase';
@@ -413,7 +414,9 @@ export function BagEquipmentModal({
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-full max-w-4xl h-[calc(100vh-4rem)] sm:h-auto max-h-[calc(100vh-4rem)] sm:max-h-[85vh] p-0 overflow-hidden flex flex-col">
+      <DialogContent 
+        className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:w-full max-w-4xl h-[calc(100vh-4rem)] sm:h-auto max-h-[calc(100vh-4rem)] sm:max-h-[85vh] p-0 overflow-hidden flex flex-col"
+        hideCloseButton={true}>
         {/* Header - Simplified for mobile */}
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 pt-3 sm:pt-6 pb-2 sm:pb-4 border-b">
           <div className="space-y-2">
@@ -430,17 +433,27 @@ export function BagEquipmentModal({
                   </Badge>
                 )}
               </div>
-              {canEdit && !isEditing && activeTab === 'details' && (
+              <div className="flex items-center gap-2">
+                {canEdit && !isEditing && activeTab === 'details' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditing(true)}
+                    className="min-h-[36px] px-2"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    <span className="ml-1 hidden sm:inline">Edit</span>
+                  </Button>
+                )}
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  onClick={() => setIsEditing(true)}
-                  className="min-h-[36px] px-2"
+                  onClick={onClose}
+                  className="min-h-[36px] w-[36px] p-0"
                 >
-                  <Edit3 className="w-4 h-4" />
-                  <span className="ml-1 hidden sm:inline">Edit</span>
+                  <X className="w-5 h-5" />
                 </Button>
-              )}
+              </div>
             </div>
             
             {/* Category and Links Row */}
@@ -518,7 +531,7 @@ export function BagEquipmentModal({
                         <div className="flex items-center gap-4">
                           <div className="w-24 h-24 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden flex-shrink-0">
                             <img
-                              src={formData.custom_photo_url || equipment.image_url}
+                              src={formData.custom_photo_url || (equipment as any)?.primaryPhoto || equipment.image_url}
                               alt={`${equipment.brand} ${equipment.model}`}
                               className="w-full h-full object-cover"
                               loading="lazy"
@@ -913,7 +926,7 @@ export function BagEquipmentModal({
                       <div className="relative w-full px-4 sm:px-0">
                         <div className="aspect-square max-w-[280px] sm:max-w-sm md:max-w-md mx-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden shadow-2xl">
                           <img
-                            src={bagEquipment?.custom_photo_url || equipment.image_url || ''}
+                            src={bagEquipment?.custom_photo_url || (equipment as any)?.primaryPhoto || equipment.image_url || ''}
                             alt={`${equipment.brand} ${equipment.model}`}
                             className="w-full h-full object-cover"
                             loading="lazy"
@@ -1146,7 +1159,7 @@ export function BagEquipmentModal({
                                 <TeedBallLike
                                   isLiked={photo.is_liked_by_user || false}
                                   likeCount={photo.likes_count || 0}
-                                  onLike={() => handlePhotoLike(photo.id, photo.is_liked_by_user || false)}
+                                  onToggle={() => handlePhotoLike(photo.id, photo.is_liked_by_user || false)}
                                   size="sm"
                                   showCount={true}
                                   className="bg-black/60 rounded-lg p-1"

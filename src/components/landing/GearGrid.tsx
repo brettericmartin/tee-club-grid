@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight, TrendingUp, Star, Award, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { formatCompactCurrency } from "@/lib/formatters";
+import topTeedEquipmentData from "@/data/topTeedEquipment.json";
 
 interface Equipment {
   id: string;
@@ -54,54 +55,157 @@ export const GearGrid = ({ onViewDetails, onBrowseAll }: GearGridProps) => {
 
   const fetchEquipment = async () => {
     try {
-      // Fetch popular equipment with photos
-      const { data: equipmentData, error } = await supabase
-        .from('equipment')
+      let processedEquipment: EquipmentWithStats[] = [];
+      
+      // First try to use pre-generated top teed equipment data
+      if (topTeedEquipmentData && topTeedEquipmentData.equipment.length > 0) {
+        console.log('Using pre-generated top teed equipment data');
+        
+        // Process the pre-generated data
+        processedEquipment = topTeedEquipmentData.equipment.map((eq, index) => {
+          // Assign badges to top items
+          let badge: "Most Teed" | "Pro Choice" | "Best Value" | undefined;
+          
+          if (index === 0) {
+            badge = "Most Teed";
+          } else if (index < 3 && ['Titleist', 'TaylorMade', 'Callaway'].includes(eq.brand)) {
+            badge = "Pro Choice";
+          } else if (index < 5 && eq.msrp && eq.msrp < 300) {
+            badge = "Best Value";
+          }
+          
+          return {
+            ...eq,
+            teesCount: eq.totalTees,
+            usersCount: eq.photoCount * 3, // Estimate users
+            avgRating: 4.2 + Math.min(eq.totalTees / 10, 0.7), // 4.2-4.9 range
+            badge
+          };
+        });
+      }
+      
+      // If we don't have enough teed equipment, supplement with popular equipment
+      if (processedEquipment.length < 8) {
+        console.log(`Only ${processedEquipment.length} teed items, fetching additional popular equipment`);
+        
+        const { data: popularEquipment, error } = await supabase
+          .from('equipment')
+          .select(`
+            *,
+            equipment_photos (
+              id,
+              photo_url,
+              is_primary
+            )
+          `)
+          .in('category', ['driver', 'iron', 'wedge', 'putter', 'ball', 'fairway_wood'])
+          .order('popularity_score', { ascending: false })
+          .limit(20);
+        
+        if (!error && popularEquipment) {
+          // Add popular equipment that's not already in our list
+          const existingIds = new Set(processedEquipment.map(eq => eq.id));
+          
+          const additionalEquipment = popularEquipment
+            .filter(eq => !existingIds.has(eq.id) && eq.equipment_photos?.length > 0)
+            .slice(0, 8 - processedEquipment.length)
+            .map(eq => {
+              const primaryPhoto = eq.equipment_photos?.find((p: any) => p.is_primary);
+              const firstPhoto = eq.equipment_photos?.[0];
+              
+              return {
+                ...eq,
+                image_url: primaryPhoto?.photo_url || firstPhoto?.photo_url || eq.image_url,
+                teesCount: 0,
+                usersCount: Math.floor(Math.random() * 10 + 1),
+                avgRating: 4.0 + (eq.popularity_score || 50) / 100,
+                badge: undefined as "Most Teed" | "Pro Choice" | "Best Value" | undefined
+              };
+            });
+          
+          processedEquipment = [...processedEquipment, ...additionalEquipment];
+        }
+      }
+      
+      if (processedEquipment.length > 0) {
+        setEquipment(processedEquipment);
+        setLoading(false);
+        return;
+      }
+      
+      // Fallback: If no pre-generated data, fetch from database
+      console.log('Falling back to live data');
+      
+      // Get top teed photos with equipment
+      const { data: topPhotos, error } = await supabase
+        .from('equipment_photos')
         .select(`
-          *,
-          equipment_photos (
+          id,
+          photo_url,
+          likes_count,
+          equipment_id,
+          equipment:equipment_id (
             id,
-            photo_url,
-            is_primary
+            brand,
+            model,
+            category,
+            image_url,
+            msrp,
+            release_year
           )
         `)
-        .in('category', ['driver', 'iron', 'wedge', 'putter', 'ball', 'fairway_wood'])
-        .order('popularity_score', { ascending: false })
-        .limit(24);
+        .gt('likes_count', 0)
+        .not('equipment_id', 'is', null)
+        .order('likes_count', { ascending: false })
+        .limit(50);
 
       if (error) throw error;
 
-      // Process equipment to get primary photos and add stats
-      const processedEquipment: EquipmentWithStats[] = (equipmentData || []).map(eq => {
-        // Get primary photo or first photo
-        const primaryPhoto = eq.equipment_photos?.find((p: any) => p.is_primary);
-        const firstPhoto = eq.equipment_photos?.[0];
-        const photoUrl = primaryPhoto?.photo_url || firstPhoto?.photo_url || eq.image_url;
-
-        // Generate some realistic stats based on popularity
-        const popularityScore = eq.popularity_score || 50;
-        const teesCount = Math.floor(popularityScore * 12 + Math.random() * 100);
-        const usersCount = Math.floor(teesCount / 3);
-        
-        // Assign badges to top items
-        let badge: "Most Teed" | "Pro Choice" | "Best Value" | undefined;
-        if (popularityScore > 90) {
-          badge = "Most Teed";
-        } else if (eq.brand === 'Titleist' && popularityScore > 80) {
-          badge = "Pro Choice";
-        } else if (eq.msrp && eq.msrp < 300 && popularityScore > 70) {
-          badge = "Best Value";
+      // Group by equipment and sum tees
+      const equipmentMap = new Map();
+      
+      topPhotos?.forEach(photo => {
+        if (photo.equipment) {
+          const equipmentId = photo.equipment.id;
+          
+          if (!equipmentMap.has(equipmentId)) {
+            equipmentMap.set(equipmentId, {
+              ...photo.equipment,
+              image_url: photo.photo_url || photo.equipment.image_url,
+              teesCount: 0,
+              photoCount: 0
+            });
+          }
+          
+          const equipment = equipmentMap.get(equipmentId);
+          equipment.teesCount += photo.likes_count || 0;
+          equipment.photoCount += 1;
         }
-
-        return {
-          ...eq,
-          image_url: photoUrl,
-          teesCount,
-          usersCount,
-          avgRating: 4.5 + (popularityScore / 100) * 0.4, // 4.5-4.9 range
-          badge
-        };
       });
+
+      // Convert to array and sort
+      const processedEquipment: EquipmentWithStats[] = Array.from(equipmentMap.values())
+        .sort((a, b) => b.teesCount - a.teesCount)
+        .slice(0, 24)
+        .map((eq, index) => {
+          // Assign badges
+          let badge: "Most Teed" | "Pro Choice" | "Best Value" | undefined;
+          
+          if (index === 0) {
+            badge = "Most Teed";
+          } else if (index < 3 && ['Titleist', 'TaylorMade', 'Callaway'].includes(eq.brand)) {
+            badge = "Pro Choice";
+          } else if (index < 5 && eq.msrp && eq.msrp < 300) {
+            badge = "Best Value";
+          }
+          
+          return {
+            ...eq,
+            usersCount: eq.photoCount * 3,
+            avgRating: 4.2 + Math.min(eq.teesCount / 10, 0.7),
+            badge
+          };
+        });
 
       setEquipment(processedEquipment);
     } catch (error) {

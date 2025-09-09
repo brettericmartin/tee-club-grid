@@ -1,0 +1,27 @@
+{
+  "generated": "2025-09-09T03:08:02.912Z",
+  "equipment": [
+    {
+      "id": "524fe4c1-46a8-4c33-a744-a97fc5c1e5fc",
+      "brand": "Garmin",
+      "model": "Approach S70 (42mm)",
+      "category": "gps",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/524fe4c1-46a8-4c33-a744-a97fc5c1e5fc/1752377003935-z9aann.png",
+      "msrp": 649,
+      "release_year": null,
+      "totalTees": 1,
+      "photoCount": 1
+    },
+    {
+      "id": "d1fd6333-6bc6-4ea4-87c9-8feea02a5b55",
+      "brand": "TaylorMade",
+      "model": "TP5",
+      "category": "ball",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/d1fd6333-6bc6-4ea4-87c9-8feea02a5b55/1752285503170-w4tjf.png",
+      "msrp": 49.99,
+      "release_year": null,
+      "totalTees": 1,
+      "photoCount": 1
+    }
+  ]
+}

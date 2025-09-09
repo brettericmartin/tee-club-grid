@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { UnifiedPhotoUploadDialog } from '@/components/shared/UnifiedPhotoUploadDialog';
 import { EquipmentImage } from '@/components/shared/EquipmentImage';
+import { togglePhotoTee, checkUserTeed } from '@/services/teeService';
 
 interface EquipmentPhoto {
   id: string;
@@ -67,6 +68,7 @@ export function EquipmentPhotoRepository({
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedPhoto, setSelectedPhoto] = useState<EquipmentPhoto | null>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [userLikes, setUserLikes] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (equipmentId) {
@@ -80,7 +82,11 @@ export function EquipmentPhotoRepository({
         .from('equipment_photos')
         .select(`
           *,
-          user_id
+          user_id,
+          equipment_photo_likes!left(
+            id,
+            user_id
+          )
         `)
         .eq('equipment_id', equipmentId)
         .not('user_id', 'is', null); // Only show user-uploaded photos
@@ -105,9 +111,23 @@ export function EquipmentPhotoRepository({
         throw error;
       }
       
-      // Filter to only user-uploaded photos
+      // Filter to only user-uploaded photos and process liked state
       const userPhotos = (data || []).filter(photo => photo.user_id);
+      
+      // Process user likes from the joined data
+      const likeStatuses: Record<string, boolean> = {};
+      if (user) {
+        userPhotos.forEach(photo => {
+          // Check if current user has liked this photo
+          const userLiked = photo.equipment_photo_likes?.some(
+            (like: any) => like.user_id === user.id
+          ) || false;
+          likeStatuses[photo.id] = userLiked;
+        });
+      }
+      
       setPhotos(userPhotos);
+      setUserLikes(likeStatuses);
     } catch (error) {
       console.error('Error loading photos:', error);
       toast.error('Failed to load photos');
@@ -123,31 +143,27 @@ export function EquipmentPhotoRepository({
     }
 
     try {
-      // For now, just reload photos after attempting to like
-      // Since we can't track user_liked state without the join
-      await supabase
-        .from('equipment_photo_likes')
-        .insert({
-          photo_id: photoId,
-          user_id: user.id
-        });
-
-      // Reload photos to get updated like counts
-      await loadPhotos();
+      const result = await togglePhotoTee(photoId, user.id);
+      
+      if (result.success) {
+        // Update local state immediately
+        setUserLikes(prev => ({ ...prev, [photoId]: result.isLiked }));
+        
+        // Update photo like count
+        setPhotos(photos.map(photo => 
+          photo.id === photoId 
+            ? { 
+                ...photo, 
+                likes_count: (photo.likes_count || 0) + (result.isLiked ? 1 : -1)
+              }
+            : photo
+        ));
+      } else {
+        toast.error(result.error || 'Failed to update like');
+      }
     } catch (error) {
       console.error('Error toggling like:', error);
-      // If error is duplicate key, that means user already liked it
-      if (error.message?.includes('duplicate')) {
-        // Try to unlike
-        await supabase
-          .from('equipment_photo_likes')
-          .delete()
-          .eq('photo_id', photoId)
-          .eq('user_id', user.id);
-        await loadPhotos();
-      } else {
-        throw error;
-      }
+      toast.error('Failed to update like');
     }
   };
 
@@ -190,9 +206,9 @@ export function EquipmentPhotoRepository({
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
             <TeedBallLike
-              isLiked={false}
+              isLiked={userLikes[photo.id] || false}
               likeCount={photo.likes_count || 0}
-              onLike={() => handleLike(photo.id)}
+              onToggle={() => handleLike(photo.id)}
               size="md"
               showCount={true}
             />
@@ -215,9 +231,8 @@ export function EquipmentPhotoRepository({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold">Photo Repository</h3>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
             <SelectTrigger className="w-32">
               <SelectValue />
@@ -247,14 +262,14 @@ export function EquipmentPhotoRepository({
               <List className="w-4 h-4" />
             </Button>
           </div>
-
-          {user && (
-            <Button onClick={() => setShowUploadDialog(true)} size="sm">
-              <Upload className="w-4 h-4 mr-2" />
-              Upload
-            </Button>
-          )}
         </div>
+
+        {user && (
+          <Button onClick={() => setShowUploadDialog(true)} size="sm" className="w-full sm:w-auto">
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Photo
+          </Button>
+        )}
       </div>
 
       {/* Photo Grid/List */}

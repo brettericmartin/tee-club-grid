@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { X, ExternalLink, Heart, Share2, ShoppingCart, Users, ChevronLeft, ChevronRight, Expand, Info } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { X, ExternalLink, Heart, Share2, ShoppingCart, Users, ChevronLeft, ChevronRight, Expand, Info, Camera } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -51,63 +51,24 @@ export function ViewerEquipmentModal({
   const navigate = useNavigate();
   
   // State
-  const [equipmentPhotos, setEquipmentPhotos] = useState<any[]>([]);
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showLightbox, setShowLightbox] = useState(false);
   const [otherUsers, setOtherUsers] = useState<any[]>([]);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const loadingRef = useRef(false);
 
   const equipment = bagEquipment?.equipment;
   const equipmentId = equipment?.id;
 
-  // Load additional data when modal opens
-  useEffect(() => {
-    if (isOpen && equipmentId) {
-      loadAdditionalData();
-    }
-  }, [isOpen, equipmentId]);
-
   const loadAdditionalData = useCallback(async () => {
     if (!equipmentId) return;
+    
+    // Prevent duplicate loading using ref
+    if (loadingRef.current) return;
+    loadingRef.current = true;
 
     setLoading(true);
     try {
-      // Load equipment photos
-      const { data: photos } = await supabase
-        .from('equipment_photos')
-        .select('*')
-        .eq('equipment_id', equipmentId)
-        .order('likes_count', { ascending: false })
-        .limit(12);
-
-      // Filter out placeholder images
-      const validPhotos = (photos || []).filter(photo => 
-        photo.photo_url && !photo.photo_url.includes('placehold')
-      );
-
-      // Add main photo if it exists
-      const allPhotos = [];
-      if (bagEquipment?.custom_photo_url && !bagEquipment.custom_photo_url.includes('placehold')) {
-        allPhotos.push({
-          id: 'custom',
-          photo_url: bagEquipment.custom_photo_url,
-          caption: 'Owner\'s photo',
-          likes_count: 0
-        });
-      }
-      if (equipment?.image_url && !equipment.image_url.includes('placehold')) {
-        allPhotos.push({
-          id: 'main',
-          photo_url: equipment.image_url,
-          caption: 'Stock photo',
-          likes_count: 0
-        });
-      }
-      allPhotos.push(...validPhotos);
-
-      setEquipmentPhotos(allPhotos);
-
       // Load other users with this equipment
       const { data: bags } = await supabase
         .from('bag_equipment')
@@ -150,8 +111,22 @@ export function ViewerEquipmentModal({
       console.error('Error loading additional data:', error);
     } finally {
       setLoading(false);
+      loadingRef.current = false;
     }
-  }, [equipmentId, bagEquipment, equipment, bagOwner, user]);
+  }, [equipmentId, bagEquipment?.custom_photo_url, equipment?.image_url, bagOwner?.id, user?.id]);
+
+  // Load additional data when modal opens
+  useEffect(() => {
+    if (!isOpen) {
+      // Clear state when modal closes
+      loadingRef.current = false;
+      return;
+    }
+    
+    if (equipmentId) {
+      loadAdditionalData();
+    }
+  }, [isOpen, equipmentId, loadAdditionalData]);
 
   const toggleWishlist = async () => {
     if (!user) {
@@ -202,8 +177,8 @@ export function ViewerEquipmentModal({
 
   if (!equipment || !bagEquipment) return null;
 
-  // Determine main display photo
-  const mainPhoto = bagEquipment.custom_photo_url || equipment.image_url || '';
+  // Determine main display photo - use primaryPhoto if available (set by loadBagEquipment)
+  const mainPhoto = bagEquipment.custom_photo_url || (equipment as any)?.primaryPhoto || equipment.image_url || '';
   const hasValidMainPhoto = mainPhoto && !mainPhoto.includes('placehold');
 
   // Check if it's a club (for showing shaft/grip)
@@ -213,7 +188,7 @@ export function ViewerEquipmentModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden" hideCloseButton={true}>
           {/* Header */}
           <DialogHeader className="px-6 pt-6 pb-0">
             <div className="flex items-start justify-between">
@@ -247,19 +222,13 @@ export function ViewerEquipmentModal({
                         src={mainPhoto}
                         alt={`${equipment.brand} ${equipment.model}`}
                         className="w-full h-full object-cover cursor-pointer transition-transform hover:scale-105"
-                        onClick={() => {
-                          setSelectedPhotoIndex(0);
-                          setShowLightbox(true);
-                        }}
+                        onClick={() => setShowLightbox(true)}
                       />
                       <Button
                         variant="ghost"
                         size="icon"
                         className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white"
-                        onClick={() => {
-                          setSelectedPhotoIndex(0);
-                          setShowLightbox(true);
-                        }}
+                        onClick={() => setShowLightbox(true)}
                       >
                         <Expand className="h-5 w-5" />
                       </Button>
@@ -273,41 +242,8 @@ export function ViewerEquipmentModal({
                     </div>
                   )}
                 </div>
-
-                {/* Photo Thumbnails */}
-                {equipmentPhotos.length > 1 && (
-                  <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-                    {equipmentPhotos.slice(0, 6).map((photo, index) => (
-                      <button
-                        key={photo.id}
-                        onClick={() => {
-                          setSelectedPhotoIndex(index);
-                          setShowLightbox(true);
-                        }}
-                        className={cn(
-                          "flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all",
-                          selectedPhotoIndex === index
-                            ? "border-primary"
-                            : "border-transparent hover:border-white/50"
-                        )}
-                      >
-                        <img
-                          src={photo.photo_url}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    ))}
-                    {equipmentPhotos.length > 6 && (
-                      <button
-                        onClick={() => setShowLightbox(true)}
-                        className="flex-shrink-0 w-20 h-20 rounded-lg bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
-                      >
-                        <span className="text-sm font-medium">+{equipmentPhotos.length - 6}</span>
-                      </button>
-                    )}
-                  </div>
-                )}
+                
+                {/* Simplified: No photo thumbnails for user's bag view */}
               </div>
 
               {/* Quick Actions */}
@@ -499,20 +435,21 @@ export function ViewerEquipmentModal({
         </DialogContent>
       </Dialog>
 
-      {/* Photo Lightbox */}
+      {/* Photo Lightbox - Single photo only */}
       <PhotoLightbox
         isOpen={showLightbox}
         onClose={() => setShowLightbox(false)}
-        photos={equipmentPhotos}
-        initialPhotoIndex={selectedPhotoIndex}
+        photos={hasValidMainPhoto ? [{
+          id: 'main',
+          photo_url: mainPhoto,
+          caption: `${equipment.brand} ${equipment.model}`
+        }] : []}
+        initialPhotoIndex={0}
         onLike={handlePhotoLike}
         showLikes={false}
       />
     </>
   );
 }
-
-// Missing import
-import { Camera } from 'lucide-react';
 
 export default React.memo(ViewerEquipmentModal);
