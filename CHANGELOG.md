@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.23.0] - 2025-09-09
+### Added
+- **Tee System**: Full implementation of golf-themed "like" system
+  - Database migrations for bag_tees and equipment_tees tables
+  - Automatic trigger functions for tee count updates
+  - Service layer with optimistic UI updates
+  - Integration across all equipment and bag displays
+- **Top Teed Equipment**: New data-driven feature showing most popular gear
+  - Automated GitHub Actions workflow for daily updates
+  - Generated JSON data file for performance
+  - Integration with equipment browser
+- **Landing Page Enhancements**: Interactive gear grid with animations
+  - Dynamic equipment showcase with golf-themed bounce animations
+  - Responsive grid layout with optimized image loading
+  - Mobile-optimized touch interactions
+
+### Changed
+- **Equipment Modal Performance**: Complete refactor for 50%+ speed improvement
+  - Optimized data fetching with parallel queries
+  - Better caching strategy for equipment data
+  - Reduced unnecessary re-renders with proper memoization
+- **Community Photos Gallery**: Enhanced loading and display
+  - Improved lazy loading with intersection observer
+  - Better error handling for missing images
+  - Consistent photo sizing across all viewports
+- **Equipment Detail Pages**: Cleaner UI with better information hierarchy
+  - Redesigned layout with clear sections
+  - Improved specifications display
+  - Better mobile responsiveness
+
+### Fixed
+- Duplicate bag equipment entries in modals and galleries
+- YouTube video embed issues with proper iframe attributes
+- Forum post display and reaction functionality
+- Equipment bag service type safety issues
+- Memory leaks in equipment modal components
+
+### Technical Details
+- Added migration: `20250109_fix_tee_system.sql`
+- New service: `teeService.ts` with complete CRUD operations
+- GitHub Actions: `.github/workflows/update-top-equipment.yml`
+- Performance monitoring added to critical paths
+
 ## [0.21.0] - 2025-09-05
 ### Fixed
 - **CRITICAL**: Resolved app-breaking dynamic import errors in App.tsx and MyBagSupabase.tsx

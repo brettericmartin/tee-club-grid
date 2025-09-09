@@ -10,6 +10,53 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.23.0",
+    date: "2025-09-09",
+    title: "Tee System Launch & Performance Boost",
+    changes: [
+      {
+        category: "feature",
+        description: "🏌️ NEW: Tee System - Show appreciation for bags and equipment with our golf-themed 'like' system"
+      },
+      {
+        category: "feature",
+        description: "Interactive landing page gear grid with animated equipment showcase"
+      },
+      {
+        category: "feature",
+        description: "Top Teed Equipment - Discover the most popular gear in the community"
+      },
+      {
+        category: "performance",
+        description: "⚡ Dramatically improved equipment modal load times with optimized data fetching"
+      },
+      {
+        category: "performance",
+        description: "Enhanced community photos gallery with better lazy loading and caching"
+      },
+      {
+        category: "improvement",
+        description: "Redesigned equipment detail pages with cleaner UI and better information hierarchy"
+      },
+      {
+        category: "improvement",
+        description: "Streamlined bag equipment service for faster page loads and smoother interactions"
+      },
+      {
+        category: "fix",
+        description: "Fixed duplicate bag equipment entries in modals and galleries"
+      },
+      {
+        category: "fix",
+        description: "Resolved video embed issues affecting YouTube content display"
+      },
+      {
+        category: "fix",
+        description: "Fixed forum post display and reaction functionality"
+      }
+    ]
+  },
+  {
     version: "0.22.0",
     date: "2025-09-07",
     title: "Feed Experience Improvements",
