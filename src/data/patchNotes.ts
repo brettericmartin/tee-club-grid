@@ -10,6 +10,25 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.23.1",
+    date: "2025-09-10",
+    title: "Photo Upload Fix",
+    changes: [
+      {
+        category: "fix",
+        description: "Fixed equipment photos not associating with equipment when uploaded through feed"
+      },
+      {
+        category: "fix",
+        description: "Feed posts now properly display uploaded photos instead of broken blob URLs"
+      },
+      {
+        category: "improvement",
+        description: "Photos uploaded to equipment now immediately appear in equipment modals and detail pages"
+      }
+    ]
+  },
+  {
     version: "0.23.0",
     date: "2025-09-09",
     title: "Tee System Launch & Performance Boost",

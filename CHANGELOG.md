@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.23.1] - 2025-09-10
+### Fixed
+- Equipment photos not associating with equipment when uploaded through feed
+  - `FeedPhotoUpload` component was using blob URL instead of uploaded URL
+  - Fixed by capturing return value from `uploadEquipmentPhoto` service
+- Feed posts now properly display uploaded photos from Supabase Storage
+- Photos uploaded to equipment now immediately appear in equipment modals and detail pages
+
+### Technical Details
+- Modified: `src/components/feed/FeedPhotoUpload.tsx` - Fixed photo URL handling
+
 ## [0.23.0] - 2025-09-09
 ### Added
 - **Tee System**: Full implementation of golf-themed "like" system

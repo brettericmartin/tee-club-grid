@@ -15,7 +15,6 @@ import { getForumThreadsByEquipment } from '@/services/forum';
 import ForumThreadPreview from '@/components/forum/ForumThreadPreview';
 import { MessageSquare } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import ReviewList from '@/components/equipment/ReviewList';
 import { getTopBagsWithEquipment } from '@/services/equipmentBags';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TeedBallIcon } from '@/components/shared/TeedBallLike';
@@ -245,7 +244,7 @@ export default function EquipmentDetail() {
                   ))}
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {equipment.averageRating.toFixed(1)} ({equipment.reviewCount} reviews)
+                  {equipment.averageRating.toFixed(1)}
                 </span>
               </div>
             )}
@@ -280,7 +279,6 @@ export default function EquipmentDetail() {
                 <Video className="w-4 h-4 mr-2" />
                 Videos
               </TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
             </TabsList>
           </div>
 
@@ -419,9 +417,6 @@ export default function EquipmentDetail() {
             />
           </TabsContent>
 
-          <TabsContent value="reviews" className="mt-6">
-            <ReviewList equipmentId={id} />
-          </TabsContent>
         </Tabs>
       </div>
     </div>

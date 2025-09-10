@@ -184,7 +184,7 @@ export const GearGrid = ({ onViewDetails, onBrowseAll }: GearGridProps) => {
       });
 
       // Convert to array and sort
-      const processedEquipment: EquipmentWithStats[] = Array.from(equipmentMap.values())
+      processedEquipment = Array.from(equipmentMap.values())
         .sort((a, b) => b.teesCount - a.teesCount)
         .slice(0, 24)
         .map((eq, index) => {
