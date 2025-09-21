@@ -83,10 +83,20 @@ export function getBestBagEquipmentPhoto(
   const { selected_photo_id, custom_photo_url, equipment } = bagEquipment;
   
   // 1. User's selected photo from unified pool (highest priority)
-  if (selected_photo_id && equipment.equipment_photos) {
-    const selectedPhoto = equipment.equipment_photos.find(p => p.id === selected_photo_id);
-    if (selectedPhoto && !isPlaceholder(selectedPhoto.photo_url)) {
-      return selectedPhoto.photo_url;
+  if (selected_photo_id) {
+    if (equipment.equipment_photos && equipment.equipment_photos.length > 0) {
+      const selectedPhoto = equipment.equipment_photos.find(p => p.id === selected_photo_id);
+      if (selectedPhoto && !isPlaceholder(selectedPhoto.photo_url)) {
+        console.log('Found selected photo for', equipment.brand, equipment.model, ':', selectedPhoto.photo_url);
+        return selectedPhoto.photo_url;
+      } else {
+        console.warn('Selected photo ID not found in equipment_photos for', equipment.brand, equipment.model, 
+          'selected_photo_id:', selected_photo_id, 
+          'available photo ids:', equipment.equipment_photos.map(p => p.id));
+      }
+    } else {
+      console.warn('No equipment_photos loaded for', equipment.brand, equipment.model, 
+        'but selected_photo_id exists:', selected_photo_id);
     }
   }
   

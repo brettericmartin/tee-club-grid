@@ -464,12 +464,16 @@ const MyBagSupabase = () => {
             equipment: item.equipment
           });
           
-          // Store displayPhoto on the bag_equipment item itself
+          // CRITICAL: Store displayPhoto on the bag_equipment item itself
           // This ensures each variant shows its own selected photo
           (item as any).displayPhoto = bestPhoto;
           
-          // Legacy: Also set primaryPhoto for backward compatibility
-          item.equipment.primaryPhoto = bestPhoto;
+          console.log(`MyBag processing: ${item.equipment.brand} ${item.equipment.model}`,
+            'selected_photo_id:', item.selected_photo_id,
+            'displayPhoto:', bestPhoto,
+            'equipment_photos count:', item.equipment.equipment_photos?.length || 0);
+          
+          // DO NOT set primaryPhoto on equipment - causes conflicts with variants
         }
         return item;
       }) || [];

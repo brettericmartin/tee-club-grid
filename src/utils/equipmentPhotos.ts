@@ -45,15 +45,18 @@ export function processEquipmentPhotos(bagEquipment: BagEquipmentItem[]): BagEqu
         equipment: item.equipment
       });
       
-      // Store the computed photo on the bag_equipment item itself
-      // NOT on the equipment object (which may be shared)
+      // CRITICAL: Store the computed photo on the bag_equipment item itself
+      // This ensures each variant maintains its own photo selection
       (item as any).displayPhoto = bestPhoto;
       
-      // Legacy: Also set primaryPhoto on equipment for backward compatibility
-      // But this should be phased out as it causes conflicts
-      item.equipment.primaryPhoto = bestPhoto;
+      console.log(`ProcessEquipment: ${item.equipment.brand} ${item.equipment.model}`,
+        'selected_photo_id:', item.selected_photo_id,
+        'displayPhoto:', bestPhoto);
       
-      // Also set most_liked_photo for compatibility
+      // DO NOT set primaryPhoto on shared equipment object - causes conflicts
+      // Only set it if needed for backward compatibility in specific places
+      
+      // Set most_liked_photo for reference (not used for display)
       if (item.equipment.equipment_photos && item.equipment.equipment_photos.length > 0) {
         const sortedPhotos = [...item.equipment.equipment_photos].sort((a, b) => 
           (b.likes_count || 0) - (a.likes_count || 0)

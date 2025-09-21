@@ -25,6 +25,7 @@ interface BagEquipmentItem {
   custom_photo_url?: string;
   selected_photo_id?: string;
   created_at: string;
+  displayPhoto?: string; // Computed photo for this specific item
   equipment: {
     id: string;
     brand: string;
@@ -88,18 +89,21 @@ const BagCardComponent = ({
   
   // Define the getEquipmentImage function first
   const getEquipmentImage = (item: BagEquipmentItem) => {
-    // First check if displayPhoto was already computed by processEquipmentPhotos
-    // This ensures each bag_equipment item shows its own selected photo
-    if ((item as any).displayPhoto !== undefined) {
+    // CRITICAL: Always use displayPhoto if available - this ensures each variant shows its own photo
+    if ((item as any).displayPhoto !== undefined && (item as any).displayPhoto !== null) {
+      console.log(`Using displayPhoto for ${item.equipment?.brand} ${item.equipment?.model}:`, (item as any).displayPhoto);
       return (item as any).displayPhoto;
     }
     
-    // Otherwise compute it using the unified photo service
+    // Fallback: compute using the unified photo service
     const bestPhoto = getBestBagEquipmentPhoto({
       selected_photo_id: item.selected_photo_id,
       custom_photo_url: item.custom_photo_url,
       equipment: item.equipment
     });
+    
+    console.log(`Computed photo for ${item.equipment?.brand} ${item.equipment?.model}:`, bestPhoto, 
+      'selected_photo_id:', item.selected_photo_id);
     
     return bestPhoto;
   };
