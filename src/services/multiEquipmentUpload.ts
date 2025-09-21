@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { compressImage } from '@/utils/imageOptimization';
+import { syncFeedPhotoToBagEquipment } from '@/services/equipmentPhotoSync';
 
 export interface PhotoUpload {
   id: string;
@@ -196,6 +197,34 @@ export async function createMultiEquipmentPost(
     if (photoError) {
       console.warn('Failed to create equipment_photos entries:', photoError);
       // Don't fail the whole operation if this fails
+    }
+    
+    // CRITICAL: Sync photos to bag_equipment so they show in user's bag!
+    // Process each unique equipment and sync the first photo for that equipment
+    const equipmentPhotoMap = new Map<string, string>();
+    uploadedPhotos.forEach(photo => {
+      if (!equipmentPhotoMap.has(photo.equipmentId)) {
+        equipmentPhotoMap.set(photo.equipmentId, photo.url);
+      }
+    });
+    
+    // Sync each equipment's photo to bag_equipment
+    for (const [equipmentId, photoUrl] of equipmentPhotoMap) {
+      try {
+        const syncResult = await syncFeedPhotoToBagEquipment(
+          userId,
+          equipmentId,
+          photoUrl,
+          false // Don't overwrite existing custom photos
+        );
+        
+        if (syncResult.updated > 0) {
+          console.log(`Synced photo for equipment ${equipmentId} to ${syncResult.updated} bag entries`);
+        }
+      } catch (syncError) {
+        console.warn(`Failed to sync photo for equipment ${equipmentId}:`, syncError);
+        // Don't fail the whole operation
+      }
     }
     
     return { 
