@@ -28,6 +28,7 @@ import type { Database } from "@/lib/supabase";
 import { smartCreateBagPost, smartCreateBagUpdatePost, smartCreateEquipmentPost } from "@/services/feedSmartUpdate";
 import { setPrimaryBag } from "@/services/bags";
 import { getUserTotalTees } from "@/services/teeService";
+import { getBestBagEquipmentPhoto } from "@/services/unifiedPhotoService";
 import { BadgeShowcase } from "@/components/badges/BadgeShowcase";
 import { useBadgeCheck } from "@/hooks/useBadgeCheck";
 import { BadgeNotificationToast } from "@/components/badges/BadgeNotificationToast";
@@ -452,28 +453,19 @@ const MyBagSupabase = () => {
         throw new Error(error?.message || 'Failed to load equipment');
       }
 
-      // Process the data to calculate most liked photos
+      // Process the data using unified photo service
       const processedData = data?.map(item => {
         if (item.equipment) {
-          // First priority: User's custom selected photo
-          if (item.custom_photo_url) {
-            item.equipment.primaryPhoto = item.custom_photo_url;
-          } 
-          // Second priority: Most liked community photo
-          else if (item.equipment.equipment_photos && item.equipment.equipment_photos.length > 0) {
-            // Sort photos by likes_count to get the most liked one
-            const sortedPhotos = [...item.equipment.equipment_photos].sort((a, b) => 
-              (b.likes_count || 0) - (a.likes_count || 0)
-            );
-            
-            // Add most_liked_photo to equipment object
-            item.equipment.most_liked_photo = sortedPhotos[0]?.photo_url || null;
-            item.equipment.primaryPhoto = item.equipment.most_liked_photo;
-          } 
-          // Third priority: Default equipment image
-          else {
-            item.equipment.primaryPhoto = item.equipment.image_url;
-          }
+          // Use the unified photo service to get the best photo
+          // This respects selected_photo_id first, then falls back to other options
+          const bestPhoto = getBestBagEquipmentPhoto({
+            selected_photo_id: item.selected_photo_id,
+            custom_photo_url: item.custom_photo_url,
+            equipment: item.equipment
+          });
+          
+          // Set primaryPhoto for display
+          item.equipment.primaryPhoto = bestPhoto;
         }
         return item;
       }) || [];

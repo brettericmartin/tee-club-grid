@@ -3,7 +3,7 @@
  * Used by both bags service and feed cards to ensure identical photo selection
  */
 
-import { getBestEquipmentPhoto } from '@/services/unifiedPhotoService';
+import { getBestBagEquipmentPhoto } from '@/services/unifiedPhotoService';
 
 export interface EquipmentWithPhotos {
   id: string;
@@ -25,21 +25,27 @@ export interface BagEquipmentItem {
   id: string;
   equipment_id: string;
   custom_photo_url?: string;
+  selected_photo_id?: string;
   equipment: EquipmentWithPhotos;
   [key: string]: any;
 }
 
 /**
  * Process equipment to set primaryPhoto using consistent priority logic:
- * 1. User's custom selected photo (custom_photo_url)
- * 2. Most liked community photo from equipment_photos
- * 3. Default equipment image (image_url)
+ * 1. User's selected photo from pool (selected_photo_id)
+ * 2. User's custom photo (custom_photo_url)
+ * 3. Most liked community photo from equipment_photos
+ * 4. Default equipment image (image_url)
  */
 export function processEquipmentPhotos(bagEquipment: BagEquipmentItem[]): BagEquipmentItem[] {
   return bagEquipment.map(item => {
     if (item.equipment) {
       // Use unified photo service for consistent photo selection
-      const bestPhoto = getBestEquipmentPhoto(item.equipment, item.custom_photo_url);
+      const bestPhoto = getBestBagEquipmentPhoto({
+        selected_photo_id: item.selected_photo_id,
+        custom_photo_url: item.custom_photo_url,
+        equipment: item.equipment
+      });
       item.equipment.primaryPhoto = bestPhoto;
       
       // Also set most_liked_photo for compatibility
@@ -74,11 +80,18 @@ export function processBagData(bagData: any): any {
 
 /**
  * Get the best available image URL for an equipment item
- * Priority: primaryPhoto (from equipment_photos) > custom_photo_url > image_url
+ * Priority: selected_photo_id > custom_photo_url > primaryPhoto > image_url
  */
 export function getEquipmentImageUrl(item: BagEquipmentItem): string | null {
-  return (item.equipment as any)?.primaryPhoto || 
-         item.custom_photo_url || 
-         item.equipment?.image_url || 
-         null;
+  // If primaryPhoto was already computed by processEquipmentPhotos, use it
+  if ((item.equipment as any)?.primaryPhoto) {
+    return (item.equipment as any).primaryPhoto;
+  }
+  
+  // Otherwise compute it using the unified photo service
+  return getBestBagEquipmentPhoto({
+    selected_photo_id: item.selected_photo_id,
+    custom_photo_url: item.custom_photo_url,
+    equipment: item.equipment
+  });
 }

@@ -11,6 +11,7 @@ import EquipmentTile from '@/components/shared/EquipmentTile';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import type { Database } from '@/lib/supabase';
 import { formatCompactCurrency } from '@/lib/formatters';
+import { getBestBagEquipmentPhoto } from '@/services/unifiedPhotoService';
 
 interface BagEquipmentItem {
   id: string;
@@ -22,6 +23,7 @@ interface BagEquipmentItem {
   notes?: string;
   custom_specs?: Record<string, any>;
   custom_photo_url?: string;
+  selected_photo_id?: string;
   created_at: string;
   equipment: {
     id: string;
@@ -34,6 +36,12 @@ interface BagEquipmentItem {
     popularity_score?: number;
     release_date?: string;
     created_at: string;
+    equipment_photos?: Array<{
+      id: string;
+      photo_url: string;
+      likes_count: number;
+      is_primary?: boolean;
+    }>;
   };
 }
 
@@ -141,19 +149,19 @@ const BagCardComponent = ({
   const equipmentCount = allEquipment.length;
 
   const getEquipmentImage = (item: BagEquipmentItem) => {
-    // First priority: User's custom selected photo
-    if (item.custom_photo_url && !imageError[`${item.id}-custom`]) {
-      return item.custom_photo_url;
+    // Use the unified photo service to get the best photo
+    const bestPhoto = getBestBagEquipmentPhoto({
+      selected_photo_id: item.selected_photo_id,
+      custom_photo_url: item.custom_photo_url,
+      equipment: item.equipment
+    });
+    
+    // Check if we've already had an error with this photo
+    if (bestPhoto && imageError[`${item.id}-${bestPhoto}`]) {
+      return null;
     }
-    // Second priority: Equipment's primary photo (could be from equipment_photos)
-    if ((item.equipment as any)?.primaryPhoto && !imageError[`${item.id}-primary`]) {
-      return (item.equipment as any).primaryPhoto;
-    }
-    // Third priority: Default equipment image
-    if (item.equipment?.image_url && !imageError[`${item.id}-equipment`]) {
-      return item.equipment.image_url;
-    }
-    return null;
+    
+    return bestPhoto;
   };
 
   const handleEquipmentClick = (e: React.MouseEvent, item: BagEquipmentItem) => {
