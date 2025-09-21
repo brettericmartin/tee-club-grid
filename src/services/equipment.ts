@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
 import { getTopBagsWithEquipment } from './equipmentBags';
+import { getBestEquipmentPhoto } from './unifiedPhotoService';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
 type EquipmentReview = Database['public']['Tables']['equipment_reviews']['Row'];
@@ -109,20 +110,14 @@ export async function getEquipment(options?: {
         const { data: anonymousData, error: anonymousError } = await anonymousQuery;
         if (!anonymousError && anonymousData) {
           return anonymousData.map(equipment => {
-            const photos = equipment.equipment_photos || [];
-            const mostLikedPhoto = photos.length > 0 
-              ? photos.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0))[0].photo_url
-              : null;
-            
-            const primaryMarkedPhoto = photos.find(p => p.is_primary)?.photo_url;
-            const anyPhoto = photos.length > 0 ? photos[0].photo_url : null;
-            const bestPhoto = primaryMarkedPhoto || mostLikedPhoto || anyPhoto || equipment.image_url;
+            // Use unified photo service for consistency
+            const bestPhoto = getBestEquipmentPhoto(equipment);
             
             return {
               ...equipment,
               averageRating: null,
               primaryPhoto: bestPhoto,
-              most_liked_photo: mostLikedPhoto || anyPhoto,
+              most_liked_photo: bestPhoto,
               savesCount: 0,
               totalLikes: 0
             };
@@ -135,20 +130,14 @@ export async function getEquipment(options?: {
         const retryResult = await query;
         if (!retryResult.error) {
           return retryResult.data?.map(equipment => {
-            const photos = equipment.equipment_photos || [];
-            const mostLikedPhoto = photos.length > 0 
-              ? photos.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0))[0].photo_url
-              : null;
-            
-            const primaryMarkedPhoto = photos.find(p => p.is_primary)?.photo_url;
-            const anyPhoto = photos.length > 0 ? photos[0].photo_url : null;
-            const bestPhoto = primaryMarkedPhoto || mostLikedPhoto || anyPhoto || equipment.image_url;
+            // Use unified photo service for consistency
+            const bestPhoto = getBestEquipmentPhoto(equipment);
             
             return {
               ...equipment,
               averageRating: null,
               primaryPhoto: bestPhoto,
-              most_liked_photo: mostLikedPhoto || anyPhoto,
+              most_liked_photo: bestPhoto,
               savesCount: 0,
               totalLikes: 0
             };
@@ -159,26 +148,16 @@ export async function getEquipment(options?: {
     throw error;
   }
   
-  // Process equipment photos to set primaryPhoto and most_liked_photo
+  // Process equipment using unified photo service for consistency
   return data?.map(equipment => {
-    // Get photos from equipment_photos
-    const photos = equipment.equipment_photos || [];
-    
-    // Find primary photo first, then most liked, then any photo
-    const primaryMarkedPhoto = photos.find(p => p.is_primary)?.photo_url;
-    const mostLikedPhoto = photos.length > 0 
-      ? photos.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0))[0].photo_url
-      : null;
-    const anyPhoto = photos.length > 0 ? photos[0].photo_url : null;
-    
-    // Use the best available photo: primary marked -> most liked -> any photo -> equipment.image_url
-    const bestPhoto = primaryMarkedPhoto || mostLikedPhoto || anyPhoto || equipment.image_url;
+    // Use unified photo service for best photo selection
+    const bestPhoto = getBestEquipmentPhoto(equipment);
     
     return {
       ...equipment,
       averageRating: null,
       primaryPhoto: bestPhoto,
-      most_liked_photo: mostLikedPhoto || anyPhoto, // Ensure we always have a photo if available
+      most_liked_photo: bestPhoto, // For backward compatibility
       savesCount: 0,
       totalLikes: 0
     };

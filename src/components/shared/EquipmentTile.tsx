@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getBestEquipmentPhoto } from '@/services/unifiedPhotoService';
 
 interface EquipmentTileProps {
   equipment: {
@@ -41,8 +42,8 @@ const EquipmentTile: FC<EquipmentTileProps> = ({
     lg: 'w-24 h-24'
   };
 
-  // 4-tier image fallback system: most_liked_photo → primaryPhoto → image_url → brand initials
-  const imageUrl = equipment.most_liked_photo || equipment.primaryPhoto || equipment.image_url;
+  // Use unified photo service for consistent photo selection across the app
+  const imageUrl = getBestEquipmentPhoto(equipment);
   const photoCount = equipment.equipment_photos?.length || 0;
 
   return (
