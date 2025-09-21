@@ -94,12 +94,18 @@ export function BagEquipmentModal({
   // Loft options by club type
   const LOFT_OPTIONS: Record<string, string[]> = {
     driver: ['8°', '8.5°', '9°', '9.5°', '10°', '10.5°', '11°', '11.5°', '12°', '12.5°'],
+    drivers: ['8°', '8.5°', '9°', '9.5°', '10°', '10.5°', '11°', '11.5°', '12°', '12.5°'], // Plural alias
     fairway_wood: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
+    fairway_woods: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'], // Plural alias
     wood: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
-    woods: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
+    woods: ['13°', '13.5°', '14°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
     hybrid: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°', '25°', '26°', '27°'],
+    hybrids: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°', '25°', '26°', '27°'], // Plural alias
+    utility_iron: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°'], // Utility irons
     wedge: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°'],
-    wedges: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°']
+    wedges: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°'],
+    putter: ['1°', '2°', '3°', '4°', '5°', '6°', '7°'], // Putter loft options
+    putters: ['1°', '2°', '3°', '4°', '5°', '6°', '7°'] // Plural alias
   };
   
   // Iron configuration options
@@ -107,7 +113,7 @@ export function BagEquipmentModal({
   const getIronIndex = (iron: string) => IRON_OPTIONS.indexOf(iron);
   
   // Check if equipment is a club
-  const isClub = equipment && ['driver', 'fairway_wood', 'wood', 'woods', 'hybrid', 'utility_iron', 
+  const isClub = equipment && ['driver', 'drivers', 'fairway_wood', 'fairway_woods', 'wood', 'woods', 'hybrid', 'hybrids', 'utility_iron', 
                   'iron', 'irons', 'wedge', 'wedges', 'putter', 'putters'].includes(equipment.category);
   
   // Check if equipment is an iron
@@ -469,8 +475,8 @@ export function BagEquipmentModal({
                 className="text-xs min-h-[32px] px-2"
               >
                 <ExternalLink className="h-3 w-3 mr-1" />
-                <span className="hidden sm:inline">View Page</span>
-                <span className="sm:hidden">View</span>
+                <span className="hidden sm:inline">Equipment Page</span>
+                <span className="sm:hidden">Equipment Page</span>
               </Button>
             </div>
           </div>
@@ -481,37 +487,37 @@ export function BagEquipmentModal({
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
             {/* Tab Navigation - Scrollable on mobile */}
             <div className="sticky top-0 z-20 bg-background border-b flex-shrink-0 overflow-x-auto">
-              <TabsList className="w-full sm:w-auto h-auto p-0 bg-transparent rounded-none inline-flex sm:grid sm:grid-cols-5">
+              <TabsList className="w-full sm:w-auto h-auto p-0 bg-transparent rounded-none flex sm:grid sm:grid-cols-5 min-w-0">
                 <TabsTrigger 
                   value="details" 
-                  className="flex-shrink-0 min-w-fit px-3 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
+                  className="flex-shrink-0 min-w-[80px] px-2 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
                 >
                   Details
                 </TabsTrigger>
                 <TabsTrigger 
                   value="photos" 
-                  className="flex-shrink-0 min-w-fit px-3 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
+                  className="flex-shrink-0 min-w-[80px] px-2 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
                 >
                   <Image className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                   Photos
                 </TabsTrigger>
                 <TabsTrigger 
                   value="videos" 
-                  className="flex-shrink-0 min-w-fit px-3 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
+                  className="flex-shrink-0 min-w-[80px] px-2 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
                 >
                   <Video className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                   Videos
                 </TabsTrigger>
                 <TabsTrigger 
                   value="reviews" 
-                  className="flex-shrink-0 min-w-fit px-3 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
+                  className="flex-shrink-0 min-w-[80px] px-2 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
                 >
                   <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                   Reviews
                 </TabsTrigger>
                 <TabsTrigger 
                   value="forums" 
-                  className="flex-shrink-0 min-w-fit px-3 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
+                  className="flex-shrink-0 min-w-[80px] px-2 sm:px-4 py-2.5 sm:py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none text-xs sm:text-sm whitespace-nowrap"
                 >
                   <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                   Forums
@@ -533,7 +539,7 @@ export function BagEquipmentModal({
                             <img
                               src={formData.custom_photo_url || (equipment as any)?.primaryPhoto || equipment.image_url}
                               alt={`${equipment.brand} ${equipment.model}`}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain"
                               loading="lazy"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
@@ -726,27 +732,38 @@ export function BagEquipmentModal({
                         )}
 
                         {/* Loft Selection */}
-                        {isClub && LOFT_OPTIONS[equipment.category] && (
-                          <div>
-                            <Label className="text-sm sm:text-base">Loft</Label>
-                            <Select
-                              value={formData.loft || 'none'}
-                              onValueChange={(value) => setFormData({ ...formData, loft: value === 'none' ? '' : value })}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select loft" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">None</SelectItem>
-                                {LOFT_OPTIONS[equipment.category].map((loft) => (
-                                  <SelectItem key={loft} value={loft}>
-                                    {loft}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        )}
+                        {isClub && (() => {
+                          // Get loft options for this category (check both singular and plural)
+                          const categoryLoftOptions = LOFT_OPTIONS[equipment.category] || 
+                                                     LOFT_OPTIONS[equipment.category.replace(/s$/, '')] || // Remove trailing 's'
+                                                     null;
+                          
+                          if (!categoryLoftOptions) return null;
+                          
+                          return (
+                            <div>
+                              <Label className="text-sm sm:text-base">Loft</Label>
+                              <Select
+                                value={formData.loft || 'none'}
+                                onValueChange={(value) => setFormData({ ...formData, loft: value === 'none' ? '' : value })}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select loft">
+                                    {formData.loft || 'Select loft'}
+                                  </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent className="max-h-[300px] overflow-y-auto z-[9999]" position="popper" sideOffset={5}>
+                                  <SelectItem value="none">None</SelectItem>
+                                  {categoryLoftOptions.map((loft) => (
+                                    <SelectItem key={loft} value={loft}>
+                                      {loft}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          );
+                        })()}
 
                         {/* Condition */}
                         <div>
@@ -928,7 +945,7 @@ export function BagEquipmentModal({
                           <img
                             src={bagEquipment?.custom_photo_url || (equipment as any)?.primaryPhoto || equipment.image_url || ''}
                             alt={`${equipment.brand} ${equipment.model}`}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                             loading="lazy"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;

@@ -679,27 +679,42 @@ export function EquipmentEditor({
             )}
 
             {/* Loft Selection - Only show for clubs with loft options */}
-            {isClub && LOFT_OPTIONS[equipment.equipment.category] && (
-              <div>
-                <Label>Loft/Configuration</Label>
-                <Select
-                  value={formData.loft || 'none'}
-                  onValueChange={(value) => setFormData({ ...formData, loft: value === 'none' ? '' : value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select loft" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {LOFT_OPTIONS[equipment.equipment.category].map((loft) => (
-                      <SelectItem key={loft} value={loft}>
-                        {loft}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            {isClub && (() => {
+              // Get loft options for this category (check both singular and plural)
+              const category = equipment.equipment.category;
+              const categoryLoftOptions = LOFT_OPTIONS[category] || 
+                                         LOFT_OPTIONS[category.replace(/s$/, '')] || // Remove trailing 's'
+                                         null;
+              
+              // Debug logging
+              console.log('[Loft Selector] Category:', category, 'Options:', categoryLoftOptions);
+              
+              if (!categoryLoftOptions || categoryLoftOptions.length === 0) return null;
+              
+              return (
+                <div>
+                  <Label>Loft/Configuration</Label>
+                  <Select
+                    value={formData.loft || 'none'}
+                    onValueChange={(value) => setFormData({ ...formData, loft: value === 'none' ? '' : value })}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select loft">
+                        {formData.loft || 'Select loft'}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px] overflow-y-auto z-[9999]" position="popper" sideOffset={5}>
+                      <SelectItem value="none">None</SelectItem>
+                      {categoryLoftOptions.map((loft) => (
+                        <SelectItem key={loft} value={loft}>
+                          {loft}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            })()}
 
             {/* Iron Configuration - Only show for iron sets */}
             {isIron && (
