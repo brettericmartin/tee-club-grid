@@ -103,7 +103,8 @@ export interface Database {
           purchase_price?: number;
           notes?: string;
           custom_specs?: Record<string, any>;
-          custom_photo_url?: string;
+          custom_photo_url?: string; // Deprecated - will be removed after migration
+          selected_photo_id?: string; // New unified photo pool approach
           shaft_id?: string;
           grip_id?: string;
           loft_option_id?: string;

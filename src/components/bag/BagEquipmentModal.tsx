@@ -28,7 +28,8 @@ import { UnifiedPhotoUploadDialog } from '@/components/shared/UnifiedPhotoUpload
 import { PhotoLightbox } from '@/components/shared/PhotoLightbox';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { syncUserPhotoToEquipment } from '@/services/equipmentPhotoSync';
-import { getBestEquipmentPhoto, fetchEquipmentPhotos } from '@/services/unifiedPhotoService';
+import { getBestEquipmentPhoto, fetchEquipmentPhotos, getBestBagEquipmentPhoto } from '@/services/unifiedPhotoService';
+import PhotoSelector from '@/components/shared/PhotoSelector';
 import { supabase } from '@/lib/supabase';
 import { togglePhotoTee } from '@/services/teeService';
 import { cn } from '@/lib/utils';
@@ -84,6 +85,7 @@ export function BagEquipmentModal({
   const [cropperImage, setCropperImage] = useState<string>('');
   const [pendingCropFile, setPendingCropFile] = useState<File | null>(null);
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
+  const [showPhotoSelector, setShowPhotoSelector] = useState(false);
   
   // Searchable dropdown states
   const [shaftOpen, setShaftOpen] = useState(false);
@@ -368,6 +370,27 @@ export function BagEquipmentModal({
     }
   }, [equipmentId, equipment, bagEquipment, user]);
 
+  // Handle photo selection from unified photo pool
+  const handlePhotoSelect = useCallback(async (photoId: string, photoUrl: string) => {
+    if (!bagEquipmentId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('bag_equipment')
+        .update({ selected_photo_id: photoId })
+        .eq('id', bagEquipmentId);
+        
+      if (error) throw error;
+      
+      toast.success('Photo selected successfully');
+      onUpdate?.(); // Refresh the bag data
+      
+    } catch (error) {
+      console.error('Error selecting photo:', error);
+      toast.error('Failed to select photo');
+    }
+  }, [bagEquipmentId, onUpdate]);
+
   const handlePhotoLike = useCallback(async (photoId: string, isLiked: boolean) => {
     if (!user) {
       toast.error('Please sign in to like photos');
@@ -602,15 +625,15 @@ export function BagEquipmentModal({
                           </div>
                         </div>
                         
-                        {/* Community Photos Button */}
+                        {/* Photo Selector Button */}
                         <Button
                           variant="outline"
-                          onClick={() => setShowPhotoGallery(true)}
+                          onClick={() => setShowPhotoSelector(true)}
                           className="w-full min-h-[44px]"
                           type="button"
                         >
                           <Images className="w-4 h-4 mr-2" />
-                          Browse Community Photos {equipmentPhotos.length > 0 && `(${equipmentPhotos.length})`}
+                          Choose from Photo Pool {equipmentPhotos.length > 0 && `(${equipmentPhotos.length})`}
                         </Button>
                       </div>
 
@@ -1409,6 +1432,15 @@ export function BagEquipmentModal({
       initialPhotoIndex={selectedPhotoIndex}
       onLike={handlePhotoLike}
       showLikes={true}
+    />
+    
+    <PhotoSelector
+      isOpen={showPhotoSelector}
+      onClose={() => setShowPhotoSelector(false)}
+      equipmentId={equipmentId}
+      equipmentName={`${equipment.brand} ${equipment.model}`}
+      selectedPhotoId={bagEquipment?.selected_photo_id}
+      onSelectPhoto={handlePhotoSelect}
     />
     </>
   );

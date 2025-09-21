@@ -16,23 +16,30 @@ interface EquipmentWithPhotos {
   category: string;
   image_url?: string;
   equipment_photos?: EquipmentPhoto[];
-  custom_photo_url?: string;
+  custom_photo_url?: string; // Deprecated
+}
+
+interface BagEquipmentWithPhoto {
+  selected_photo_id?: string;
+  custom_photo_url?: string; // Deprecated fallback
+  equipment: EquipmentWithPhotos;
 }
 
 /**
  * Gets the best available photo URL for equipment with proper fallback logic
  * Priority order:
- * 1. Custom photo URL (user-selected)
- * 2. Most liked community photo from equipment_photos
- * 3. Equipment's default image_url (if not placeholder)
- * 4. Category fallback image
- * 5. null (will trigger brand initials display)
+ * 1. Selected photo from unified pool (selected_photo_id)
+ * 2. Custom photo URL (deprecated fallback)
+ * 3. Most liked community photo from equipment_photos
+ * 4. Equipment's default image_url (if not placeholder)
+ * 5. Category fallback image
+ * 6. null (will trigger brand initials display)
  */
 export function getBestEquipmentPhoto(
   equipment: EquipmentWithPhotos,
   customPhotoUrl?: string
 ): string | null {
-  // 1. Custom photo URL (highest priority)
+  // 1. Custom photo URL (deprecated fallback)
   if (customPhotoUrl && !isPlaceholder(customPhotoUrl)) {
     return customPhotoUrl;
   }
@@ -59,6 +66,32 @@ export function getBestEquipmentPhoto(
 
   // 5. Return null to trigger brand initials display
   return null;
+}
+
+/**
+ * Gets the best photo for bag equipment using unified photo pool
+ * Priority order:
+ * 1. User's selected photo (selected_photo_id)
+ * 2. Custom photo URL (deprecated fallback)
+ * 3. Most liked community photo
+ * 4. Equipment's default image_url
+ * 5. null
+ */
+export function getBestBagEquipmentPhoto(
+  bagEquipment: BagEquipmentWithPhoto
+): string | null {
+  const { selected_photo_id, custom_photo_url, equipment } = bagEquipment;
+  
+  // 1. User's selected photo from unified pool (highest priority)
+  if (selected_photo_id && equipment.equipment_photos) {
+    const selectedPhoto = equipment.equipment_photos.find(p => p.id === selected_photo_id);
+    if (selectedPhoto && !isPlaceholder(selectedPhoto.photo_url)) {
+      return selectedPhoto.photo_url;
+    }
+  }
+  
+  // 2. Fall back to the standard photo selection logic
+  return getBestEquipmentPhoto(equipment, custom_photo_url);
 }
 
 /**

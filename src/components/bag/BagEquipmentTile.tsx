@@ -2,14 +2,15 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ShoppingCart } from 'lucide-react';
 import { listLinksForBagEquipment } from '@/services/userEquipmentLinks';
-import { getBestEquipmentPhoto } from '@/services/unifiedPhotoService';
+import { getBestBagEquipmentPhoto } from '@/services/unifiedPhotoService';
 import { cn } from '@/lib/utils';
 import type { Database } from '@/lib/supabase';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'];
 type BagEquipment = Database['public']['Tables']['bag_equipment']['Row'] & {
   equipment: Equipment;
-  custom_photo_url?: string;
+  custom_photo_url?: string; // Deprecated
+  selected_photo_id?: string; // New unified approach
 };
 
 interface BagEquipmentTileProps {
@@ -38,8 +39,12 @@ export function BagEquipmentTile({
 
   // Get the primary image for equipment using unified photo service
   const getEquipmentImage = () => {
-    // Use the unified photo service for consistent photo selection
-    return getBestEquipmentPhoto(item.equipment, item.custom_photo_url);
+    // Use the new unified bag equipment photo service
+    return getBestBagEquipmentPhoto({
+      selected_photo_id: item.selected_photo_id,
+      custom_photo_url: item.custom_photo_url, // Fallback during migration
+      equipment: item.equipment
+    });
   };
 
   const handleBuyClick = (e: React.MouseEvent) => {
