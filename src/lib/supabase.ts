@@ -106,10 +106,14 @@ export interface Database {
           custom_photo_url?: string;
           shaft_id?: string;
           grip_id?: string;
+          loft_option_id?: string;
           condition?: string;
-          created_at: string;
+          photo_crop_data?: Record<string, any>;
+          position?: number;
+          position_data?: Record<string, any>;
+          added_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['bag_equipment']['Row'], 'id' | 'created_at'>;
+        Insert: Omit<Database['public']['Tables']['bag_equipment']['Row'], 'id' | 'added_at'>;
         Update: Partial<Database['public']['Tables']['bag_equipment']['Insert']>;
       };
       bag_likes: {

@@ -72,7 +72,7 @@ SELECT
       be.custom_specs->>'loft',
       be.shaft_id,
       be.grip_id,
-      be.created_at
+      be.added_at
   ) as variant_number
 FROM bag_equipment be
 JOIN equipment e ON e.id = be.equipment_id;
