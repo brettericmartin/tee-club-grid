@@ -66,12 +66,18 @@ export function EquipmentEditor({
   // Loft options by club type
   const LOFT_OPTIONS: Record<string, string[]> = {
     driver: ['8°', '8.5°', '9°', '9.5°', '10°', '10.5°', '11°', '11.5°', '12°', '12.5°'],
+    drivers: ['8°', '8.5°', '9°', '9.5°', '10°', '10.5°', '11°', '11.5°', '12°', '12.5°'], // Plural alias
     fairway_wood: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
+    fairway_woods: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'], // Plural alias
     wood: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
     woods: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
     hybrid: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°', '25°', '26°', '27°'],
+    hybrids: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°', '25°', '26°', '27°'], // Plural alias
+    utility_iron: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°'], // Utility irons
     wedge: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°'],
-    wedges: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°']
+    wedges: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°'],
+    putter: ['1°', '2°', '3°', '4°', '5°', '6°', '7°'], // Putter loft options
+    putters: ['1°', '2°', '3°', '4°', '5°', '6°', '7°'] // Plural alias
   };
   
   // Iron configuration options
@@ -103,7 +109,7 @@ export function EquipmentEditor({
   const [newGrip, setNewGrip] = useState({ brand: '', model: '', size: 'Standard', color: '' });
   
   // Check if equipment is a club (needs shaft/grip/loft options)
-  const isClub = ['driver', 'fairway_wood', 'wood', 'woods', 'hybrid', 'utility_iron', 
+  const isClub = ['driver', 'drivers', 'fairway_wood', 'fairway_woods', 'wood', 'woods', 'hybrid', 'hybrids', 'utility_iron', 
                   'iron', 'irons', 'wedge', 'wedges', 'putter', 'putters'].includes(equipment.equipment.category);
   
   // Check if equipment is an iron that needs configuration
@@ -481,29 +487,45 @@ export function EquipmentEditor({
                   <PopoverContent className="w-full p-0 max-h-[40vh] sm:max-h-[50vh]" align="start" sideOffset={4}>
                     <Command>
                       <CommandInput 
-                        placeholder="Search shafts..." 
+                        placeholder="Search shafts by brand, model, or flex..." 
                         value={shaftSearch}
                         onValueChange={setShaftSearch}
+                        className="h-9"
                       />
-                      <CommandEmpty>
-                        <div className="p-4 text-sm text-center">
-                          <p className="mb-2">No shaft found.</p>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setShaftOpen(false);
-                              setShowAddShaft(true);
-                            }}
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add New Shaft
-                          </Button>
-                        </div>
-                      </CommandEmpty>
+                      <CommandEmpty />
                       <CommandList className="max-h-[30vh] sm:max-h-[40vh] overflow-y-auto">
                         <CommandGroup>
-                          {shafts && shafts.length > 0 && shafts
+                          {(() => {
+                            // Filter shafts based on search
+                            const filteredShafts = shafts.filter((shaft) => {
+                              if (!shaftSearch) return true;
+                              const searchableText = `${shaft.brand} ${shaft.model} ${shaft.specs?.flex || ''} ${shaft.specs?.weight || ''}`.toLowerCase();
+                              return searchableText.includes(shaftSearch.toLowerCase());
+                            });
+                            
+                            // Show empty state if no results
+                            if (filteredShafts.length === 0) {
+                              return (
+                                <div className="p-4 text-sm text-center">
+                                  <p className="mb-2">No shaft found matching "{shaftSearch}"</p>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setShaftOpen(false);
+                                      setShowAddShaft(true);
+                                      setNewShaft({ ...newShaft, brand: shaftSearch.split(' ')[0] || '', model: shaftSearch });
+                                    }}
+                                  >
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Add New Shaft
+                                  </Button>
+                                </div>
+                              );
+                            }
+                            
+                            // Show filtered results
+                            return filteredShafts
                             .map((shaft) => {
                               // Create a searchable string with all relevant shaft attributes
                               const searchableText = `${shaft.brand} ${shaft.model} ${shaft.specs?.flex || ''} ${shaft.specs?.weight || ''}`.toLowerCase();
@@ -539,7 +561,8 @@ export function EquipmentEditor({
                                   )}
                                 </CommandItem>
                               );
-                            })}
+                            });
+                          })()}
                         </CommandGroup>
                       </CommandList>
                     </Command>
@@ -571,29 +594,45 @@ export function EquipmentEditor({
                   <PopoverContent className="w-full p-0 max-h-[40vh] sm:max-h-[50vh]" align="start" sideOffset={4}>
                     <Command>
                       <CommandInput 
-                        placeholder="Search grips..." 
+                        placeholder="Search grips by brand, model, or size..." 
                         value={gripSearch}
                         onValueChange={setGripSearch}
+                        className="h-9"
                       />
-                      <CommandEmpty>
-                        <div className="p-4 text-sm text-center">
-                          <p className="mb-2">No grip found.</p>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setGripOpen(false);
-                              setShowAddGrip(true);
-                            }}
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add New Grip
-                          </Button>
-                        </div>
-                      </CommandEmpty>
+                      <CommandEmpty />
                       <CommandList className="max-h-[30vh] sm:max-h-[40vh] overflow-y-auto">
                         <CommandGroup>
-                          {grips && grips.length > 0 && grips
+                          {(() => {
+                            // Filter grips based on search
+                            const filteredGrips = grips.filter((grip) => {
+                              if (!gripSearch) return true;
+                              const searchableText = `${grip.brand} ${grip.model} ${grip.specs?.size || ''} ${grip.specs?.color || ''}`.toLowerCase();
+                              return searchableText.includes(gripSearch.toLowerCase());
+                            });
+                            
+                            // Show empty state if no results
+                            if (filteredGrips.length === 0) {
+                              return (
+                                <div className="p-4 text-sm text-center">
+                                  <p className="mb-2">No grip found matching "{gripSearch}"</p>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setGripOpen(false);
+                                      setShowAddGrip(true);
+                                      setNewGrip({ ...newGrip, brand: gripSearch.split(' ')[0] || '', model: gripSearch });
+                                    }}
+                                  >
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Add New Grip
+                                  </Button>
+                                </div>
+                              );
+                            }
+                            
+                            // Show filtered results
+                            return filteredGrips
                             .map((grip) => {
                               // Create a searchable string with all relevant grip attributes
                               const searchableText = `${grip.brand} ${grip.model} ${grip.specs?.size || ''} ${grip.specs?.color || ''}`.toLowerCase();
@@ -629,7 +668,8 @@ export function EquipmentEditor({
                                   )}
                                 </CommandItem>
                               );
-                            })}
+                            });
+                          })()}
                         </CommandGroup>
                       </CommandList>
                     </Command>
