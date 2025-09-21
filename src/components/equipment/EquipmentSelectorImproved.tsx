@@ -1129,51 +1129,88 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                 const categoryLoftOptions = selectedCategory?.value ? LOFT_OPTIONS[selectedCategory.value] : [];
                 
                 if (!categoryLoftOptions || categoryLoftOptions.length === 0) {
-                  return (
-                    <div className="p-4 text-center text-white/60">
-                      <p>No loft options available for this category</p>
-                    </div>
-                  );
+                  // Skip loft step if no options available
+                  handleComplete();
+                  return null;
                 }
 
                 return (
                   <>
-                    <Select
-                      value={showCustomLoft ? 'custom' : (customLoft || 'none')}
-                      onValueChange={(value) => {
-                        if (value === 'custom') {
-                          setShowCustomLoft(true);
-                          setCustomLoft('');
-                        } else {
+                    {/* None/Default Option */}
+                    <Card
+                      className={`glass-card p-4 cursor-pointer transition-colors ${
+                        !customLoft && !showCustomLoft
+                          ? 'ring-2 ring-primary bg-primary/10' 
+                          : 'hover:bg-white/20'
+                      }`}
+                      onClick={() => {
+                        setCustomLoft('');
+                        setShowCustomLoft(false);
+                        handleDoubleTap(() => handleComplete());
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-white">None / Default</p>
+                          <p className="text-sm text-white/60">Use standard loft</p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-white/40" />
+                      </div>
+                    </Card>
+
+                    {/* Preset Loft Options */}
+                    {categoryLoftOptions.map((loft) => (
+                      <Card
+                        key={loft}
+                        className={`glass-card p-4 cursor-pointer transition-colors ${
+                          customLoft === loft && !showCustomLoft
+                            ? 'ring-2 ring-primary bg-primary/10' 
+                            : 'hover:bg-white/20'
+                        }`}
+                        onClick={() => {
+                          setCustomLoft(loft);
                           setShowCustomLoft(false);
-                          setCustomLoft(value === 'none' ? '' : value);
+                          handleDoubleTap(() => handleComplete());
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-white">{loft}</p>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-white/40" />
+                        </div>
+                      </Card>
+                    ))}
+
+                    {/* Custom Loft Option */}
+                    <Card
+                      className={`glass-card p-4 cursor-pointer transition-colors ${
+                        showCustomLoft
+                          ? 'ring-2 ring-primary bg-primary/10' 
+                          : 'hover:bg-white/20'
+                      }`}
+                      onClick={() => {
+                        setShowCustomLoft(true);
+                        if (!customLoft || categoryLoftOptions.includes(customLoft)) {
+                          setCustomLoft('');
                         }
                       }}
                     >
-                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                        <SelectValue placeholder="Select loft">
-                          {customLoft || 'Select loft'}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent className="glass-card max-h-[300px] overflow-y-auto">
-                        <SelectItem value="none">None / Default</SelectItem>
-                        {categoryLoftOptions.map((loft) => (
-                          <SelectItem key={loft} value={loft}>
-                            {loft}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="custom" className="border-t">
-                          <div className="flex items-center">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-white flex items-center">
                             <Plus className="mr-2 h-4 w-4" />
                             Custom Loft...
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                          </p>
+                          <p className="text-sm text-white/60">Enter your own loft value</p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-white/40" />
+                      </div>
+                    </Card>
 
                     {/* Custom Loft Input */}
                     {showCustomLoft && (
-                      <div className="space-y-2">
+                      <div className="p-4 bg-white/10 rounded-lg space-y-2">
                         <Input
                           type="text"
                           placeholder="Enter custom loft (e.g., 9.75°)"
