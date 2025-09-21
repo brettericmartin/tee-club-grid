@@ -1368,9 +1368,29 @@ export function BagEquipmentModal({
     <UnifiedPhotoUploadDialog
       isOpen={showPhotoUpload}
       onClose={() => setShowPhotoUpload(false)}
-      onUploadComplete={(photoUrl) => {
+      onUploadComplete={async (photoUrl) => {
+        // Update local state
         setFormData({ ...formData, custom_photo_url: photoUrl });
-        loadAdditionalData();
+        
+        // CRITICAL: Also save to database immediately so photo persists!
+        try {
+          const { error } = await supabase
+            .from('bag_equipment')
+            .update({ custom_photo_url: photoUrl })
+            .eq('id', bagEquipmentId);
+          
+          if (error) {
+            console.error('Error saving photo to bag_equipment:', error);
+            toast.error('Failed to save photo to your bag');
+          } else {
+            console.log('Photo saved to bag_equipment successfully');
+            // Refresh the data
+            loadAdditionalData();
+            if (onUpdate) onUpdate();
+          }
+        } catch (error) {
+          console.error('Error updating bag equipment photo:', error);
+        }
       }}
       context={{
         type: 'equipment',

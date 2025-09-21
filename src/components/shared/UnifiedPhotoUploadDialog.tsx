@@ -15,7 +15,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { createEquipmentPhotoFeedPost } from '@/services/feedService';
 import { useFeed } from '@/contexts/FeedContext';
-import { syncUserPhotoToEquipment } from '@/services/equipmentPhotoSync';
+import { syncUserPhotoToEquipment, syncFeedPhotoToBagEquipment } from '@/services/equipmentPhotoSync';
 import { ImageCropDialog } from './ImageCropDialog';
 import { getProfile } from '@/services/profileService';
 
@@ -169,6 +169,18 @@ export function UnifiedPhotoUploadDialog({
             caption || `${context.equipmentName || 'Equipment'} photo`
           );
           console.log('Photo synced to equipment gallery');
+          
+          // CRITICAL: Also sync to bag_equipment so it shows in user's bag!
+          const syncResult = await syncFeedPhotoToBagEquipment(
+            user.id,
+            context.equipmentId,
+            publicUrl,
+            true // Update even if custom photo exists since user is explicitly uploading
+          );
+          
+          if (syncResult.updated > 0) {
+            console.log(`Updated ${syncResult.updated} bag equipment entries with new photo`);
+          }
         } catch (error) {
           console.error('Error syncing photo to equipment:', error);
           // Don't fail the whole upload if sync fails
