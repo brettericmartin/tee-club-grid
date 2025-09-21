@@ -321,7 +321,15 @@ export async function getMyBag(userId: string) {
         *,
         bag_equipment (
           *,
-          equipment:equipment (*)
+          equipment:equipment (
+            *,
+            equipment_photos (
+              id,
+              photo_url,
+              likes_count,
+              is_primary
+            )
+          )
         )
       `)
       .eq('user_id', userId)
@@ -418,7 +426,15 @@ export async function getEquipmentVariants(bagId: string, equipmentId: string) {
     .from('bag_equipment')
     .select(`
       *,
-      equipment:equipment (*),
+      equipment:equipment (
+        *,
+        equipment_photos (
+          id,
+          photo_url,
+          likes_count,
+          is_primary
+        )
+      ),
       shaft:shaft_id (*),
       grip:grip_id (*)
     `)

@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ShoppingCart } from 'lucide-react';
 import { listLinksForBagEquipment } from '@/services/userEquipmentLinks';
+import { getBestEquipmentPhoto } from '@/services/unifiedPhotoService';
 import { cn } from '@/lib/utils';
 import type { Database } from '@/lib/supabase';
 
@@ -35,10 +36,10 @@ export function BagEquipmentTile({
   const links = linksResponse?.data || [];
   const primaryLink = links.find((l: any) => l.is_primary);
 
-  // Get the primary image for equipment
+  // Get the primary image for equipment using unified photo service
   const getEquipmentImage = () => {
-    return item.custom_photo_url || 
-           item.equipment.image_url;
+    // Use the unified photo service for consistent photo selection
+    return getBestEquipmentPhoto(item.equipment, item.custom_photo_url);
   };
 
   const handleBuyClick = (e: React.MouseEvent) => {
