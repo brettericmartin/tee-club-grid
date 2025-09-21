@@ -293,9 +293,9 @@ export async function createEquipmentPhotoPost(
 }
 
 // Get feed posts with following prioritization
-export async function getFeedPosts(userId?: string, filter: 'all' | 'following' | 'in-my-bags' = 'all') {
+export async function getFeedPosts(userId?: string, filter: 'all' | 'following' | 'in-my-bags' = 'all', sortBy: 'new' | 'hot' = 'new') {
   try {
-    console.log('Getting feed posts with filter:', filter, 'userId:', userId);
+    console.log('Getting feed posts with filter:', filter, 'userId:', userId, 'sortBy:', sortBy);
     
     // Simplified query - fetch posts without complex joins
     // We'll handle user likes separately to avoid query failures
@@ -328,9 +328,16 @@ export async function getFeedPosts(userId?: string, filter: 'all' | 'following' 
     
     let query = supabase
       .from('feed_posts')
-      .select(selectQuery)
-      .order('created_at', { ascending: false })
-      .limit(50); // Increased limit to show more posts
+      .select(selectQuery);
+    
+    // Apply sorting based on sortBy parameter
+    if (sortBy === 'hot') {
+      query = query.order('hot_score', { ascending: false, nullsFirst: false });
+    } else {
+      query = query.order('created_at', { ascending: false });
+    }
+    
+    query = query.limit(50); // Increased limit to show more posts
 
     // Filter based on type
     if (filter === 'following' && userId) {

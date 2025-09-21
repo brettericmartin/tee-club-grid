@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import type { Database } from "@/lib/supabase";
 import { smartCreateBagPost, smartCreateBagUpdatePost, smartCreateEquipmentPost } from "@/services/feedSmartUpdate";
 import { setPrimaryBag } from "@/services/bags";
+import { getUserTotalTees } from "@/services/teeService";
 import { BadgeShowcase } from "@/components/badges/BadgeShowcase";
 import { useBadgeCheck } from "@/hooks/useBadgeCheck";
 import { BadgeNotificationToast } from "@/components/badges/BadgeNotificationToast";
@@ -96,9 +97,18 @@ type Bag = Database['public']['Tables']['user_bags']['Row'] & {
 // Loft options by club type
 const LOFT_OPTIONS: Record<string, string[]> = {
   driver: ['8°', '8.5°', '9°', '9.5°', '10°', '10.5°', '11°', '11.5°', '12°', '12.5°'],
+  drivers: ['8°', '8.5°', '9°', '9.5°', '10°', '10.5°', '11°', '11.5°', '12°', '12.5°'], // Plural alias
   fairway_wood: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
+  fairway_woods: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'], // Plural alias
+  wood: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
+  woods: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
   hybrid: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°', '25°', '26°', '27°'],
-  wedge: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°']
+  hybrids: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°', '25°', '26°', '27°'], // Plural alias
+  utility_iron: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°'], // Utility irons
+  wedge: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°'],
+  wedges: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°'],
+  putter: ['1°', '2°', '3°', '4°', '5°', '6°', '7°'], // Putter loft options
+  putters: ['1°', '2°', '3°', '4°', '5°', '6°', '7°'] // Plural alias
 };
 
 const MyBagSupabase = () => {
@@ -304,48 +314,11 @@ const MyBagSupabase = () => {
       // Ensure user.id is a string safely
       const userId = user.id ? String(user.id) : '';
       
-      // First get the user's bag IDs
-      const { data: userBags, error: bagsError } = await supabase
-        .from('user_bags')
-        .select('id')
-        .eq('user_id', userId);
+      // Use the comprehensive tee aggregation service
+      const teeData = await getUserTotalTees(userId);
       
-      
-      // Count tees from user's bags if they have any
-      let bagTees = 0;
-      if (userBags && Array.isArray(userBags) && userBags.length > 0) {
-        const bagIds = userBags.map(bag => String(bag.id));
-        const { count } = await supabase
-          .from('bag_tees')
-          .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
-          .in('bag_id', bagIds);
-        bagTees = count || 0;
-      }
-      
-      // First get the user's post IDs
-      const { data: userPosts, error: postsError } = await supabase
-        .from('feed_posts')
-        .select('id')
-        .eq('user_id', userId);
-      
-      if (postsError) {
-        // Error fetching posts, continue with calculation
-      }
-      
-      // Count tees from user's posts if they have any
-      let postTees = 0;
-      if (userPosts && Array.isArray(userPosts) && userPosts.length > 0) {
-        const postIds = userPosts.map(post => String(post.id));
-        const { count } = await supabase
-          .from('likes')
-          .select('id', { count: 'exact' })  // Don't use head: true to avoid hanging
-          .in('post_id', postIds);
-        postTees = count || 0;
-      }
-      
-      const total = (bagTees || 0) + (postTees || 0);
-      setTotalTees(total);
-      console.log('[MyBag] Total tees calculated:', total);
+      setTotalTees(teeData.totalTees);
+      console.log('[MyBag] Total tees calculated:', teeData);
     } catch (error) {
       console.error('[MyBag] Error in calculateTotalTees:', error);
       setTotalTees(0);
@@ -1414,7 +1387,7 @@ const MyBagSupabase = () => {
               title="Feed View"
             >
               <img 
-                src="/dog.png" 
+                src="/icons/teed-hotdog-icon.svg" 
                 alt="Feed" 
                 className="w-4 h-4 sm:mr-2" 
                 style={{ filter: viewMode === 'feed' ? 'none' : 'brightness(0) invert(1)' }}

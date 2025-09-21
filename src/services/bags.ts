@@ -10,7 +10,7 @@ type Equipment = Database['public']['Tables']['equipment']['Row'];
 
 // Get all bags for browsing
 export async function getBags(options?: {
-  sortBy?: 'trending' | 'newest' | 'most-liked' | 'following';
+  sortBy?: 'trending' | 'newest' | 'most-liked' | 'following' | 'hot';
   handicapRange?: [number, number];
   priceRange?: [number, number];
   userId?: string;
@@ -82,9 +82,11 @@ export async function getBags(options?: {
     case 'newest':
       query = query.order('created_at', { ascending: false });
       break;
+    case 'hot':
+      query = query.order('hot_score', { ascending: false, nullsFirst: false });
+      break;
     case 'most-liked':
-      // This would need a computed column or join
-      query = query.order('created_at', { ascending: false });
+      query = query.order('tees_count', { ascending: false });
       break;
     default:
       query = query.order('created_at', { ascending: false });

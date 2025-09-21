@@ -107,21 +107,31 @@ export const GearGrid = ({ onViewDetails, onBrowseAll }: GearGridProps) => {
           const existingIds = new Set(processedEquipment.map(eq => eq.id));
           
           const additionalEquipment = popularEquipment
-            .filter(eq => !existingIds.has(eq.id) && eq.equipment_photos?.length > 0)
+            .filter(eq => !existingIds.has(eq.id))
             .slice(0, 8 - processedEquipment.length)
             .map(eq => {
+              // Prioritize user-uploaded photos
               const primaryPhoto = eq.equipment_photos?.find((p: any) => p.is_primary);
               const firstPhoto = eq.equipment_photos?.[0];
               
+              // Use user photo if available, otherwise use default image_url
+              let displayImage = primaryPhoto?.photo_url || firstPhoto?.photo_url || eq.image_url;
+              
+              // If no image at all, skip this item by returning null
+              if (!displayImage) {
+                return null;
+              }
+              
               return {
                 ...eq,
-                image_url: primaryPhoto?.photo_url || firstPhoto?.photo_url || eq.image_url,
+                image_url: displayImage,
                 teesCount: 0,
                 usersCount: Math.floor(Math.random() * 10 + 1),
                 avgRating: 4.0 + (eq.popularity_score || 50) / 100,
                 badge: undefined as "Most Teed" | "Pro Choice" | "Best Value" | undefined
               };
-            });
+            })
+            .filter(item => item !== null);
           
           processedEquipment = [...processedEquipment, ...additionalEquipment];
         }

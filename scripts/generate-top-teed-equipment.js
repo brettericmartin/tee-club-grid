@@ -26,14 +26,15 @@ async function generateTopTeedEquipment() {
   console.log('📸 Finding Equipment from Most-Teed Photos\n');
 
   try {
-    // Get the top teed photos with their equipment info
-    const { data: topPhotos, error } = await supabase
+    // First, get ALL photos with their equipment info (including those with 0 likes)
+    const { data: allPhotos, error } = await supabase
       .from('equipment_photos')
       .select(`
         id,
         photo_url,
         likes_count,
         equipment_id,
+        is_primary,
         equipment:equipment_id (
           id,
           brand,
@@ -45,17 +46,18 @@ async function generateTopTeedEquipment() {
           popularity_score
         )
       `)
-      .gt('likes_count', 0) // Only photos with at least 1 tee
-      .not('equipment_id', 'is', null) // Must have equipment
+      .not('equipment_id', 'is', null)
       .order('likes_count', { ascending: false })
-      .limit(100); // Get top 100 photos
+      .limit(500); // Get more photos to ensure variety
 
     if (error) throw error;
+
+    console.log(`Found ${allPhotos?.length || 0} equipment photos total\n`);
 
     // Group by equipment and sum tees
     const equipmentMap = new Map();
     
-    topPhotos?.forEach(photo => {
+    allPhotos?.forEach(photo => {
       if (photo.equipment) {
         const equipmentId = photo.equipment.id;
         
@@ -65,7 +67,8 @@ async function generateTopTeedEquipment() {
             totalTees: 0,
             photoCount: 0,
             topPhotoUrl: photo.photo_url,
-            topPhotoTees: photo.likes_count
+            topPhotoTees: photo.likes_count || 0,
+            hasPrimaryPhoto: photo.is_primary
           });
         }
         
@@ -73,17 +76,27 @@ async function generateTopTeedEquipment() {
         equipment.totalTees += photo.likes_count || 0;
         equipment.photoCount += 1;
         
-        // Keep the most teed photo as the display photo
-        if ((photo.likes_count || 0) > equipment.topPhotoTees) {
+        // Prioritize primary photos, then most teed photos
+        if (photo.is_primary && !equipment.hasPrimaryPhoto) {
           equipment.topPhotoUrl = photo.photo_url;
-          equipment.topPhotoTees = photo.likes_count;
+          equipment.hasPrimaryPhoto = true;
+        } else if (!equipment.hasPrimaryPhoto && (photo.likes_count || 0) > equipment.topPhotoTees) {
+          equipment.topPhotoUrl = photo.photo_url;
+          equipment.topPhotoTees = photo.likes_count || 0;
         }
       }
     });
 
-    // Convert to array and sort by total tees
+    // Convert to array and sort - prioritize items with photos and tees
     const topEquipment = Array.from(equipmentMap.values())
-      .sort((a, b) => b.totalTees - a.totalTees)
+      .sort((a, b) => {
+        // First sort by whether they have photos
+        if (a.photoCount > 0 && b.photoCount === 0) return -1;
+        if (b.photoCount > 0 && a.photoCount === 0) return 1;
+        
+        // Then sort by total tees
+        return b.totalTees - a.totalTees;
+      })
       .slice(0, 24); // Top 24 for landing page
 
     console.log('🏆 Top Equipment from Most-Teed Photos:');

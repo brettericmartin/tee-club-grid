@@ -270,62 +270,69 @@ const Equipment = () => {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Show info if no equipment loaded - removed since we have data */}
         
-        {/* Filters and Submit Button - All in one row on desktop */}
-        <div className="mb-6">
-          {/* Desktop: All in one row with filters on left, button on right */}
-          <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
-            {/* Filters Group */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap lg:flex-nowrap">
-              {/* Category Filter */}
-              <select 
-                value={category} 
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
-              >
-                <option value="all">All Equipment</option>
-                {categoryOptions.map(cat => (
-                  <option key={cat.value} value={cat.value}>{cat.label}</option>
-                ))}
-              </select>
+        {/* Filters and Submit Button */}
+        <div className="mb-6 overflow-x-auto">
+          {/* Mobile: Stack vertically, Desktop: Row layout */}
+          <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between min-w-0">
+            {/* Filters Group - Stack on mobile, row on desktop */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:flex-wrap lg:flex-nowrap min-w-0">
+              {/* First Row on Mobile: Category and Sort */}
+              <div className="flex gap-2 w-full sm:w-auto">
+                {/* Category Filter */}
+                <select 
+                  value={category} 
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="flex-1 sm:flex-initial sm:w-auto px-3 py-2 text-sm sm:text-base border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
+                >
+                  <option value="all">All Equipment</option>
+                  {categoryOptions.map(cat => (
+                    <option key={cat.value} value={cat.value}>{cat.label}</option>
+                  ))}
+                </select>
 
-              {/* Sort */}
-              <select 
-                value={sortBy} 
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
-              >
-                <option value="popular">Most Liked</option>
-                <option value="newest">Newest</option>
-              </select>
+                {/* Sort */}
+                <select 
+                  value={sortBy} 
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="flex-1 sm:flex-initial sm:w-auto px-3 py-2 text-sm sm:text-base border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
+                >
+                  <option value="popular">Most Liked</option>
+                  <option value="newest">Newest</option>
+                </select>
+              </div>
 
-              {/* Brand Filter */}
-              <select 
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-                className="w-full sm:w-auto px-4 py-2 border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
-              >
-                <option value="all">All Brands</option>
-                {brands.map(b => (
-                  <option key={b} value={b}>{b}</option>
-                ))}
-              </select>
+              {/* Second Row on Mobile: Brand and Saved */}
+              <div className="flex gap-2 w-full sm:w-auto items-center">
+                {/* Brand Filter */}
+                <select 
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
+                  className="flex-1 sm:flex-initial sm:w-auto px-3 py-2 text-sm sm:text-base border border-white/10 rounded-lg bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] transition-colors"
+                >
+                  <option value="all">All Brands</option>
+                  {brands.map(b => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
 
-              {/* Saved Only Checkbox */}
-              {user && (
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="saved-only"
-                    checked={showSavedOnly}
-                    onCheckedChange={(checked) => setShowSavedOnly(checked as boolean)}
-                  />
-                  <label 
-                    htmlFor="saved-only" 
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap"
-                  >
-                    Saved items only
-                  </label>
-                </div>
-              )}
+                {/* Saved Only Checkbox */}
+                {user && (
+                  <div className="flex items-center space-x-2 px-2">
+                    <Checkbox 
+                      id="saved-only"
+                      checked={showSavedOnly}
+                      onCheckedChange={(checked) => setShowSavedOnly(checked as boolean)}
+                      className="h-4 w-4"
+                    />
+                    <label 
+                      htmlFor="saved-only" 
+                      className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap"
+                    >
+                      Saved only
+                    </label>
+                  </div>
+                )}
+              </div>
             </div>
             
             {/* Submit Button */}

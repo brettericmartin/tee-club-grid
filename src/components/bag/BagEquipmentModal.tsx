@@ -28,6 +28,7 @@ import { UnifiedPhotoUploadDialog } from '@/components/shared/UnifiedPhotoUpload
 import { PhotoLightbox } from '@/components/shared/PhotoLightbox';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import { syncUserPhotoToEquipment } from '@/services/equipmentPhotoSync';
+import { getBestEquipmentPhoto, fetchEquipmentPhotos } from '@/services/unifiedPhotoService';
 import { supabase } from '@/lib/supabase';
 import { togglePhotoTee } from '@/services/teeService';
 import { cn } from '@/lib/utils';
@@ -285,13 +286,8 @@ export function BagEquipmentModal({
     if (!equipmentId) return;
 
     try {
-      // Load equipment photos from equipment_photos table
-      const { data: photos } = await supabase
-        .from('equipment_photos')
-        .select('*')
-        .eq('equipment_id', equipmentId)
-        .order('likes_count', { ascending: false })
-        .limit(20);
+      // Load equipment photos using unified service
+      const photos = await fetchEquipmentPhotos(equipmentId, 20);
       
       // If user is logged in, check which photos they've liked
       let photosWithLikes = photos || [];
@@ -325,11 +321,10 @@ export function BagEquipmentModal({
         });
       }
       
-      // Add the equipment's main photo if it exists and is different (and not a placeholder)
-      const mainPhoto = equipment?.image_url;
+      // Add the equipment's main photo if it exists and is different
+      const mainPhoto = getBestEquipmentPhoto(equipment);
       if (mainPhoto && 
-          mainPhoto !== bagEquipment?.custom_photo_url && 
-          !mainPhoto.includes('placehold')) {
+          mainPhoto !== bagEquipment?.custom_photo_url) {
         allPhotos.push({
           id: 'main-photo',
           photo_url: mainPhoto,
@@ -537,19 +532,33 @@ export function BagEquipmentModal({
                         <Label className="text-sm sm:text-base font-medium">Equipment Photo</Label>
                         <div className="flex items-center gap-4">
                           <div className="w-24 h-24 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden flex-shrink-0">
-                            <img
-                              src={formData.custom_photo_url || (equipment as any)?.primaryPhoto || equipment.image_url}
-                              alt={`${equipment.brand} ${equipment.model}`}
-                              className="w-full h-full object-contain"
-                              loading="lazy"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                if (!target.src.includes('placehold')) {
-                                  target.style.objectFit = 'contain';
-                                  target.style.padding = '0.5rem';
-                                }
-                              }}
-                            />
+                            {(() => {
+                              const photoUrl = getBestEquipmentPhoto(equipment, formData.custom_photo_url);
+                              if (photoUrl) {
+                                return (
+                                  <img
+                                    src={photoUrl}
+                                    alt={`${equipment.brand} ${equipment.model}`}
+                                    className="w-full h-full object-contain"
+                                    loading="lazy"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      if (!target.src.includes('placehold')) {
+                                        target.style.objectFit = 'contain';
+                                        target.style.padding = '0.5rem';
+                                      }
+                                    }}
+                                  />
+                                );
+                              } else {
+                                const brandInitials = equipment.brand?.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) || 'EQ';
+                                return (
+                                  <div className="w-full h-full flex items-center justify-center text-white/60 text-lg font-medium">
+                                    {brandInitials}
+                                  </div>
+                                );
+                              }
+                            })()}
                           </div>
                           <div className="space-y-2">
                             <Button 

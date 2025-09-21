@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Video, Play, Loader2, Share2, CheckCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -290,28 +289,6 @@ export function BagVideosTab({
         </div>
       </div>
 
-      {/* Video Hub Link Banner */}
-      <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-500/20 rounded-lg">
-              <Play className="h-5 w-5 text-emerald-400" />
-            </div>
-            <div>
-              <h4 className="font-medium text-white">Explore the Video Hub</h4>
-              <p className="text-sm text-muted-foreground">
-                Discover trending videos, equipment reviews, and community showcases
-              </p>
-            </div>
-          </div>
-          <Link to="/video-hub">
-            <Button variant="default" size="sm" className="bg-emerald-600 hover:bg-emerald-700">
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Visit Video Hub
-            </Button>
-          </Link>
-        </div>
-      </div>
 
       {/* Add Video Form */}
       {showAddForm && isOwner && (

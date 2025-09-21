@@ -115,8 +115,8 @@ export const FeedProvider: React.FC<FeedProviderProps> = ({ children }) => {
       // If filter is 'following' and no user, just show all posts
       const effectiveFilter = (filter === 'following' || filter === 'in-my-bags') && !user ? 'all' : filter;
       
-      console.log('[FeedContext.loadMainFeed] Calling getFeedPosts with:', user?.id, effectiveFilter);
-      const feedPosts = await getFeedPosts(user?.id, effectiveFilter);
+      console.log('[FeedContext.loadMainFeed] Calling getFeedPosts with:', user?.id, effectiveFilter, currentSort);
+      const feedPosts = await getFeedPosts(user?.id, effectiveFilter, currentSort);
       
       console.log('[FeedContext] Raw feed posts received:', feedPosts.length, 'posts');
       if (feedPosts.length === 0) {

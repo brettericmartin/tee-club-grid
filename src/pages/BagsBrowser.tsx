@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users, Loader2, ShoppingBag, ChevronDown } from "lucide-react";
+import { Search, Filter, TrendingUp, Clock, Heart, DollarSign, Users, Loader2, ShoppingBag, ChevronDown, Flame } from "lucide-react";
 import { TeedBallIcon } from "@/components/shared/TeedBallLike";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,7 +21,7 @@ import { toggleFollow, getUserFollowing } from "@/services/users";
 import { toast } from "sonner";
 import { DataLoader } from "@/components/shared/DataLoader";
 
-type SortOption = "trending" | "newest" | "most-liked" | "following" | "price-high" | "price-low";
+type SortOption = "hot" | "trending" | "newest" | "most-liked" | "following" | "price-high" | "price-low";
 type HandicapRange = "all" | "0-5" | "6-15" | "16+";
 type PriceRange = "all" | "under-2k" | "2k-5k" | "5k+";
 type FilterOption = "all" | "teed" | "following";
@@ -266,6 +266,7 @@ const BagsBrowser = () => {
 
   const getSortIcon = (sort: SortOption) => {
     switch (sort) {
+      case "hot": return <Flame className="w-4 h-4" />;
       case "trending": return <TrendingUp className="w-4 h-4" />;
       case "newest": return <Clock className="w-4 h-4" />;
       case "most-liked": return <Heart className="w-4 h-4" />;
@@ -306,6 +307,7 @@ const BagsBrowser = () => {
                   <span className="flex items-center gap-2">
                     {getSortIcon(sortBy)}
                     <span>Sort: {
+                      sortBy === "hot" ? "Hot" :
                       sortBy === "newest" ? "Newest" :
                       sortBy === "most-liked" ? "Most Liked" :
                       sortBy === "following" ? "Following" :
@@ -319,6 +321,15 @@ const BagsBrowser = () => {
               <DropdownMenuContent align="start" className="w-56 bg-[#1a1a1a] border-white/10">
                 <DropdownMenuLabel className="text-white">Sort By</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuItem 
+                  onClick={() => setSortBy("hot")}
+                  className="text-white/90 hover:text-white focus:bg-white/10"
+                >
+                  <Flame className="w-4 h-4 mr-2" />
+                  Hot
+                  <span className="ml-auto text-xs text-white/50">Trending now</span>
+                  {sortBy === "hot" && <span className="ml-2 text-primary">✓</span>}
+                </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setSortBy("newest")}
                   className="text-white/90 hover:text-white focus:bg-white/10"
@@ -495,6 +506,12 @@ const BagsBrowser = () => {
               </div>
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="hot">
+                <div className="flex items-center gap-2">
+                  <Flame className="w-4 h-4" />
+                  Hot
+                </div>
+              </SelectItem>
               <SelectItem value="newest">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />

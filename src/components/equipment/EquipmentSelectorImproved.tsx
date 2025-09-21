@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ChevronRight, X, Plus, RotateCcw, Save } from 'lucide-react';
+import { Search, ChevronRight, X, Plus, RotateCcw, Save, Camera } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,7 +11,9 @@ import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/supabase';
 import { EQUIPMENT_CATEGORIES as STANDARD_CATEGORIES, CATEGORY_DISPLAY_NAMES } from '@/lib/equipment-categories';
 import { useCategoryImages } from '@/hooks/useCategoryImages';
+import { getBestEquipmentPhoto } from '@/services/unifiedPhotoService';
 import SubmitEquipmentModal from '@/components/SubmitEquipmentModal';
+import { CommunityPhotosGallery } from '@/components/bag/CommunityPhotosGallery';
 import { toast } from 'sonner';
 import { useFormPersistence } from '@/hooks/useFormPersistence';
 
@@ -129,23 +131,15 @@ const EquipmentImage = ({
 }) => {
   const [imageError, setImageError] = useState(false);
   
-  // Determine image source with fallback priority:
-  // 1. Equipment-specific most liked photo (NEW!)
-  // 2. equipment.image_url
-  // 3. most liked photo from category
-  // 4. brand initials
+  // Use unified photo service for consistent photo selection
   const getImageSrc = () => {
-    // First try equipment-specific most liked photo
-    if (!imageError && equipment.most_liked_photo) {
-      return equipment.most_liked_photo;
-    }
+    if (imageError) return null;
     
-    // Then try the original equipment image
-    if (!imageError && equipment.image_url) {
-      return equipment.image_url;
-    }
+    // Get best photo using unified service
+    const bestPhoto = getBestEquipmentPhoto(equipment);
+    if (bestPhoto) return bestPhoto;
     
-    // Finally try category-level most liked photo
+    // Fallback to category-level most liked photo
     const categoryImage = categoryImages[equipment.category];
     if (categoryImage?.imageUrl) {
       return categoryImage.imageUrl;
@@ -258,6 +252,8 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   // Other state not persisted
   const [loading, setLoading] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+  const [selectedCustomPhoto, setSelectedCustomPhoto] = useState<string | null>(null);
   const [shaftSearch, setShaftSearch] = useState('');
   const [gripSearch, setGripSearch] = useState('');
   const [customLoft, setCustomLoft] = useState('');
@@ -511,6 +507,11 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     // Add custom loft if provided
     if (customLoft && customLoft !== 'none') {
       selection.custom_loft = customLoft;
+    }
+    
+    // Add custom photo if selected
+    if (selectedCustomPhoto) {
+      selection.custom_photo_url = selectedCustomPhoto;
     }
 
     onSelectEquipment(selection);
@@ -891,7 +892,9 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                   {equipment.map((item) => (
                     <Card
                       key={item.id}
-                      className="glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors"
+                      className={`glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors ${
+                        selectedEquipment?.id === item.id ? 'ring-2 ring-primary bg-primary/10' : ''
+                      }`}
                       onClick={() => handleEquipmentSelect(item)}
                     >
                       <div className="flex items-start justify-between">
@@ -919,9 +922,23 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           {step === 'shaft' && (
             <div className="space-y-3">
               <div className="mb-4 p-3 bg-white/10 rounded-lg">
-                <p className="text-sm text-white/60">Customizing</p>
-                <p className="font-medium">{selectedEquipment?.brand} {selectedEquipment?.model}</p>
-                <p className="text-xs text-white/40 mt-1 sm:hidden">Tap to select • Double-tap to continue</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white/60">Customizing</p>
+                    <p className="font-medium">{selectedEquipment?.brand} {selectedEquipment?.model}</p>
+                    <p className="text-xs text-white/40 mt-1 sm:hidden">Tap to select • Double-tap to continue</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPhotoGallery(true)}
+                    className="glass-button"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    {selectedCustomPhoto ? 'Change Photo' : 'Select Photo'}
+                  </Button>
+                </div>
               </div>
 
               {/* Search input for shafts */}
@@ -1119,9 +1136,23 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
           {step === 'loft' && (
             <div className="space-y-3">
               <div className="mb-4 p-3 bg-white/10 rounded-lg">
-                <p className="text-sm text-white/60">Customizing</p>
-                <p className="font-medium">{selectedEquipment?.brand} {selectedEquipment?.model}</p>
-                <p className="text-xs text-white/40 mt-1 sm:hidden">Tap to select • Double-tap to continue</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white/60">Customizing</p>
+                    <p className="font-medium">{selectedEquipment?.brand} {selectedEquipment?.model}</p>
+                    <p className="text-xs text-white/40 mt-1 sm:hidden">Tap to select • Double-tap to continue</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPhotoGallery(true)}
+                    className="glass-button"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    {selectedCustomPhoto ? 'Change Photo' : 'Select Photo'}
+                  </Button>
+                </div>
               </div>
 
               {/* Get loft options for this category */}
@@ -1316,6 +1347,19 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
       }}
       initialCategory={selectedCategory?.value}
     />
+    
+    {selectedEquipment && (
+      <CommunityPhotosGallery
+        isOpen={showPhotoGallery}
+        onClose={() => setShowPhotoGallery(false)}
+        equipmentId={selectedEquipment.id}
+        onSelectPhoto={(photoUrl) => {
+          setSelectedCustomPhoto(photoUrl);
+          setShowPhotoGallery(false);
+          toast.success('Photo selected for equipment');
+        }}
+      />
+    )}
   </>
   );
 }

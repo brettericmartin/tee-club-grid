@@ -1,5 +1,5 @@
 {
-  "generated": "2025-09-09T03:08:02.912Z",
+  "generated": "2025-09-12T03:09:08.335Z",
   "equipment": [
     {
       "id": "524fe4c1-46a8-4c33-a744-a97fc5c1e5fc",
@@ -21,6 +21,248 @@
       "msrp": 49.99,
       "release_year": null,
       "totalTees": 1,
+      "photoCount": 2
+    },
+    {
+      "id": "c714657e-2ac2-4163-952d-47831c9e4c16",
+      "brand": "Callaway",
+      "model": "Chrome Soft",
+      "category": "ball",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/c714657e-2ac2-4163-952d-47831c9e4c16/1752352258555-yscdm.jpg",
+      "msrp": 49.99,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "123f6385-e304-4e01-9675-d0280c3372e2",
+      "brand": "SkyCaddie",
+      "model": "LX5",
+      "category": "gps",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/123f6385-e304-4e01-9675-d0280c3372e2/1752377713544-fcaul7.png",
+      "msrp": 349,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "682994ad-9a4e-4f5d-8813-90205cc36d25",
+      "brand": "Shot Scope",
+      "model": "G5",
+      "category": "gps",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/682994ad-9a4e-4f5d-8813-90205cc36d25/1752377801151-1zc9a.png",
+      "msrp": 179,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "47a49c30-3ce8-42fb-af29-7eb4ebd92f8f",
+      "brand": "Bushnell",
+      "model": "Tour V6 Shift",
+      "category": "rangefinder",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/47a49c30-3ce8-42fb-af29-7eb4ebd92f8f/1752377872379-j3h6b.png",
+      "msrp": 449,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "10886bae-a963-4126-9662-cf7c390bdfaa",
+      "brand": "Callaway",
+      "model": "Weather Spann",
+      "category": "glove",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/10886bae-a963-4126-9662-cf7c390bdfaa/1752377944728-kx9w4n.png",
+      "msrp": 22.99,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "cf9eae5b-0393-4ff9-9a7f-a5ecffc16621",
+      "brand": "Ping",
+      "model": "G430 Max",
+      "category": "driver",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/cf9eae5b-0393-4ff9-9a7f-a5ecffc16621/1752378130095-f1gjef.png",
+      "msrp": 571,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 3
+    },
+    {
+      "id": "cbf29e3b-1c78-45c5-8ea8-26531a2a501e",
+      "brand": "Precision Pro",
+      "model": "NX10",
+      "category": "rangefinder",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/cbf29e3b-1c78-45c5-8ea8-26531a2a501e/1752378281740-rbn4e.png",
+      "msrp": 249,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "284d4a7e-349c-4691-974a-97c8bfb17e55",
+      "brand": "Precision Pro",
+      "model": "Titan Elite",
+      "category": "rangefinder",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/284d4a7e-349c-4691-974a-97c8bfb17e55/1752378350885-p9bdbp.png",
+      "msrp": 399,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "52b1d574-36a5-440f-8c0b-40cdcaa411a1",
+      "brand": "Mizuno",
+      "model": "RainFit",
+      "category": "glove",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/52b1d574-36a5-440f-8c0b-40cdcaa411a1/1752378423976-rioqr6b.png",
+      "msrp": 22.99,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "6ca6b03b-cf03-4fc2-b6ba-36e23927c6f0",
+      "brand": "Leupold",
+      "model": "GX-6c",
+      "category": "rangefinder",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/6ca6b03b-cf03-4fc2-b6ba-36e23927c6f0/1752378537354-8yzghh.png",
+      "msrp": 599,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "ed00162f-028d-4723-bd30-979e90e0cf08",
+      "brand": "TaylorMade",
+      "model": "Stratus Tech",
+      "category": "glove",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/ed00162f-028d-4723-bd30-979e90e0cf08/1752378600202-ph83xa.png",
+      "msrp": 19.99,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "d0dc884b-9c03-41cf-97d9-30f296ce7101",
+      "brand": "Callaway",
+      "model": "Apex 19",
+      "category": "iron",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/1752965871509.jpg",
+      "msrp": 999.99,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 3
+    },
+    {
+      "id": "8243a3d3-752a-4444-939d-8063136c0cd1",
+      "brand": "SkyCaddie",
+      "model": "SX550",
+      "category": "gps",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/8243a3d3-752a-4444-939d-8063136c0cd1/1752378811370-21vd1o.png",
+      "msrp": 449,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "c10df341-4416-4375-8cf0-4f95bebe73c0",
+      "brand": "Callaway",
+      "model": "Apex Pro 24",
+      "category": "iron",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/c10df341-4416-4375-8cf0-4f95bebe73c0/1752384149578-2q9gh.png",
+      "msrp": 1499,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 2
+    },
+    {
+      "id": "89ca5d3b-6ac4-44ee-861c-9378e0ad4941",
+      "brand": "Callaway",
+      "model": "Dawn Patrol",
+      "category": "glove",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/89ca5d3b-6ac4-44ee-861c-9378e0ad4941/1752378644531-ucxzt.png",
+      "msrp": 16.99,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "267f8093-4102-40c8-b0ea-ec1694b17da4",
+      "brand": "Titleist",
+      "model": "Players Flex",
+      "category": "glove",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/267f8093-4102-40c8-b0ea-ec1694b17da4/1752378756341-zug8z4.jpg",
+      "msrp": 19.99,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "93aeadc3-c508-4e4c-9d05-36e575836216",
+      "brand": "TaylorMade",
+      "model": "BRNR Mini",
+      "category": "driver",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/1752351611740.png",
+      "msrp": 449,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 4
+    },
+    {
+      "id": "c9f8482c-13bf-4be4-b3a8-d43705a18d0b",
+      "brand": "Callaway",
+      "model": "Paradym Ai Smoke MAX Fairway",
+      "category": "fairway-wood",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/1752352995512.jpg",
+      "msrp": 349,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "dc846390-63f0-4dd1-bf0b-9a0d4ea0f2d2",
+      "brand": "Titleist",
+      "model": "TSR2 Hybrid",
+      "category": "hybrid",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/1752353069744.jpg",
+      "msrp": 279,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "c7c07438-fe51-4ae5-8e80-cd216fbffa32",
+      "brand": "Scotty Cameron",
+      "model": "Special Select Newport 2 Plus",
+      "category": "putter",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/1752353127327.jpg",
+      "msrp": 449,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "ccd0b61d-ff0d-408f-8621-8821e6a704f5",
+      "brand": "TaylorMade",
+      "model": "Rain Control",
+      "category": "glove",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/1752353229105.jpg",
+      "msrp": 24.99,
+      "release_year": null,
+      "totalTees": 0,
+      "photoCount": 1
+    },
+    {
+      "id": "98b4b0cb-040d-4af4-b5c2-e758489f0de8",
+      "brand": "Vessel",
+      "model": "Lux Cart",
+      "category": "bag",
+      "image_url": "https://kgleorvvtrqlgolzdbbw.supabase.co/storage/v1/object/public/equipment-photos/38c167c1-d10a-406d-9b9d-c86292739ccd/1752353806914.jpg",
+      "msrp": 445,
+      "release_year": null,
+      "totalTees": 0,
       "photoCount": 1
     }
   ]

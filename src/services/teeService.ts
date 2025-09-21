@@ -250,6 +250,120 @@ export async function getBagTotalTees(bagId: string): Promise<AggregatedTees> {
 }
 
 /**
+ * Get total tees received by a user across all content
+ * This is the comprehensive aggregation function that counts ALL tees
+ */
+export async function getUserTotalTees(userId: string): Promise<{
+  bagTees: number;
+  postTees: number;
+  photoTees: number;
+  equipmentTees: number;
+  totalTees: number;
+}> {
+  try {
+    console.log('[getUserTotalTees] Starting for user:', userId);
+    
+    // 1. Count tees on user's bags (other users teeing this user's bags)
+    const { data: userBags } = await supabase
+      .from('user_bags')
+      .select('id')
+      .eq('user_id', userId);
+    
+    let bagTees = 0;
+    if (userBags && userBags.length > 0) {
+      const bagIds = userBags.map(bag => bag.id);
+      const { count: bagCount } = await supabase
+        .from('bag_tees')
+        .select('*', { count: 'exact', head: true })
+        .in('bag_id', bagIds);
+      bagTees = bagCount || 0;
+    }
+    
+    // 2. Count tees on user's feed posts
+    const { data: userPosts } = await supabase
+      .from('feed_posts')
+      .select('id')
+      .eq('user_id', userId);
+    
+    let postTees = 0;
+    if (userPosts && userPosts.length > 0) {
+      const postIds = userPosts.map(post => post.id);
+      // Check both 'likes' and 'feed_likes' tables for compatibility
+      const { count: likesCount } = await supabase
+        .from('likes')
+        .select('*', { count: 'exact', head: true })
+        .in('post_id', postIds);
+      
+      const { count: feedLikesCount } = await supabase
+        .from('feed_likes')
+        .select('*', { count: 'exact', head: true })
+        .in('post_id', postIds);
+      
+      postTees = (likesCount || 0) + (feedLikesCount || 0);
+    }
+    
+    // 3. Count tees on user's equipment photos
+    const { data: userPhotos } = await supabase
+      .from('equipment_photos')
+      .select('id')
+      .eq('user_id', userId);
+    
+    let photoTees = 0;
+    if (userPhotos && userPhotos.length > 0) {
+      const photoIds = userPhotos.map(photo => photo.id);
+      const { count: photoCount } = await supabase
+        .from('equipment_photo_likes')
+        .select('*', { count: 'exact', head: true })
+        .in('photo_id', photoIds);
+      photoTees = photoCount || 0;
+    }
+    
+    // 4. Count tees on equipment added by this user
+    const { data: userEquipment } = await supabase
+      .from('equipment')
+      .select('id')
+      .eq('added_by_user_id', userId);
+    
+    let equipmentTees = 0;
+    if (userEquipment && userEquipment.length > 0) {
+      const equipmentIds = userEquipment.map(eq => eq.id);
+      const { count: equipmentCount } = await supabase
+        .from('equipment_tees')
+        .select('*', { count: 'exact', head: true })
+        .in('equipment_id', equipmentIds);
+      equipmentTees = equipmentCount || 0;
+    }
+    
+    const totalTees = bagTees + postTees + photoTees + equipmentTees;
+    
+    console.log('[getUserTotalTees] Results:', {
+      bagTees,
+      postTees,
+      photoTees,
+      equipmentTees,
+      totalTees
+    });
+    
+    return {
+      bagTees,
+      postTees,
+      photoTees,
+      equipmentTees,
+      totalTees
+    };
+  } catch (error) {
+    console.error('[getUserTotalTees] Error:', error);
+    return {
+      bagTees: 0,
+      postTees: 0,
+      photoTees: 0,
+      equipmentTees: 0,
+      totalTees: 0
+    };
+  }
+}
+
+/**
  * Get all items teed by a user
  */
 export async function getUserTeedItems(
