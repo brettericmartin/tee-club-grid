@@ -38,6 +38,16 @@ const WaitlistPage = () => {
   const [referralCode, setReferralCode] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Check if user already has beta access and redirect them
+  useEffect(() => {
+    // If user is authenticated and has beta access, redirect to my-bag
+    if (user && profile?.beta_access) {
+      console.log('[Waitlist] User already has beta access, redirecting to my-bag');
+      navigate('/my-bag');
+      return;
+    }
+  }, [user, profile, navigate]);
+
   // Capture both invite and referral codes from URL params and track page view
   useEffect(() => {
     // Track page view

@@ -33,9 +33,23 @@ export default function AuthCallback() {
               setError(error.message);
             } else if (data?.session) {
               console.log('Session set successfully from hash');
-              // Wait for auth state to propagate
+              
+              // Check if user has beta access
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('beta_access, is_admin')
+                .eq('id', data.session.user.id)
+                .single();
+              
+              // Wait for auth state to propagate and navigate based on beta access
               setTimeout(() => {
-                navigate('/my-bag');
+                if (profile && (profile.beta_access || profile.is_admin)) {
+                  console.log('User has beta access, navigating to my-bag');
+                  navigate('/my-bag');
+                } else {
+                  console.log('User needs waitlist, navigating to waitlist');
+                  navigate('/waitlist');
+                }
               }, 500);
               return;
             }
@@ -51,7 +65,7 @@ export default function AuthCallback() {
         if (errorParam) {
           console.error('OAuth error:', errorParam, errorDescription);
           setError(errorDescription || errorParam);
-          setTimeout(() => navigate('/my-bag'), 3000);
+          setTimeout(() => navigate('/waitlist'), 3000);
           return;
         }
         
@@ -62,17 +76,32 @@ export default function AuthCallback() {
           if (error) {
             console.error('Error exchanging code for session:', error);
             setError(error.message);
-            setTimeout(() => navigate('/my-bag'), 3000);
+            setTimeout(() => navigate('/waitlist'), 3000);
             return;
           }
           
           if (data?.session) {
             console.log('Successfully authenticated with Google, session:', data.session.user?.email);
+            
+            // Check if user has beta access
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('beta_access, is_admin')
+              .eq('id', data.session.user.id)
+              .single();
+            
             // Force a refresh of the auth state
             await supabase.auth.refreshSession();
-            // Wait for auth state to propagate
+            
+            // Wait for auth state to propagate and navigate based on beta access
             setTimeout(() => {
-              navigate('/my-bag');
+              if (profile && (profile.beta_access || profile.is_admin)) {
+                console.log('User has beta access, navigating to my-bag');
+                navigate('/my-bag');
+              } else {
+                console.log('User needs waitlist, navigating to waitlist');
+                navigate('/waitlist');
+              }
             }, 500);
             return;
           }
@@ -84,22 +113,36 @@ export default function AuthCallback() {
         if (sessionError) {
           console.error('Error getting session:', sessionError);
           setError(sessionError.message);
-          setTimeout(() => navigate('/my-bag'), 3000);
+          setTimeout(() => navigate('/waitlist'), 3000);
           return;
         }
 
         if (session) {
           console.log('Found existing session');
-          navigate('/my-bag');
+          
+          // Check if user has beta access
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('beta_access, is_admin')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile && (profile.beta_access || profile.is_admin)) {
+            console.log('User has beta access, navigating to my-bag');
+            navigate('/my-bag');
+          } else {
+            console.log('User needs waitlist, navigating to waitlist');
+            navigate('/waitlist');
+          }
         } else {
           console.log('No session found after callback');
           setError('Authentication failed - no session created');
-          setTimeout(() => navigate('/my-bag'), 3000);
+          setTimeout(() => navigate('/waitlist'), 3000);
         }
       } catch (error) {
         console.error('Error during auth callback:', error);
         setError('An unexpected error occurred');
-        setTimeout(() => navigate('/my-bag'), 3000);
+        setTimeout(() => navigate('/waitlist'), 3000);
       }
     };
 
