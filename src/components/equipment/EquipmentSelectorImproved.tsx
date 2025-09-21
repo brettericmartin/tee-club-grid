@@ -260,6 +260,8 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [shaftSearch, setShaftSearch] = useState('');
   const [gripSearch, setGripSearch] = useState('');
+  const [customLoft, setCustomLoft] = useState('');
+  const [showCustomLoft, setShowCustomLoft] = useState(false);
   
   // Double tap detection for mobile
   const [lastTap, setLastTap] = useState(0);
@@ -272,6 +274,14 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   
   // Category images for fallbacks
   const { categoryImages } = useCategoryImages(Object.values(STANDARD_CATEGORIES));
+  
+  // Loft options by equipment category
+  const LOFT_OPTIONS: Record<string, string[]> = {
+    driver: ['8°', '8.5°', '9°', '9.5°', '10°', '10.5°', '11°', '11.5°', '12°', '12.5°'],
+    fairway_wood: ['13°', '13.5°', '14°', '15°', '15.5°', '16°', '16.5°', '17°', '17.5°', '18°', '18.5°', '19°', '19.5°', '20°', '21°', '22°', '23°'],
+    hybrid: ['16°', '17°', '18°', '19°', '20°', '21°', '22°', '23°', '24°', '25°', '26°', '27°'],
+    wedge: ['46°', '48°', '50°', '52°', '54°', '56°', '58°', '60°', '62°', '64°'],
+  };
 
   // Don't reset state when dialog closes - persist it instead
   useEffect(() => {
@@ -497,6 +507,11 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     if (selectedShaft) selection.shaft_id = selectedShaft.id;
     if (selectedGrip) selection.grip_id = selectedGrip.id;
     if (selectedLoft) selection.loft_option_id = selectedLoft.id;
+    
+    // Add custom loft if provided
+    if (customLoft && customLoft !== 'none') {
+      selection.custom_loft = customLoft;
+    }
 
     onSelectEquipment(selection);
     handleSuccess(); // Clear persisted data on success
@@ -519,7 +534,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     switch (step) {
       case 'shaft': return selectedShaft !== undefined; // Allow null for Default/Stock
       case 'grip': return selectedGrip !== undefined; // Allow null for Default/Stock
-      case 'loft': return !selectedCategory?.hasLoft || !!selectedLoft;
+      case 'loft': return !selectedCategory?.hasLoft || !!customLoft || !!selectedLoft;
       default: return true;
     }
   };
@@ -1109,24 +1124,72 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                 <p className="text-xs text-white/40 mt-1 sm:hidden">Tap to select • Double-tap to continue</p>
               </div>
 
-              <Select
-                value={selectedLoft?.id}
-                onValueChange={(value) => {
-                  const loft = loftOptions.find(l => l.id === value);
-                  setSelectedLoft(loft || null);
-                }}
-              >
-                <SelectTrigger className="bg-white/10 border-white/20">
-                  <SelectValue placeholder="Select loft" />
-                </SelectTrigger>
-                <SelectContent className="glass-card">
-                  {loftOptions.map((loft) => (
-                    <SelectItem key={loft.id} value={loft.id}>
-                      {loft.display_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* Get loft options for this category */}
+              {(() => {
+                const categoryLoftOptions = selectedCategory?.value ? LOFT_OPTIONS[selectedCategory.value] : [];
+                
+                if (!categoryLoftOptions || categoryLoftOptions.length === 0) {
+                  return (
+                    <div className="p-4 text-center text-white/60">
+                      <p>No loft options available for this category</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <>
+                    <Select
+                      value={showCustomLoft ? 'custom' : (customLoft || 'none')}
+                      onValueChange={(value) => {
+                        if (value === 'custom') {
+                          setShowCustomLoft(true);
+                          setCustomLoft('');
+                        } else {
+                          setShowCustomLoft(false);
+                          setCustomLoft(value === 'none' ? '' : value);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                        <SelectValue placeholder="Select loft">
+                          {customLoft || 'Select loft'}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="glass-card max-h-[300px] overflow-y-auto">
+                        <SelectItem value="none">None / Default</SelectItem>
+                        {categoryLoftOptions.map((loft) => (
+                          <SelectItem key={loft} value={loft}>
+                            {loft}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="custom" className="border-t">
+                          <div className="flex items-center">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Custom Loft...
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {/* Custom Loft Input */}
+                    {showCustomLoft && (
+                      <div className="space-y-2">
+                        <Input
+                          type="text"
+                          placeholder="Enter custom loft (e.g., 9.75°)"
+                          value={customLoft}
+                          onChange={(e) => setCustomLoft(e.target.value)}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                          autoFocus
+                        />
+                        <p className="text-xs text-white/60">
+                          Enter your custom loft value (include ° symbol if desired)
+                        </p>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
         </ScrollArea>
