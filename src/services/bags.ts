@@ -374,6 +374,67 @@ export async function updateBag(bagId: string, updates: {
   return data;
 }
 
+// Check if exact duplicate equipment exists (same equipment with identical specs)
+export async function checkEquipmentDuplicate(
+  bagId: string, 
+  equipmentId: string, 
+  details?: {
+    shaft_id?: string;
+    grip_id?: string;
+    custom_specs?: Record<string, any>;
+  }
+): Promise<boolean> {
+  // Get existing equipment in bag
+  const { data: existing } = await supabase
+    .from('bag_equipment')
+    .select('*')
+    .eq('bag_id', bagId)
+    .eq('equipment_id', equipmentId);
+
+  if (!existing || existing.length === 0) return false;
+
+  // Check if any existing entry has identical specs
+  return existing.some(item => {
+    const sameShaft = (item.shaft_id === (details?.shaft_id || null));
+    const sameGrip = (item.grip_id === (details?.grip_id || null));
+    
+    // Deep compare custom_specs
+    const existingSpecs = item.custom_specs || {};
+    const newSpecs = details?.custom_specs || {};
+    
+    // Check if loft is the same
+    const sameLoft = existingSpecs.loft === newSpecs.loft;
+    
+    // Check if all specs match
+    const sameSpecs = JSON.stringify(existingSpecs) === JSON.stringify(newSpecs);
+    
+    return sameShaft && sameGrip && sameSpecs;
+  });
+}
+
+// Get equipment variants in bag (same equipment with different specs)
+export async function getEquipmentVariants(bagId: string, equipmentId: string) {
+  const { data, error } = await supabase
+    .from('bag_equipment')
+    .select(`
+      *,
+      equipment:equipment (*),
+      shaft:shaft_id (*),
+      grip:grip_id (*)
+    `)
+    .eq('bag_id', bagId)
+    .eq('equipment_id', equipmentId)
+    .order('created_at');
+
+  if (error) throw error;
+  
+  return data?.map((item, index) => ({
+    ...item,
+    variant_number: index + 1,
+    variant_label: item.custom_specs?.loft ? `${item.custom_specs.loft}` : null
+  })) || [];
+}
+
 // Add equipment to bag
 export async function addEquipmentToBag(bagId: string, equipmentId: string, details?: {
   is_featured?: boolean;
@@ -381,7 +442,20 @@ export async function addEquipmentToBag(bagId: string, equipmentId: string, deta
   purchase_price?: number;
   notes?: string;
   custom_specs?: Record<string, any>;
+  shaft_id?: string;
+  grip_id?: string;
 }) {
+  // Check for exact duplicate (same equipment with identical specs)
+  const isDuplicate = await checkEquipmentDuplicate(bagId, equipmentId, {
+    shaft_id: details?.shaft_id,
+    grip_id: details?.grip_id,
+    custom_specs: details?.custom_specs
+  });
+  
+  if (isDuplicate) {
+    throw new Error('This exact equipment configuration already exists in your bag. You can add the same equipment with different specifications (loft, shaft, grip, etc).');
+  }
+
   const { data, error } = await supabase
     .from('bag_equipment')
     .insert({

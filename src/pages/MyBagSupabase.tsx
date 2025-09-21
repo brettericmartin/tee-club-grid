@@ -1455,6 +1455,9 @@ const MyBagSupabase = () => {
                         <div>
                           <h3 className="font-semibold text-white hover:text-primary transition-colors text-lg">
                             {item.equipment?.brand || 'Unknown'} {item.equipment?.model || ''}
+                            {item.custom_specs?.loft && (
+                              <span className="ml-2 text-sm text-primary">({item.custom_specs.loft})</span>
+                            )}
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs px-2 py-0.5 bg-white/10 rounded-full text-white/80 capitalize">
@@ -1473,6 +1476,19 @@ const MyBagSupabase = () => {
                                 }
                               </span>
                             )}
+                            {/* Show if this is a variant */}
+                            {(() => {
+                              const sameEquipment = bagItems.filter(i => i.equipment_id === item.equipment_id);
+                              if (sameEquipment.length > 1) {
+                                const variantIndex = sameEquipment.findIndex(i => i.id === item.id) + 1;
+                                return (
+                                  <span className="text-xs px-2 py-0.5 bg-primary/10 rounded-full text-primary border border-primary/30">
+                                    Variant {variantIndex} of {sameEquipment.length}
+                                  </span>
+                                );
+                              }
+                              return null;
+                            })()}
                           </div>
                         </div>
                         {item.purchase_price && (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ChevronRight, X, Plus, RotateCcw, Save, Camera } from 'lucide-react';
+import { Search, ChevronRight, X, Plus, RotateCcw, Save, Camera, Copy } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,10 +12,12 @@ import type { Database } from '@/lib/supabase';
 import { EQUIPMENT_CATEGORIES as STANDARD_CATEGORIES, CATEGORY_DISPLAY_NAMES } from '@/lib/equipment-categories';
 import { useCategoryImages } from '@/hooks/useCategoryImages';
 import { getBestEquipmentPhoto } from '@/services/unifiedPhotoService';
+import { getEquipmentVariants } from '@/services/bags';
 import SubmitEquipmentModal from '@/components/SubmitEquipmentModal';
 import { CommunityPhotosGallery } from '@/components/bag/CommunityPhotosGallery';
 import { toast } from 'sonner';
 import { useFormPersistence } from '@/hooks/useFormPersistence';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'] & {
   most_liked_photo?: string;
@@ -212,6 +214,8 @@ const initialFormState: FormState = {
 };
 
 export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }: EquipmentSelectorImprovedProps) {
+  const { user } = useAuth();
+  
   // Use form persistence hook
   const {
     state: formState,
@@ -258,6 +262,7 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   const [gripSearch, setGripSearch] = useState('');
   const [customLoft, setCustomLoft] = useState('');
   const [showCustomLoft, setShowCustomLoft] = useState(false);
+  const [existingVariants, setExistingVariants] = useState<any[]>([]);
   
   // Double tap detection for mobile
   const [lastTap, setLastTap] = useState(0);
@@ -450,6 +455,47 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     }
   };
 
+  // Load existing variants for all equipment in user's bag on component mount
+  const loadAllVariants = async () => {
+    if (!user) return;
+    
+    try {
+      // Get user's current bag
+      const { data: bagData } = await supabase
+        .from('user_bags')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('is_primary', true)
+        .single();
+      
+      if (!bagData) return;
+      
+      // Get all equipment in the bag
+      const { data: bagEquipment } = await supabase
+        .from('bag_equipment')
+        .select(`
+          *,
+          equipment:equipment_id (*),
+          shaft:shaft_id (*),
+          grip:grip_id (*)
+        `)
+        .eq('bag_id', bagData.id);
+      
+      if (bagEquipment) {
+        setExistingVariants(bagEquipment);
+      }
+    } catch (error) {
+      console.error('Error loading existing equipment:', error);
+    }
+  };
+
+  // Load existing variants on mount
+  useEffect(() => {
+    if (isOpen && user) {
+      loadAllVariants();
+    }
+  }, [isOpen, user]);
+
   // Load equipment when step changes to 'equipment' and we have category + brand
   useEffect(() => {
     if (step === 'equipment' && selectedCategory && selectedBrand) {
@@ -479,8 +525,48 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     setStep('equipment');
   };
 
-  const handleEquipmentSelect = (equipment: Equipment) => {
+  // Check for existing variants of this equipment in user's bag
+  const checkForVariants = async (equipmentId: string) => {
+    if (!user) return;
+    
+    try {
+      // Get user's current bag
+      const { data: bagData } = await supabase
+        .from('user_bags')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('is_primary', true)
+        .single();
+      
+      if (!bagData) return;
+      
+      // Get variants of this equipment
+      const variants = await getEquipmentVariants(bagData.id, equipmentId);
+      setExistingVariants(variants);
+      
+      if (variants.length > 0) {
+        // Show info about existing variants
+        const variantInfo = variants.map(v => {
+          const specs = [];
+          if (v.custom_specs?.loft) specs.push(v.custom_specs.loft);
+          if (v.shaft?.model) specs.push(v.shaft.model);
+          return specs.length > 0 ? specs.join(', ') : 'Standard configuration';
+        }).join(' | ');
+        
+        toast.info(`You have ${variants.length} of these in your bag: ${variantInfo}`, {
+          duration: 5000
+        });
+      }
+    } catch (error) {
+      console.error('Error checking for variants:', error);
+    }
+  };
+
+  const handleEquipmentSelect = async (equipment: Equipment) => {
     setSelectedEquipment(equipment);
+    
+    // Check for existing variants
+    await checkForVariants(equipment.id);
     
     // Determine next step based on category
     if (!selectedCategory) return;
@@ -889,30 +975,46 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                 </div>
               ) : (
                 <div className="grid gap-3">
-                  {equipment.map((item) => (
-                    <Card
-                      key={item.id}
-                      className={`glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors ${
-                        selectedEquipment?.id === item.id ? 'ring-2 ring-primary bg-primary/10' : ''
-                      }`}
-                      onClick={() => handleEquipmentSelect(item)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-white">{item.model}</h3>
-                          <p className="text-sm text-white/60">{item.brand}</p>
-                          {item.msrp && (
-                            <p className="text-sm text-white/60">${item.msrp}</p>
-                          )}
+                  {equipment.map((item) => {
+                    // Check if this equipment has variants in the bag
+                    const hasVariants = existingVariants.some(v => v.equipment_id === item.id);
+                    const variantCount = existingVariants.filter(v => v.equipment_id === item.id).length;
+                    
+                    return (
+                      <Card
+                        key={item.id}
+                        className={`glass-card p-4 cursor-pointer hover:bg-white/20 transition-colors ${
+                          selectedEquipment?.id === item.id ? 'ring-2 ring-primary bg-primary/10' : ''
+                        }`}
+                        onClick={() => handleEquipmentSelect(item)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start gap-2">
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-white">{item.model}</h3>
+                                <p className="text-sm text-white/60">{item.brand}</p>
+                                {item.msrp && (
+                                  <p className="text-sm text-white/60">${item.msrp}</p>
+                                )}
+                              </div>
+                              {hasVariants && (
+                                <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30">
+                                  <Copy className="w-3 h-3 mr-1" />
+                                  {variantCount} in bag
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          <EquipmentImage 
+                            equipment={item}
+                            categoryImages={categoryImages}
+                            className="w-20 h-20 object-cover rounded flex-shrink-0"
+                          />
                         </div>
-                        <EquipmentImage 
-                          equipment={item}
-                          categoryImages={categoryImages}
-                          className="w-20 h-20 object-cover rounded flex-shrink-0"
-                        />
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </div>
