@@ -645,7 +645,7 @@ export function BagEquipmentModal({
                                   {formData.shaft_id
                                     ? shafts.find((s) => s.id === formData.shaft_id)?.brand + ' ' +
                                       shafts.find((s) => s.id === formData.shaft_id)?.model
-                                    : "Select shaft..."}
+                                    : "Default/Stock Shaft"}
                                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                               </PopoverTrigger>
@@ -696,7 +696,7 @@ export function BagEquipmentModal({
                                   {formData.grip_id
                                     ? grips.find((g) => g.id === formData.grip_id)?.brand + ' ' +
                                       grips.find((g) => g.id === formData.grip_id)?.model
-                                    : "Select grip..."}
+                                    : "Default/Stock Grip"}
                                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                               </PopoverTrigger>

@@ -481,7 +481,7 @@ export function EquipmentEditor({
                         ? shafts.find((shaft) => shaft.id === formData.shaft_id)?.brand + ' ' +
                           shafts.find((shaft) => shaft.id === formData.shaft_id)?.model + ' - ' +
                           shafts.find((shaft) => shaft.id === formData.shaft_id)?.flex
-                        : "Select shaft..."}
+                        : "Default/Stock Shaft"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -497,6 +497,9 @@ export function EquipmentEditor({
                       <CommandList className="max-h-[30vh] sm:max-h-[40vh] overflow-y-auto">
                         <CommandGroup>
                           {(() => {
+                            // Always show Default/Stock option first if no search or if it matches
+                            const showDefault = !shaftSearch || 'default stock shaft'.includes(shaftSearch.toLowerCase());
+                            
                             // Filter shafts based on search
                             const filteredShafts = shafts.filter((shaft) => {
                               if (!shaftSearch) return true;
@@ -504,8 +507,8 @@ export function EquipmentEditor({
                               return searchableText.includes(shaftSearch.toLowerCase());
                             });
                             
-                            // Show empty state if no results
-                            if (filteredShafts.length === 0) {
+                            // Show empty state if no results and no default option
+                            if (!showDefault && filteredShafts.length === 0) {
                               return (
                                 <div className="p-4 text-sm text-center">
                                   <p className="mb-2">No shaft found matching "{shaftSearch}"</p>
@@ -525,9 +528,35 @@ export function EquipmentEditor({
                               );
                             }
                             
-                            // Show filtered results
-                            return filteredShafts
-                            .map((shaft) => {
+                            // Build results array
+                            return (
+                              <>
+                                {/* Default/Stock option */}
+                                {showDefault && (
+                                  <CommandItem
+                                    value="default-stock-shaft"
+                                    onSelect={() => {
+                                      setFormData({ ...formData, shaft_id: null });
+                                      setShaftOpen(false);
+                                      setShaftSearch('');
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        !formData.shaft_id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    <div className="flex-1">
+                                      <div className="font-medium">Default/Stock Shaft</div>
+                                      <div className="text-sm text-muted-foreground">
+                                        Use manufacturer's stock shaft
+                                      </div>
+                                    </div>
+                                  </CommandItem>
+                                )}
+                                {/* Regular shaft options */}
+                                {filteredShafts.map((shaft) => {
                               // Create a searchable string with all relevant shaft attributes
                               const searchableText = `${shaft.brand} ${shaft.model} ${shaft.specs?.flex || ''} ${shaft.specs?.weight || ''}`.toLowerCase();
                               
@@ -562,7 +591,9 @@ export function EquipmentEditor({
                                   )}
                                 </CommandItem>
                               );
-                            });
+                            })}
+                              </>
+                            );
                           })()}
                         </CommandGroup>
                       </CommandList>
@@ -588,7 +619,7 @@ export function EquipmentEditor({
                         ? grips.find((grip) => grip.id === formData.grip_id)?.brand + ' ' +
                           grips.find((grip) => grip.id === formData.grip_id)?.model + ' - ' +
                           grips.find((grip) => grip.id === formData.grip_id)?.size
-                        : "Select grip..."}
+                        : "Default/Stock Grip"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -604,6 +635,9 @@ export function EquipmentEditor({
                       <CommandList className="max-h-[30vh] sm:max-h-[40vh] overflow-y-auto">
                         <CommandGroup>
                           {(() => {
+                            // Always show Default/Stock option first if no search or if it matches
+                            const showDefault = !gripSearch || 'default stock grip'.includes(gripSearch.toLowerCase());
+                            
                             // Filter grips based on search
                             const filteredGrips = grips.filter((grip) => {
                               if (!gripSearch) return true;
@@ -611,8 +645,8 @@ export function EquipmentEditor({
                               return searchableText.includes(gripSearch.toLowerCase());
                             });
                             
-                            // Show empty state if no results
-                            if (filteredGrips.length === 0) {
+                            // Show empty state if no results and no default option
+                            if (!showDefault && filteredGrips.length === 0) {
                               return (
                                 <div className="p-4 text-sm text-center">
                                   <p className="mb-2">No grip found matching "{gripSearch}"</p>
@@ -632,9 +666,35 @@ export function EquipmentEditor({
                               );
                             }
                             
-                            // Show filtered results
-                            return filteredGrips
-                            .map((grip) => {
+                            // Build results array
+                            return (
+                              <>
+                                {/* Default/Stock option */}
+                                {showDefault && (
+                                  <CommandItem
+                                    value="default-stock-grip"
+                                    onSelect={() => {
+                                      setFormData({ ...formData, grip_id: null });
+                                      setGripOpen(false);
+                                      setGripSearch('');
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        !formData.grip_id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    <div className="flex-1">
+                                      <div className="font-medium">Default/Stock Grip</div>
+                                      <div className="text-sm text-muted-foreground">
+                                        Use manufacturer's stock grip
+                                      </div>
+                                    </div>
+                                  </CommandItem>
+                                )}
+                                {/* Regular grip options */}
+                                {filteredGrips.map((grip) => {
                               // Create a searchable string with all relevant grip attributes
                               const searchableText = `${grip.brand} ${grip.model} ${grip.specs?.size || ''} ${grip.specs?.color || ''}`.toLowerCase();
                               
@@ -669,7 +729,9 @@ export function EquipmentEditor({
                                   )}
                                 </CommandItem>
                               );
-                            });
+                            })}
+                              </>
+                            );
                           })()}
                         </CommandGroup>
                       </CommandList>
