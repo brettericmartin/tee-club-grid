@@ -107,6 +107,7 @@ export function EquipmentEditor({
   const [showAddGrip, setShowAddGrip] = useState(false);
   const [newShaft, setNewShaft] = useState({ brand: '', model: '', flex: '', weight: '' });
   const [newGrip, setNewGrip] = useState({ brand: '', model: '', size: 'Standard', color: '' });
+  const [showCustomLoft, setShowCustomLoft] = useState(false);
   
   // Check if equipment is a club (needs shaft/grip/loft options)
   const isClub = ['driver', 'drivers', 'fairway_wood', 'fairway_woods', 'wood', 'woods', 'hybrid', 'hybrids', 'utility_iron', 
@@ -691,12 +692,28 @@ export function EquipmentEditor({
               
               if (!categoryLoftOptions || categoryLoftOptions.length === 0) return null;
               
+              // Check if the current loft is a custom value (not in the predefined list)
+              const isCustomLoft = formData.loft && 
+                                  formData.loft !== 'none' && 
+                                  !categoryLoftOptions.includes(formData.loft);
+              
               return (
                 <div>
                   <Label>Loft/Configuration</Label>
                   <Select
-                    value={formData.loft || 'none'}
-                    onValueChange={(value) => setFormData({ ...formData, loft: value === 'none' ? '' : value })}
+                    value={isCustomLoft || showCustomLoft ? 'custom' : (formData.loft || 'none')}
+                    onValueChange={(value) => {
+                      if (value === 'custom') {
+                        setShowCustomLoft(true);
+                        // Clear the loft value when switching to custom
+                        if (!isCustomLoft) {
+                          setFormData({ ...formData, loft: '' });
+                        }
+                        return;
+                      }
+                      setShowCustomLoft(false);
+                      setFormData({ ...formData, loft: value === 'none' ? '' : value });
+                    }}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select loft">
@@ -710,8 +727,31 @@ export function EquipmentEditor({
                           {loft}
                         </SelectItem>
                       ))}
+                      <SelectItem value="custom" className="border-t">
+                        <div className="flex items-center">
+                          <Plus className="mr-2 h-4 w-4" />
+                          Custom Loft...
+                        </div>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
+                  
+                  {/* Custom Loft Input - Show when custom is selected or current value is custom */}
+                  {(isCustomLoft || showCustomLoft) && (
+                    <div className="mt-2">
+                      <Input
+                        type="text"
+                        placeholder="Enter custom loft (e.g., 9.75°)"
+                        value={formData.loft || ''}
+                        onChange={(e) => setFormData({ ...formData, loft: e.target.value })}
+                        className="w-full"
+                        autoFocus
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Enter your custom loft value (include ° symbol if desired)
+                      </p>
+                    </div>
+                  )}
                 </div>
               );
             })()}

@@ -87,6 +87,7 @@ export function BagEquipmentModal({
   // Searchable dropdown states
   const [shaftOpen, setShaftOpen] = useState(false);
   const [gripOpen, setGripOpen] = useState(false);
+  const [showCustomLoft, setShowCustomLoft] = useState(false);
   
   const equipment = bagEquipment?.equipment;
   const equipmentId = equipment?.id;
@@ -740,12 +741,28 @@ export function BagEquipmentModal({
                           
                           if (!categoryLoftOptions) return null;
                           
+                          // Check if the current loft is a custom value (not in the predefined list)
+                          const isCustomLoft = formData.loft && 
+                                              formData.loft !== 'none' && 
+                                              !categoryLoftOptions.includes(formData.loft);
+                          
                           return (
                             <div>
                               <Label className="text-sm sm:text-base">Loft</Label>
                               <Select
-                                value={formData.loft || 'none'}
-                                onValueChange={(value) => setFormData({ ...formData, loft: value === 'none' ? '' : value })}
+                                value={isCustomLoft || showCustomLoft ? 'custom' : (formData.loft || 'none')}
+                                onValueChange={(value) => {
+                                  if (value === 'custom') {
+                                    setShowCustomLoft(true);
+                                    // Clear the loft value when switching to custom
+                                    if (!isCustomLoft) {
+                                      setFormData({ ...formData, loft: '' });
+                                    }
+                                    return;
+                                  }
+                                  setShowCustomLoft(false);
+                                  setFormData({ ...formData, loft: value === 'none' ? '' : value });
+                                }}
                               >
                                 <SelectTrigger className="w-full">
                                   <SelectValue placeholder="Select loft">
@@ -759,8 +776,31 @@ export function BagEquipmentModal({
                                       {loft}
                                     </SelectItem>
                                   ))}
+                                  <SelectItem value="custom" className="border-t">
+                                    <div className="flex items-center">
+                                      <Plus className="mr-2 h-4 w-4" />
+                                      Custom Loft...
+                                    </div>
+                                  </SelectItem>
                                 </SelectContent>
                               </Select>
+                              
+                              {/* Custom Loft Input - Show when custom is selected or current value is custom */}
+                              {(isCustomLoft || showCustomLoft) && (
+                                <div className="mt-2">
+                                  <Input
+                                    type="text"
+                                    placeholder="Enter custom loft (e.g., 9.75°)"
+                                    value={formData.loft || ''}
+                                    onChange={(e) => setFormData({ ...formData, loft: e.target.value })}
+                                    className="w-full"
+                                    autoFocus
+                                  />
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Enter your custom loft value (include ° symbol if desired)
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           );
                         })()}
