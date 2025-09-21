@@ -222,6 +222,35 @@ export async function syncCustomPhotoToEquipment(
 }
 
 /**
+ * SINGLE SOURCE OF TRUTH FOR EQUIPMENT PHOTOS
+ * This function MUST be used everywhere equipment photos are displayed
+ * to ensure consistency between BagCard, Gallery, and all other components
+ */
+export function getItemDisplayPhoto(item: any): string | null {
+  // If displayPhoto was already computed and stored, use it
+  if (item.displayPhoto !== undefined && item.displayPhoto !== null) {
+    return item.displayPhoto;
+  }
+  
+  // Otherwise compute it using the unified logic
+  if (!item.equipment) {
+    return null;
+  }
+  
+  // Use getBestBagEquipmentPhoto to compute the photo
+  const bestPhoto = getBestBagEquipmentPhoto({
+    selected_photo_id: item.selected_photo_id,
+    custom_photo_url: item.custom_photo_url,
+    equipment: item.equipment
+  });
+  
+  // Cache it on the item for consistency
+  item.displayPhoto = bestPhoto;
+  
+  return bestPhoto;
+}
+
+/**
  * Get a fallback image for a category
  * This can be expanded to return actual category images
  */

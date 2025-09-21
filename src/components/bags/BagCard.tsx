@@ -11,7 +11,7 @@ import EquipmentTile from '@/components/shared/EquipmentTile';
 import { TeedBallLike } from '@/components/shared/TeedBallLike';
 import type { Database } from '@/lib/supabase';
 import { formatCompactCurrency } from '@/lib/formatters';
-import { getBestBagEquipmentPhoto } from '@/services/unifiedPhotoService';
+import { getItemDisplayPhoto } from '@/services/unifiedPhotoService';
 
 interface BagEquipmentItem {
   id: string;
@@ -87,25 +87,9 @@ const BagCardComponent = ({
   const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   
-  // Define the getEquipmentImage function first
+  // Use the unified photo getter - SINGLE SOURCE OF TRUTH
   const getEquipmentImage = (item: BagEquipmentItem) => {
-    // CRITICAL: Always use displayPhoto if available - this ensures each variant shows its own photo
-    if ((item as any).displayPhoto !== undefined && (item as any).displayPhoto !== null) {
-      console.log(`Using displayPhoto for ${item.equipment?.brand} ${item.equipment?.model}:`, (item as any).displayPhoto);
-      return (item as any).displayPhoto;
-    }
-    
-    // Fallback: compute using the unified photo service
-    const bestPhoto = getBestBagEquipmentPhoto({
-      selected_photo_id: item.selected_photo_id,
-      custom_photo_url: item.custom_photo_url,
-      equipment: item.equipment
-    });
-    
-    console.log(`Computed photo for ${item.equipment?.brand} ${item.equipment?.model}:`, bestPhoto, 
-      'selected_photo_id:', item.selected_photo_id);
-    
-    return bestPhoto;
+    return getItemDisplayPhoto(item);
   };
   
   // Define club categories
@@ -120,7 +104,7 @@ const BagCardComponent = ({
   );
   
   // Get the golf bag image using unified photo service
-  const golfBagImage = golfBag ? getEquipmentImage(golfBag) : null;
+  const golfBagImage = golfBag ? getItemDisplayPhoto(golfBag) : null;
   
   // Separate clubs and accessories
   const clubs = allEquipment.filter(item => 

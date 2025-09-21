@@ -3,7 +3,7 @@
  * Used by both bags service and feed cards to ensure identical photo selection
  */
 
-import { getBestBagEquipmentPhoto } from '@/services/unifiedPhotoService';
+import { getItemDisplayPhoto } from '@/services/unifiedPhotoService';
 
 export interface EquipmentWithPhotos {
   id: string;
@@ -37,34 +37,20 @@ export interface BagEquipmentItem {
  */
 export function processEquipmentPhotos(bagEquipment: BagEquipmentItem[]): BagEquipmentItem[] {
   return bagEquipment.map(item => {
-    if (item.equipment) {
-      // Use unified photo service for consistent photo selection
-      const bestPhoto = getBestBagEquipmentPhoto({
-        selected_photo_id: item.selected_photo_id,
-        custom_photo_url: item.custom_photo_url,
-        equipment: item.equipment
-      });
+    // CRITICAL: Create a new object to prevent shared references
+    // This ensures each variant maintains its own data
+    const processedItem = { ...item };
+    
+    if (processedItem.equipment) {
+      // Use the unified photo getter - SINGLE SOURCE OF TRUTH
+      const displayPhoto = getItemDisplayPhoto(processedItem);
       
-      // CRITICAL: Store the computed photo on the bag_equipment item itself
-      // This ensures each variant maintains its own photo selection
-      (item as any).displayPhoto = bestPhoto;
-      
-      console.log(`ProcessEquipment: ${item.equipment.brand} ${item.equipment.model}`,
-        'selected_photo_id:', item.selected_photo_id,
-        'displayPhoto:', bestPhoto);
-      
-      // DO NOT set primaryPhoto on shared equipment object - causes conflicts
-      // Only set it if needed for backward compatibility in specific places
-      
-      // Set most_liked_photo for reference (not used for display)
-      if (item.equipment.equipment_photos && item.equipment.equipment_photos.length > 0) {
-        const sortedPhotos = [...item.equipment.equipment_photos].sort((a, b) => 
-          (b.likes_count || 0) - (a.likes_count || 0)
-        );
-        item.equipment.most_liked_photo = sortedPhotos[0]?.photo_url || null;
-      }
+      console.log(`ProcessEquipment: ${processedItem.equipment.brand} ${processedItem.equipment.model}`,
+        'selected_photo_id:', processedItem.selected_photo_id,
+        'displayPhoto:', displayPhoto);
     }
-    return item;
+    
+    return processedItem;
   });
 }
 
@@ -88,18 +74,9 @@ export function processBagData(bagData: any): any {
 
 /**
  * Get the best available image URL for an equipment item
- * Priority: selected_photo_id > custom_photo_url > primaryPhoto > image_url
+ * ALWAYS uses the unified photo getter for consistency
  */
 export function getEquipmentImageUrl(item: BagEquipmentItem): string | null {
-  // If primaryPhoto was already computed by processEquipmentPhotos, use it
-  if ((item.equipment as any)?.primaryPhoto) {
-    return (item.equipment as any).primaryPhoto;
-  }
-  
-  // Otherwise compute it using the unified photo service
-  return getBestBagEquipmentPhoto({
-    selected_photo_id: item.selected_photo_id,
-    custom_photo_url: item.custom_photo_url,
-    equipment: item.equipment
-  });
+  // Use the unified photo getter - SINGLE SOURCE OF TRUTH
+  return getItemDisplayPhoto(item);
 }

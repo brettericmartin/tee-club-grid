@@ -28,7 +28,7 @@ import type { Database } from "@/lib/supabase";
 import { smartCreateBagPost, smartCreateBagUpdatePost, smartCreateEquipmentPost } from "@/services/feedSmartUpdate";
 import { setPrimaryBag } from "@/services/bags";
 import { getUserTotalTees } from "@/services/teeService";
-import { getBestBagEquipmentPhoto } from "@/services/unifiedPhotoService";
+import { getItemDisplayPhoto } from "@/services/unifiedPhotoService";
 import { BadgeShowcase } from "@/components/badges/BadgeShowcase";
 import { useBadgeCheck } from "@/hooks/useBadgeCheck";
 import { BadgeNotificationToast } from "@/components/badges/BadgeNotificationToast";
@@ -456,24 +456,13 @@ const MyBagSupabase = () => {
       // Process the data using unified photo service
       const processedData = data?.map(item => {
         if (item.equipment) {
-          // Use the unified photo service to get the best photo
-          // This respects selected_photo_id first, then falls back to other options
-          const bestPhoto = getBestBagEquipmentPhoto({
-            selected_photo_id: item.selected_photo_id,
-            custom_photo_url: item.custom_photo_url,
-            equipment: item.equipment
-          });
-          
-          // CRITICAL: Store displayPhoto on the bag_equipment item itself
-          // This ensures each variant shows its own selected photo
-          (item as any).displayPhoto = bestPhoto;
+          // Use the unified photo getter to compute and cache displayPhoto
+          const displayPhoto = getItemDisplayPhoto(item);
           
           console.log(`MyBag processing: ${item.equipment.brand} ${item.equipment.model}`,
             'selected_photo_id:', item.selected_photo_id,
-            'displayPhoto:', bestPhoto,
+            'displayPhoto:', displayPhoto,
             'equipment_photos count:', item.equipment.equipment_photos?.length || 0);
-          
-          // DO NOT set primaryPhoto on equipment - causes conflicts with variants
         }
         return item;
       }) || [];
@@ -1447,7 +1436,7 @@ const MyBagSupabase = () => {
                       onClick={() => handleEditEquipment(item)}
                     >
                       <img
-                        src={(item as any)?.displayPhoto || (item.equipment as any)?.primaryPhoto || item.custom_photo_url || item.equipment?.image_url}
+                        src={getItemDisplayPhoto(item)}
                         alt={`${item.equipment?.brand || ''} ${item.equipment?.model || ''}`}
                         className="w-full h-full object-cover"
                         loading="lazy"
