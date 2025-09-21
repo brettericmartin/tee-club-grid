@@ -258,6 +258,8 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   // Other state not persisted
   const [loading, setLoading] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [shaftSearch, setShaftSearch] = useState('');
+  const [gripSearch, setGripSearch] = useState('');
   
   // Double tap detection for mobile
   const [lastTap, setLastTap] = useState(0);
@@ -515,8 +517,8 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
 
   const canProceed = () => {
     switch (step) {
-      case 'shaft': return !!selectedShaft;
-      case 'grip': return !!selectedGrip;
+      case 'shaft': return selectedShaft !== undefined; // Allow null for Default/Stock
+      case 'grip': return selectedGrip !== undefined; // Allow null for Default/Stock
       case 'loft': return !selectedCategory?.hasLoft || !!selectedLoft;
       default: return true;
     }
@@ -907,7 +909,57 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                 <p className="text-xs text-white/40 mt-1 sm:hidden">Tap to select • Double-tap to continue</p>
               </div>
 
-              {shafts.map((shaft) => (
+              {/* Search input for shafts */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
+                <Input
+                  placeholder="Search shafts by brand, model, or flex..."
+                  value={shaftSearch}
+                  onChange={(e) => setShaftSearch(e.target.value)}
+                  className="pl-9 bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                />
+              </div>
+
+              {/* Default/Stock Shaft Option */}
+              {(!shaftSearch || 'default stock shaft'.includes(shaftSearch.toLowerCase())) && (
+                <Card
+                  className={`glass-card p-4 cursor-pointer transition-colors ${
+                    selectedShaft === null 
+                      ? 'ring-2 ring-primary bg-primary/10' 
+                      : 'hover:bg-white/20'
+                  }`}
+                  onClick={() => {
+                    setSelectedShaft(null);
+                    setShaftSearch('');
+                    handleDoubleTap(() => {
+                      if (selectedCategory?.hasGrip) {
+                        setStep('grip');
+                      } else if (selectedCategory?.hasLoft) {
+                        setStep('loft');
+                      } else {
+                        handleComplete();
+                      }
+                    });
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-white">Default/Stock Shaft</p>
+                      <p className="text-sm text-white/60">Use manufacturer's stock shaft</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-white/40" />
+                  </div>
+                </Card>
+              )}
+
+              {/* Filtered shaft list */}
+              {shafts
+                .filter((shaft) => {
+                  if (!shaftSearch) return true;
+                  const searchText = `${shaft.brand} ${shaft.model} ${shaft.flex || ''} ${shaft.weight || ''}`.toLowerCase();
+                  return searchText.includes(shaftSearch.toLowerCase());
+                })
+                .map((shaft) => (
                 <Card
                   key={shaft.id}
                   className={`glass-card p-4 cursor-pointer transition-colors ${
@@ -955,10 +1007,60 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
               <div className="mb-4 p-3 bg-white/10 rounded-lg">
                 <p className="text-sm text-white/60">Customizing</p>
                 <p className="font-medium">{selectedEquipment?.brand} {selectedEquipment?.model}</p>
-                <p className="text-sm text-white/60">{selectedShaft?.brand} {selectedShaft?.model}</p>
+                <p className="text-sm text-white/60">
+                  {selectedShaft ? `${selectedShaft.brand} ${selectedShaft.model}` : 'Default/Stock Shaft'}
+                </p>
               </div>
 
-              {grips.map((grip) => (
+              {/* Search input for grips */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 h-4 w-4" />
+                <Input
+                  placeholder="Search grips by brand, model, or size..."
+                  value={gripSearch}
+                  onChange={(e) => setGripSearch(e.target.value)}
+                  className="pl-9 bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                />
+              </div>
+
+              {/* Default/Stock Grip Option */}
+              {(!gripSearch || 'default stock grip'.includes(gripSearch.toLowerCase())) && (
+                <Card
+                  className={`glass-card p-4 cursor-pointer transition-colors ${
+                    selectedGrip === null 
+                      ? 'ring-2 ring-primary bg-primary/10' 
+                      : 'hover:bg-white/20'
+                  }`}
+                  onClick={() => {
+                    setSelectedGrip(null);
+                    setGripSearch('');
+                    handleDoubleTap(() => {
+                      if (selectedCategory?.hasLoft) {
+                        setStep('loft');
+                      } else {
+                        handleComplete();
+                      }
+                    });
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-white">Default/Stock Grip</p>
+                      <p className="text-sm text-white/60">Use manufacturer's stock grip</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-white/40" />
+                  </div>
+                </Card>
+              )}
+
+              {/* Filtered grip list */}
+              {grips
+                .filter((grip) => {
+                  if (!gripSearch) return true;
+                  const searchText = `${grip.brand} ${grip.model} ${grip.size || ''} ${grip.material || ''}`.toLowerCase();
+                  return searchText.includes(gripSearch.toLowerCase());
+                })
+                .map((grip) => (
                 <Card
                   key={grip.id}
                   className={`glass-card p-4 cursor-pointer transition-colors ${
