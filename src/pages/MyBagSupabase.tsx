@@ -648,6 +648,8 @@ const MyBagSupabase = () => {
     shaft_id?: string;
     grip_id?: string;
     loft?: string;
+    selected_photo_id?: string;
+    custom_photo_url?: string; // Fallback
     iron_config?: {
       type: 'set' | 'single';
       from?: string;
@@ -676,7 +678,9 @@ const MyBagSupabase = () => {
         condition: 'new',
         shaft_id: selection.shaft_id || null,
         grip_id: selection.grip_id || null,
-        custom_specs: Object.keys(customSpecs).length > 0 ? customSpecs : null
+        custom_specs: Object.keys(customSpecs).length > 0 ? customSpecs : null,
+        selected_photo_id: selection.selected_photo_id || null,
+        custom_photo_url: selection.custom_photo_url || null
       };
       
       // Preparing equipment insert

@@ -15,6 +15,8 @@ import { getBestEquipmentPhoto } from '@/services/unifiedPhotoService';
 import { getEquipmentVariants } from '@/services/bags';
 import SubmitEquipmentModal from '@/components/SubmitEquipmentModal';
 import { CommunityPhotosGallery } from '@/components/bag/CommunityPhotosGallery';
+import PhotoSelector from '@/components/shared/PhotoSelector';
+import { fetchEquipmentPhotos } from '@/services/unifiedPhotoService';
 import { toast } from 'sonner';
 import { useFormPersistence } from '@/hooks/useFormPersistence';
 import { useAuth } from '@/contexts/AuthContext';
@@ -258,6 +260,9 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
   const [selectedCustomPhoto, setSelectedCustomPhoto] = useState<string | null>(null);
+  const [showPhotoSelector, setShowPhotoSelector] = useState(false);
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
+  const [equipmentPhotos, setEquipmentPhotos] = useState<any[]>([]);
   const [shaftSearch, setShaftSearch] = useState('');
   const [gripSearch, setGripSearch] = useState('');
   const [customLoft, setCustomLoft] = useState('');
@@ -507,8 +512,27 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
   useEffect(() => {
     if (selectedEquipment) {
       loadCustomizationOptions();
+      // Load photos from the unified pool for this equipment
+      loadEquipmentPhotos(selectedEquipment.id);
     }
   }, [selectedEquipment]);
+
+  // Load photos from unified pool
+  const loadEquipmentPhotos = async (equipmentId: string) => {
+    try {
+      const photos = await fetchEquipmentPhotos(equipmentId, 50);
+      setEquipmentPhotos(photos || []);
+      
+      // Auto-select the most liked photo if available
+      if (photos && photos.length > 0 && !selectedPhotoId) {
+        const bestPhoto = photos[0]; // Already sorted by likes
+        setSelectedPhotoId(bestPhoto.id);
+        setSelectedCustomPhoto(bestPhoto.photo_url);
+      }
+    } catch (error) {
+      console.error('Error loading equipment photos:', error);
+    }
+  };
 
   const handleCategorySelect = (category: typeof EQUIPMENT_CATEGORIES[0]) => {
     setSelectedCategory(category);
@@ -595,8 +619,12 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
       selection.custom_loft = customLoft;
     }
     
-    // Add custom photo if selected
-    if (selectedCustomPhoto) {
+    // Add selected photo from unified pool
+    if (selectedPhotoId) {
+      selection.selected_photo_id = selectedPhotoId;
+    }
+    // Fallback to custom photo URL if no unified photo selected
+    else if (selectedCustomPhoto) {
       selection.custom_photo_url = selectedCustomPhoto;
     }
 
@@ -1034,11 +1062,11 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowPhotoGallery(true)}
+                    onClick={() => setShowPhotoSelector(true)}
                     className="glass-button"
                   >
                     <Camera className="w-4 h-4 mr-2" />
-                    {selectedCustomPhoto ? 'Change Photo' : 'Select Photo'}
+                    {selectedPhotoId ? `Photo Selected` : equipmentPhotos.length > 0 ? `Choose from ${equipmentPhotos.length} Photos` : 'Add Photo'}
                   </Button>
                 </div>
               </div>
@@ -1248,11 +1276,11 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowPhotoGallery(true)}
+                    onClick={() => setShowPhotoSelector(true)}
                     className="glass-button"
                   >
                     <Camera className="w-4 h-4 mr-2" />
-                    {selectedCustomPhoto ? 'Change Photo' : 'Select Photo'}
+                    {selectedPhotoId ? `Photo Selected` : equipmentPhotos.length > 0 ? `Choose from ${equipmentPhotos.length} Photos` : 'Add Photo'}
                   </Button>
                 </div>
               </div>
@@ -1451,16 +1479,33 @@ export function EquipmentSelectorImproved({ isOpen, onClose, onSelectEquipment }
     />
     
     {selectedEquipment && (
-      <CommunityPhotosGallery
-        isOpen={showPhotoGallery}
-        onClose={() => setShowPhotoGallery(false)}
-        equipmentId={selectedEquipment.id}
-        onSelectPhoto={(photoUrl) => {
-          setSelectedCustomPhoto(photoUrl);
-          setShowPhotoGallery(false);
-          toast.success('Photo selected for equipment');
-        }}
-      />
+      <>
+        <CommunityPhotosGallery
+          isOpen={showPhotoGallery}
+          onClose={() => setShowPhotoGallery(false)}
+          equipmentId={selectedEquipment.id}
+          onSelectPhoto={(photoUrl) => {
+            setSelectedCustomPhoto(photoUrl);
+            setShowPhotoGallery(false);
+            toast.success('Photo selected for equipment');
+          }}
+        />
+        
+        {/* Unified Photo Selector */}
+        <PhotoSelector
+          isOpen={showPhotoSelector}
+          onClose={() => setShowPhotoSelector(false)}
+          equipmentId={selectedEquipment.id}
+          equipmentName={`${selectedEquipment.brand} ${selectedEquipment.model}`}
+          selectedPhotoId={selectedPhotoId}
+          onSelectPhoto={(photoId, photoUrl) => {
+            setSelectedPhotoId(photoId);
+            setSelectedCustomPhoto(photoUrl);
+            setShowPhotoSelector(false);
+            toast.success(`Selected photo from pool (${equipmentPhotos.length} available)`);
+          }}
+        />
+      </>
     )}
   </>
   );

@@ -460,6 +460,8 @@ export async function addEquipmentToBag(bagId: string, equipmentId: string, deta
   custom_specs?: Record<string, any>;
   shaft_id?: string;
   grip_id?: string;
+  selected_photo_id?: string;
+  custom_photo_url?: string; // Fallback during transition
 }) {
   // Check for exact duplicate (same equipment with identical specs)
   const isDuplicate = await checkEquipmentDuplicate(bagId, equipmentId, {
