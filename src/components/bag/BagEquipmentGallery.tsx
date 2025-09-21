@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import type { Database } from '@/lib/supabase';
+import { getItemDisplayPhoto } from '@/services/unifiedPhotoService';
 
 type Equipment = Database['public']['Tables']['equipment']['Row'] & {
   equipment_photos?: Array<{
@@ -37,12 +38,9 @@ const BagEquipmentGallery = ({
     }
   };
 
-  // Get the primary image for equipment
+  // Use the unified photo getter - SINGLE SOURCE OF TRUTH
   const getEquipmentImage = (item: BagEquipment) => {
-    return item.custom_photo_url || 
-           item.equipment.most_liked_photo || 
-           item.equipment.primaryPhoto || 
-           item.equipment.image_url;
+    return getItemDisplayPhoto(item);
   };
 
   return (

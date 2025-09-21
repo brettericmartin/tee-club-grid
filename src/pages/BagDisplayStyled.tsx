@@ -110,6 +110,7 @@ const BagDisplayStyled = () => {
           profiles (*),
           bag_equipment (
             *,
+            selected_photo_id,
             equipment (
               *,
               equipment_photos (
@@ -165,6 +166,7 @@ const BagDisplayStyled = () => {
           profiles (*),
           bag_equipment (
             *,
+            selected_photo_id,
             equipment (
               *,
               equipment_photos (
