@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Heart } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Heart, Check } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -24,6 +24,8 @@ interface PhotoLightboxProps {
   initialPhotoIndex?: number;
   onLike?: (photoId: string, isLiked: boolean) => Promise<void>;
   showLikes?: boolean;
+  onSelectPhoto?: (photoId: string, photoUrl: string) => void;
+  currentSelectedId?: string;
   className?: string;
 }
 
@@ -34,6 +36,8 @@ export function PhotoLightbox({
   initialPhotoIndex = 0,
   onLike,
   showLikes = true,
+  onSelectPhoto,
+  currentSelectedId,
   className
 }: PhotoLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialPhotoIndex);
@@ -312,6 +316,37 @@ export function PhotoLightbox({
                     showCount={true}
                     className="text-white hover:text-primary"
                   />
+                </div>
+              )}
+
+              {/* Select Photo Button */}
+              {onSelectPhoto && (
+                <div className="flex items-center">
+                  <Button
+                    variant={currentSelectedId === currentPhoto.id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      onSelectPhoto(currentPhoto.id, currentPhoto.photo_url);
+                      onClose();
+                    }}
+                    className={cn(
+                      currentSelectedId === currentPhoto.id
+                        ? "bg-primary text-white"
+                        : "bg-white/20 text-white border-white/40 hover:bg-white/30"
+                    )}
+                  >
+                    {currentSelectedId === currentPhoto.id ? (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Selected
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Select This Photo
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
 

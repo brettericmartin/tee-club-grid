@@ -1432,6 +1432,8 @@ export function BagEquipmentModal({
       initialPhotoIndex={selectedPhotoIndex}
       onLike={handlePhotoLike}
       showLikes={true}
+      onSelectPhoto={canEdit ? handlePhotoSelect : undefined}
+      currentSelectedId={bagEquipment?.selected_photo_id}
     />
     
     <PhotoSelector
