@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { uploadEquipmentPhoto } from '@/services/equipment';
+import { syncFeedPhotoToBagEquipment } from '@/services/equipmentPhotoSync';
 import { createEquipmentPhotoPost } from '@/services/feedService';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -52,7 +53,7 @@ export function SinglePhotoUpload({ isOpen, onClose, onSuccess }: SinglePhotoUpl
       // If equipment is selected, upload to equipment_photos table AND storage
       if (selectedEquipmentId && selectedEquipmentName) {
         // This uploads to storage AND creates equipment_photos record
-        const result = await uploadEquipmentPhoto(
+        photoUrl = await uploadEquipmentPhoto(
           user.id,
           selectedEquipmentId,
           selectedFile,
@@ -60,8 +61,16 @@ export function SinglePhotoUpload({ isOpen, onClose, onSuccess }: SinglePhotoUpl
           false // Not primary photo
         );
         
-        if (result.photo) {
-          photoUrl = result.photo.photo_url;
+        // Sync the photo to user's bag_equipment if they have this equipment
+        const syncResult = await syncFeedPhotoToBagEquipment(
+          user.id,
+          selectedEquipmentId,
+          photoUrl,
+          false // Don't overwrite existing custom photos
+        );
+        
+        if (syncResult.updated > 0) {
+          console.log(`Updated ${syncResult.updated} bag equipment entries with new photo`);
         }
         
         // Create feed post using the existing service function

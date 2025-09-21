@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { uploadEquipmentPhoto } from '@/services/equipment';
+import { syncFeedPhotoToBagEquipment } from '@/services/equipmentPhotoSync';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -50,13 +51,25 @@ export function EquipmentPhotoManager({
 
     setIsUploading(true);
     try {
-      await uploadEquipmentPhoto(
+      const photoUrl = await uploadEquipmentPhoto(
         user.id,
         equipmentId,
         selectedFile,
         caption,
         photos.length === 0 // Make first photo primary
       );
+
+      // Sync the photo to user's bag_equipment if they have this equipment
+      const syncResult = await syncFeedPhotoToBagEquipment(
+        user.id,
+        equipmentId,
+        photoUrl,
+        false // Don't overwrite existing custom photos
+      );
+      
+      if (syncResult.updated > 0) {
+        console.log(`Updated ${syncResult.updated} bag equipment entries with new photo`);
+      }
 
       toast.success('Photo uploaded successfully!');
       setShowUploadDialog(false);

@@ -3,6 +3,8 @@
  * Used by both bags service and feed cards to ensure identical photo selection
  */
 
+import { getBestEquipmentPhoto } from '@/services/unifiedPhotoService';
+
 export interface EquipmentWithPhotos {
   id: string;
   brand: string;
@@ -36,24 +38,16 @@ export interface BagEquipmentItem {
 export function processEquipmentPhotos(bagEquipment: BagEquipmentItem[]): BagEquipmentItem[] {
   return bagEquipment.map(item => {
     if (item.equipment) {
-      // First priority: User's custom selected photo
-      if (item.custom_photo_url) {
-        item.equipment.primaryPhoto = item.custom_photo_url;
-      } 
-      // Second priority: Most liked community photo from equipment_photos
-      else if (item.equipment.equipment_photos && item.equipment.equipment_photos.length > 0) {
-        // Sort photos by likes_count to get the most liked one
+      // Use unified photo service for consistent photo selection
+      const bestPhoto = getBestEquipmentPhoto(item.equipment, item.custom_photo_url);
+      item.equipment.primaryPhoto = bestPhoto;
+      
+      // Also set most_liked_photo for compatibility
+      if (item.equipment.equipment_photos && item.equipment.equipment_photos.length > 0) {
         const sortedPhotos = [...item.equipment.equipment_photos].sort((a, b) => 
           (b.likes_count || 0) - (a.likes_count || 0)
         );
-        
-        // Add most_liked_photo to equipment object
         item.equipment.most_liked_photo = sortedPhotos[0]?.photo_url || null;
-        item.equipment.primaryPhoto = item.equipment.most_liked_photo;
-      } 
-      // Third priority: Default equipment image
-      else {
-        item.equipment.primaryPhoto = item.equipment.image_url;
       }
     }
     return item;

@@ -137,3 +137,83 @@ export async function removeUserPhotoFromEquipment(
     };
   }
 }
+
+/**
+ * Syncs a photo uploaded through feed to the user's bag equipment
+ * This ensures photos uploaded via feed show up in the user's bag
+ */
+export async function syncFeedPhotoToBagEquipment(
+  userId: string,
+  equipmentId: string,
+  photoUrl: string,
+  updateIfExists: boolean = false
+): Promise<{ success: boolean; updated: number; error?: string }> {
+  try {
+    // First, find user's bags
+    const { data: userBags, error: bagsError } = await supabase
+      .from('user_bags')
+      .select('id')
+      .eq('user_id', userId);
+
+    if (bagsError) {
+      console.error('Error fetching user bags:', bagsError);
+      return { success: false, updated: 0, error: bagsError.message };
+    }
+
+    if (!userBags || userBags.length === 0) {
+      console.log('User has no bags');
+      return { success: true, updated: 0 }; // Not an error, user just has no bags
+    }
+
+    const bagIds = userBags.map(bag => bag.id);
+
+    // Find bag_equipment entries for this equipment in user's bags
+    const { data: bagEquipment, error: equipmentError } = await supabase
+      .from('bag_equipment')
+      .select('id, custom_photo_url')
+      .eq('equipment_id', equipmentId)
+      .in('bag_id', bagIds);
+
+    if (equipmentError) {
+      console.error('Error fetching bag equipment:', equipmentError);
+      return { success: false, updated: 0, error: equipmentError.message };
+    }
+
+    if (!bagEquipment || bagEquipment.length === 0) {
+      console.log('User does not have this equipment in any bags');
+      return { success: true, updated: 0 }; // Not an error, equipment not in bags
+    }
+
+    let updatedCount = 0;
+
+    // Update bag_equipment entries
+    for (const item of bagEquipment) {
+      // Only update if no custom photo exists or if updateIfExists is true
+      if (!item.custom_photo_url || updateIfExists) {
+        const { error: updateError } = await supabase
+          .from('bag_equipment')
+          .update({ custom_photo_url: photoUrl })
+          .eq('id', item.id);
+
+        if (updateError) {
+          console.error(`Error updating bag equipment ${item.id}:`, updateError);
+          // Continue with other items even if one fails
+        } else {
+          updatedCount++;
+          console.log(`Updated bag_equipment ${item.id} with new photo`);
+        }
+      }
+    }
+
+    console.log(`Successfully updated ${updatedCount} bag equipment entries`);
+    return { success: true, updated: updatedCount };
+
+  } catch (error) {
+    console.error('Error in syncFeedPhotoToBagEquipment:', error);
+    return { 
+      success: false, 
+      updated: 0,
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+}

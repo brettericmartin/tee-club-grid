@@ -3,6 +3,7 @@ import type { Database } from '@/lib/supabase';
 import { retryQuery } from '@/utils/supabaseQuery';
 import { executeWithRetry } from '@/lib/authHelpers';
 import { processEquipmentPhotos } from '@/utils/equipmentPhotos';
+import { getBestEquipmentPhoto } from '@/services/unifiedPhotoService';
 
 type UserBag = Database['public']['Tables']['user_bags']['Row'];
 type BagEquipment = Database['public']['Tables']['bag_equipment']['Row'];
@@ -280,7 +281,15 @@ export async function getUserBag(username: string) {
       ),
       bag_equipment (
         *,
-        equipment:equipment (*)
+        equipment:equipment (
+          *,
+          equipment_photos (
+            id,
+            photo_url,
+            likes_count,
+            is_primary
+          )
+        )
       ),
       bag_likes (count)
     `)
@@ -289,12 +298,12 @@ export async function getUserBag(username: string) {
 
   if (error) throw error;
   
-  // Process equipment to set primaryPhoto from custom_photo_url
+  // Process equipment to set primaryPhoto using unified photo service
   if (data && data.bag_equipment) {
     data.bag_equipment = data.bag_equipment.map(item => {
       if (item.equipment) {
-        // Use custom photo if available, otherwise use default image
-        item.equipment.primaryPhoto = item.custom_photo_url || item.equipment.image_url;
+        // Use unified photo service for consistent photo selection
+        item.equipment.primaryPhoto = getBestEquipmentPhoto(item.equipment, item.custom_photo_url);
       }
       return item;
     });
@@ -319,12 +328,12 @@ export async function getMyBag(userId: string) {
       .single();
   });
 
-  // Process equipment to set primaryPhoto from custom_photo_url
+  // Process equipment to set primaryPhoto using unified photo service
   if (data && data.bag_equipment) {
     data.bag_equipment = data.bag_equipment.map(item => {
       if (item.equipment) {
-        // Use custom photo if available, otherwise use default image
-        item.equipment.primaryPhoto = item.custom_photo_url || item.equipment.image_url;
+        // Use unified photo service for consistent photo selection
+        item.equipment.primaryPhoto = getBestEquipmentPhoto(item.equipment, item.custom_photo_url);
       }
       return item;
     });

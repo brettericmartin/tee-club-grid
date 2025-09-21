@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { uploadEquipmentPhoto } from '@/services/equipment';
 import { createEquipmentPhotoFeedPost } from '@/services/feedService';
+import { syncFeedPhotoToBagEquipment } from '@/services/equipmentPhotoSync';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
@@ -62,6 +63,18 @@ export function QuickPhotoUpload({
         caption || `Photo of ${equipmentName}`,
         false // Not primary by default
       );
+
+      // Sync the photo to user's bag_equipment if they have this equipment
+      const syncResult = await syncFeedPhotoToBagEquipment(
+        user.id,
+        equipmentId,
+        photoUrl,
+        false // Don't overwrite existing custom photos
+      );
+      
+      if (syncResult.updated > 0) {
+        console.log(`Updated ${syncResult.updated} bag equipment entries with new photo`);
+      }
 
       // Create feed post if checkbox is checked
       if (shareToFeed && photoUrl) {

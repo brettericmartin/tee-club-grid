@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { uploadEquipmentPhoto } from '@/services/equipment';
+import { syncFeedPhotoToBagEquipment } from '@/services/equipmentPhotoSync';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -53,6 +54,18 @@ export function FeedPhotoUpload({ onPhotoUploaded }: FeedPhotoUploadProps) {
         false // Not primary photo
       );
 
+      // Sync the photo to user's bag_equipment if they have this equipment
+      const syncResult = await syncFeedPhotoToBagEquipment(
+        user.id,
+        selectedEquipmentId,
+        uploadedPhotoUrl,
+        false // Don't overwrite existing custom photos
+      );
+      
+      if (syncResult.updated > 0) {
+        console.log(`Updated ${syncResult.updated} bag equipment entries with new photo`);
+      }
+
       // Create a feed post for this photo upload with the actual uploaded URL
       const { error: feedError } = await supabase
         .from('feed_posts')
@@ -70,7 +83,7 @@ export function FeedPhotoUpload({ onPhotoUploaded }: FeedPhotoUploadProps) {
 
       if (feedError) throw feedError;
 
-      toast.success('Photo shared to feed!');
+      toast.success('Photo shared to feed and updated in your bag!');
       resetForm();
       setShowDialog(false);
       onPhotoUploaded?.();
