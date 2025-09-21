@@ -86,6 +86,24 @@ const BagCardComponent = ({
   const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   
+  // Define the getEquipmentImage function first
+  const getEquipmentImage = (item: BagEquipmentItem) => {
+    // First check if displayPhoto was already computed by processEquipmentPhotos
+    // This ensures each bag_equipment item shows its own selected photo
+    if ((item as any).displayPhoto !== undefined) {
+      return (item as any).displayPhoto;
+    }
+    
+    // Otherwise compute it using the unified photo service
+    const bestPhoto = getBestBagEquipmentPhoto({
+      selected_photo_id: item.selected_photo_id,
+      custom_photo_url: item.custom_photo_url,
+      equipment: item.equipment
+    });
+    
+    return bestPhoto;
+  };
+  
   // Define club categories
   const CLUB_CATEGORIES = ['driver', 'fairway_wood', 'hybrid', 'iron', 'wedge', 'putter'];
   const ACCESSORY_CATEGORIES = ['ball', 'glove', 'rangefinder', 'gps', 'tee', 'towel', 'ball_marker', 'divot_tool', 'accessories', 'shaft', 'grip'];
@@ -97,8 +115,8 @@ const BagCardComponent = ({
     item.equipment && item.equipment.category === 'bag'
   );
   
-  // Get the golf bag image
-  const golfBagImage = golfBag?.custom_photo_url || golfBag?.equipment?.image_url;
+  // Get the golf bag image using unified photo service
+  const golfBagImage = golfBag ? getEquipmentImage(golfBag) : null;
   
   // Separate clubs and accessories
   const clubs = allEquipment.filter(item => 
@@ -147,22 +165,6 @@ const BagCardComponent = ({
   ) || 0;
   
   const equipmentCount = allEquipment.length;
-
-  const getEquipmentImage = (item: BagEquipmentItem) => {
-    // Use the unified photo service to get the best photo
-    const bestPhoto = getBestBagEquipmentPhoto({
-      selected_photo_id: item.selected_photo_id,
-      custom_photo_url: item.custom_photo_url,
-      equipment: item.equipment
-    });
-    
-    // Check if we've already had an error with this photo
-    if (bestPhoto && imageError[`${item.id}-${bestPhoto}`]) {
-      return null;
-    }
-    
-    return bestPhoto;
-  };
 
   const handleEquipmentClick = (e: React.MouseEvent, item: BagEquipmentItem) => {
     e.stopPropagation(); // Prevent card click

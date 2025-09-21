@@ -464,7 +464,11 @@ const MyBagSupabase = () => {
             equipment: item.equipment
           });
           
-          // Set primaryPhoto for display
+          // Store displayPhoto on the bag_equipment item itself
+          // This ensures each variant shows its own selected photo
+          (item as any).displayPhoto = bestPhoto;
+          
+          // Legacy: Also set primaryPhoto for backward compatibility
           item.equipment.primaryPhoto = bestPhoto;
         }
         return item;
@@ -1439,7 +1443,7 @@ const MyBagSupabase = () => {
                       onClick={() => handleEditEquipment(item)}
                     >
                       <img
-                        src={(item.equipment as any)?.primaryPhoto || item.custom_photo_url || item.equipment?.image_url}
+                        src={(item as any)?.displayPhoto || (item.equipment as any)?.primaryPhoto || item.custom_photo_url || item.equipment?.image_url}
                         alt={`${item.equipment?.brand || ''} ${item.equipment?.model || ''}`}
                         className="w-full h-full object-cover"
                         loading="lazy"

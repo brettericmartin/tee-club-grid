@@ -31,11 +31,9 @@ export interface BagEquipmentItem {
 }
 
 /**
- * Process equipment to set primaryPhoto using consistent priority logic:
- * 1. User's selected photo from pool (selected_photo_id)
- * 2. User's custom photo (custom_photo_url)
- * 3. Most liked community photo from equipment_photos
- * 4. Default equipment image (image_url)
+ * Process equipment to compute display photo for each bag_equipment item
+ * IMPORTANT: Sets displayPhoto on the bag_equipment item, not on shared equipment object
+ * This allows different variants (e.g., two woods) to show different photos
  */
 export function processEquipmentPhotos(bagEquipment: BagEquipmentItem[]): BagEquipmentItem[] {
   return bagEquipment.map(item => {
@@ -46,6 +44,13 @@ export function processEquipmentPhotos(bagEquipment: BagEquipmentItem[]): BagEqu
         custom_photo_url: item.custom_photo_url,
         equipment: item.equipment
       });
+      
+      // Store the computed photo on the bag_equipment item itself
+      // NOT on the equipment object (which may be shared)
+      (item as any).displayPhoto = bestPhoto;
+      
+      // Legacy: Also set primaryPhoto on equipment for backward compatibility
+      // But this should be phased out as it causes conflicts
       item.equipment.primaryPhoto = bestPhoto;
       
       // Also set most_liked_photo for compatibility
