@@ -53,5 +53,5 @@ export interface UserProfile {
   avgScore?: number;
   roundsPlayed?: number;
   avatar?: string;
-  bagBackground?: 'midwest-lush' | 'desert' | 'ocean' | 'mountain';
+  bagBackground?: 'charcoal' | 'white' | 'usa' | 'eu' | 'pnw' | 'desert';
 }

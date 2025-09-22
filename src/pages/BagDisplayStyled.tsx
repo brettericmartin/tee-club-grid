@@ -327,7 +327,7 @@ const BagDisplayStyled = () => {
   return (
     <div className="min-h-screen bg-black relative">
       {/* Background Layer */}
-      <BackgroundLayer backgroundId={bagData.background_image || 'midwest-lush'} />
+      <BackgroundLayer backgroundId={bagData.background_image || 'charcoal'} />
       
       {/* Content */}
       <div className="relative z-10">

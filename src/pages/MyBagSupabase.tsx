@@ -140,7 +140,7 @@ const MyBagSupabase = () => {
   const [bagDescription, setBagDescription] = useState("");
   const [hideValue, setHideValue] = useState(false);
   const [bagItems, setBagItems] = useState<BagEquipmentItem[]>([]);
-  const [selectedBackground, setSelectedBackground] = useState('midwest-lush');
+  const [selectedBackground, setSelectedBackground] = useState('charcoal');
   const [viewMode, setViewMode] = useState<'gallery' | 'list' | 'card' | 'feed' | 'videos'>('gallery');
   const [layout, setLayout] = useState<BagLayout>({});
   const [showBagSelector, setShowBagSelector] = useState(false);
@@ -407,7 +407,7 @@ const MyBagSupabase = () => {
           setBagName(primaryBag.name);
           setBagDescription(primaryBag.description || '');
           setHideValue(primaryBag.hide_value || false);
-          setSelectedBackground(primaryBag.background_image || 'midwest-lush');
+          setSelectedBackground(primaryBag.background_image || 'charcoal');
           await loadBagEquipment(primaryBag.id);
         } else if (userBags.length > 0) {
           // No primary bag set, show selector
@@ -510,7 +510,7 @@ const MyBagSupabase = () => {
       setBagName(bag.name);
       setBagDescription(bag.description || '');
       setHideValue(bag.hide_value || false);
-      setSelectedBackground(bag.background_image || 'midwest-lush');
+      setSelectedBackground(bag.background_image || 'charcoal');
       await loadBagEquipment(bag.id);
     }
   };
@@ -551,7 +551,7 @@ const MyBagSupabase = () => {
       setCurrentBag(newBag);
       setBagName(newBag.name);
       setBagDescription('');
-      setSelectedBackground('midwest-lush');
+      setSelectedBackground('charcoal');
       setBagItems([]);
       
       // Create feed post for bag creation
@@ -1180,7 +1180,7 @@ const MyBagSupabase = () => {
                 if (currentBag) {
                   setBagName(currentBag.name);
                   setBagDescription(currentBag.description || '');
-                  setSelectedBackground(currentBag.background_image || 'midwest-lush');
+                  setSelectedBackground(currentBag.background_image || 'charcoal');
                 }
               }} variant="outline" size="sm">
                 <X className="w-4 h-4 mr-2" />
