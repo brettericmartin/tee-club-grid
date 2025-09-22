@@ -82,21 +82,18 @@ export function getBestBagEquipmentPhoto(
 ): string | null {
   const { selected_photo_id, custom_photo_url, equipment } = bagEquipment;
   
+  
   // 1. User's selected photo from unified pool (highest priority)
   if (selected_photo_id) {
     if (equipment.equipment_photos && equipment.equipment_photos.length > 0) {
       const selectedPhoto = equipment.equipment_photos.find(p => p.id === selected_photo_id);
       if (selectedPhoto && !isPlaceholder(selectedPhoto.photo_url)) {
-        console.log('Found selected photo for', equipment.brand, equipment.model, ':', selectedPhoto.photo_url);
         return selectedPhoto.photo_url;
       } else {
-        console.warn('Selected photo ID not found in equipment_photos for', equipment.brand, equipment.model, 
-          'selected_photo_id:', selected_photo_id, 
-          'available photo ids:', equipment.equipment_photos.map(p => p.id));
+        // Selected photo ID not found in equipment_photos
       }
     } else {
-      console.warn('No equipment_photos loaded for', equipment.brand, equipment.model, 
-        'but selected_photo_id exists:', selected_photo_id);
+      // No equipment_photos loaded but selected_photo_id exists
     }
   }
   
@@ -227,12 +224,9 @@ export async function syncCustomPhotoToEquipment(
  * to ensure consistency between BagCard, Gallery, and all other components
  */
 export function getItemDisplayPhoto(item: any): string | null {
-  // If displayPhoto was already computed and stored, use it
-  if (item.displayPhoto !== undefined && item.displayPhoto !== null) {
-    return item.displayPhoto;
-  }
+  // IMPORTANT: Always compute fresh to ensure selected_photo_id is respected
+  // Do NOT use cached displayPhoto as it may have been computed before selected_photo_id was available
   
-  // Otherwise compute it using the unified logic
   if (!item.equipment) {
     return null;
   }
@@ -244,7 +238,7 @@ export function getItemDisplayPhoto(item: any): string | null {
     equipment: item.equipment
   });
   
-  // Cache it on the item for consistency
+  // Update the cached value
   item.displayPhoto = bestPhoto;
   
   return bestPhoto;

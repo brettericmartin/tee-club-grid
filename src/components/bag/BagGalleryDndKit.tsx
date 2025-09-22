@@ -426,7 +426,7 @@ export function BagGalleryDndKit({
           >
             {items.map((item) => (
               <SortableItem
-                key={item.equipment_id}
+                key={item.id}
                 item={item}
                 isEditing={isEditing && !showPreview}
                 isDragging={!!activeId}

@@ -44,10 +44,6 @@ export function processEquipmentPhotos(bagEquipment: BagEquipmentItem[]): BagEqu
     if (processedItem.equipment) {
       // Use the unified photo getter - SINGLE SOURCE OF TRUTH
       const displayPhoto = getItemDisplayPhoto(processedItem);
-      
-      console.log(`ProcessEquipment: ${processedItem.equipment.brand} ${processedItem.equipment.model}`,
-        'selected_photo_id:', processedItem.selected_photo_id,
-        'displayPhoto:', displayPhoto);
     }
     
     return processedItem;

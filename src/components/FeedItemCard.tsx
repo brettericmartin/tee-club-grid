@@ -82,6 +82,7 @@ export const FeedItemCard = ({ post, currentUserId, onLike, onFollow }: FeedItem
           bag_equipment (
             *,
             custom_photo_url,
+            selected_photo_id,
             purchase_price,
             is_featured,
             equipment_id,

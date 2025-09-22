@@ -284,6 +284,7 @@ export async function getUserBag(username: string) {
       ),
       bag_equipment (
         *,
+        selected_photo_id,
         equipment:equipment (
           *,
           equipment_photos (

@@ -42,8 +42,8 @@ const EquipmentTile: FC<EquipmentTileProps> = ({
     lg: 'w-24 h-24'
   };
 
-  // Use unified photo service for consistent photo selection across the app
-  const imageUrl = getBestEquipmentPhoto(equipment);
+  // Use provided image_url if available, otherwise use unified photo service
+  const imageUrl = equipment.image_url || getBestEquipmentPhoto(equipment);
   const photoCount = equipment.equipment_photos?.length || 0;
 
   return (

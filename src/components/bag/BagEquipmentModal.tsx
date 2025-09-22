@@ -375,12 +375,33 @@ export function BagEquipmentModal({
     if (!bagEquipmentId) return;
     
     try {
-      const { error } = await supabase
-        .from('bag_equipment')
-        .update({ selected_photo_id: photoId })
-        .eq('id', bagEquipmentId);
+      // Special handling for stock/main photos and custom photos
+      if (photoId === 'main-photo' || photoId === 'custom-photo') {
+        // Clear the selected_photo_id to use default/custom photo
+        const updateData = { 
+          selected_photo_id: null,
+          // If it's the main photo, we might want to set custom_photo_url to the equipment's image
+          // But only if it's different from what's already there
+          ...(photoId === 'main-photo' && photoUrl !== bagEquipment?.custom_photo_url 
+            ? { custom_photo_url: photoUrl } 
+            : {})
+        };
         
-      if (error) throw error;
+        const { error } = await supabase
+          .from('bag_equipment')
+          .update(updateData)
+          .eq('id', bagEquipmentId);
+          
+        if (error) throw error;
+      } else {
+        // Regular photo from equipment_photos table
+        const { error } = await supabase
+          .from('bag_equipment')
+          .update({ selected_photo_id: photoId })
+          .eq('id', bagEquipmentId);
+          
+        if (error) throw error;
+      }
       
       toast.success('Photo selected successfully');
       onUpdate?.(); // Refresh the bag data
@@ -389,7 +410,7 @@ export function BagEquipmentModal({
       console.error('Error selecting photo:', error);
       toast.error('Failed to select photo');
     }
-  }, [bagEquipmentId, onUpdate]);
+  }, [bagEquipmentId, bagEquipment, onUpdate]);
 
   const handlePhotoLike = useCallback(async (photoId: string, isLiked: boolean) => {
     if (!user) {

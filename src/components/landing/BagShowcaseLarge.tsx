@@ -78,13 +78,20 @@ export const BagShowcaseLarge = () => {
             is_featured,
             purchase_price,
             custom_photo_url,
+            selected_photo_id,
             equipment:equipment_id (
               id,
               brand,
               model,
               category,
               image_url,
-              msrp
+              msrp,
+              equipment_photos (
+                id,
+                photo_url,
+                likes_count,
+                is_primary
+              )
             )
           )
         `)
