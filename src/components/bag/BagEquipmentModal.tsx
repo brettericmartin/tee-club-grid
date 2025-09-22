@@ -1064,7 +1064,7 @@ export function BagEquipmentModal({
                     <div className="space-y-6">
                       {/* Main Image - Responsive and no padding */}
                       <div className="relative w-full px-4 sm:px-0">
-                        <div className="aspect-square max-w-[280px] sm:max-w-sm md:max-w-md mx-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden shadow-2xl">
+                        <div className="aspect-square max-w-[280px] sm:max-w-sm md:max-w-md mx-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden shadow-2xl relative group">
                           <img
                             src={bagEquipment?.custom_photo_url || (equipment as any)?.primaryPhoto || equipment.image_url || ''}
                             alt={`${equipment.brand} ${equipment.model}`}
@@ -1079,6 +1079,26 @@ export function BagEquipmentModal({
                               }
                             }}
                           />
+                          
+                          {/* Crop Button Overlay - Show when user can edit and has a custom photo */}
+                          {canEdit && bagEquipment?.custom_photo_url && (
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => {
+                                  setCropperImage(bagEquipment.custom_photo_url || '');
+                                  setShowCropper(true);
+                                  setPendingCropFile(null);
+                                }}
+                                className="bg-black/70 hover:bg-black/90 text-white border-0"
+                                type="button"
+                              >
+                                <Crop className="w-4 h-4 mr-1" />
+                                Crop
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -1458,7 +1478,32 @@ export function BagEquipmentModal({
       }}
       imageUrl={cropperImage}
       onCropComplete={async (croppedImageUrl) => {
+        // Update local state
         setFormData({ ...formData, custom_photo_url: croppedImageUrl });
+        
+        // If not in editing mode, save immediately to database
+        if (!isEditing) {
+          try {
+            const { error } = await supabase
+              .from('bag_equipment')
+              .update({ custom_photo_url: croppedImageUrl })
+              .eq('id', bagEquipmentId);
+            
+            if (error) {
+              console.error('Error saving cropped photo:', error);
+              toast.error('Failed to save cropped photo');
+            } else {
+              toast.success('Photo cropped successfully');
+              // Refresh the data
+              loadAdditionalData();
+              if (onUpdate) onUpdate();
+            }
+          } catch (error) {
+            console.error('Error updating cropped photo:', error);
+            toast.error('Failed to save cropped photo');
+          }
+        }
+        
         setShowCropper(false);
         setCropperImage('');
         setPendingCropFile(null);
