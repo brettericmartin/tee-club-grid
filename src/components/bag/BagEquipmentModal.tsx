@@ -1480,15 +1480,37 @@ export function BagEquipmentModal({
       onCropComplete={async (croppedImageUrl) => {
         // Update local state
         setFormData({ ...formData, custom_photo_url: croppedImageUrl });
-        
+
         // If not in editing mode, save immediately to database
         if (!isEditing) {
           try {
+            // First ensure photo is in equipment_photos table
+            const { data: photoData } = await supabase
+              .from('equipment_photos')
+              .upsert({
+                photo_url: croppedImageUrl,
+                equipment_id: equipmentId,
+                user_id: user?.id,
+                caption: `Cropped photo of ${equipment.brand} ${equipment.model}`,
+                is_primary: false,
+                likes_count: 0
+              }, {
+                onConflict: 'photo_url,equipment_id'
+              })
+              .select()
+              .single();
+
+            // Update bag_equipment with both URL and photo ID
+            const updateData: any = { custom_photo_url: croppedImageUrl };
+            if (photoData) {
+              updateData.selected_photo_id = photoData.id;
+            }
+
             const { error } = await supabase
               .from('bag_equipment')
-              .update({ custom_photo_url: croppedImageUrl })
+              .update(updateData)
               .eq('id', bagEquipmentId);
-            
+
             if (error) {
               console.error('Error saving cropped photo:', error);
               toast.error('Failed to save cropped photo');
@@ -1518,14 +1540,28 @@ export function BagEquipmentModal({
       onUploadComplete={async (photoUrl) => {
         // Update local state
         setFormData({ ...formData, custom_photo_url: photoUrl });
-        
-        // CRITICAL: Also save to database immediately so photo persists!
+
+        // Save photo URL and try to find its ID in equipment_photos
         try {
+          // First check if photo exists in equipment_photos (it should, from UnifiedPhotoUploadDialog)
+          const { data: photoData } = await supabase
+            .from('equipment_photos')
+            .select('id')
+            .eq('photo_url', photoUrl)
+            .eq('equipment_id', equipmentId)
+            .single();
+
+          // Update bag_equipment with both URL and photo ID if found
+          const updateData: any = { custom_photo_url: photoUrl };
+          if (photoData) {
+            updateData.selected_photo_id = photoData.id;
+          }
+
           const { error } = await supabase
             .from('bag_equipment')
-            .update({ custom_photo_url: photoUrl })
+            .update(updateData)
             .eq('id', bagEquipmentId);
-          
+
           if (error) {
             console.error('Error saving photo to bag_equipment:', error);
             toast.error('Failed to save photo to your bag');
