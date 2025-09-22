@@ -10,6 +10,57 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    version: "0.24.0",
+    date: "2025-09-21",
+    title: "Equipment Photo System & Bag Customization",
+    changes: [
+      {
+        category: "feature",
+        description: "🎯 Unified photo pool system - all photos for same equipment shared across variants"
+      },
+      {
+        category: "feature",
+        description: "📸 Photo selection - choose which photo displays for each equipment in your bag"
+      },
+      {
+        category: "feature",
+        description: "✂️ Re-crop photos - ability to adjust crop after initial save"
+      },
+      {
+        category: "feature",
+        description: "🎨 Enhanced bag backgrounds - new color schemes and improved visual themes"
+      },
+      {
+        category: "feature",
+        description: "🔄 Equipment variants - add multiple instances of same equipment with different specs"
+      },
+      {
+        category: "feature",
+        description: "🛒 Purchase links - equipment now shows buy links when available"
+      },
+      {
+        category: "improvement",
+        description: "Photo sync - uploads from equipment modal automatically appear in feed posts"
+      },
+      {
+        category: "improvement",
+        description: "Consistent photo display - unified logic across bag cards, galleries, and equipment pages"
+      },
+      {
+        category: "fix",
+        description: "Resolved duplicate feed posts when uploading photos"
+      },
+      {
+        category: "fix",
+        description: "Fixed photo display conflicts for equipment variants"
+      },
+      {
+        category: "fix",
+        description: "Equipment photos now respect individual selected photo preferences"
+      }
+    ]
+  },
+  {
     version: "0.23.1",
     date: "2025-09-10",
     title: "Photo Upload Fix",

@@ -82,16 +82,16 @@ export async function getBags(options?: {
   // Sort options
   switch (options?.sortBy) {
     case 'newest':
-      query = query.order('created_at', { ascending: false });
+      query = query.order('created_at', { ascending: false, nullsFirst: false });
       break;
     case 'hot':
       query = query.order('hot_score', { ascending: false, nullsFirst: false });
       break;
     case 'most-liked':
-      query = query.order('tees_count', { ascending: false });
+      query = query.order('tees_count', { ascending: false, nullsFirst: false });
       break;
     default:
-      query = query.order('created_at', { ascending: false });
+      query = query.order('created_at', { ascending: false, nullsFirst: false });
   }
 
   // Execute query with proper error handling and auth retry
@@ -177,18 +177,33 @@ export async function getBags(options?: {
   const processedData = data?.map(bag => {
     // Use shared utility to process equipment photos
     const processedEquipment = processEquipmentPhotos(bag.bag_equipment || []);
-    
+
     return {
       ...bag,
       bag_equipment: processedEquipment,
-      totalValue: processedEquipment.reduce((sum, item) => 
+      equipmentCount: processedEquipment.length,
+      totalValue: processedEquipment.reduce((sum, item) =>
         sum + (item.purchase_price || item.equipment?.msrp || 0), 0
       ) || 0,
       likesCount: bag.likes_count || 0
     };
   }) || [];
-  
-  return processedData;
+
+  // Prioritize bags with 5+ items, then apply the original sort
+  const sortedData = processedData.sort((a, b) => {
+    // First priority: bags with 5+ items
+    const aPriority = a.equipmentCount >= 5;
+    const bPriority = b.equipmentCount >= 5;
+
+    if (aPriority && !bPriority) return -1;
+    if (!aPriority && bPriority) return 1;
+
+    // Within the same priority group, maintain the original database sort order
+    // The database has already sorted by created_at, hot_score, or tees_count
+    return 0; // Keep original order from database query
+  });
+
+  return sortedData;
 }
 
 // Get a bag by ID (for feed cards)
