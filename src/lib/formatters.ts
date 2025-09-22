@@ -32,7 +32,9 @@ export function formatCompactCurrency(value: number | null | undefined): string 
   if (value == null || isNaN(value)) {
     return '$0';
   }
-  return `$${formatCompactNumber(value)}`;
+  // Round to 2 decimal places before formatting to avoid floating point issues
+  const roundedValue = Math.round(value * 100) / 100;
+  return `$${formatCompactNumber(roundedValue)}`;
 }
 
 /**
@@ -50,7 +52,12 @@ export function formatNumberWithCommas(value: number | null | undefined): string
  */
 export function formatCurrency(value: number | null | undefined): string {
   if (value == null || isNaN(value)) {
-    return '$0';
+    return '$0.00';
   }
-  return `$${value.toLocaleString()}`;
+  // Round to 2 decimal places to avoid floating point issues
+  const roundedValue = Math.round(value * 100) / 100;
+  return `$${roundedValue.toLocaleString(undefined, { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  })}`;
 }

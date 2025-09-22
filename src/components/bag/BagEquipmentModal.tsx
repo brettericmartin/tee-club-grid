@@ -135,6 +135,7 @@ export function BagEquipmentModal({
     condition: bagEquipment?.condition || 'new',
     purchase_price: bagEquipment?.purchase_price?.toString() || '',
     purchase_date: bagEquipment?.purchase_date || '',
+    purchase_link: bagEquipment?.purchase_link || '',
     iron_config_type: bagEquipment?.custom_specs?.iron_config?.type || 'set',
     iron_from: bagEquipment?.custom_specs?.iron_config?.from || '5',
     iron_to: bagEquipment?.custom_specs?.iron_config?.to || 'PW',
@@ -212,6 +213,7 @@ export function BagEquipmentModal({
         custom_specs: Object.keys(customSpecs).length > 0 ? customSpecs : null,
         purchase_price: formData.purchase_price ? parseFloat(formData.purchase_price) : null,
         purchase_date: formData.purchase_date || null,
+        purchase_link: formData.purchase_link || null,
         condition: formData.condition,
         notes: formData.notes || null,
         is_featured: formData.is_featured,
@@ -985,6 +987,34 @@ export function BagEquipmentModal({
                           />
                         </div>
                       </div>
+                      
+                      {/* Purchase Link */}
+                      <div>
+                        <Label className="text-sm sm:text-base">Purchase Link</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="url"
+                            placeholder="https://example.com/product"
+                            value={formData.purchase_link}
+                            onChange={(e) => setFormData({ ...formData, purchase_link: e.target.value })}
+                            className="flex-1"
+                          />
+                          {formData.purchase_link && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => window.open(formData.purchase_link, '_blank')}
+                              title="Open link"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Add a link to where you purchased this item
+                        </p>
+                      </div>
 
                       {/* Notes */}
                       <div>
@@ -1151,6 +1181,34 @@ export function BagEquipmentModal({
                               <div className="flex justify-between">
                                 <span className="text-muted-foreground">Condition</span>
                                 <span className="font-medium capitalize">{formData.condition}</span>
+                              </div>
+                            )}
+                            {bagEquipment.purchase_price && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Purchase Price</span>
+                                <span className="font-medium">${bagEquipment.purchase_price.toFixed(2)}</span>
+                              </div>
+                            )}
+                            {bagEquipment.purchase_date && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Purchase Date</span>
+                                <span className="font-medium">
+                                  {new Date(bagEquipment.purchase_date).toLocaleDateString()}
+                                </span>
+                              </div>
+                            )}
+                            {bagEquipment.purchase_link && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Purchase Link</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => window.open(bagEquipment.purchase_link, '_blank')}
+                                  className="h-auto py-1 px-2"
+                                >
+                                  <ExternalLink className="h-3 w-3 mr-1" />
+                                  <span className="text-sm">View</span>
+                                </Button>
                               </div>
                             )}
                           </div>

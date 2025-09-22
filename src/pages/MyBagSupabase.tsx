@@ -138,6 +138,7 @@ const MyBagSupabase = () => {
   const [currentBag, setCurrentBag] = useState<Bag | null>(null);
   const [bagName, setBagName] = useState("");
   const [bagDescription, setBagDescription] = useState("");
+  const [hideValue, setHideValue] = useState(false);
   const [bagItems, setBagItems] = useState<BagEquipmentItem[]>([]);
   const [selectedBackground, setSelectedBackground] = useState('midwest-lush');
   const [viewMode, setViewMode] = useState<'gallery' | 'list' | 'card' | 'feed' | 'videos'>('gallery');
@@ -405,6 +406,7 @@ const MyBagSupabase = () => {
           setCurrentBag(primaryBag);
           setBagName(primaryBag.name);
           setBagDescription(primaryBag.description || '');
+          setHideValue(primaryBag.hide_value || false);
           setSelectedBackground(primaryBag.background_image || 'midwest-lush');
           await loadBagEquipment(primaryBag.id);
         } else if (userBags.length > 0) {
@@ -507,6 +509,7 @@ const MyBagSupabase = () => {
       setCurrentBag(bag);
       setBagName(bag.name);
       setBagDescription(bag.description || '');
+      setHideValue(bag.hide_value || false);
       setSelectedBackground(bag.background_image || 'midwest-lush');
       await loadBagEquipment(bag.id);
     }
@@ -593,6 +596,7 @@ const MyBagSupabase = () => {
           name: bagName,
           description: bagDescription,
           background_image: selectedBackground,
+          hide_value: hideValue,
           bag_type: currentBag.bag_type || 'main',
           updated_at: new Date().toISOString()
         })
@@ -1189,6 +1193,32 @@ const MyBagSupabase = () => {
         {/* Background Picker in Edit Mode */}
         {isEditing && (
           <div className="mb-6 space-y-6">
+            {/* Hide Value Toggle */}
+            <div className="flex items-center justify-between p-4 bg-[#2a2a2a] rounded-lg">
+              <div>
+                <label htmlFor="hide-value" className="text-sm font-medium text-white">
+                  Hide Bag Value
+                </label>
+                <p className="text-xs text-white/60 mt-1">
+                  When enabled, your bag's total value won't be shown publicly
+                </p>
+              </div>
+              <button
+                id="hide-value"
+                type="button"
+                onClick={() => setHideValue(!hideValue)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  hideValue ? 'bg-primary' : 'bg-white/20'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    hideValue ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+            
             {/* Background Selector */}
             <div>
               <label className="text-sm text-white/80 mb-3 block">Bag Background</label>

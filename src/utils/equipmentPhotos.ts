@@ -58,12 +58,18 @@ export function processBagData(bagData: any): any {
   
   const processedEquipment = processEquipmentPhotos(bagData.bag_equipment || []);
   
+  // Calculate total value with proper rounding to avoid floating point errors
+  const rawTotal = processedEquipment.reduce((sum, item) => 
+    sum + (item.purchase_price || item.equipment?.msrp || 0), 0
+  ) || 0;
+  
+  // Round to 2 decimal places
+  const totalValue = Math.round(rawTotal * 100) / 100;
+  
   return {
     ...bagData,
     bag_equipment: processedEquipment,
-    totalValue: processedEquipment.reduce((sum, item) => 
-      sum + (item.purchase_price || item.equipment?.msrp || 0), 0
-    ) || 0,
+    totalValue,
     likesCount: bagData.likes_count || 0
   };
 }
