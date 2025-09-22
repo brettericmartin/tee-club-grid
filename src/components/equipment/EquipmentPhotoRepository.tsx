@@ -88,8 +88,8 @@ export function EquipmentPhotoRepository({
             user_id
           )
         `)
-        .eq('equipment_id', equipmentId)
-        .not('user_id', 'is', null); // Only show user-uploaded photos
+        .eq('equipment_id', equipmentId);
+        // Removed filter - show ALL photos for this equipment
 
       // Apply sorting
       switch (sortBy) {

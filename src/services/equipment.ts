@@ -187,7 +187,7 @@ export async function getEquipmentDetails(equipmentId: string) {
   let photos: any = { data: [] };
   
   try {
-    // First try normal query
+    // First try normal query - get ALL photos for this equipment
     [reviews, photos] = await Promise.all([
       supabase
         .from('equipment_reviews')
@@ -197,7 +197,7 @@ export async function getEquipmentDetails(equipmentId: string) {
         .from('equipment_photos')
         .select('*')
         .eq('equipment_id', equipmentId)
-        .not('user_id', 'is', null)  // Only user photos
+        // Remove user_id filter to get ALL photos
         .order('likes_count', { ascending: false })
     ]);
     
@@ -228,7 +228,7 @@ export async function getEquipmentDetails(equipmentId: string) {
           )
         `)
         .eq('id', equipmentId)
-        .not('equipment_photos.user_id', 'is', null)
+        // Remove user_id filter to get ALL photos
         .single();
         
       if (equipmentWithPhotos?.equipment_photos) {
@@ -244,20 +244,20 @@ export async function getEquipmentDetails(equipmentId: string) {
     console.warn('Error fetching related data:', err);
   }
 
-  // Get the best photo: most liked user photo -> any user photo
-  // Filter to only user photos (not scraper/system photos)
-  const userPhotos = photos.data?.filter((p: any) => p.user_id) || [];
-  console.log('[getEquipmentDetails] User photos:', userPhotos.length, 'of', photos.data?.length || 0, 'total');
-  
-  // Sort by likes_count descending (already sorted from query, but filter might have changed order)
-  const sortedUserPhotos = [...userPhotos].sort((a: any, b: any) => (b.likes_count || 0) - (a.likes_count || 0));
-  const mostLikedPhoto = sortedUserPhotos[0]?.photo_url;
-  const anyPhoto = userPhotos[0]?.photo_url; // Get any user photo as fallback
+  // Get the best photo from ALL photos (not just user photos)
+  // This includes photos uploaded through equipment modals, bag equipment, etc.
+  const allPhotos = photos.data || [];
+  console.log('[getEquipmentDetails] All photos:', allPhotos.length);
+
+  // Sort by likes_count descending (already sorted from query, but double-check)
+  const sortedPhotos = [...allPhotos].sort((a: any, b: any) => (b.likes_count || 0) - (a.likes_count || 0));
+  const mostLikedPhoto = sortedPhotos[0]?.photo_url;
+  const anyPhoto = allPhotos[0]?.photo_url; // Get any photo as fallback
   const bestPhoto = mostLikedPhoto || anyPhoto;
   
   console.log('[getEquipmentDetails] Photo resolution:', {
     totalPhotos: photos.data?.length || 0,
-    userPhotos: userPhotos.length,
+    allPhotos: allPhotos.length,
     mostLikedPhoto: !!mostLikedPhoto,
     bestPhoto: bestPhoto || 'NONE',
     equipmentImageUrl: equipment.image_url || 'NONE'
