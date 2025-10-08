@@ -204,7 +204,7 @@ export default function EquipmentDetail() {
                 <EquipmentImage
                   src={equipment.primaryPhoto || equipment.most_liked_photo || equipment.image_url}
                   alt={`${equipment.brand} ${equipment.model}`}
-                  className="w-full h-96 object-cover rounded-lg"
+                  className="w-full h-96 object-contain rounded-lg"
                   fallbackText={equipment.brand?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                 />
               </CardContent>

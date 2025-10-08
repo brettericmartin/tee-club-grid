@@ -1315,7 +1315,7 @@ export function BagEquipmentModal({
                             <img
                               src={photo.photo_url}
                               alt="Equipment photo"
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                              className="w-full h-full object-contain transition-transform group-hover:scale-105"
                               loading="lazy"
                             />
                             

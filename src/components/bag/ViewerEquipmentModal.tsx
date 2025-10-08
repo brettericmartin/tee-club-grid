@@ -221,7 +221,7 @@ export function ViewerEquipmentModal({
                       <img
                         src={mainPhoto}
                         alt={`${equipment.brand} ${equipment.model}`}
-                        className="w-full h-full object-cover cursor-pointer transition-transform hover:scale-105"
+                        className="w-full h-full object-contain cursor-pointer transition-transform hover:scale-105"
                         onClick={() => setShowLightbox(true)}
                       />
                       <Button
